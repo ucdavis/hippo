@@ -1,5 +1,10 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Hippo.Web
 {
@@ -23,7 +28,27 @@ namespace Hippo.Web
                 configuration.RootPath = "ClientApp/build";
             });
 
-            // TODO: authentication
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddOpenIdConnect(oidc =>
+            {
+                oidc.ClientId = Configuration["Authentication:ClientId"];
+                oidc.ClientSecret = Configuration["Authentication:ClientSecret"];
+                oidc.Authority = Configuration["Authentication:Authority"];
+                oidc.ResponseType = OpenIdConnectResponseType.Code;
+                oidc.Scope.Add("openid");
+                oidc.Scope.Add("profile");
+                oidc.Scope.Add("email");
+                oidc.Scope.Add("eduPerson");
+                oidc.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+                };
+            });
             
             // TODO: database/EF
 
@@ -32,6 +57,7 @@ namespace Hippo.Web
             // TODO: config
 
             // TODO: DI
+            services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
         }
 
@@ -41,10 +67,12 @@ namespace Hippo.Web
 
             if (env.IsDevelopment())
             {
+                System.Console.WriteLine("Development environment detected");
                 app.UseDeveloperExceptionPage();
             }
             else
             {
+                System.Console.WriteLine("Production environment detected");
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -79,8 +107,7 @@ namespace Hippo.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action}/{id?}",
-                    defaults: new { controller = "Home", action = "Index" },
-                    constraints: new { controller = "(home)" }
+                    defaults: new { controller = "Home", action = "Index" }
                 );
 
                 // TODO: API routes map to all other controllers
