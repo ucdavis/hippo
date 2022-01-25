@@ -1,0 +1,447 @@
+.alert-info {
+  background-color: $primary-light;
+  color: $primary-color;
+  border-color: transparentize($primary-color, 0.5);
+  i {
+    color: $primary-color;
+  }
+}
+.alert-danger {
+  background-color: transparentize($secondary-color, 0.88);
+  color: $secondary-color;
+  border-color: transparentize($secondary-color, 0.5);
+  i {
+    color: $secondary-color;
+  }
+}
+.alert-link {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.badge-primary {
+  background-color: $primary-light;
+  color: $primary-color;
+  border-color: transparentize($primary-color, 0.5);
+  &:hover {
+    text-decoration: none;
+  }
+}
+.btn {
+  font-family: $sans-bold;
+  font-size: 1.2rem;
+  padding: 8px 20px;
+  text-decoration: none;
+  &:hover {
+    text-decoration: none;
+  }
+}
+.btn-primary {
+  &:hover {
+    background-color: lighten($primary-color, 7);
+    border-color: lighten($primary-color, 7);
+  }
+}
+.btn-outline-disabled {
+  background-color: #fff;
+  border-color: $secondary-font;
+  color: $secondary-font;
+  &:hover {
+    background-color: #fff;
+    border-color: lighten($secondary-font, 7);
+    color: lighten($secondary-font, 7);
+  }
+}
+.btn-outline {
+  background-color: #fff;
+  border-color: $primary-color;
+  color: $primary-color;
+  &:hover {
+    background-color: #fff;
+    border-color: lighten($primary-color, 7);
+    color: lighten($primary-color, 7);
+  }
+}
+.btn-outline-danger {
+  background-color: #fff;
+  border-color: $merlot;
+  color: $merlot;
+  &:hover {
+    background-color: #fff;
+    border-color: lighten($merlot, 9);
+    color: lighten($merlot, 9);
+  }
+}
+.btn-secondary {
+  background-color: $california;
+  border-color: $california;
+  color: #fff;
+  &:hover {
+    background-color: lighten($california, 7);
+    border-color: lighten($california, 7);
+    color: #fff;
+  }
+}
+.btn-sunflower {
+  background-color: #d5b804;
+  border-color: #d5b804;
+  color: #fff;
+  &:hover {
+    background-color: lighten(#d5b804, 7);
+    border-color: lighten(#d5b804, 7);
+    color: #fff;
+  }
+}
+.btn-danger {
+  background-color: $merlot;
+  border-color: $merlot;
+  color: #fff;
+  &:hover {
+    background-color: lighten($merlot, 7);
+    border-color: lighten($merlot, 7);
+    color: #fff;
+  }
+}
+.btn-sm {
+  font-size: 1rem;
+}
+.box-shadow {
+  box-shadow: $box-shadow;
+}
+.btn:focus,
+.btn.focus {
+  box-shadow: none;
+}
+.btn-link {
+  color: $primary-color;
+  background: rgba(0, 0, 0, 0);
+  border: 0px;
+  box-shadow: none;
+  &:hover {
+    color: darken($primary-color, 3);
+  }
+}
+.btn-fa {
+  padding: 0;
+}
+.btn-lg,
+.btn-group-lg > .btn {
+  padding: 1rem 1.5rem;
+}
+.btn-light {
+  color: $primary-color;
+  &:hover {
+    background-color: $bg-primary;
+    color: $primary-color;
+  }
+}
+
+.page-item.active .page-link {
+  background-color: transparentize($primary-color, 0.3);
+  border-color: transparentize($primary-color, 0.3);
+}
+.page-link {
+  color: $primary-color;
+}
+.svg-inline--fa {
+  padding-left: 4px;
+}
+.primary-color {
+  color: $primary-color;
+}
+.primary-font {
+  color: $primary-font;
+}
+.bold-font {
+  font-family: $sans-bold;
+}
+//modal
+
+.modal-header {
+  background-color: $primary-light;
+}
+.leaflet-popup-content {
+  p {
+    margin: 0;
+  }
+}
+.progress {
+  background-color: #f2f2f2;
+  border: 1px solid $borders;
+}
+.progress-bar {
+  background-color: $primary-color;
+}
+// tables
+.projectlisttable-wrapper {
+  .harvest-table {
+    th {
+      &:nth-child(4),
+      &:nth-child(1),
+      &:nth-child(3),
+      &:nth-child(2) {
+        width: 10%;
+      }
+    }
+  }
+}
+.harvest-table {
+  margin-bottom: 3rem;
+  th {
+    background-color: $primary-light;
+    color: $secondary-font;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    svg {
+      width: 12px !important;
+      color: $primary-color;
+    }
+  }
+
+  a {
+    color: $primary-color;
+    &:hover {
+      color: darken($primary-color, 3);
+    }
+  }
+  td {
+    padding: 0.5rem;
+    vertical-align: middle;
+    p {
+      margin-bottom: 0;
+    }
+  }
+  tr {
+    background-color: #fff !important;
+  }
+}
+$nchild-wide: 24%;
+.activity-table {
+  th {
+    color: $primary-font;
+    font-family: $sans-bold;
+    font-size: 1.1rem;
+    text-transform: capitalize;
+    border-top: 0;
+    &:nth-child(2) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+    &:nth-child(3) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+    &:nth-child(4) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+  }
+  td {
+    border-top: 0;
+    &:nth-child(2) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+    &:nth-child(3) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+    &:nth-child(4) {
+      text-align: right;
+      width: $nchild-wide;
+    }
+  }
+}
+.btn-link:focus,
+.btn-link.focus {
+  text-decoration: none;
+}
+.page-link:hover {
+  color: $primary-color;
+}
+.page-item button {
+  height: 54px;
+}
+.project-status-PendingApproval {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #d5b804;
+    margin-right: 2px;
+  }
+}
+.project-status-PendingAccountApproval {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #d5b804;
+    margin-right: 2px;
+  }
+}
+.project-status-Requested {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $california;
+    margin-right: 2px;
+  }
+}
+.project-status-QuoteRejected {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $merlot;
+    margin-right: 2px;
+  }
+}
+.project-status-Active {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $quad;
+    margin-right: 2px;
+  }
+}
+.project-status-ChangeRequested {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $california;
+    margin-right: 2px;
+  }
+}
+.project-status-Completed {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $bodega;
+    margin-right: 2px;
+  }
+}
+.project-status-AwaitingCloseout {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $california;
+    margin-right: 2px;
+  }
+}
+.project-status-PendingCloseoutApproval {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $poppy;
+    margin-right: 2px;
+  }
+}
+.project-status-FinalInvoicePending {
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: $california;
+    margin-right: 6px;
+  }
+}
+.react-date-picker__inputGroup__input:invalid {
+  background-color: rgba(38, 96, 65, 0.1);
+}
+.react-date-picker__inputGroup__input:focus-visible {
+  outline: none !important;
+}
+.react-date-picker__button:enabled:hover .react-date-picker__button__icon,
+.react-date-picker__button:enabled:focus .react-date-picker__button__icon {
+  stroke: $primary-color;
+}
+input[type="radio" i] {
+  background-color: $primary-color;
+}
+.badge {
+  padding: 4px;
+  border: 1px solid $borders;
+  border-radius: 1px;
+}
+.react-date-picker__wrapper {
+  border-color: $borders;
+  border-radius: 2px;
+  &.is-invalid {
+    border-color: $error-color;
+  }
+}
+.react-date-picker__calendar-button {
+  background-color: transparentize($primary-color, 0.85);
+  border-left: 1px solid $borders;
+}
+.react-date-picker__button svg {
+  stroke: $primary-color;
+}
+.react-datepicker__close-icon::after {
+  background-color: $primary-color;
+}
+.margin-left-fixer {
+  margin-left: -1.5%;
+}
+.float-right {
+  float: right;
+}
+.california-bg {
+  background-color: transparentize($california, 0.9);
+  a {
+    color: $california;
+    &:hover {
+      color: transparentize($california, 0.9);
+    }
+  }
+}
+.sunflower-bg {
+  background-color: transparentize(#d5b804, 0.9);
+  a {
+    color: #d5b804;
+
+    &:hover {
+      color: transparentize(#d5b804, 0.9);
+    }
+  }
+}
+.merlot-bg {
+  background-color: transparentize($merlot, 0.9);
+  a {
+    color: $merlot;
+
+    &:hover {
+      color: transparentize($merlot, 0.9);
+    }
+  }
+}
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: $primary-color;
+}

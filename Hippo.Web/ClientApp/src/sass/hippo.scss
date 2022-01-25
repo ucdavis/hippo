@@ -1,0 +1,8 @@
+/* Provide sufficient contrast against white background */
+@charset "utf-8";
+
+@import "import", "typography", "layout", "regions", "components";
+
+.searchPersonsClearButton > button{
+    margin: -1.3em .5em 0em 0em;
+}

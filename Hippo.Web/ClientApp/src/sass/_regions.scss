@@ -1,0 +1,206 @@
+// home
+
+.quick-actions-wrapper {
+  .list-group-item {
+    &:hover {
+      background-color: $primary-light;
+    }
+  }
+  a {
+    display: flex;
+    justify-content: space-between;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+// quote info area
+.quote-info {
+  p {
+    margin-bottom: 6px;
+  }
+  p.lede {
+    margin-bottom: 0;
+  }
+  .quote-info-box {
+    border: 1px solid $borders;
+    padding: 2%;
+  }
+}
+.card-project-totals {
+  .card-header {
+    font-weight: bold;
+    border-bottom: 1px solid $borders;
+    font-size: 1.1rem;
+    background-color: #fff;
+  }
+  .card-body {
+    padding: 0.8rem 0.8rem 0 0.8rem !important;
+  }
+}
+.total-row {
+  // background-color: transparentize($primary-color, 0.75);
+  padding-top: 1%;
+  .col-6 {
+    border-top: 2px solid #dee2e6;
+    padding-top: 1%;
+  }
+  h6 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  p.lede {
+    margin-bottom: 0;
+  }
+}
+.rbt-token {
+  color: $primary-color;
+  background-color: transparentize($primary-color, 0.85);
+}
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.nav-wrapper {
+  border-bottom: 1px solid $borders;
+
+  margin-bottom: 2%;
+}
+.navbar {
+  padding-left: 0;
+  .nav-item {
+    .nav-link {
+      font-size: 1.2rem;
+      color: $primary-font;
+      padding: 0.75rem;
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+  .dropdown-menu {
+    z-index: 9999;
+  }
+}
+.user-sign-in {
+  justify-content: center;
+}
+.create-card {
+  margin: 0 auto;
+}
+// quote page
+.activity-line {
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+.activity-entry-titles {
+  border-bottom: 1px solid $primary-light;
+  margin-bottom: 1%;
+}
+.activity-line-item {
+  .form-group {
+    margin-bottom: 8px;
+  }
+  .btn {
+    margin-top: 8px;
+  }
+}
+.adjust-chooser {
+  display: inline-block;
+}
+.map-wrapper {
+  border-top: 1px solid $borders;
+}
+//approval
+
+.approval-row-title {
+  .col {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+}
+.approval-row {
+  margin: 16px 0;
+}
+
+//project details
+
+.attached-files-list {
+  svg {
+    margin-right: 8px;
+  }
+}
+.project-detail-tables {
+  // border-top: 1px solid $borders;
+  border-bottom: 1px solid $borders;
+  padding: 2% 0 3% 0;
+}
+.project-actions {
+  h4 {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: $secondary-font;
+    font-family: $sans-bold;
+  }
+  .btn {
+    margin-top: 6px;
+  }
+}
+.card-project-status {
+  h4 {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: $secondary-font;
+    font-family: $sans-bold;
+  }
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 0px;
+  }
+  border-top: 1px solid $borders;
+}
+.project-header {
+  border-bottom: 1px solid $borders;
+}
+
+.leaflet-popup-content {
+  width: 250px !important;
+}
+.trash-col {
+  .btn {
+    padding: 0;
+  }
+}
+.attached-files-list {
+  li {
+    margin: 1.5% 0;
+  }
+}
+.ticket-response-list {
+  p {
+    margin-bottom: 0;
+  }
+  span.ticket-responder {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: $secondary-font;
+  }
+}
+.ticket-response-card {
+  background: #fff;
+  border: 1px solid $borders;
+  box-shadow: $box-shadow;
+  padding: 2%;
+  margin-bottom: 16px;
+  p.lede {
+    color: $secondary-font;
+  }
+}
+.ticket-reply-form {
+  margin-bottom: 1%;
+}
+.ticket-timestamp {
+  color: $tertiary-font;
+}
