@@ -92,9 +92,10 @@ namespace Hippo.Web
 
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
         {
             // TODO: DB config/init
+            ConfigureDb(dbContext);
 
             if (env.IsDevelopment())
             {
@@ -170,6 +171,23 @@ namespace Hippo.Web
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+        }
+
+        private void ConfigureDb(AppDbContext dbContext)
+        {
+            var recreateDb = Configuration.GetValue<bool>("Dev:RecreateDb");
+
+            if (recreateDb)
+            {
+                dbContext.Database.EnsureDeleted();
+            }
+
+            dbContext.Database.Migrate();
+
+
+            var initializer = new DbInitializer(dbContext);
+            initializer.Initialize(recreateDb).GetAwaiter().GetResult();
+
         }
     }
 }
