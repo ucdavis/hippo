@@ -1,3 +1,6 @@
+using Hippo.Core.Data;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Routing.Constraints;
@@ -49,8 +52,36 @@ namespace Hippo.Web
                     NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
                 };
             });
-            
-            // TODO: database/EF
+
+            // Done? (Copied from Harvest): database/EF
+            var efProvider = Configuration.GetValue("Provider", "none");
+            if (efProvider == "SqlServer" || (efProvider == "none" && Configuration.GetValue<bool>("Dev:UseSql")))
+            {
+                services.AddDbContextPool<AppDbContext, AppDbContextSqlServer>((serviceProvider, o) =>
+                {
+                    o.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                        sqlOptions =>
+                        {
+                            sqlOptions.MigrationsAssembly("Harvest.Core");
+                            sqlOptions.UseNetTopologySuite();
+                        });
+#if DEBUG
+                    o.EnableSensitiveDataLogging();
+#endif
+                });
+            }
+            else
+            {
+                services.AddDbContextPool<AppDbContext, AppDbContextSqlite>((serviceProvider, o) =>
+                {
+                    var connection = new SqliteConnection("Data Source=harvest.db");
+                    o.UseSqlite(connection, sqliteOptions =>
+                    {
+                        sqliteOptions.MigrationsAssembly("Harvest.Core");
+                        sqliteOptions.UseNetTopologySuite();
+                    });
+                });
+            }
 
             // TODO: authorization
 
