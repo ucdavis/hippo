@@ -62,7 +62,7 @@ namespace Hippo.Web
                     o.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
                         sqlOptions =>
                         {
-                            sqlOptions.MigrationsAssembly("Harvest.Core");
+                            sqlOptions.MigrationsAssembly("Hippo.Core");
                             sqlOptions.UseNetTopologySuite();
                         });
 #if DEBUG
@@ -74,10 +74,10 @@ namespace Hippo.Web
             {
                 services.AddDbContextPool<AppDbContext, AppDbContextSqlite>((serviceProvider, o) =>
                 {
-                    var connection = new SqliteConnection("Data Source=harvest.db");
+                    var connection = new SqliteConnection("Data Source=hippo.db");
                     o.UseSqlite(connection, sqliteOptions =>
                     {
-                        sqliteOptions.MigrationsAssembly("Harvest.Core");
+                        sqliteOptions.MigrationsAssembly("Hippo.Core");
                         sqliteOptions.UseNetTopologySuite();
                     });
                 });
