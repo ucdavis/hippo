@@ -1,3 +1,6 @@
+using Hippo.Core.Data;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Routing.Constraints;
@@ -49,8 +52,36 @@ namespace Hippo.Web
                     NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
                 };
             });
-            
-            // TODO: database/EF
+
+            // Done? (Copied from Harvest): database/EF
+            var efProvider = Configuration.GetValue("Provider", "none");
+            if (efProvider == "SqlServer" || (efProvider == "none" && Configuration.GetValue<bool>("Dev:UseSql")))
+            {
+                services.AddDbContextPool<AppDbContext, AppDbContextSqlServer>((serviceProvider, o) =>
+                {
+                    o.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                        sqlOptions =>
+                        {
+                            sqlOptions.MigrationsAssembly("Hippo.Core");
+                            sqlOptions.UseNetTopologySuite();
+                        });
+#if DEBUG
+                    o.EnableSensitiveDataLogging();
+#endif
+                });
+            }
+            else
+            {
+                services.AddDbContextPool<AppDbContext, AppDbContextSqlite>((serviceProvider, o) =>
+                {
+                    var connection = new SqliteConnection("Data Source=hippo.db");
+                    o.UseSqlite(connection, sqliteOptions =>
+                    {
+                        sqliteOptions.MigrationsAssembly("Hippo.Core");
+                        sqliteOptions.UseNetTopologySuite();
+                    });
+                });
+            }
 
             // TODO: authorization
 
@@ -61,9 +92,10 @@ namespace Hippo.Web
 
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
         {
             // TODO: DB config/init
+            ConfigureDb(dbContext);
 
             if (env.IsDevelopment())
             {
@@ -139,6 +171,23 @@ namespace Hippo.Web
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+        }
+
+        private void ConfigureDb(AppDbContext dbContext)
+        {
+            var recreateDb = Configuration.GetValue<bool>("Dev:RecreateDb");
+
+            if (recreateDb)
+            {
+                dbContext.Database.EnsureDeleted();
+            }
+
+            dbContext.Database.Migrate();
+
+
+            var initializer = new DbInitializer(dbContext);
+            initializer.Initialize(recreateDb).GetAwaiter().GetResult();
+
         }
     }
 }
