@@ -63,7 +63,6 @@ namespace Hippo.Web
                         sqlOptions =>
                         {
                             sqlOptions.MigrationsAssembly("Hippo.Core");
-                            sqlOptions.UseNetTopologySuite();
                         });
 #if DEBUG
                     o.EnableSensitiveDataLogging();
@@ -78,7 +77,6 @@ namespace Hippo.Web
                     o.UseSqlite(connection, sqliteOptions =>
                     {
                         sqliteOptions.MigrationsAssembly("Hippo.Core");
-                        sqliteOptions.UseNetTopologySuite();
                     });
                 });
             }
