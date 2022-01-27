@@ -15,7 +15,7 @@ namespace Hippo.Core.Services
     {
         Task SendSampleNotificationMessage(string email, string body);
         Task SendNotification(string[] emails, string[] ccEmails, string body, string textVersion, string subject = "Hippo Notification");
-    }
+    } 
 
     public class NotificationService : INotificationService
     {
