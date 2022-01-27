@@ -37,7 +37,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hippo.Core\Hippo.Core.csproj" />
-    <ProjectReference Include="..\Hippo.Email\Hippo.Email.csproj" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
