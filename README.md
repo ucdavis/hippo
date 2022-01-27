@@ -26,6 +26,6 @@ Make sure to invoke "Prettier" before committing JS changes.  If using VSCode co
 If making large JS changes, run `npm test` inside the `Hippo.Web/ClientApp` directory and it will automatically re-run affected tests.
 
 
-# LGTM Status
+# CodeQL Status
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/ucdavis/hippo.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ucdavis/hippo/alerts/)
+![CodeQL Scan](https://github.com/ucdavis/hippo/actions/workflows/codeql-analysis.yml/badge.svg)
