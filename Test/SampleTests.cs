@@ -21,7 +21,7 @@ namespace Test
 
         [Theory]
         [InlineData(3, true)]
-        //[InlineData(3, false, Skip = "An example of a skipped theory")]
+        [InlineData(3, false, Skip = "An example of a skipped theory")]
         [InlineData(5, true)]
         [InlineData(6, false)]
         public void MyFirstTheory(int value, bool expected)
