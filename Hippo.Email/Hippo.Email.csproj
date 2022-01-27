@@ -10,10 +10,4 @@
     <PackageReference Include="Razor.Templating.Core" Version="1.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Views\Emails\" />
-    <Folder Include="Views\Shared\" />
-  </ItemGroup>
-
 </Project>

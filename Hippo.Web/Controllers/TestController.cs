@@ -1,6 +1,8 @@
 ﻿using Hippo.Core.Services;
+using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Razor.Templating.Core;
 
 namespace Hippo.Web.Controllers
 {
@@ -21,9 +23,15 @@ namespace Hippo.Web.Controllers
             return Content("Done. Maybe...");
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> TestBody()
         {
-            return View();
+            var model = new SampleModel();
+
+
+
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/Sample_mjml.cshtml", model);
+
+            return Content(results);
         }
     }
 }
