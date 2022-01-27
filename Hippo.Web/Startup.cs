@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Hippo.Core.Models.Settings;
+using Hippo.Core.Services;
 
 namespace Hippo.Web
 {
@@ -86,7 +88,11 @@ namespace Hippo.Web
             // TODO: config
 
             // TODO: DI
+            //Settings:
+            services.Configure<EmailSettings>(Configuration.GetSection("Email"));
+
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
+            services.AddScoped<INotificationService, NotificationService>();
 
         }
 
