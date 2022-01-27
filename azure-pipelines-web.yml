@@ -1,0 +1,94 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+name: 1.1.$(Date:yyMM).$(build.buildId)
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: Test
+  jobs:
+  - job:
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '14.x'
+
+    - task: Npm@1
+      displayName: 'Install Npm Packages'
+      inputs:
+        command: 'install'
+        workingDir: './Hippo.Web/ClientApp'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET 6 sdk'
+      inputs:
+        packageType: 'sdk'
+        version: '6.x'
+    
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Server Tests'
+      inputs:
+        command: 'test'
+
+    - task: Npm@1
+      displayName: 'Run Client Tests'
+      inputs:
+        command: 'custom'
+        workingDir: './Hippo.Web/ClientApp'
+        customCommand: 'run citest'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Client Test Results'
+      inputs:
+        searchFolder: './Hippo.Web/ClientApp'
+        testResultsFormat: 'VSTest'
+        testResultsFiles: '**/test-results.trx'
+        testRunTitle: 'Client Tests'
+
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish code coverage from Hippo.Web/ClientApp/cobertura-coverage.xml'
+      inputs:
+        codeCoverageTool: cobertura
+        summaryFileLocation: './Hippo.Web/ClientApp/cobertura-coverage.xml'
+        reportDirectory: './Hippo.Web/ClientApp'
+
+- stage: Publish
+  jobs:
+  - job:
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET 6 sdk'
+      inputs:
+        packageType: 'sdk'
+        version: '6.x'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Hippo.Web'
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        zipAfterPublish: false
+        modifyOutputPath: false
+        projects: './Hippo.Web/Hippo.Web.csproj'
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/'
+
+
+    - task: PublishBuildArtifacts@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      displayName: 'Publish Build Artifacts for main branch builds'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
