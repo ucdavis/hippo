@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Web", "Hippo.Web\Hippo.Web.csproj", "{0A9C323F-977B-4606-ADC6-28EC1CD648D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Core", "Hippo.Core\Hippo.Core.csproj", "{61C74DB3-AD7C-42EF-AEA5-486A268ED421}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Core", "Hippo.Core\Hippo.Core.csproj", "{61C74DB3-AD7C-42EF-AEA5-486A268ED421}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{61C74DB3-AD7C-42EF-AEA5-486A268ED421}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61C74DB3-AD7C-42EF-AEA5-486A268ED421}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61C74DB3-AD7C-42EF-AEA5-486A268ED421}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
