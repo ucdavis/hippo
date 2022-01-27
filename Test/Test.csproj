@@ -19,4 +19,13 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestServices\" />
+    <Folder Include="TestControllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hippo.Core\Hippo.Core.csproj" />
+  </ItemGroup>
+
 </Project>
