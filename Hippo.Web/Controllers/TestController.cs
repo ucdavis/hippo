@@ -18,7 +18,16 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestEmail()
         {
-            await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", "Test the body");
+            var model = new SampleModel();
+            model.Name = "Some Name, really.";
+            model.SomeText = "This is some replaced text.";
+            model.SomeText2 = "Even More replaced text";
+
+            var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/Sample.cshtml", model);
+
+
+            //await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", emailBody);
+            await _notificationService.SendNotification(new string[] { "jsylvestre@ucdavis.edu" }, null, emailBody, "Test", "Test 2");
 
             return Content("Done. Maybe...");
         }
