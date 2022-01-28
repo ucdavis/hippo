@@ -21,14 +21,16 @@ namespace Hippo.Core.Domain
         public User Owner { get; set; }
 
         public int SponsorId { get; set; }
-        public Account Sponsor { get;set;}
+        public Account Sponsor { get; set; }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
-            modelBuilder.Entity<Account>().HasIndex(a =>a.SponsorId);
+            modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
+            //self referencing foreign key
+            modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
         }
     }
 }
