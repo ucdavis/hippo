@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hippo.Email.Views.Shared
+namespace Hippo.Email.Models
 {
-    public class EmailButtonModel
+    public class EmailInnerDetailsModel
     {
-        public EmailButtonModel(string text, string url)
+        public EmailInnerDetailsModel(string heading, string text)
         {
+            Heading = heading;
             Text = text;
-            Url = url;
         }
 
+        public string Heading { get; set; }
         public string Text { get; set; }
-        public string Url { get; set; }
     }
 }
