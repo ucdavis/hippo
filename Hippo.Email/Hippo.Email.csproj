@@ -4,7 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
 	<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
   </PropertyGroup>
-
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App"/>
+	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="Razor.Templating.Core" Version="1.7.0" />
   </ItemGroup>
