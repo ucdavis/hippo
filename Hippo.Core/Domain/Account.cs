@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hippo.Core.Domain
+{
+    public class Account
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+        public DateTime UpdatedOn { get; set; }
+
+        [Required]
+        public int OwnerId { get; set; }
+        [Required]
+        public User Owner { get; set; }
+
+        public int SponsorId { get; set; }
+        public Account Sponsor { get;set;}
+    }
+}
