@@ -15,12 +15,14 @@ namespace Hippo.Core.Domain
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
 
+        public bool CanSponsor { get; set; }
+
         [Required]
         public int OwnerId { get; set; }
         [Required]
         public User Owner { get; set; }
 
-        public int SponsorId { get; set; }
+        public int? SponsorId { get; set; }
         public Account Sponsor { get; set; }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
