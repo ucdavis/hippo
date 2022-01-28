@@ -22,5 +22,13 @@ namespace Hippo.Core.Domain
 
         public int SponsorId { get; set; }
         public Account Sponsor { get;set;}
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
+            modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
+            modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
+            modelBuilder.Entity<Account>().HasIndex(a =>a.SponsorId);
+        }
     }
 }
