@@ -90,6 +90,7 @@ namespace Hippo.Web
             // TODO: DI
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
+            services.Configure<SshSettings>(Configuration.GetSection("SSH"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
