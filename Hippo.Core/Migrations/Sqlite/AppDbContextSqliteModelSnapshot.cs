@@ -44,7 +44,7 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("SponsorId");
 
-                    b.ToTable("Account");
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>

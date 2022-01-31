@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
 {
-    public class Account
+    public class Account    
     {
         public Account()
         {
