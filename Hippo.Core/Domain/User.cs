@@ -32,5 +32,20 @@ namespace Hippo.Core.Domain
 
         [StringLength(20)]
         public string Kerberos { get; set; }
+
+        [JsonIgnore]
+        public List<Account> Accounts { get; set; }
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(a => a.Email); 
+
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.Owner)
+                .WithMany(a => a.Accounts)
+                .HasForeignKey(a => a.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }
