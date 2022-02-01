@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
+using Hippo.Web.Models.Settings;
+using Hippo.Web.Services;
 
 namespace Hippo.Web
 {
@@ -90,9 +92,11 @@ namespace Hippo.Web
             // TODO: DI
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
+            services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IIdentityService, IdentityService>();
 
         }
 
