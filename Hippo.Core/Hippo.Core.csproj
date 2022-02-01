@@ -5,10 +5,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App"/>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Hippo.Email\Hippo.Email.csproj"/>
+		<ProjectReference Include="..\Hippo.Email\Hippo.Email.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -20,7 +20,6 @@
 	<ItemGroup>
 		<Folder Include="Migrations\SqlServer\" />
 		<Folder Include="Migrations\Sqlite\" />
-		<Folder Include="Utilities\" />
 	</ItemGroup>
 
 </Project>
