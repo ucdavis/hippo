@@ -13,6 +13,8 @@ namespace Hippo.Core.Domain
         {
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
+            IsActive = false;
+            Status = Statuses.PendingApproval;
         }
 
         [Key]
