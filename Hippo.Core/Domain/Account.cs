@@ -53,7 +53,7 @@ namespace Hippo.Core.Domain
         public class Statuses
         {
             public const string Processing = "Processing";
-            public const string PendingApproval = "Pending Approval";
+            public const string PendingApproval = "PendingApproval";
             public const string Rejected = "Rejected";
             public const string Active = "Active";
 
