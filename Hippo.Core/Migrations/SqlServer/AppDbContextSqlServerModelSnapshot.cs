@@ -36,11 +36,22 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.Property<int?>("SponsorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SshKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
