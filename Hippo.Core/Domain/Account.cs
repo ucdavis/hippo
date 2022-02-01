@@ -24,6 +24,8 @@ namespace Hippo.Core.Domain
         public bool CanSponsor { get; set; }
         public bool IsActive { get;set;}
 
+        public string SshKey { get; set; }
+
         [Required]
         [MaxLength(50)]
         public string Status { get; set; }
