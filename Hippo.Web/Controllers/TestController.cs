@@ -3,9 +3,6 @@ using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Razor.Templating.Core;
-using Renci.SshNet;
-using Microsoft.Extensions.Options;
-using Hippo.Core.Models.Settings;
 using System.Text;
 
 namespace Hippo.Web.Controllers
@@ -14,12 +11,14 @@ namespace Hippo.Web.Controllers
     public class TestController : Controller
     {
         public INotificationService _notificationService { get; }
-        private readonly SshSettings _sshSettings;
+        public ISshService _sshService { get; }
 
-        public TestController(INotificationService notificationService, IOptions<SshSettings> sshSettings)
+
+        public TestController(INotificationService notificationService, ISshService sshService)
         {
             _notificationService = notificationService;
-            _sshSettings = sshSettings.Value;
+            _sshService = sshService;
+
         }
 
         public async Task<IActionResult> TestEmail()
@@ -57,31 +56,14 @@ namespace Hippo.Web.Controllers
 
             //return null;
 
-
-            var rsa = Convert.FromBase64String(_sshSettings.Key);
-            var stream = new MemoryStream(rsa);
-            var pkFile = new PrivateKeyFile(stream);
-
-
-
-
-            using (var client = new SshClient(_sshSettings.Url, _sshSettings.Name, pkFile))
+            var testValue = _sshService.Test();
+            var sb = new StringBuilder();
+            foreach (var result in testValue)
             {
-                client.Connect();
-                var result = client.RunCommand("ls -l");
-                client.Disconnect();
-
-                return(Content( result.Result));
-
-                //var sb = new StringBuilder();
-                //foreach (var item in result.Result.Split('\n'))
-                //{
-                //    sb.AppendLine(item.ToString());
-                //}
-
-
-                //return Content(sb.ToString());
+                sb.AppendLine(result);
             }
+
+            return Content(sb.ToString());
         }
     }
 }

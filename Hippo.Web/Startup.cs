@@ -94,6 +94,7 @@ namespace Hippo.Web
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ISshService, SshService>();
 
         }
 
