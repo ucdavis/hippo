@@ -50,12 +50,6 @@ namespace Hippo.Web.Controllers
 
         public IActionResult TestSsh()
         {
-            //read file into base64 string
-            //var file = System.IO.File.ReadAllBytes("D:\\Work\\GitProjects\\hippo\\Hippo.Web\\remote-api-auth.pk");
-            //var base64 = System.Convert.ToBase64String(file);
-
-            //return null;
-
             var testValue = _sshService.Test();
             var sb = new StringBuilder();
             foreach (var result in testValue)
