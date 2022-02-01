@@ -22,9 +22,10 @@ namespace Hippo.Core.Services
         public SshService(IOptions<SshSettings> sshSettings)
         {
             _sshSettings = sshSettings.Value;
-            var rsa = Convert.FromBase64String(_sshSettings.Key);
-            var stream = new MemoryStream(rsa);
-            _pkFile = new PrivateKeyFile(stream);
+            using(var stream = new MemoryStream(Convert.FromBase64String(_sshSettings.Key)))
+            {
+                _pkFile = new PrivateKeyFile(stream);
+            }           
         }
 
         public IEnumerable<string> Test()
