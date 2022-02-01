@@ -17,7 +17,7 @@ namespace Hippo.Core.Services
     public class SshService : ISshService
     {
         private readonly SshSettings _sshSettings;
-        private readonly PrivateKeyFile? _pkFile;
+        private readonly PrivateKeyFile _pkFile;
 
         public SshService(IOptions<SshSettings> sshSettings)
         {
