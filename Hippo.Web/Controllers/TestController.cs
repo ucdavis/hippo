@@ -65,7 +65,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            using (var client = new SshClient(_sshSettings.Url, "remote-api", pkFile))
+            using (var client = new SshClient(_sshSettings.Url, _sshSettings.Name, pkFile))
             {
                 client.Connect();
                 var result = client.RunCommand("ls -l");
