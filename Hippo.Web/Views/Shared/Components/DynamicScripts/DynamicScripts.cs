@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
-namespace Harvest.Web.Views.Shared.Components.DynamicScripts
+namespace Hippo.Web.Views.Shared.Components.DynamicScripts
 {
     [ViewComponent(Name = "DynamicScripts")]
     public class DynamicScripts : ViewComponent

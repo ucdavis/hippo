@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
-namespace Harvest.Web.Views.Shared.Components.DynamicStyles
+namespace Hippo.Web.Views.Shared.Components.DynamicStyles
 {
     [ViewComponent(Name = "DynamicStyles")]
     public class DynamicStyles : ViewComponent
