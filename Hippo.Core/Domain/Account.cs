@@ -13,6 +13,8 @@ namespace Hippo.Core.Domain
         {
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
+            IsActive = false;
+            Status = Statuses.PendingApproval;
         }
 
         [Key]
@@ -22,6 +24,13 @@ namespace Hippo.Core.Domain
         public DateTime UpdatedOn { get; set; }
 
         public bool CanSponsor { get; set; }
+        public bool IsActive { get;set;}
+
+        public string SshKey { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; }
 
         [Required]
         public int OwnerId { get; set; }
@@ -39,6 +48,22 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
+        }
+
+        public class Statuses
+        {
+            public const string Processing = "Processing";
+            public const string PendingApproval = "PendingApproval";
+            public const string Rejected = "Rejected";
+            public const string Active = "Active";
+
+            public static List<string> TypeList = new List<string>
+            {
+                Processing,
+                PendingApproval,
+                Rejected,
+                Active,
+            }.ToList();
         }
     }
 }

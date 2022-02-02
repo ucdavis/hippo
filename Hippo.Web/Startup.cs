@@ -124,10 +124,12 @@ namespace Hippo.Web
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
+            services.Configure<SshSettings>(Configuration.GetSection("SSH"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
 
@@ -221,6 +223,7 @@ namespace Hippo.Web
             if (recreateDb)
             {
                 dbContext.Database.EnsureDeleted();
+                dbContext.Dispose();
             }
 
             dbContext.Database.Migrate();
