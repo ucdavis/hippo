@@ -5,16 +5,17 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App"/>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Hippo.Email\Hippo.Email.csproj"/>
+		<ProjectReference Include="..\Hippo.Email\Hippo.Email.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+		<PackageReference Include="SSH.NET" Version="2020.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
