@@ -11,13 +11,13 @@ declare var Hippo: AppContextShape;
 
 const App = () => {
   return (
-      <AppContext.Provider value={Hippo}>
+    <AppContext.Provider value={Hippo}>
       <AppNav></AppNav>
       <Switch>
         <Route exact path="/" component={Home} />
         <Route path="/page2" component={Sample2} />
       </Switch>
-      </AppContext.Provider>
+    </AppContext.Provider>
   );
 };
 
