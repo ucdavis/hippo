@@ -186,6 +186,7 @@ namespace Hippo.Web
             if (recreateDb)
             {
                 dbContext.Database.EnsureDeleted();
+                dbContext.Dispose();
             }
 
             dbContext.Database.Migrate();
