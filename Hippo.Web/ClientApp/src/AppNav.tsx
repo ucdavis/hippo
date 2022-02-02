@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext,useState } from "react";
 import {
   Collapse,
   DropdownItem,
@@ -13,10 +13,11 @@ import {
   NavLink,
   UncontrolledDropdown,
 } from "reactstrap";
+import AppContext from "./Shared/AppContext";
 
 export const AppNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+    const user = useContext(AppContext).user;
   const toggle = () => setIsOpen(!isOpen);
 
   return (
@@ -45,7 +46,7 @@ export const AppNav = () => {
             </DropdownMenu>
           </UncontrolledDropdown>
         </Nav>
-        <NavbarText>Simple Text</NavbarText>
+              <NavbarText>Welcome, {user.detail.name}</NavbarText>
       </Collapse>
     </Navbar>
   );

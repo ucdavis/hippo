@@ -1,4 +1,7 @@
 @using Microsoft.Extensions.Configuration
+@using Hippo.Core.Services
+@inject IConfiguration Configuration
+@inject IUserService UserService
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 
 <!DOCTYPE html>
@@ -41,7 +44,9 @@
 
 
     <script>
-        var Hippo = {};
+        var Hippo = { user: {}};
+
+        Hippo.user.detail = @Html.Raw(Context.GetUserDetails());
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";
     </script>
 
