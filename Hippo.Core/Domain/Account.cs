@@ -29,9 +29,10 @@ namespace Hippo.Core.Domain
         /// Sponsor must resolve to a user (or at least an email?) 
         /// if the department wants a specific name, it can be added here. 
         /// Otherwise we should use the User.Name
+        /// This is only when account CanSponsor is true
         /// </summary>
         [MaxLength(100)]
-        public string SponsorName { get; set; }
+        public string Name { get; set; }
         public bool IsActive { get;set;}
 
         public string SshKey { get; set; }
@@ -54,6 +55,8 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
+            modelBuilder.Entity<Account>().HasIndex(a => a.Name);
+            modelBuilder.Entity<Account>().HasIndex(a => a.CanSponsor);
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
         }
