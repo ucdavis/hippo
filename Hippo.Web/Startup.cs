@@ -10,6 +10,10 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
+using Hippo.Web.Models.Settings;
+using Hippo.Web.Services;
+using System.Security.Claims;
+using Hippo.Core.Utilities;
 
 namespace Hippo.Web
 {
@@ -53,6 +57,35 @@ namespace Hippo.Web
                 {
                     NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
                 };
+                oidc.Events.OnTicketReceived = async context =>
+                {
+                    var identity = (ClaimsIdentity)context.Principal.Identity;
+                    if (identity == null)
+                    {
+                        return;
+                    }
+
+                    // Sometimes CAS doesn't return the required IAM ID
+                    // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
+                    if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID"))
+                    {
+                        var identityService = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
+                        var kerbId = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                        if (kerbId != null)
+                        {
+                            var identityUser = await identityService.GetByKerberos(kerbId.Value);
+
+                            if (identityUser != null)
+                            {
+                                identity.AddClaim(new Claim("ucdPersonIAMID", identityUser.Iam));
+                            }
+                        }
+                    }
+
+                    // Ensure user exists in the db
+                    var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                    await userService.GetUser(identity.Claims.ToArray());
+                };
             });
 
             // Done? (Copied from Harvest): database/EF
@@ -90,11 +123,15 @@ namespace Hippo.Web
             // TODO: DI
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
+            services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.Configure<SshSettings>(Configuration.GetSection("SSH"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<ISshService, SshService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
 
         }
 

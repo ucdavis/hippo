@@ -21,7 +21,6 @@
 	<ItemGroup>
 		<Folder Include="Migrations\SqlServer\" />
 		<Folder Include="Migrations\Sqlite\" />
-		<Folder Include="Utilities\" />
 	</ItemGroup>
 
 </Project>
