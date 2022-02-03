@@ -39,6 +39,10 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
