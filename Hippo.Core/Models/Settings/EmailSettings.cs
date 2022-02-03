@@ -17,5 +17,6 @@ namespace Hippo.Core.Models.Settings
         public string BccEmail { get; set; }
         public string FromEmail { get; set; }
         public string FromName { get; set; }
+        public string BaseUrl { get; set; }
     }
 }
