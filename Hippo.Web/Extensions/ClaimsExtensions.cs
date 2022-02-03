@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Hippo.Core.Domain;
 
-namespace Harvest.Web.Extensions
+namespace Hippo.Web.Extensions
 {
     public static class ClaimsExtensions
     {

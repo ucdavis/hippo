@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Harvest.Web.Extensions
+namespace Hippo.Web.Extensions
 {
     public static class AuthenticationExtensions
     {
