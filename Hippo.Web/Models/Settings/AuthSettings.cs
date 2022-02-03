@@ -2,7 +2,7 @@
 {
     public class AuthSettings
     {
-        public string IamKey { get; set; }
-        public string Authority { get; set; }
+        public string IamKey { get; set; } = String.Empty;
+        public string Authority { get; set; } = String.Empty;
     }
 }

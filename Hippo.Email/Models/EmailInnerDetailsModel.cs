@@ -14,7 +14,7 @@ namespace Hippo.Email.Models
             Text = text;
         }
 
-        public string Heading { get; set; }
-        public string Text { get; set; }
+        public string Heading { get; set; } = String.Empty;
+        public string Text { get; set; } = String.Empty;
     }
 }
