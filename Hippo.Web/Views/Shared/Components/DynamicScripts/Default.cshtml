@@ -1,9 +1,6 @@
 @model Hippo.Web.Views.Shared.Components.DynamicScripts.DynamicScriptModel
 
-@if(Model != null)
+@foreach (var script in Model.Scripts)
 {
-    @foreach (var script in Model.Scripts)
-    {
-        @Html.Raw(script)
-    }
+    @Html.Raw(script)
 }
