@@ -8,8 +8,8 @@ namespace Hippo.Email.Models
 {
     public class SampleModel
     {
-        public string Name { get;set; }
-        public string SomeText { get;set; }
-        public string SomeText2 { get; set; }
+        public string Name { get;set; } = String.Empty;
+        public string SomeText { get;set; } = String.Empty;
+        public string SomeText2 { get; set; } = String.Empty;
     }
 }

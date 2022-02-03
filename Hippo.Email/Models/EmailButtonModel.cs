@@ -14,7 +14,7 @@ namespace Hippo.Email.Models
             Url = url;
         }
 
-        public string Text { get; set; }
-        public string Url { get; set; }
+        public string Text { get; set; } = String.Empty;
+        public string Url { get; set; } = String.Empty;
     }
 }
