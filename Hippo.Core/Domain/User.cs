@@ -36,6 +36,9 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
 
+        [Display(Name = "Name")]
+        public string Name => FirstName + " " + LastName;
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
