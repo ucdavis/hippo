@@ -14,7 +14,7 @@ namespace Hippo.Core.Domain
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
             IsActive = false;
-            Status = Statuses.PendingApproval;
+            Status = Statuses.PendingApproval;            
         }
 
         [Key]
@@ -24,6 +24,14 @@ namespace Hippo.Core.Domain
         public DateTime UpdatedOn { get; set; }
 
         public bool CanSponsor { get; set; }
+
+        /// <summary>
+        /// Sponsor must resolve to a user (or at least an email?) 
+        /// if the department wants a specific name, it can be added here. 
+        /// Otherwise we should use the User.Name
+        /// </summary>
+        [MaxLength(100)]
+        public string SponsorName { get; set; }
         public bool IsActive { get;set;}
 
         public string SshKey { get; set; }
