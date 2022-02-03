@@ -1,6 +1,9 @@
 @model string[]
 
-@foreach (var style in Model)
+@if(Model != null)
 {
-    @Html.Raw(style)
+    @foreach (var style in Model)
+    {
+        @Html.Raw(style)
+    }
 }
