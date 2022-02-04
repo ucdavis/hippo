@@ -2,6 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "./App";
+import { fakeAppContext } from "./test/mockData";
+
+beforeEach(() => {
+  (global as any).Hippo = fakeAppContext;
+});
 
 it("renders without crashing", async () => {
   const div = document.createElement("div");
