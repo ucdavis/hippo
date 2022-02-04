@@ -12,6 +12,9 @@ namespace Hippo.Core.Services
     public interface ISshService
     {
         IEnumerable<string> Test();
+        void PlaceFile(string contents, string path);
+
+        MemoryStream DownloadFile(string fileName);
     }
 
     public class SshService : ISshService
@@ -22,22 +25,49 @@ namespace Hippo.Core.Services
         public SshService(IOptions<SshSettings> sshSettings)
         {
             _sshSettings = sshSettings.Value;
-            using(var stream = new MemoryStream(Convert.FromBase64String(_sshSettings.Key)))
+            using (var stream = new MemoryStream(Convert.FromBase64String(_sshSettings.Key)))
             {
                 _pkFile = new PrivateKeyFile(stream);
-            }           
+            }
+        }
+
+        public void PlaceFile(string contents, string path)
+        {
+            using var client = GetScpClient();
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(contents));
+            client.Upload(ms, path);
         }
 
         public IEnumerable<string> Test()
         {
-            using (var client = new SshClient(_sshSettings.Url, _sshSettings.Name, _pkFile))
-            {
-                client.Connect();
-                var result = client.RunCommand("ls -l");
-                client.Disconnect();
-                return result.Result.Split('\n');
-            }
+            using var client = GetSshClient();
+            var result = client.RunCommand("ls -l");
+            return result.Result.Split('\n');
+        }
+
+        // for running shell commands
+        private SshClient GetSshClient()
+        {
+            var client = new SshClient(_sshSettings.Url, _sshSettings.Name, _pkFile);
+            client.Connect();
+            return client;
+        }
+
+        // for file transfer
+        private ScpClient GetScpClient()
+        {
+            var client = new ScpClient(_sshSettings.Url, _sshSettings.Name, _pkFile);
+            client.Connect();
+            return client;
+        }
+
+        public MemoryStream DownloadFile(string fileName)
+        {
+            using var client = GetScpClient();
+            var stream = new MemoryStream();
+            client.Download(fileName, stream );
+
+            return stream;
         }
     }
-
 }
