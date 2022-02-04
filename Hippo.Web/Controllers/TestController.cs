@@ -65,5 +65,12 @@ namespace Hippo.Web.Controllers
             _sshService.PlaceFile("This is a test file 123.", "/var/lib/remote-api/test.txt");
             return Content("file placed");
         }
+
+        public IActionResult TestScd()
+        {
+            using var stream = _sshService.DownloadFile("jcstest.txt"); 
+            
+            return File(stream.ToArray(), "application/force-download");
+        }
     }
 }

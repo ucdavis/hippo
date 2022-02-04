@@ -13,6 +13,8 @@ namespace Hippo.Core.Services
     {
         IEnumerable<string> Test();
         void PlaceFile(string contents, string path);
+
+        MemoryStream DownloadFile(string fileName);
     }
 
     public class SshService : ISshService
@@ -57,6 +59,15 @@ namespace Hippo.Core.Services
             var client = new ScpClient(_sshSettings.Url, _sshSettings.Name, _pkFile);
             client.Connect();
             return client;
+        }
+
+        public MemoryStream DownloadFile(string fileName)
+        {
+            using var client = GetScpClient();
+            var stream = new MemoryStream();
+            client.Download(fileName, stream );
+
+            return stream;
         }
     }
 }
