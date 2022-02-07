@@ -1,8 +1,8 @@
 @import "bootstrap/scss/_functions";
 @import "bootstrap/scss/_variables";
 @import "@ucdavis/gunrockin/sass/gunrockin.scss";
-$primary-color: $redwood;
-$secondary-color: $california;
+$primary-color: $tahoe;
+$secondary-color: $sunflower;
 $theme-colors: (
   primary: $primary-color,
   secondary: $secondary-color,
@@ -10,14 +10,13 @@ $theme-colors: (
 @import "bootstrap/scss/bootstrap";
 @import "@ucdavis/gunrockin/sass/_typography.scss";
 
-$bg-primary: #f7f7f7;
-$bg-secondary: #f7fafc;
+$primary-bg: #181818;
+$borders: #30363d;
+$primary-font: rgba(254, 254, 254, 0.95); //
+$secondary-font: rgba(254, 254, 254, 0.6); //
+
 $danger: $merlot;
 $error-color: $danger;
-
-$borders-secondary: #e5eaef;
-
-$primary-light: #ebf1ee;
 
 @media (min-width: 576px) {
   .modal-dialog {

@@ -1,8 +1,11 @@
+html {
+  color: $primary-font;
+}
 h1,
 h2,
 h3,
 h4 {
-  color: $primary-color;
+  color: $primary-font;
 }
 h1 {
   font-weight: 600;
@@ -18,7 +21,7 @@ h2 {
   font-size: 1.6rem;
 }
 h3 {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
 }
 h4 {
   font-size: 1.2rem;
@@ -26,7 +29,7 @@ h4 {
 }
 h5 {
   text-transform: uppercase;
-  color: $primary-color;
+  color: $primary-font;
   font-size: 1.2rem;
   font-family: $sans-bold;
 }
@@ -39,16 +42,17 @@ h5 {
   font-size: 1.8rem;
 }
 p {
+  color: $primary-font;
   font-size: 1rem;
   &.subtitle {
     margin-bottom: 0;
   }
   &.lede {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-family: $sans-bold;
   }
-  &.discreet {
-    font-style: italic;
+  &.form-helper {
+    font-size: 0.9rem;
     color: $secondary-font;
   }
 }
@@ -64,4 +68,11 @@ a {
 }
 label {
   text-transform: none !important;
+}
+li {
+  color: $primary-font;
+}
+
+.discreet {
+  color: $secondary-font;
 }
