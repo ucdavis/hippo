@@ -48,12 +48,8 @@ p {
     margin-bottom: 0;
   }
   &.lede {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-family: $sans-bold;
-  }
-  &.discreet {
-    font-style: italic;
-    color: $secondary-font;
   }
 }
 label {
@@ -71,4 +67,8 @@ label {
 }
 li {
   color: $primary-font;
+}
+
+.discreet {
+  color: $secondary-font;
 }

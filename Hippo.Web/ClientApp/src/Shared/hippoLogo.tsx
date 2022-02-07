@@ -5,7 +5,6 @@ export const hippoLogo = () => (
     viewBox="0 0 53 67"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
   >
     <title>hippo-logo</title>
     <g id="Main" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -182,3 +181,4 @@ export const hippoLogo = () => (
     </g>
   </svg>
 );
+export default hippoLogo;

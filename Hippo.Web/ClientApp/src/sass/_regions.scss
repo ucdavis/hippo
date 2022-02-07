@@ -1,0 +1,26 @@
+.appheader {
+  text-align: center;
+  padding: 4% 0;
+  svg {
+    margin-bottom: 8px;
+  }
+  h1 {
+    vertical-align: middle;
+    margin-top: 4px;
+    img {
+      margin-right: 8px;
+    }
+  }
+}
+// hippo
+#hippo-logo {
+  &:hover {
+    #background-fill {
+      fill: $tahoe;
+    }
+  }
+}
+#background-fill {
+  fill: $california;
+  transition: all 0.5s ease;
+}
