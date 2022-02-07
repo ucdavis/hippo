@@ -8,8 +8,8 @@ namespace Hippo.Web.Services
 {
     public interface IIdentityService
     {
-        Task<User> GetByEmail(string email);
-        Task<User> GetByKerberos(string kerb);
+        Task<User?> GetByEmail(string email);
+        Task<User?> GetByKerberos(string kerb);
     }
 
     public class IdentityService : IIdentityService
@@ -23,7 +23,7 @@ namespace Hippo.Web.Services
             _authSettings = authSettings.Value;
         }
 
-        public async Task<User> GetByEmail(string email)
+        public async Task<User?> GetByEmail(string email)
         {
             var clientws = new IetClient(_authSettings.IamKey);
             // get IAM from email
@@ -45,7 +45,7 @@ namespace Hippo.Web.Services
             return null;
         }
 
-        public async Task<User> GetByKerberos(string kerb)
+        public async Task<User?> GetByKerberos(string kerb)
         {
             var clientws = new IetClient(_authSettings.IamKey);
             var ucdKerbResult = await clientws.Kerberos.Search(KerberosSearchField.userId, kerb);

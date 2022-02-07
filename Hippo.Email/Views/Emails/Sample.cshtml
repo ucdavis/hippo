@@ -194,7 +194,7 @@
                     </tr>
                     <tr>
                       <td align="left" style="font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:0px;word-break:break-word;">
-                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;line-height:1;text-align:left;color:rgba(31,31,31,0.8);">@Model.Name</div>
+                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;line-height:1;text-align:left;color:rgba(31,31,31,0.8);">@Model?.Name</div>
                       </td>
                     </tr>
                   </tbody>
@@ -311,7 +311,7 @@
                               <td align="left" style="font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:5px;padding-left:0px;word-break:break-word;">
                                 <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
                                   <p><b>Test</b></p>
-                                  <p>@Model.SomeText2</p>
+                                  <p>@Model?.SomeText2</p>
                                 </div>
                               </td>
                             </tr>
@@ -371,7 +371,7 @@
                             <tr>
                               <td align="left" style="font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:5px;padding-left:0px;word-break:break-word;">
                                 <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
-                                  <p>@Model.SomeText</p>
+                                  <p>@Model?.SomeText</p>
                                 </div>
                               </td>
                             </tr>

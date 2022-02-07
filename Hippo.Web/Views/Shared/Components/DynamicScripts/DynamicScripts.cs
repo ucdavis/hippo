@@ -38,6 +38,6 @@ namespace Hippo.Web.Views.Shared.Components.DynamicScripts
 
     public class DynamicScriptModel
     {
-        public string[] Scripts { get; set; }
+        public string[] Scripts { get; set; } = new string[0];
     }
 }

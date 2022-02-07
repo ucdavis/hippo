@@ -59,11 +59,12 @@ namespace Hippo.Web
                 };
                 oidc.Events.OnTicketReceived = async context =>
                 {
-                    var identity = (ClaimsIdentity)context.Principal.Identity;
-                    if (identity == null)
+                    if(context.Principal == null || context.Principal.Identity == null)
                     {
                         return;
                     }
+                    var identity = (ClaimsIdentity)context.Principal.Identity;
+ 
 
                     // Sometimes CAS doesn't return the required IAM ID
                     // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
