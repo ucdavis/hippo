@@ -1,9 +1,27 @@
 .btn {
-  font-family: $sans-bold;
-  font-size: 1.2rem;
-  padding: 8px 20px;
+  white-space: nowrap;
+  display: inline-block;
+  padding: 8px 24px;
+  box-shadow: 0 -3px 0 rgba(0, 0, 0, 0.15) inset, 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: $primary-color;
+  border-radius: 2px;
+  font-size: 1.1rem;
+  letter-spacing: 0.025em;
+  color: #fff !important;
   text-decoration: none;
+  transition: all 0.15s ease;
+  border: none;
+  font-family: $sans-bold;
+  &:active,
+  &:focus {
+    background-color: darken($primary-color, 5);
+  }
   &:hover {
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 -3px 0 rgba(0, 0, 0, 0.15) inset,
+      0 3px 6px rgba(0, 0, 0, 0.08);
+    background-color: lighten($primary-color, 5);
     text-decoration: none;
   }
 }
@@ -156,7 +174,22 @@ label {
   background-color: $primary-bg;
   border: 1px solid $borders;
   color: $primary-font;
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 0.1rem transparentize($primary-color, 0.75);
+  }
 }
 hr {
   border-color: $borders;
+}
+.form-control {
+  background-color: $primary-bg;
+  border: 1px solid $borders;
+  color: $primary-font;
+}
+.form-control:focus {
+  background-color: $primary-bg;
+  border-color: $primary-color;
+  color: $primary-font;
+  box-shadow: 0 0 0 0.1rem transparentize($primary-color, 0.75);
 }
