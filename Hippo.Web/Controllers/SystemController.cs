@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Security.Claims;
 
 namespace Hippo.Web.Controllers
@@ -32,7 +33,7 @@ namespace Hippo.Web.Controllers
             {
                 return Unauthorized();
             }
-            //Log.Information($"Emulation attempted for {model.Search} by {User.Identity.Name}");
+            Log.Information($"Emulation attempted for {id} by {currentUser.Name}");
             var lookupVal = id.Trim();
 
             var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Email == lookupVal || u.Kerberos == lookupVal);

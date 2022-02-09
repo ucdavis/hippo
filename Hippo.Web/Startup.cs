@@ -14,6 +14,8 @@ using Hippo.Web.Models.Settings;
 using Hippo.Web.Services;
 using System.Security.Claims;
 using Hippo.Core.Utilities;
+using Serilog;
+using Hippo.Web.Middleware;
 
 namespace Hippo.Web
 {
@@ -29,8 +31,11 @@ namespace Hippo.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
-
+            services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<SerilogControllerActionFilter>();
+            });
+                
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -176,6 +181,9 @@ namespace Hippo.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<LogUserNameMiddleware>();
+            app.UseSerilogRequestLogging();
 
             app.UseEndpoints(endpoints =>
             {
