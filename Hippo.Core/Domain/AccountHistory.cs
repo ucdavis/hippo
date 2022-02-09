@@ -21,6 +21,10 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(500)]
         public string Action { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; }
+        
         public int? ActorId { get;set;}
         public User Actor { get; set; }
         public int AccountId { get; set; }
