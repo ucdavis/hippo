@@ -49,6 +49,9 @@ namespace Hippo.Core.Domain
         public int? SponsorId { get; set; }
         public Account Sponsor { get; set; }
 
+        [JsonIgnore]
+        public List<AccountHistory> Histories { get; set; }
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
@@ -57,6 +60,12 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
             modelBuilder.Entity<Account>().HasIndex(a => a.CanSponsor);
+
+            modelBuilder.Entity<AccountHistory>()
+                .HasOne(a => a.Account)
+                .WithMany(a => a.Histories)
+                .HasForeignKey(a => a.AccountId);
+
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
         }
