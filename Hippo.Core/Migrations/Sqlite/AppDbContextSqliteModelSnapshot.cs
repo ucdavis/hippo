@@ -62,6 +62,40 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.AccountHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ActorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ActorId");
+
+                    b.ToTable("AccountHistories");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -111,6 +145,28 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Owner");
 
                     b.Navigation("Sponsor");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.AccountHistory", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany("Histories")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.User", "Actor")
+                        .WithMany()
+                        .HasForeignKey("ActorId");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Actor");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
+                {
+                    b.Navigation("Histories");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
