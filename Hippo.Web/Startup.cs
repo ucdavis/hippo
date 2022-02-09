@@ -14,6 +14,8 @@ using Hippo.Web.Models.Settings;
 using Hippo.Web.Services;
 using System.Security.Claims;
 using Hippo.Core.Utilities;
+using Serilog;
+using Hippo.Web.Middleware;
 
 namespace Hippo.Web
 {
@@ -176,6 +178,9 @@ namespace Hippo.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<LogUserNameMiddleware>();
+            app.UseSerilogRequestLogging();
 
             app.UseEndpoints(endpoints =>
             {
