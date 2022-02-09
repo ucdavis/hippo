@@ -33,7 +33,14 @@ export const AppNav = () => {
         <p className="lede">High Performance Personnel Onboarding</p>
         <p className="login">
           {user.detail.name}
-          <span className="discreet"> • log out</span>
+          <span className="discreet">
+            {" "}
+            <form action="/Account/Logout" method="post" id="logoutForm">
+              <button className="btn btn-link btn-sm" type="submit">
+                • log out
+              </button>
+            </form>
+          </span>
         </p>
       </div>
     </div>
