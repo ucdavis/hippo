@@ -3,12 +3,14 @@ using Hippo.Core.Services;
 using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Hippo.Web.Controllers
 {
+    [Authorize]
     public class SystemController : Controller
     {
         private readonly AppDbContext _dbContext;
@@ -28,7 +30,7 @@ namespace Hippo.Web.Controllers
             var currentUser = await _userService.GetCurrentUser();
             if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
             {
-                throw new Exception("Not authorized");
+                return Unauthorized();
             }
             //Log.Information($"Emulation attempted for {model.Search} by {User.Identity.Name}");
             var lookupVal = id.Trim();
