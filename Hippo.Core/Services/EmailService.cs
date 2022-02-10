@@ -104,7 +104,7 @@ namespace Hippo.Core.Services
         {
             if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null)
             {
-                return await _dbContext.Accounts.AsNoTracking().AsSplitQuery().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
+                return await _dbContext.Accounts.AsNoTracking().AsSingleQuery().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
             }
             return account;
         }
