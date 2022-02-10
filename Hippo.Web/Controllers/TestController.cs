@@ -43,11 +43,11 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestBody()
         {
-            var model = new DecisionModel();
+            var model = new NewRequestModel();
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission_mjml.cshtml", model);
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
             return Content(results);
         }
