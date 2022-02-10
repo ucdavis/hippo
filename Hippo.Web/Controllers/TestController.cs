@@ -62,6 +62,17 @@ namespace Hippo.Web.Controllers
             return Content("Houston we have a problem");
         }
 
+        public async Task<IActionResult> TestAccountDecision()
+        {
+            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
+            if (await _emailService.AccountDecission(account, true))
+            {
+                await _emailService.AccountDecission(account, false);
+                return Content("Emails Sent");
+            }
+            return Content("Houston we have a problem");
+        }
+
         public IActionResult TestSsh()
         {
             var testValue = _sshService.Test();
