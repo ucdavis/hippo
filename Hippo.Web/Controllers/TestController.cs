@@ -1,7 +1,9 @@
-﻿using Hippo.Core.Services;
+﻿using Hippo.Core.Data;
+using Hippo.Core.Services;
 using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Razor.Templating.Core;
 using System.Text;
 
@@ -12,13 +14,15 @@ namespace Hippo.Web.Controllers
     {
         public INotificationService _notificationService { get; }
         public ISshService _sshService { get; }
+        public IEmailService _emailService { get; }
+        public AppDbContext _dbContext { get; }
 
-
-        public TestController(INotificationService notificationService, ISshService sshService)
+        public TestController(INotificationService notificationService, ISshService sshService, IEmailService emailService, AppDbContext dbContext)
         {
             _notificationService = notificationService;
             _sshService = sshService;
-
+            _emailService = emailService;
+            _dbContext = dbContext;
         }
 
         public async Task<IActionResult> TestEmail()
@@ -39,13 +43,34 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestBody()
         {
-            var model = new SampleModel();
+            var model = new NewRequestModel();
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/Sample_mjml.cshtml", model);
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
             return Content(results);
+        }
+
+        public async Task<IActionResult> TestAccountRequest()
+        {
+            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
+            if(await _emailService.AccountRequested(account))
+            {
+                return Content("Email Sent");
+            }
+            return Content("Houston we have a problem");
+        }
+
+        public async Task<IActionResult> TestAccountDecision()
+        {
+            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
+            if (await _emailService.AccountDecission(account, true))
+            {
+                await _emailService.AccountDecission(account, false);
+                return Content("Emails Sent");
+            }
+            return Content("Houston we have a problem");
         }
 
         public IActionResult TestSsh()
