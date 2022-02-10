@@ -34,9 +34,41 @@ namespace Hippo.Core.Services
             _emailSettings = emailSettings.Value;
         }
 
-        public Task<bool> AccountDecission(Account account, bool isApproved)
+        public async Task<bool> AccountDecission(Account account, bool isApproved)
         {
-            throw new NotImplementedException();
+            try
+            {
+                account = await CheckForMissingData(account);
+                var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
+                var emailTo = account.Owner.Email;
+
+                var model = new DecisionModel()
+                {
+                    SponsorName = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name,
+                    RequesterName = account.Owner.Name,
+                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
+                    DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
+                    RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
+                    Decision = isApproved ? "Approved" : "Rejected",
+                    DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
+                };
+
+                if (!isApproved)
+                {
+                    model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
+                }
+
+                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission.cshtml", model);
+
+                await _notificationService.SendNotification(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Account Request", ex);
+                return false;
+            }
         }
 
         public async Task<bool> AccountRequested(Account account)
@@ -57,7 +89,7 @@ namespace Hippo.Core.Services
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
 
-                await _notificationService.SendNotification(new [] {emailTo },null, emailBody, emailTo, "A new account request is ready for your approval");  
+                await _notificationService.SendNotification(new[] { emailTo }, null, emailBody, "A new account request is ready for your approval");
 
                 return true;
             }
