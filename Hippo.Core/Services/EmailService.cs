@@ -38,7 +38,7 @@ namespace Hippo.Core.Services
         {
             try
             {
-                account = await CheckForMissingData(account);
+                account = await GetCompleteAccount(account);
                 var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
                 var emailTo = account.Owner.Email;
 
@@ -75,7 +75,7 @@ namespace Hippo.Core.Services
         {
             try 
             { 
-                account = await CheckForMissingData(account);
+                account = await GetCompleteAccount(account);
                 var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
                 var emailTo = account.Sponsor.Owner.Email; 
 
@@ -100,11 +100,11 @@ namespace Hippo.Core.Services
             }
         }
 
-        private async Task<Account> CheckForMissingData(Account account)
+        private async Task<Account> GetCompleteAccount(Account account)
         {
             if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null)
             {
-                return await _dbContext.Accounts.AsNoTracking().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
+                return await _dbContext.Accounts.AsNoTracking().AsSplitQuery().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
             }
             return account;
         }
