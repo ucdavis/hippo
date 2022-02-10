@@ -135,6 +135,7 @@ namespace Hippo.Web
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
