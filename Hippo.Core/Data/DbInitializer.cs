@@ -50,6 +50,7 @@ namespace Hippo.Core.Data
                     CanSponsor = true,
                     Owner = ScottUser,
                     IsActive = true,
+                    Name = "Scott's Account",
                     Status = Account.Statuses.Active,
                 };
                 await _dbContext.Accounts.AddAsync(account);
@@ -59,6 +60,7 @@ namespace Hippo.Core.Data
                     CanSponsor = false,
                     Owner = JasonUser,
                     Sponsor = account,
+                    Name = "Jason's Account",
                     IsActive = false,
                     Status = Account.Statuses.PendingApproval,
                 };

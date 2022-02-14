@@ -1,40 +1,40 @@
-import { Component, useContext } from "react";
-import { Link } from "react-router-dom";
-import AppContext from "../Shared/AppContext";
+import { useEffect, useState } from "react";
+
+import { Account } from "../types";
+import { authenticatedFetch } from "../util/api";
+
+import { RequestForm } from "./RequstForm";
 
 export const Home = () => {
-  const user = useContext(AppContext).user;
+  const [account, setAccount] = useState<Account>();
+
+  useEffect(() => {
+    // query for user account status
+    const fetchAccount = async () => {
+      const response = await authenticatedFetch("/api/account/get");
+
+      if (response.ok) {
+        if (response.status === 204) {
+          // no content means we have no account record for this person
+          setAccount({ id: 0, status: "NonExistant" } as Account);
+        } else {
+          // else we have the account
+          // setAccount(await response.json());
+          // TODO: we are hardcoding no account for now to test
+          setAccount({ id: 0, status: "NonExistant" } as Account);
+        }
+      }
+    };
+
+    fetchAccount();
+  }, []);
 
   return (
     <div className="row justify-content-center">
       <div className="col-md-6">
-        <h3>
-          Welcome, <span className="status-color">{user.detail.firstName}</span>
-        </h3>
-        <p>If you’d like access to HiPPO please answer the questions below</p>
-
-        <hr />
-        <div className="form-group">
-          <label>Who is sponsoring your account?</label>
-          <select className="form-select" aria-label="Default select example">
-            <option selected>Open this select menu</option>
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
-          </select>
-          <p className="form-helper">Help text</p>
-        </div>
-        <div className="form-group">
-          <label className="form-label">What is your SSH key</label>
-          <textarea
-            className="form-control"
-            id="exampleFormControlTextarea1"
-          ></textarea>
-          <p className="form-helper">Help text</p>
-        </div>
-        <a href="#" className="btn btn-primary">
-          Submit
-        </a>
+        {!account && <p>Loading...</p>}
+        {account && account.status === "NonExistant" && <RequestForm />}
+        {account && account.status !== "NonExistant" && <p>You have an account, TODO</p>}
       </div>
     </div>
   );

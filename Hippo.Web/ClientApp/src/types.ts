@@ -8,6 +8,14 @@ export interface User {
   name: string;
 }
 
+export interface Account {
+  id: number;
+  name: string;
+  status: string;
+  canSponsor: boolean;
+  createdOn: string;
+}
+
 export interface AppContextShape {
   antiForgeryToken: string;
   user: {
