@@ -19,9 +19,10 @@ export const Home = () => {
           setAccount({ id: 0, status: "NonExistant" } as Account);
         } else {
           // else we have the account
-          // setAccount(await response.json());
+          setAccount(await response.json());
+
           // TODO: we are hardcoding no account for now to test
-          setAccount({ id: 0, status: "NonExistant" } as Account);
+          // setAccount({ id: 0, status: "NonExistant" } as Account);
         }
       }
     };
@@ -34,7 +35,9 @@ export const Home = () => {
       <div className="col-md-6">
         {!account && <p>Loading...</p>}
         {account && account.status === "NonExistant" && <RequestForm />}
-        {account && account.status !== "NonExistant" && <p>You have an account, TODO</p>}
+        {account && account.status !== "NonExistant" && (
+          <p>You have an account, TODO</p>
+        )}
       </div>
     </div>
   );
