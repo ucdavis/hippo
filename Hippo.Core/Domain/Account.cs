@@ -13,7 +13,7 @@ namespace Hippo.Core.Domain
         {
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
-            IsActive = false;
+            IsActive = true;
             Status = Statuses.PendingApproval;            
         }
 
@@ -54,6 +54,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Account>().HasQueryFilter(a => a.IsActive);
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
