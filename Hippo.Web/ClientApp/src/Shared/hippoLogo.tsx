@@ -7,7 +7,7 @@ export const hippoLogo = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <title>hippo-logo</title>
-    <g id="Main" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Main" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="Artboard-Copy" transform="translate(-694.000000, -71.000000)">
         <g id="hippo-logo" transform="translate(694.000000, 71.000000)">
           <path
@@ -22,152 +22,152 @@ export const hippoLogo = () => (
           >
             <polygon
               id="Path-20"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="19.4275676 56.3437925 25.7297044 61.9985992 22.1851973 65.6645401 11.7655676 65.6645401"
             ></polygon>
             <polygon
               id="Path-21"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="26.2845676 61.9857445 29.8623167 65.6645401 39.6965676 65.6645401 32.3005132 56.3437925"
             ></polygon>
             <polygon
               id="Path-22"
-              fill-opacity="0.4"
+              fillOpacity="0.4"
               points="25.7315676 61.9985992 29.4775557 65.6645401 22.1851973 65.6645401"
             ></polygon>
             <polygon
               id="Path-9"
-              fill-opacity="0.4"
+              fillOpacity="0.4"
               points="34.7876348 45.3806315 38.1635676 46.7250259 37.3096505 51.5581632 32.0350676 56.3437925 29.8623167 53.434407"
             ></polygon>
             <polygon
               id="Path-10"
-              fill-opacity="0"
+              fillOpacity="0"
               points="32.3005132 56.5252758 39.794819 65.6645401 51.4708659 58.7288568 34.5388411 54.4658476"
             ></polygon>
             <polygon
               id="Path-11"
-              fill-opacity="0"
+              fillOpacity="0"
               points="34.5388411 54.4658476 50.8725275 58.3516355 37.6218077 51.4554346"
             ></polygon>
             <polygon
               id="Path-12"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="51.4708659 58.3516355 51.4708659 43.5967251 37.6218077 51.4554346"
             ></polygon>
             <polygon
               id="Path-13"
-              fill-opacity="0"
+              fillOpacity="0"
               points="46.7923525 36.7199277 38.3203999 46.5615962 37.6218077 51.4554346 51.6327312 43.4129963"
             ></polygon>
             <polygon
               id="Path-14"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="46.7985531 36.3574358 44.4585676 18.6361032 38.2425676 29.4176565"
             ></polygon>
             <polygon
               id="Path-15"
-              fill-opacity="0"
+              fillOpacity="0"
               points="38.7465676 15.6147495 35.7380309 18.6361032 35.7380309 25.9646643 38.0435676 29.4176565 44.4585676 18.3559854"
             ></polygon>
             <polygon
               id="Path-16"
-              fill-opacity="0"
+              fillOpacity="0"
               points="13.1255676 15.6147495 15.8259227 18.6361032 15.8259227 25.8014163 13.1255676 29.8774836 4.72936249 36.3574358 13.2995676 46.7176958 16.9205676 45.3806315 25.7310676 19.7037445 17.7910676 15.6147495"
             ></polygon>
             <polygon
               id="Path-4"
-              fill-opacity="0"
+              fillOpacity="0"
               points="4.72936249 36.8096786 13.2995676 46.7176958 14.1250019 51.5581632 0 43.5882955"
             ></polygon>
             <polygon
               id="Path-5"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="0 44.0467445 0 58.3516355 13.8774891 51.5581632"
             ></polygon>
             <polygon
               id="Path-6"
-              fill-opacity="0"
+              fillOpacity="0"
               points="14.32654 51.8041616 0.241567612 58.3516355 17.4355676 54.5288091"
             ></polygon>
             <polygon
               id="Path-7"
-              fill-opacity="0"
+              fillOpacity="0"
               points="19.4275676 56.3437925 11.7832661 65.3827445 0.241567612 58.6799837 17.7910676 54.4658476"
             ></polygon>
             <polygon
               id="Path-8"
-              fill-opacity="0.4"
+              fillOpacity="0.4"
               points="16.6858196 45.538158 13.2995676 46.7176958 14.32654 51.8041616 19.4275676 56.3437925 21.6629772 53.3692022"
             ></polygon>
             <polygon
               id="Path-3"
-              fill-opacity="0.2"
+              fillOpacity="0.2"
               points="7.24835968 18.6361032 4.72936249 36.3574358 13.1995676 29.4176565"
             ></polygon>
             <polygon
               id="Path-2"
-              fill-opacity="0"
+              fillOpacity="0"
               points="7.24835968 18.6361032 13.2205676 29.4176565 15.4555676 25.4757445 15.4555676 18.9017445 12.7155676 15.6147495"
             ></polygon>
             <polygon
               id="Path-17"
-              fill-opacity="0"
+              fillOpacity="0"
               points="25.7315676 20.0777429 34.5415676 45.3806315 38.1635676 46.7250259 46.7985531 36.7199277 38.3375676 29.4176565 35.7380309 25.9646643 35.7380309 18.6361032 38.7465676 15.6147495 33.6720676 15.6147495"
             ></polygon>
             <polygon
               id="Path-18"
-              fill-opacity="0"
+              fillOpacity="0"
               points="25.7310676 20.0777429 16.9205676 45.3806315 34.5415676 45.3806315"
             ></polygon>
             <polygon
               id="Path-19"
-              fill-opacity="0"
+              fillOpacity="0"
               points="16.9205676 45.538158 34.5388411 45.538158 30.1268531 53.1552445 32.0350676 56.3437925 25.7315676 61.9985992 19.4275676 56.3437925 21.6629772 53.3692022"
             ></polygon>
             <polygon
               id="Path-23"
-              fill-opacity="0"
+              fillOpacity="0"
               points="13.6005676 7.8426748 8.35356761 3.66424454 3.86456761 2.22321756 3.08770016 8.04015514 11.3519636 11.6817445"
             ></polygon>
             <polygon
               id="Path-24"
-              fill-opacity="0.4"
+              fillOpacity="0.4"
               points="3.86456761 2.22321756 8.64556761 0 13.4190676 7.85021155 8.34413389 3.66424454"
             ></polygon>
             <polygon
               id="Path-25"
-              fill-opacity="0"
+              fillOpacity="0"
               points="13.6005676 8.37574454 17.2865676 15.1877445 13.1255676 15.6147495 7.69556761 18.1517445"
             ></polygon>
             <polygon
               id="Path-26"
-              fill-opacity="0"
+              fillOpacity="0"
               points="37.7579468 8.0403862 43.7705676 18.1517445 38.7465676 15.6147495 34.1765676 15.6147495"
             ></polygon>
             <polygon
               id="Path-27"
-              fill-opacity="0"
+              fillOpacity="0"
               points="40.318315 11.6817445 48.0608861 8.0403862 47.8625676 2.22321756 43.3075676 3.66424454 38.0435676 7.65324454"
             ></polygon>
             <polygon
               id="Path-28"
-              fill-opacity="0.4"
+              fillOpacity="0.4"
               points="47.6025676 2.22321756 42.6395676 0 38.0435676 7.21189499 43.3075676 3.66424454"
             ></polygon>
             <polygon
               id="Path-29"
-              fill-opacity="0"
+              fillOpacity="0"
               points="13.9578849 8.0403862 17.5620676 15.6147495 25.7310676 9.55374454"
             ></polygon>
             <polygon
               id="Path-30"
-              fill-opacity="0"
+              fillOpacity="0"
               points="37.5113081 8.0403862 33.9751186 15.6147495 25.9202306 9.21474454"
             ></polygon>
             <polygon
               id="Path-31"
-              fill-opacity="0"
+              fillOpacity="0"
               points="25.7310676 9.21474454 33.9751186 15.6147495 25.9202306 20.0777429 17.7910676 15.6147495"
             ></polygon>
           </g>
