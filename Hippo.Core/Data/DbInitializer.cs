@@ -61,7 +61,7 @@ namespace Hippo.Core.Data
                     Owner = JasonUser,
                     Sponsor = account,
                     Name = "Jason's Account",
-                    IsActive = false,
+                    IsActive = true,
                     Status = Account.Statuses.PendingApproval,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);                
