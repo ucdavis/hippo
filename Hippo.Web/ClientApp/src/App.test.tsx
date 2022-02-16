@@ -9,7 +9,7 @@ beforeEach(() => {
   const sponsorResponse = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve(fakeAccounts),
+    json: () => fakeAccounts,
   });
 
   (global as any).Hippo = fakeAppContext;
