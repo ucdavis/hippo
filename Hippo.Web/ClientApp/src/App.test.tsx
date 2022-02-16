@@ -17,7 +17,7 @@ beforeEach(() => {
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
       "/api/account/get": sponsorResponse,
-    })
+    } as any)
   );
 });
 
