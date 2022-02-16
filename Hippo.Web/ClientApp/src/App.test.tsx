@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "./App";
 import { fakeAccounts, fakeAppContext } from "./test/mockData";
-import { responseMap } from "./Test/testHelpers";
+import { responseMap } from "./test/testHelpers";
 
 beforeEach(() => {
   const sponsorResponse = {
