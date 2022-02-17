@@ -84,7 +84,7 @@ namespace Hippo.Core.Data
                     IsActive = true,
                     Status = Account.Statuses.PendingApproval,
                 };
-                await _dbContext.Accounts.AddAsync(otherAccount);
+                await _dbContext.Accounts.AddAsync(pendingAccount);
             }
 
             await _dbContext.SaveChangesAsync();
