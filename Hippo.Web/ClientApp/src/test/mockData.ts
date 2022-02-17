@@ -10,15 +10,6 @@ const fakeUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
-export const fakeAppContext: AppContextShape = {
-  antiForgeryToken: "fakeAntiForgeryToken",
-  user: {
-    detail: {
-      ...fakeUser,
-    },
-  },
-};
-
 export const fakeAccounts: Account[] = [
   {
     id: 1,
@@ -35,3 +26,13 @@ export const fakeAccounts: Account[] = [
     createdOn: "2020-01-01T00:00:00.000Z",
   },
 ];
+
+export const fakeAppContext: AppContextShape = {
+  antiForgeryToken: "fakeAntiForgeryToken",
+  user: {
+    detail: {
+      ...fakeUser,
+    },
+  },
+  account: fakeAccounts[0],
+};
