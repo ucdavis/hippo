@@ -35,7 +35,7 @@ namespace Hippo.Web
             {
                 options.Filters.Add<SerilogControllerActionFilter>();
             });
-                
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -64,12 +64,12 @@ namespace Hippo.Web
                 };
                 oidc.Events.OnTicketReceived = async context =>
                 {
-                    if(context.Principal == null || context.Principal.Identity == null)
+                    if (context.Principal == null || context.Principal.Identity == null)
                     {
                         return;
                     }
                     var identity = (ClaimsIdentity)context.Principal.Identity;
- 
+
 
                     // Sometimes CAS doesn't return the required IAM ID
                     // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
@@ -128,6 +128,10 @@ namespace Hippo.Web
                     {
                         sqliteOptions.MigrationsAssembly("Hippo.Core");
                     });
+
+#if DEBUG
+                    o.EnableSensitiveDataLogging();
+#endif
                 });
             }
 
@@ -201,20 +205,27 @@ namespace Hippo.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action}/{id?}",
-                    defaults: new { controller = "Home", action = "Index" }
+                    defaults: new { controller = "Home", action = "Index" },
+                    constraints: new { controller = "(home|test|system)" }
                 );
 
-                // TODO: API routes map to all other controllers
+                // API routes map to all other controllers
+                endpoints.MapControllerRoute(
+                    name: "API",
+                    pattern: "/api/{controller=Account}/{action=Index}/{id?}");
 
                 // any other nonfile route should be handled by the spa, except leave the sockjs route alone if we are in dev mode (hot reloading)
-                if (env.IsDevelopment()) {
+                if (env.IsDevelopment())
+                {
                     endpoints.MapControllerRoute(
                         name: "react",
                         pattern: "{*path:nonfile}",
                         defaults: new { controller = "Home", action = "Index" },
                         constraints: new { path = new RegexRouteConstraint("^(?!sockjs-node).*$") }
                     );
-                } else {
+                }
+                else
+                {
                     endpoints.MapControllerRoute(
                         name: "react",
                         pattern: "{*path:nonfile}",
