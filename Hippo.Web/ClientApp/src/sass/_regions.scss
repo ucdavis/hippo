@@ -1,7 +1,7 @@
 .appheader {
   text-align: center;
-  padding: 4% 0;
-  svg {
+  padding: 2% 0 4% 0;
+  .hippo svg {
     margin-bottom: 8px;
   }
   h1 {
@@ -10,37 +10,5 @@
     img {
       margin-right: 8px;
     }
-  }
-}
-// hippo
-// #hippo-logo {
-//   &:hover {
-//     #background-fill {
-//       fill: $tahoe;
-//     }
-//   }
-// }
-#background-fill {
-  transition: all 0.5s ease;
-  animation: colormorph 20s ease-in infinite;
-}
-@keyframes colormorph {
-  0% {
-    fill: $primary-color;
-  }
-  33% {
-    fill: $primary-color;
-  }
-  36% {
-    fill: $secondary-color;
-  }
-  66% {
-    fill: $secondary-color;
-  }
-  69% {
-    fill: $primary-color;
-  }
-  100% {
-    fill: $primary-color;
   }
 }
