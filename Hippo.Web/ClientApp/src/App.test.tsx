@@ -6,17 +6,17 @@ import { fakeAccounts, fakeAppContext } from "./test/mockData";
 import { responseMap } from "./test/testHelpers";
 
 beforeEach(() => {
-  const sponsorResponse = Promise.resolve({
+  const accountResponse = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => fakeAccounts,
+    json: () => Promise.resolve(fakeAccounts[0]),
   });
 
   (global as any).Hippo = fakeAppContext;
 
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
-      "/api/account/get": sponsorResponse,
+      "/api/account/get": accountResponse,
     })
   );
 });
