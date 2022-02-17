@@ -9,6 +9,7 @@ import { Home } from "./components/Home";
 import { AccountInfo } from "./components/AccountInfo";
 import { RequestForm } from "./components/RequstForm";
 import { PendingApproval } from "./components/PendingApproval";
+import { ApproveAccounts } from "./components/ApproveAccounts";
 
 declare var Hippo: AppContextShape;
 
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/active" component={AccountInfo} />
           <Route path="/pendingapproval" component={PendingApproval} />
           <Route path="/create" component={RequestForm} />
+          <Route path="/approve" component={ApproveAccounts} />
         </Switch>
       </div>
     </AppContext.Provider>

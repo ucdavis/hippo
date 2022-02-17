@@ -34,6 +34,35 @@ public class AccountController : SuperController
         return Ok(await _dbContext.Accounts.Where(a => a.CanSponsor).AsNoTracking().ToListAsync());
     }
 
+    // Return all accounts that are waiting for the current user to approve
+    [HttpGet]
+    public async Task<ActionResult> Pending()
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().ToListAsync());
+    }
+
+    // Approve a given pending account if you are the sponsor
+    [HttpPost]
+    public async Task<ActionResult> Approve(int id)
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        account.Status = Account.Statuses.Active;
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] CreateModel model)
     {
