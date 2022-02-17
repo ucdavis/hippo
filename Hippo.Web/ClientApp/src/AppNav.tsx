@@ -21,7 +21,7 @@ export const AppNav = () => {
 
   return (
     <div className="row appheader justify-content-center">
-      <div className="col-md-6">
+      <div className="col-md-6 hippo">
         <HippoLogo />
 
         <h1>

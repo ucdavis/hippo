@@ -10,10 +10,11 @@ $theme-colors: (
 @import "bootstrap/scss/bootstrap";
 @import "@ucdavis/gunrockin/sass/_typography.scss";
 
-$primary-bg: #181818;
-$borders: #30363d;
-$primary-font: rgba(254, 254, 254, 0.95); //
-$secondary-font: rgba(254, 254, 254, 0.6); //
+$primary-bg: #fefefe;
+$borders: #c9c3ce;
+$primary-font: rgba(67, 67, 67, 0.99); //
+$secondary-font: rgba(67, 67, 67, 0.7); //
+$tertiary-font: rgba(67, 67, 67, 0.48); //
 
 $danger: $merlot;
 $error-color: $danger;

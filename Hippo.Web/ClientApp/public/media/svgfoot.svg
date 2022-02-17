@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1121px" height="102px" viewBox="0 0 1121 102" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>svgfoot</title>
+    <g id="Main" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy-3" transform="translate(-186.000000, -1031.000000)">
+            <g id="svgfoot" transform="translate(186.840927, 1031.575470)">
+                <g id="geo-foot" transform="translate(558.130871, 61.432797) rotate(-180.000000) translate(-558.130871, -61.432797) translate(3.153958, 22.424530)">
+                    <polygon id="background" fill="#00B2E3" points="1.56702124 0.0124619132 83.9402297 51.565364 90.1170656 40.8426061 103.477968 66.0703089 182.800387 40.8426061 220.904148 76.1330022 241.368891 53.3410859 312.541088 78.0165342 445.105193 40.8426061 524.678427 66.0703089 553.929575 30.8054072 666.9411 40.8426061 694.871904 20.9690482 716.734437 51.565364 795.295891 30.8054072 924.803123 66.0703089 996.81416 40.8426061 1019.09843 66.0703089 1065.23307 25.6117438 1108.94104 -2.70674227e-16"></polygon>
+                    <g id="cuts" fill="#000000" stroke="#181818" stroke-width="1.000695">
+                        <polygon id="Path-36" fill-opacity="0.2" stroke-linejoin="round" points="0 5.46933518e-05 83.9402297 51.565364 90.1170656 40.8426061"></polygon>
+                        <polygon id="Path-37" fill-opacity="0" stroke-linejoin="round" points="1.56702124 0.0124619132 89.9447074 5.46933516e-05 90.1170656 40.8426061"></polygon>
+                        <polygon id="Path-38" fill-opacity="0.4" stroke-linejoin="round" points="90.2737718 0 90.1170656 42.1810719 103.477968 66.0703089"></polygon>
+                        <polyline id="Path-39" fill-opacity="0.2" stroke-linejoin="round" points="103.477968 66.0703089 182.800387 40.8426061 90.7203851 -1.47104298e-14"></polyline>
+                        <polygon id="Path-40" fill-opacity="0.4" stroke-linejoin="round" points="182.800387 40.8426061 220.904148 76.1330022 257.463727 34.5943967"></polygon>
+                        <polygon id="Path-41" fill-opacity="0.2" stroke-linejoin="round" points="257.463727 34.5943967 170.007608 34.5943967 182.800387 40.8426061"></polygon>
+                        <polygon id="Path-42" fill-opacity="0.2" stroke-linejoin="round" points="257.463727 34.5943967 312.541088 78.0165342 241.368891 53.3410859"></polygon>
+                        <polygon id="Path-43" fill-opacity="0.2" stroke-linejoin="round" points="313.471412 78.0165342 445.105193 40.8426061 331.255063 18.7734648"></polygon>
+                        <polyline id="Path-44" fill-opacity="0.4" stroke-linejoin="round" points="313.471412 78.0165342 257.463727 34.5943967 331.255063 18.7734648"></polyline>
+                        <polygon id="Path-45" fill-opacity="0.2" stroke-linejoin="round" points="445.105193 40.8426061 524.678427 66.0703089 553.929575 30.8054072"></polygon>
+                        <polygon id="Path-46" fill-opacity="0" stroke-linejoin="round" points="553.929575 30.8054072 449.922298 25.1855024 331.255063 18.7734648 445.105193 40.8426061"></polygon>
+                        <polygon id="Path-47" fill-opacity="0.4" stroke-linejoin="round" points="331.255063 18.7734648 407.013197 3.72423452e-12 498.907602 0 553.929575 30.8054072"></polygon>
+                        <polygon id="Path-48" fill-opacity="0.2" stroke-linejoin="round" points="553.929575 30.8054072 666.9411 40.8426061 674.829792 1.34410726e-12 646.810221 5.46933557e-05"></polygon>
+                        <polygon id="Path-49" fill-opacity="0" stroke-linejoin="round" points="553.929575 30.8054072 499.517384 2.50729801e-12 646.810221 0"></polygon>
+                        <polygon id="Path-50" fill-opacity="0.4" stroke-linejoin="round" points="666.9411 40.8426061 694.871904 20.9690482 682.601315 1.0893284e-12 674.829792 0"></polygon>
+                        <polygon id="Path-51" fill-opacity="0" stroke-linejoin="round" points="694.871904 20.9690482 716.734437 51.565364 795.295891 30.8054072"></polygon>
+                        <polygon id="Path-52" fill-opacity="0.2" stroke-linejoin="round" points="682.601315 1.36301164e-12 694.871904 20.9690482 795.295891 30.8054072 705.607519 0"></polygon>
+                        <polygon id="Path-53" fill-opacity="0.2" stroke-linejoin="round" points="795.295891 30.8054072 924.803123 66.0703089 996.81416 40.8426061"></polygon>
+                        <polygon id="Path-54" fill-opacity="0" stroke-linejoin="round" points="795.295891 30.8054072 996.81416 40.8426061 963.035301 7.19832069"></polygon>
+                        <polygon id="Path-55" fill-opacity="0.4" stroke-linejoin="round" points="795.295891 30.8054072 963.035301 7.19832069 821.263207 5.46933556e-05 705.607519 8.15428954e-12"></polygon>
+                        <polygon id="Path-56" fill-opacity="0.4" stroke-linejoin="round" points="996.81416 40.8426061 1019.09843 66.0703089 1065.23307 25.6117438"></polygon>
+                        <polygon id="Path-57" fill-opacity="0.2" stroke-linejoin="round" points="996.81416 40.8426061 1065.23307 25.6117438 963.035301 7.19832069"></polygon>
+                        <polygon id="Path-64" fill-opacity="0" points="963.035301 7.19832069 1031.61246 4.98318953e-13 1109.95382 5.46933558e-05 1065.23307 25.6117438"></polygon>
+                        <polygon id="Path-66" fill-opacity="0.4" stroke-linejoin="round" points="90.9235613 5.88858525e-13 205.610752 -3.68685947e-14 170.007608 34.5943967"></polygon>
+                        <polygon id="Path-67" fill-opacity="0" stroke-linejoin="round" points="170.007608 34.5943967 257.463727 34.5943967 205.925737 0"></polygon>
+                        <polygon id="Path-68" fill-opacity="0.2" stroke-linejoin="round" points="206.933364 0 331.255063 18.7734648 257.463727 34.5943967"></polygon>
+                        <polygon id="Path-69" fill-opacity="0.2" stroke-linejoin="round" points="343.946166 8.79302794e-15 331.255063 18.7734648 407.013197 2.66786981e-13"></polygon>
+                    </g>
+                </g>
+                <g id="pieces">
+                    <g id="pieces1" transform="translate(0.000000, 62.679448)">
+                        <polygon id="piecebg" fill="#00B2E3" points="2.45629127 15.5749363 23.9259737 0 0 0"></polygon>
+                        <polygon id="piece2" fill-opacity="0" fill="#000000" points="2.45629127 15.5749363 23.9259737 0 0 0"></polygon>
+                    </g>
+                    <g id="pieces2" transform="translate(99.009349, 16.370755)">
+                        <polygon id="piecebg" fill="#00B2E3" points="0 0 22.284274 26.7292813 72.9048512 10.0793904"></polygon>
+                        <polygon id="piece1" fill-opacity="0.4" fill="#000000" points="0 0 22.284274 26.7292813 72.9048512 10.0793904"></polygon>
+                    </g>
+                    <g id="pieces3" transform="translate(317.811892, 38.875700)">
+                        <polygon id="piecebg" fill="#00B2E3" points="0 20.7599569 42.021268 10.7227579 12.9645359 -2.30481821e-15"></polygon>
+                        <polygon id="piece3" fill-opacity="0" fill="#000000" points="0 20.7599569 42.021268 10.7227579 12.9645359 -2.30481821e-15"></polygon>
+                    </g>
+                    <g id="pieces4" transform="translate(404.182220, 19.932983)">
+                        <polygon id="piecebg" fill="#00B2E3" points="0 11.7599335 22.0536588 42.3557205 34.8169403 0"></polygon>
+                        <polygon id="piece4" fill-opacity="0.2" fill="#000000" points="0 11.7599335 22.0536588 42.3557205 34.8169403 0"></polygon>
+                    </g>
+                    <g id="pieces5" transform="translate(520.564850, 42.149292)">
+                        <polygon id="piecebg" fill="#00B2E3" points="0 13.2200623 33.6133579 15.4863651 47.2369537 0"></polygon>
+                        <polygon id="piece5" fill-opacity="0.1" fill="#000000" points="0 13.2200623 33.6133579 15.4863651 47.2369537 4.54747351e-13"></polygon>
+                    </g>
+                    <g id="pieces6" transform="translate(805.566694, 0.000000)">
+                        <polygon id="piecebg" fill="#00B2E3" points="32.0494708 0 71.1721974 29.8466675 0 5.17121925"></polygon>
+                        <polygon id="piece6" fill-opacity="0.4" fill="#000000" points="32.0494708 0 71.1721974 29.8466675 0 5.17121925"></polygon>
+                    </g>
+                    <g id="pieces7" transform="translate(1011.629815, 17.370755)">
+                        <polygon id="piecebg" fill="#00B2E3" points="13.3609019 25.2277028 19.5377378 14.5049449 9.11663826e-13 0"></polygon>
+                        <polygon id="piece7" fill-opacity="0" fill="#000000" points="13.3609019 25.2277028 19.5377378 14.5049449 2.16912463e-15 0"></polygon>
+                    </g>
+                    <g id="pieces8" transform="translate(1070.438339, 62.548187)">
+                        <polygon id="piecebg" fill="#00B2E3" points="0 0 29.2915924 17.6395707 49.5373535 8.81978536"></polygon>
+                        <polygon id="piece8" fill-opacity="0.2" fill="#000000" points="0 0 29.2915924 17.6395707 49.5373535 8.81978536"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

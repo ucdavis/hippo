@@ -9,6 +9,7 @@ import { Home } from "./components/Home";
 import { AccountInfo } from "./components/AccountInfo";
 import { RequestForm } from "./components/RequstForm";
 import { PendingApproval } from "./components/PendingApproval";
+import BottomSvg from "./Shared/bottomSvg";
 
 declare var Hippo: AppContextShape;
 
@@ -24,6 +25,9 @@ const App = () => {
     <AppContext.Provider value={Hippo}>
       <div className={`account-status-${accountClassName}`}>
         <AppNav></AppNav>
+        <div className="bottom-svg">
+          <BottomSvg />
+        </div>
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/active" component={AccountInfo} />
