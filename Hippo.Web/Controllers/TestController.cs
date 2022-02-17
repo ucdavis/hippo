@@ -12,16 +12,16 @@ namespace Hippo.Web.Controllers
     [Authorize]
     public class TestController : Controller
     {
-        public INotificationService _notificationService { get; }
-        public ISshService _sshService { get; }
         public IEmailService _emailService { get; }
+        public ISshService _sshService { get; }
+        public INotificationService _notificationService { get; }
         public AppDbContext _dbContext { get; }
 
-        public TestController(INotificationService notificationService, ISshService sshService, IEmailService emailService, AppDbContext dbContext)
+        public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext)
         {
-            _notificationService = notificationService;
-            _sshService = sshService;
             _emailService = emailService;
+            _sshService = sshService;
+            _notificationService = notificationService;
             _dbContext = dbContext;
         }
 
@@ -36,7 +36,7 @@ namespace Hippo.Web.Controllers
 
 
             //await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", emailBody);
-            await _notificationService.SendNotification(new string[] { "jsylvestre@ucdavis.edu" }, null, emailBody, "Test", "Test 2");
+            await _emailService.SendEmail(new string[] { "jsylvestre@ucdavis.edu" }, null, emailBody, "Test", "Test 2");
 
             return Content("Done. Maybe...");
         }
@@ -55,7 +55,7 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> TestAccountRequest()
         {
             var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
-            if(await _emailService.AccountRequested(account))
+            if(await _notificationService.AccountRequested(account))
             {
                 return Content("Email Sent");
             }
@@ -65,9 +65,9 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> TestAccountDecision()
         {
             var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
-            if (await _emailService.AccountDecission(account, true))
+            if (await _notificationService.AccountDecission(account, true))
             {
-                await _emailService.AccountDecission(account, false);
+                await _notificationService.AccountDecission(account, false);
                 return Content("Emails Sent");
             }
             return Content("Houston we have a problem");

@@ -1,112 +1,89 @@
-﻿using Hippo.Core.Data;
-using Hippo.Core.Domain;
-using Hippo.Core.Models.Settings;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Hippo.Core.Models.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Serilog;
-using Hippo.Email.Models;
-using Hippo.Core.Extensions;
-using Razor.Templating.Core;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
+using Microsoft.Extensions.Options;
 
 namespace Hippo.Core.Services
 {
     public interface IEmailService
     {
-        Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecission(Account account, bool isApproved);
-    }
+        Task SendSampleEmailMessage(string email, string body);
+        Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject = "Hippo Notification");
+    } 
 
     public class EmailService : IEmailService
     {
-        private readonly AppDbContext _dbContext;
-        private readonly INotificationService _notificationService;
+        private readonly SmtpClient _client;
         private readonly EmailSettings _emailSettings;
 
-        public EmailService(AppDbContext dbContext, INotificationService notificationService, IOptions<EmailSettings> emailSettings)
+        public EmailService(IOptions<EmailSettings> emailSettings)
         {
-            _dbContext = dbContext;
-            _notificationService = notificationService;
             _emailSettings = emailSettings.Value;
+            _client = new SmtpClient(_emailSettings.Host, _emailSettings.Port) { Credentials = new NetworkCredential(_emailSettings.UserName, _emailSettings.Password), EnableSsl = true };
         }
 
-        public async Task<bool> AccountDecission(Account account, bool isApproved)
+        public async Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject = "Hippo Notification")
         {
-            try
+            if (_emailSettings.DisableSend.Equals("Yes", StringComparison.OrdinalIgnoreCase))
             {
-                account = await GetCompleteAccount(account);
-                var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
-                var emailTo = account.Owner.Email;
-
-                var model = new DecisionModel()
+                return;
+            }
+            using (var message = new MailMessage { From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName), Subject = subject })
+            {
+                foreach (var email in emails)
                 {
-                    SponsorName = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name,
-                    RequesterName = account.Owner.Name,
-                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
-                    Decision = isApproved ? "Approved" : "Rejected",
-                    DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                };
-
-                if (!isApproved)
-                {
-                    model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
+                    message.To.Add(new MailAddress(email, email));
                 }
 
-                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission.cshtml", model);
-
-                await _notificationService.SendNotification(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Error emailing Account Request", ex);
-                return false;
-            }
-        }
-
-        public async Task<bool> AccountRequested(Account account)
-        {
-            try 
-            { 
-                account = await GetCompleteAccount(account);
-                var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
-                var emailTo = account.Sponsor.Owner.Email; 
-
-                var model = new NewRequestModel()
+                if (ccEmails != null && ccEmails.Length > 0)
                 {
-                    SponsorName = account.Sponsor.Owner.Name,
-                    RequesterName = account.Owner.Name,
-                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
-                };
+                    foreach (var ccEmail in ccEmails)
+                    {
+                        message.CC.Add(new MailAddress(ccEmail));
+                    }
+                }
 
-                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
+                if (!string.IsNullOrWhiteSpace(_emailSettings.BccEmail))
+                {
+                    message.Bcc.Add(new MailAddress(_emailSettings.BccEmail));
+                }
 
-                await _notificationService.SendNotification(new[] { emailTo }, null, emailBody, "A new account request is ready for your approval");
+                // body is our fallback text and we'll add an HTML view as an alternate.
+                message.Body = textVersion;
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Error emailing Account Request", ex) ;
-                return false;
+                var htmlView = AlternateView.CreateAlternateViewFromString(body, new ContentType(MediaTypeNames.Text.Html));
+                message.AlternateViews.Add(htmlView);
+
+                await _client.SendMailAsync(message);
             }
         }
 
-        private async Task<Account> GetCompleteAccount(Account account)
+        public async Task SendSampleEmailMessage(string email, string body)
         {
-            if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null)
+            if (_emailSettings.DisableSend.Equals("Yes", StringComparison.OrdinalIgnoreCase))
             {
-                return await _dbContext.Accounts.AsNoTracking().AsSingleQuery().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
+                return;
             }
-            return account;
+
+            using (var message = new MailMessage { From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName), Subject = "Hippo Notification" })
+            {
+                message.To.Add(new MailAddress(email, email));
+
+                // body is our fallback text and we'll add an HTML view as an alternate.
+                message.Body = "Sample Email Text";
+
+                var htmlView = AlternateView.CreateAlternateViewFromString(body, new ContentType(MediaTypeNames.Text.Html));
+                message.AlternateViews.Add(htmlView);
+
+                await _client.SendMailAsync(message);
+            }
         }
     }
-}
+
+ }
