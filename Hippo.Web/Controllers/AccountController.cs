@@ -45,6 +45,8 @@ public class AccountController : SuperController
             return BadRequest("You already have an account");
         }
 
+        //TODO: Simple Ssh Validation
+
         var account = new Account()
         {
             CanSponsor = false, // TOOD: determine how new sponsors are created

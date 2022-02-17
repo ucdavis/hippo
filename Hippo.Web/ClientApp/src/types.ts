@@ -16,6 +16,11 @@ export interface Account {
   createdOn: string;
 }
 
+export interface RequestPostModel {
+  sponsorId: number;
+  sshKey: string;
+}
+
 export interface AppContextShape {
   antiForgeryToken: string;
   user: {
