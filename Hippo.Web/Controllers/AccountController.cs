@@ -12,11 +12,13 @@ public class AccountController : SuperController
 {
     private AppDbContext _dbContext;
     private IUserService _userService;
+    private ISshService _sshService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService)
     {
         _dbContext = dbContext;
         _userService = userService;
+        _sshService = sshService;
     }
 
     // Return account info for the currently logged in user
@@ -49,14 +51,22 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
+        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
 
         if (account == null)
         {
             return NotFound();
         }
 
+        Console.WriteLine($"Approving account {account.Owner.Iam} with ssh key {account.SshKey}");
+
+        _sshService.PlaceFile(account.SshKey, $"/var/lib/remote-api/{account.Owner.Kerberos}.txt");
+
         account.Status = Account.Statuses.Active;
+
+        // TODO: send notification
+        // TODO: save history of approval
 
         await _dbContext.SaveChangesAsync();
 

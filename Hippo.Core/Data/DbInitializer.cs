@@ -53,6 +53,8 @@ namespace Hippo.Core.Data
 
             if (!(await _dbContext.Accounts.AnyAsync()))
             {
+                var sampleSsh = "ABC123";
+
                 var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
                 var scottAccount = new Account()
                 {
@@ -60,6 +62,7 @@ namespace Hippo.Core.Data
                     Owner = ScottUser,
                     IsActive = true,
                     Name = "Scott's Account",
+                    SshKey = sampleSsh,
                     Status = Account.Statuses.Active,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
@@ -71,6 +74,7 @@ namespace Hippo.Core.Data
                     Sponsor = scottAccount,
                     Name = "Jason's Account",
                     IsActive = true,
+                    SshKey = sampleSsh,
                     Status = Account.Statuses.PendingApproval,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
@@ -82,6 +86,7 @@ namespace Hippo.Core.Data
                     Sponsor = scottAccount,
                     Name = "James' Account",
                     IsActive = true,
+                    SshKey = sampleSsh,
                     Status = Account.Statuses.PendingApproval,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);
