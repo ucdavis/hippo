@@ -21,4 +21,5 @@ export interface AppContextShape {
   user: {
     detail: User;
   };
+  account: Account;
 }
