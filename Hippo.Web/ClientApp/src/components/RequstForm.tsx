@@ -18,23 +18,16 @@ export const RequestForm = () => {
     const fetchSponsors = async () => {
       const response = await authenticatedFetch("/api/account/sponsors");
 
+      const sponsorResult = await response.json();
+
       if (response.ok) {
-        setSponsors(await response.json());
+        setSponsors(await sponsorResult);
+        setRequest({ ...request, sponsorId: sponsorResult[0].id });
       }
     };
 
     fetchSponsors();
-  }, []);
-
-  //When sponsors load, set the default sponsor
-  useEffect(() => {
-    if (sponsors.length > 0) {
-      setRequest({
-        ...request,
-        sponsorId: sponsors[0].id,
-      });
-    }
-  }, [request, sponsors]);
+  }, [request]);
 
   const handleSubmit = async () => {
     const response = await authenticatedFetch("/api/account/create", {
