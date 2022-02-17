@@ -24,7 +24,8 @@ namespace Hippo.Core.Data
                 //do what needs to be done?
             }
 
-            var JasonUser = await CheckAndCreateUser(new User {
+            var JasonUser = await CheckAndCreateUser(new User
+            {
                 Email = "jsylvestre@ucdavis.edu",
                 Kerberos = "jsylvest",
                 FirstName = "Jason",
@@ -39,13 +40,21 @@ namespace Hippo.Core.Data
                 LastName = "Kirkland",
                 Iam = "1000029584",
             });
+            var JamesUser = await CheckAndCreateUser(new User
+            {
+                Email = "jscubbage@ucdavis.edu",
+                Kerberos = "jscub",
+                FirstName = "James",
+                LastName = "Cubbage",
+                Iam = "1000025056",
+            });
 
             await _dbContext.SaveChangesAsync();
 
             if (!(await _dbContext.Accounts.AnyAsync()))
             {
                 var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
-                var account = new Account()
+                var scottAccount = new Account()
                 {
                     CanSponsor = true,
                     Owner = ScottUser,
@@ -53,18 +62,29 @@ namespace Hippo.Core.Data
                     Name = "Scott's Account",
                     Status = Account.Statuses.Active,
                 };
-                await _dbContext.Accounts.AddAsync(account);
+                await _dbContext.Accounts.AddAsync(scottAccount);
 
                 var otherAccount = new Account()
                 {
                     CanSponsor = false,
                     Owner = JasonUser,
-                    Sponsor = account,
+                    Sponsor = scottAccount,
                     Name = "Jason's Account",
                     IsActive = true,
                     Status = Account.Statuses.PendingApproval,
                 };
-                await _dbContext.Accounts.AddAsync(otherAccount);                
+                await _dbContext.Accounts.AddAsync(otherAccount);
+
+                var pendingAccount = new Account()
+                {
+                    CanSponsor = false,
+                    Owner = JamesUser,
+                    Sponsor = scottAccount,
+                    Name = "James' Account",
+                    IsActive = true,
+                    Status = Account.Statuses.PendingApproval,
+                };
+                await _dbContext.Accounts.AddAsync(pendingAccount);
             }
 
             await _dbContext.SaveChangesAsync();
