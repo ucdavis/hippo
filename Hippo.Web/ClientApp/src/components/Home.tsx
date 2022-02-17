@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-
+import { Redirect } from "react-router-dom";
 import { Account } from "../types";
+
 import { authenticatedFetch } from "../util/api";
 
-import { RequestForm } from "./RequstForm";
-
+// query for account status and redirect to the proper page depending on the results
 export const Home = () => {
-  const [account, setAccount] = useState<Account>();
+  const [accountStatus, setAccountStatus] = useState<string>();
 
   useEffect(() => {
     // query for user account status
@@ -16,15 +16,14 @@ export const Home = () => {
       if (response.ok) {
         if (response.status === 204) {
           // no content means we have no account record for this person
-          setAccount({ id: 0, status: "NonExistant" } as Account);
+          setAccountStatus("create");
         } else {
-          // else we have the account
-          setAccount(await response.json());
-
-          // TODO: we are hardcoding no account for now to test
-          // setAccount({ id: 0, status: "NonExistant" } as Account);
+          const account = (await response.json()) as Account;
+          setAccountStatus(account.status.toLocaleLowerCase());
         }
       }
+
+      // TODO: handle error case
     };
 
     fetchAccount();
@@ -33,11 +32,8 @@ export const Home = () => {
   return (
     <div className="row justify-content-center">
       <div className="col-md-6">
-        {!account && <p>Loading...</p>}
-        {account && account.status === "NonExistant" && <RequestForm />}
-        {account && account.status !== "NonExistant" && (
-          <p>You have an account, TODO</p>
-        )}
+        {accountStatus === undefined && <p>Loading...</p>}
+        {accountStatus !== undefined && <Redirect to={`/${accountStatus}`} />}
       </div>
     </div>
   );

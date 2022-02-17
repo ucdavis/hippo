@@ -42,37 +42,39 @@ export const RequestForm = () => {
   };
 
   return (
-    <>
-      <h3>
-        Welcome, <span className="status-color">{user.detail.firstName}</span>
-      </h3>
-      <p>
-        You don't seem to have an account on Farm yet. If you’d like access,
-        please answer the questions below
-      </p>
-      <hr />
-      <div className="form-group">
-        <label>Who is sponsoring your account?</label>
-        <select className="form-select" aria-label="Default select example">
-          {sponsors.map((sponsor) => (
-            <option key={sponsor.id} value={sponsor.id}>
-              {sponsor.name}
-            </option>
-          ))}
-        </select>
-        <p className="form-helper">Help text</p>
+    <div className="row justify-content-center">
+      <div className="col-md-6">
+        <h3>
+          Welcome, <span className="status-color">{user.detail.firstName}</span>
+        </h3>
+        <p>
+          You don't seem to have an account on Farm yet. If you’d like access,
+          please answer the questions below
+        </p>
+        <hr />
+        <div className="form-group">
+          <label>Who is sponsoring your account?</label>
+          <select className="form-select" aria-label="Default select example">
+            {sponsors.map((sponsor) => (
+              <option key={sponsor.id} value={sponsor.id}>
+                {sponsor.name}
+              </option>
+            ))}
+          </select>
+          <p className="form-helper">Help text</p>
+        </div>
+        <div className="form-group">
+          <label className="form-label">What is your SSH key</label>
+          <textarea
+            className="form-control"
+            id="exampleFormControlTextarea1"
+          ></textarea>
+          <p className="form-helper">Help text</p>
+        </div>
+        <button onClick={handleSubmit} className="btn btn-primary">
+          Submit
+        </button>
       </div>
-      <div className="form-group">
-        <label className="form-label">What is your SSH key</label>
-        <textarea
-          className="form-control"
-          id="exampleFormControlTextarea1"
-        ></textarea>
-        <p className="form-helper">Help text</p>
-      </div>
-      <button onClick={handleSubmit} className="btn btn-primary">
-        Submit
-      </button>
-    </>
+    </div>
   );
 };
