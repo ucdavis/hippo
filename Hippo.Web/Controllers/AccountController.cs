@@ -84,6 +84,19 @@ public class AccountController : SuperController
             return BadRequest("You already have an account");
         }
 
+        if(!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
+        {
+            return BadRequest("Bad Sponsor Id");
+        }
+        if (string.IsNullOrWhiteSpace(model.SshKey))
+        {
+            return BadRequest("Missing SSH Key");
+        }
+        if(!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
+        {
+            return BadRequest("Invalid SSH key");
+        }
+
         var account = new Account()
         {
             CanSponsor = false, // TOOD: determine how new sponsors are created
