@@ -26,6 +26,16 @@ export const RequestForm = () => {
     fetchSponsors();
   }, []);
 
+  //When sponsors load, set the default sponsor
+  useEffect(() => {
+    if (sponsors.length > 0) {
+      setRequest({
+        ...request,
+        sponsorId: sponsors[0].id,
+      });
+    }
+  }, [request, sponsors]);
+
   const handleSubmit = async () => {
     const response = await authenticatedFetch("/api/account/create", {
       method: "POST",
