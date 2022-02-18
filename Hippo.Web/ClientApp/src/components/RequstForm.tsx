@@ -1,17 +1,20 @@
 import { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import AppContext from "../Shared/AppContext";
 import { Account, RequestPostModel } from "../types";
 import { authenticatedFetch } from "../util/api";
 
 export const RequestForm = () => {
-  const user = useContext(AppContext).user;
+  const [context, setContext] = useContext(AppContext);
 
   const [sponsors, setSponsors] = useState<Account[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({
     sponsorId: 0,
     sshKey: "",
   });
+
+  const history = useHistory();
 
   // load up possible sponsors
   useEffect(() => {
@@ -21,13 +24,13 @@ export const RequestForm = () => {
       const sponsorResult = await response.json();
 
       if (response.ok) {
-        setSponsors(await sponsorResult);
-        setRequest({ ...request, sponsorId: sponsorResult[0].id });
+        setSponsors(sponsorResult);
+        setRequest((r) => ({ ...r, sponsorId: sponsorResult[0].id }));
       }
     };
 
     fetchSponsors();
-  }, [request]);
+  }, []);
 
   const handleSubmit = async () => {
     const response = await authenticatedFetch("/api/account/create", {
@@ -37,9 +40,8 @@ export const RequestForm = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
-
-      console.log("new acct", newAccount);
-      // do something with it
+      setContext((ctx) => ({ ...ctx, account: newAccount }));
+      history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
     }
   };
 
@@ -47,7 +49,8 @@ export const RequestForm = () => {
     <div className="row justify-content-center">
       <div className="col-md-6">
         <h3>
-          Welcome, <span className="status-color">{user.detail.firstName}</span>
+          Welcome,{" "}
+          <span className="status-color">{context.user.detail.firstName}</span>
         </h3>
         <p>
           You don't seem to have an account on Farm yet. If you’d like access,
@@ -79,7 +82,11 @@ export const RequestForm = () => {
             onChange={(e) => setRequest({ ...request, sshKey: e.target.value })}
           ></textarea>
           <p className="form-helper">
-            Paste all of the text from your public SSH file here.
+            Paste all of the text from your public SSH file here. Example:
+            <br></br>
+            <code>
+              -----BEGIN RSA PRIVATE KEY-----ABC123-----END RSA PRIVATE KEY-----
+            </code>
           </p>
         </div>
         <button onClick={handleSubmit} className="btn btn-primary">
