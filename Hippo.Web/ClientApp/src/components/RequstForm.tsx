@@ -5,7 +5,7 @@ import { Account, RequestPostModel } from "../types";
 import { authenticatedFetch } from "../util/api";
 
 export const RequestForm = () => {
-  const user = useContext(AppContext).user;
+  const [{ user }] = useContext(AppContext);
 
   const [sponsors, setSponsors] = useState<Account[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({

@@ -16,7 +16,7 @@ import { authenticatedFetch } from "./util/api";
 declare var Hippo: AppContextShape;
 
 const App = () => {
-  const [account, setAccount] = useState<Account>();
+  const [context, setContext] = useState<AppContextShape>(Hippo);
 
   const loc = useLocation();
 
@@ -33,10 +33,16 @@ const App = () => {
       if (response.ok) {
         if (response.status === 204) {
           // no content means we have no account record for this person
-          setAccount({ id: 0, status: "create" } as Account);
+          setContext((ctx) => ({
+            ...ctx,
+            account: { id: 0, status: "create" } as Account,
+          }));
         } else {
           const account = (await response.json()) as Account;
-          setAccount(account);
+          setContext((ctx) => ({
+            ...ctx,
+            account,
+          }));
         }
       }
 
@@ -46,10 +52,9 @@ const App = () => {
     fetchAccount();
   }, []);
 
-  if (account) {
-    const context: AppContextShape = { ...Hippo, account };
+  if (context.account) {
     return (
-      <AppContext.Provider value={context}>
+      <AppContext.Provider value={[context, setContext]}>
         <div className={`account-status-${accountClassName}`}>
           <AppNav></AppNav>
           <div className="bottom-svg">

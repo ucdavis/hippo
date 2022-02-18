@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import AppContext from "../Shared/AppContext";
 
 export const AccountInfo = () => {
-  const { account } = useContext(AppContext);
+  const [{ account }] = useContext(AppContext);
 
   return (
     <div className="row justify-content-center">
