@@ -120,6 +120,12 @@ public class AccountController : SuperController
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
 
+        var success = await _notificationService.AccountRequested(account);
+        if (!success)
+        {
+            Log.Error("Error creating Account Request email");
+        }
+
         return Ok(account);
     }
 
