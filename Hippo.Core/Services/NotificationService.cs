@@ -18,7 +18,7 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecission(Account account, bool isApproved);
+        Task<bool> AccountDecision(Account account, bool isApproved);
     }
 
     public class NotificationService : INotificationService
@@ -34,7 +34,7 @@ namespace Hippo.Core.Services
             _emailSettings = emailSettings.Value;
         }
 
-        public async Task<bool> AccountDecission(Account account, bool isApproved)
+        public async Task<bool> AccountDecision(Account account, bool isApproved)
         {
             try
             {
