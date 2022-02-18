@@ -43,9 +43,14 @@ export const RequestForm = () => {
       setContext((ctx) => ({ ...ctx, account: newAccount }));
       history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
     } else {
-      const errorText = await response.text();
-      console.error(errorText);
-      alert(errorText);
+      if (response.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        console.error(errorText);
+        alert(errorText);
+      } else {
+        // const errorText = await response.text(); //This can contain exception info
+        alert("An error happened, please try again.");
+      }
     }
   };
 
