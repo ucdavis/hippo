@@ -15,13 +15,15 @@ public class AccountController : SuperController
     private IUserService _userService;
     private ISshService _sshService;
     private INotificationService _notificationService;
+    private IHistoryService _historyService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _sshService = sshService;
         _notificationService = notificationService;
+        _historyService = historyService;
     }
 
     // Return account info for the currently logged in user
@@ -75,6 +77,8 @@ public class AccountController : SuperController
         {
             Log.Error("Error creating Account Decision email");
         }
+
+        await _historyService.AddHistory(account, "Approved");
         
 
         await _dbContext.SaveChangesAsync();
@@ -116,6 +120,8 @@ public class AccountController : SuperController
             Name = currentUser.Name,
             Status = Account.Statuses.PendingApproval,
         };
+
+        account = await _historyService.AddHistory(account, "Requested");
 
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
