@@ -4,6 +4,7 @@ using Hippo.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Hippo.Web.Controllers;
 
@@ -13,12 +14,16 @@ public class AccountController : SuperController
     private AppDbContext _dbContext;
     private IUserService _userService;
     private ISshService _sshService;
+    private INotificationService _notificationService;
+    private IHistoryService _historyService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _sshService = sshService;
+        _notificationService = notificationService;
+        _historyService = historyService;
     }
 
     // Return account info for the currently logged in user
@@ -67,6 +72,14 @@ public class AccountController : SuperController
 
         // TODO: send notification
         // TODO: save history of approval
+        var success = await _notificationService.AccountDecision(account, true);
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        await _historyService.Approved(account);
+        
 
         await _dbContext.SaveChangesAsync();
 
@@ -108,8 +121,16 @@ public class AccountController : SuperController
             Status = Account.Statuses.PendingApproval,
         };
 
+        account = await _historyService.Requested(account);
+
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
+
+        var success = await _notificationService.AccountRequested(account);
+        if (!success)
+        {
+            Log.Error("Error creating Account Request email");
+        }
 
         return Ok(account);
     }

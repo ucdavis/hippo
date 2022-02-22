@@ -65,9 +65,9 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> TestAccountDecision()
         {
             var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
-            if (await _notificationService.AccountDecission(account, true))
+            if (await _notificationService.AccountDecision(account, true))
             {
-                await _notificationService.AccountDecission(account, false);
+                await _notificationService.AccountDecision(account, false);
                 return Content("Emails Sent");
             }
             return Content("Houston we have a problem");

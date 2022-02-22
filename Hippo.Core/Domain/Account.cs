@@ -14,7 +14,8 @@ namespace Hippo.Core.Domain
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
             IsActive = true;
-            Status = Statuses.PendingApproval;            
+            Status = Statuses.PendingApproval;
+            Histories = new List<AccountHistory>();
         }
 
         [Key]

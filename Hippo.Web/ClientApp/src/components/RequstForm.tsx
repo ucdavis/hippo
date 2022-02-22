@@ -42,6 +42,15 @@ export const RequestForm = () => {
       const newAccount = await response.json();
       setContext((ctx) => ({ ...ctx, account: newAccount }));
       history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
+    } else {
+      if (response.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        console.error(errorText);
+        alert(errorText);
+      } else {
+        // const errorText = await response.text(); //This can contain exception info
+        alert("An error happened, please try again.");
+      }
     }
   };
 
@@ -61,7 +70,7 @@ export const RequestForm = () => {
           <label>Who is sponsoring your account?</label>
           <select
             onChange={(e) =>
-              setRequest({ ...request, sponsorId: Number(e.target.value) })
+              setRequest((r) => ({ ...r, sponsorId: Number(e.target.value) }))
             }
             className="form-select"
             aria-label="Default select example"
@@ -79,7 +88,9 @@ export const RequestForm = () => {
           <textarea
             className="form-control"
             id="exampleFormControlTextarea1"
-            onChange={(e) => setRequest({ ...request, sshKey: e.target.value })}
+            onChange={(e) =>
+              setRequest((r) => ({ ...r, sshKey: e.target.value }))
+            }
           ></textarea>
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:
