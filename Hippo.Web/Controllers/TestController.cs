@@ -99,6 +99,35 @@ namespace Hippo.Web.Controllers
             return File(stream.ToArray(), "application/force-download");
         }
 
+        public IActionResult TestRename1()
+        {
+
+            _sshService.RenameFile("jcstest.txt", ".jcstest.txt");
+
+            var testValue = _sshService.Test();
+            var sb = new StringBuilder();
+            foreach (var result in testValue)
+            {
+                sb.AppendLine(result);
+            }
+
+            return Content(sb.ToString());
+        }
+        public IActionResult TestRename2()
+        {
+
+            _sshService.RenameFile(".jcstest.txt", "jcstest.txt");
+
+            var testValue = _sshService.Test();
+            var sb = new StringBuilder();
+            foreach (var result in testValue)
+            {
+                sb.AppendLine(result);
+            }
+
+            return Content(sb.ToString());
+        }
+
         [Authorize(Policy = AccessCodes.AdminAccess)]
         public IActionResult TestAuth()
         {
