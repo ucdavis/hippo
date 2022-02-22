@@ -1,4 +1,5 @@
 ﻿using Hippo.Core.Data;
+using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -11,7 +12,7 @@ using System.Security.Claims;
 
 namespace Hippo.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
     public class SystemController : Controller
     {
         private readonly AppDbContext _dbContext;
@@ -27,12 +28,12 @@ namespace Hippo.Web.Controllers
         }
         public async Task<IActionResult> Emulate(string id)
         {
-            var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
+            //var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
             var currentUser = await _userService.GetCurrentUser();
-            if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
-            {
-                return Unauthorized();
-            }
+            //if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
+            //{
+            //    return Unauthorized();
+            //}
             Log.Information($"Emulation attempted for {id} by {currentUser.Name}");
             var lookupVal = id.Trim();
 
