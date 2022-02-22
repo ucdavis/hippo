@@ -15,7 +15,7 @@ namespace Hippo.Core.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
@@ -55,9 +55,17 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CanSponsor");
+
+                    b.HasIndex("CreatedOn");
+
+                    b.HasIndex("Name");
+
                     b.HasIndex("OwnerId");
 
                     b.HasIndex("SponsorId");
+
+                    b.HasIndex("UpdatedOn");
 
                     b.ToTable("Accounts");
                 });
@@ -116,6 +124,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Kerberos")
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
@@ -127,6 +138,13 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email");
+
+                    b.HasIndex("Iam")
+                        .IsUnique();
+
+                    b.HasIndex("IsAdmin");
+
                     b.ToTable("Users");
                 });
 
@@ -135,7 +153,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Account", "Sponsor")
@@ -152,7 +170,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.Account", "Account")
                         .WithMany("Histories")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.User", "Actor")
