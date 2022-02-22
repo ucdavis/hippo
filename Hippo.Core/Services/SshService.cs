@@ -42,7 +42,7 @@ namespace Hippo.Core.Services
         public IEnumerable<string> Test()
         {
             using var client = GetSshClient();
-            var result = client.RunCommand("ls -l");
+            var result = client.RunCommand("ls -l"); // ls -alR
             return result.Result.Split('\n');
         }
 
