@@ -1,4 +1,5 @@
 ﻿using Hippo.Core.Data;
+using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -96,6 +97,12 @@ namespace Hippo.Web.Controllers
             using var stream = _sshService.DownloadFile("jcstest.txt"); 
             
             return File(stream.ToArray(), "application/force-download");
+        }
+
+        [Authorize(Policy = AccessCodes.AdminAccess)]
+        public IActionResult TestAuth()
+        {
+            return Content("Success");
         }
     }
 }
