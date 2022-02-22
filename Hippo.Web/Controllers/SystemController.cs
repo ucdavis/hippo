@@ -50,6 +50,10 @@ namespace Hippo.Web.Controllers
                     _dbContext.Users.Add(user);
                     await _dbContext.SaveChangesAsync();
                 }
+                else
+                {
+                    throw new Exception("User is null");
+                }
             }
 
             var identity = new ClaimsIdentity(new[]
