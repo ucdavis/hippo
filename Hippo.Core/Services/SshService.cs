@@ -13,6 +13,7 @@ namespace Hippo.Core.Services
     {
         IEnumerable<string> Test();
         void PlaceFile(string contents, string path);
+        void RenameFile(string origPath, string newPath);
 
         MemoryStream DownloadFile(string fileName);
     }
@@ -68,6 +69,12 @@ namespace Hippo.Core.Services
             client.Download(fileName, stream );
 
             return stream;
+        }
+
+        public void RenameFile(string origPath, string newPath)
+        {
+            using var client = GetSshClient();
+            var result = client.RunCommand($"mv \"{origPath}\" \"{newPath}\"");
         }
     }
 }

@@ -66,7 +66,10 @@ public class AccountController : SuperController
 
         Console.WriteLine($"Approving account {account.Owner.Iam} with ssh key {account.SshKey}");
 
-        _sshService.PlaceFile(account.SshKey, $"/var/lib/remote-api/{account.Owner.Kerberos}.txt");
+        var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}";
+
+        _sshService.PlaceFile(account.SshKey, $"{fileName}.dot");
+        _sshService.RenameFile($"{fileName}.dot", $"{fileName}.txt");
 
         account.Status = Account.Statuses.Active;
 
