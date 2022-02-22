@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace Hippo.Web.Controllers
 {
-    [Authorize(Policy = AccessCodes.SystemAccess)]
+    [Authorize]
     public class SystemController : Controller
     {
         private readonly AppDbContext _dbContext;
@@ -26,6 +26,8 @@ namespace Hippo.Web.Controllers
             _identityService = identityService;
             _userService = userService;
         }
+
+        [Authorize(Policy = AccessCodes.SystemAccess)]
         public async Task<IActionResult> Emulate(string id)
         {
             //var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
