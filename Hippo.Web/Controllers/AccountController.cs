@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using static Hippo.Core.Domain.AccountHistory;
 
 namespace Hippo.Web.Controllers;
 
@@ -79,7 +78,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.AddHistory(account, Actions.Approved);
+        await _historyService.Approved(account);
         
 
         await _dbContext.SaveChangesAsync();
@@ -122,7 +121,7 @@ public class AccountController : SuperController
             Status = Account.Statuses.PendingApproval,
         };
 
-        account = await _historyService.AddHistory(account, Actions.Requested);
+        account = await _historyService.Requested(account);
 
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();

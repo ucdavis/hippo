@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Hippo.Core.Domain.AccountHistory;
 
 namespace Hippo.Core.Services
 {
     public interface IHistoryService
     {
         Task<Account> AddHistory(Account account, string action);
+        Task<Account> Requested(Account account);
+        Task<Account> Approved(Account account);
+        Task<Account> Rejected(Account account);
     }
 
     public class HistoryService : IHistoryService
@@ -35,6 +39,21 @@ namespace Hippo.Core.Services
             }
             account.Histories.Add(history);
             return account;
+        }
+
+        public Task<Account> Requested(Account account)
+        {
+            return AddHistory(account, Actions.Requested);
+        }
+
+        public Task<Account> Approved(Account account)
+        {
+            return AddHistory(account, Actions.Approved);
+        }
+
+        public Task<Account> Rejected(Account account)
+        {
+            return AddHistory(account, Actions.Rejected);
         }
     }
 }
