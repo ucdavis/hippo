@@ -31,5 +31,25 @@ namespace Hippo.Core.Domain
         public Account Account { get; set; }
 
 
+        public class Actions
+        {
+            public const string Requested = "Requested";
+            public const string Approved = "Approved";
+            public const string Rejected = "Rejected";
+            public const string AdminApproved = "Admin Approved";
+            public const string AdminRejected = "Admin Rejected";
+            public const string Other = "Other";
+
+            public static List<string> TypeList = new List<string>
+            {
+                Requested,
+                Approved,
+                Rejected,
+                AdminApproved,
+                AdminRejected,
+                Other,
+            }.ToList();
+        }
+
     }
 }
