@@ -26,27 +26,37 @@ namespace Hippo.Core.Data
 
             var JasonUser = await CheckAndCreateUser(new User
             {
-                Email = "jsylvestre@ucdavis.edu",
-                Kerberos = "jsylvest",
+                Email     = "jsylvestre@ucdavis.edu",
+                Kerberos  = "jsylvest",
                 FirstName = "Jason",
-                LastName = "Sylvestre",
-                Iam = "1000009309",
+                LastName  = "Sylvestre",
+                Iam       = "1000009309",
             });
             var ScottUser = await CheckAndCreateUser(new User
             {
-                Email = "srkirkland@ucdavis.edu",
-                Kerberos = "postit",
+                Email     = "srkirkland@ucdavis.edu",
+                Kerberos  = "postit",
                 FirstName = "Scott",
-                LastName = "Kirkland",
-                Iam = "1000029584",
+                LastName  = "Kirkland",
+                Iam       = "1000029584",
             });
             var JamesUser = await CheckAndCreateUser(new User
             {
-                Email = "jscubbage@ucdavis.edu",
-                Kerberos = "jscub",
+                Email     = "jscubbage@ucdavis.edu",
+                Kerberos  = "jscub",
                 FirstName = "James",
-                LastName = "Cubbage",
-                Iam = "1000025056",
+                LastName  = "Cubbage",
+                Iam       = "1000025056",
+            });
+
+            var OmenAdmin = await CheckAndCreateUser(new User
+            {
+                Email     = "omen@ucdavis.edu",
+                Kerberos  = "omen",
+                Iam       = "1000019756",
+                FirstName = "Omen",
+                LastName  = "Wild",
+                IsAdmin   = true,
             });
 
             await _dbContext.SaveChangesAsync();
@@ -56,38 +66,38 @@ namespace Hippo.Core.Data
                 var sampleSsh = "ABC123";
 
                 var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
-                var scottAccount = new Account()
+                var scottAccount   = new Account()
                 {
-                    CanSponsor = true,
-                    Owner = ScottUser,
-                    IsActive = true,
-                    Name = "Scott's Account",
-                    SshKey = sampleSsh,
-                    Status = Account.Statuses.Active,
+                    CanSponsor     = true,
+                    Owner          = ScottUser,
+                    IsActive       = true,
+                    Name           = "Scott's Account",
+                    SshKey         = sampleSsh,
+                    Status         = Account.Statuses.Active,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
 
-                var otherAccount = new Account()
+                var otherAccount   = new Account()
                 {
-                    CanSponsor = false,
-                    Owner = JasonUser,
-                    Sponsor = scottAccount,
-                    Name = "Jason's Account",
-                    IsActive = true,
-                    SshKey = sampleSsh,
-                    Status = Account.Statuses.PendingApproval,
+                    CanSponsor     = false,
+                    Owner          = JasonUser,
+                    Sponsor        = scottAccount,
+                    Name           = "Jason's Account",
+                    IsActive       = true,
+                    SshKey         = sampleSsh,
+                    Status         = Account.Statuses.PendingApproval,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
 
                 var pendingAccount = new Account()
                 {
-                    CanSponsor = false,
-                    Owner = JamesUser,
-                    Sponsor = scottAccount,
-                    Name = "James' Account",
-                    IsActive = true,
-                    SshKey = sampleSsh,
-                    Status = Account.Statuses.PendingApproval,
+                    CanSponsor     = false,
+                    Owner          = JamesUser,
+                    Sponsor        = scottAccount,
+                    Name           = "James' Account",
+                    IsActive       = true,
+                    SshKey         = sampleSsh,
+                    Status         = Account.Statuses.PendingApproval,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);
             }
