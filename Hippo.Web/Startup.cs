@@ -16,6 +16,9 @@ using System.Security.Claims;
 using Hippo.Core.Utilities;
 using Serilog;
 using Hippo.Web.Middleware;
+using Hippo.Core.Models;
+using Hippo.Web.Handlers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hippo.Web
 {
@@ -102,6 +105,16 @@ namespace Hippo.Web
                     await userService.GetUser(identity.Claims.ToArray());
                 };
             });
+
+            services.AddAuthorization(options =>
+            { 
+                options.AddPolicy(AccessCodes.SystemAccess, policy => policy.Requirements.Add(
+                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.SystemAccess))));
+
+                options.AddPolicy(AccessCodes.AdminAccess, policy => policy.Requirements.Add(
+                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.AdminAccess))));
+            });
+            services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 
             // Done? (Copied from Harvest): database/EF
             var efProvider = Configuration.GetValue("Provider", "none");

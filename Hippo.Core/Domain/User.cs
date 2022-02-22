@@ -9,6 +9,11 @@ namespace Hippo.Core.Domain
 {
     public class User
     {
+        public User()
+        {
+            IsAdmin = false;
+        }
+
         [Key]
         public int Id { get; set; }
 
@@ -39,10 +44,13 @@ namespace Hippo.Core.Domain
         [Display(Name = "Name")]
         public string Name => FirstName + " " + LastName;
 
+        public bool IsAdmin { get; set; }
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
             modelBuilder.Entity<User>().HasIndex(a => a.Email); 
+            modelBuilder.Entity<User>().HasIndex(a => a.IsAdmin);
 
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Owner)

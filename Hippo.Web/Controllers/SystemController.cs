@@ -1,4 +1,5 @@
 ﻿using Hippo.Core.Data;
+using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -25,14 +26,16 @@ namespace Hippo.Web.Controllers
             _identityService = identityService;
             _userService = userService;
         }
+
+        [Authorize(Policy = AccessCodes.SystemAccess)]
         public async Task<IActionResult> Emulate(string id)
         {
-            var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
+            //var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
             var currentUser = await _userService.GetCurrentUser();
-            if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
-            {
-                return Unauthorized();
-            }
+            //if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
+            //{
+            //    return Unauthorized();
+            //}
             Log.Information($"Emulation attempted for {id} by {currentUser.Name}");
             var lookupVal = id.Trim();
 
@@ -49,6 +52,10 @@ namespace Hippo.Web.Controllers
                     // user found in IAM but not in our db, add them and save before we continue
                     _dbContext.Users.Add(user);
                     await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("User is null");
                 }
             }
 
