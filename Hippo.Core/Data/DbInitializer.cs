@@ -49,6 +49,15 @@ namespace Hippo.Core.Data
                 Iam       = "1000025056",
             });
 
+            var SlupskyUser = await CheckAndCreateUser(new User
+            {
+                Email = "cslupsky@ucdavis.edu",
+                Kerberos = "cslupsky",
+                FirstName = "Carolyn",
+                LastName = "Slupsky",
+                Iam = "1000012183",
+            });
+
             var OmenAdmin = await CheckAndCreateUser(new User
             {
                 Email     = "omen@ucdavis.edu",
@@ -58,6 +67,8 @@ namespace Hippo.Core.Data
                 LastName  = "Wild",
                 IsAdmin   = true,
             });
+
+
 
             await _dbContext.SaveChangesAsync();
 
@@ -76,6 +87,17 @@ namespace Hippo.Core.Data
                     Status         = Account.Statuses.Active,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
+
+                var slupskyAccount = new Account()
+                {
+                    CanSponsor = true,
+                    Owner = SlupskyUser,
+                    IsActive = true,
+                    Name = "Slupsky",
+                    SshKey = sampleSsh,
+                    Status = Account.Statuses.Active,
+                };
+                await _dbContext.Accounts.AddAsync(slupskyAccount);
 
                 var otherAccount   = new Account()
                 {
