@@ -80,7 +80,7 @@ export const AdminUsers = () => {
               className="form-control"
               id="emailLookup"
               placeholder="example@ucdavis.edu"
-              defaultValue={request.id}
+              value={request.id}
               onChange={(e) =>
                 setRequest((r) => ({ ...r, id: e.target.value }))
               }
