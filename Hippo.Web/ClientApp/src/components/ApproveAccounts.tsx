@@ -39,6 +39,22 @@ export const ApproveAccounts = () => {
     }
   };
 
+  const handleReject = async (account: Account) => {
+    setAccountSubmitting(account.id);
+
+    const response = await authenticatedFetch(
+      `/api/account/reject/${account.id}`,
+      { method: "POST" }
+    );
+
+    if (response.ok) {
+      setAccountSubmitting(undefined);
+
+      // remove the account from the list
+      setAccounts(accounts?.filter((a) => a.id !== account.id));
+    }
+  };
+
   if (accounts === undefined) {
     return <div>Loading...</div>;
   } else {
@@ -68,6 +84,15 @@ export const ApproveAccounts = () => {
                       {accountSubmitting === account.id
                         ? "Approving..."
                         : "Approve"}
+                    </button>{" "}
+                    <button
+                      disabled={accountSubmitting !== undefined}
+                      onClick={() => handleReject(account)}
+                      className="btn btn-danger"
+                    >
+                      {accountSubmitting === account.id
+                        ? "Rejecting..."
+                        : "Reject"}
                     </button>
                   </td>
                 </tr>
