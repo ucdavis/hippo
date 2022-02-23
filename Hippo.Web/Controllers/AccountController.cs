@@ -91,6 +91,40 @@ public class AccountController : SuperController
     }
 
     [HttpPost]
+    public async Task<ActionResult> Reject(int id)
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        Console.WriteLine($"Rejecting account {account.Owner.Iam} with ssh key {account.SshKey}");
+
+
+        account.Status = Account.Statuses.Rejected;
+        account.IsActive = false;
+
+        var success = await _notificationService.AccountDecision(account, false);
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        await _historyService.Rejected(account);
+
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+
+    [HttpPost]
     public async Task<ActionResult> Create([FromBody] CreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
