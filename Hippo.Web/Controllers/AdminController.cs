@@ -33,6 +33,11 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> Create(string id)
     {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return BadRequest("You must supply either an email or kerb id to lookup.");
+        }
+
         var userLookup = id.Contains("@")
                     ? await _identityService.GetByEmail(id)
                     : await _identityService.GetByKerberos(id);
