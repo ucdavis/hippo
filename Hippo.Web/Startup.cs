@@ -226,7 +226,9 @@ namespace Hippo.Web
                 // API routes map to all other controllers
                 endpoints.MapControllerRoute(
                     name: "API",
-                    pattern: "/api/{controller=Account}/{action=Index}/{id?}");
+                    pattern: "/api/{controller}/{action}/{id?}",
+                    defaults: new { controller = "Account", action = "Index" },
+                    constraints: new { controller = "Account|Admin" });
 
                 // any other nonfile route should be handled by the spa, except leave the sockjs route alone if we are in dev mode (hot reloading)
                 if (env.IsDevelopment())
