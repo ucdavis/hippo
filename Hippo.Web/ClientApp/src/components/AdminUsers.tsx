@@ -10,6 +10,9 @@ export const AdminUsers = () => {
 
   const [users, setUsers] = useState<User[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
+  const [request, setRequest] = useState({
+    id: "",
+  });
 
   useEffect(() => {
     const fetchAdminUsers = async () => {
@@ -33,8 +36,34 @@ export const AdminUsers = () => {
     if (response.ok) {
       setAdminRemoving(undefined);
 
-      // remove the account from the list
+      // remove the user from the list
       setUsers(users?.filter((a) => a.id !== user.id));
+    }
+    //todo deal with error
+  };
+
+  const handleSubmit = async () => {
+    const response = await authenticatedFetch(
+      `/api/admin/create/${request.id}`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (response.ok) {
+      const newUser = await response.json();
+      //Add the user to the list
+      setUsers((r) => (r ? [...r, newUser] : [newUser]));
+      setRequest((r) => ({ ...r, id: "" }));
+    } else {
+      if (response.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        console.error(errorText);
+        alert(errorText);
+      } else {
+        // const errorText = await response.text(); //This can contain exception info
+        alert("An error happened, please try again.");
+      }
     }
   };
 
@@ -44,6 +73,25 @@ export const AdminUsers = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-6">
+          <div className="form-group">
+            <label className="form-label">Email or Kerberos</label>
+
+            <input
+              className="form-control"
+              id="emailLookup"
+              placeholder="example@ucdavis.edu"
+              value={request.id}
+              onChange={(e) =>
+                setRequest((r) => ({ ...r, id: e.target.value }))
+              }
+            ></input>
+          </div>
+          <br />
+          <button className="btn btn-primary" onClick={handleSubmit}>
+            Add Admin
+          </button>
+          <hr />
+
           <p>There are {users.length} users with admin access</p>
           <table className="table">
             <thead>
