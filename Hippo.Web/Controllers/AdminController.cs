@@ -57,13 +57,9 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Remove(string iamId)
+    public async Task<IActionResult> Remove(int id)
     {
-        if (iamId == null)
-        {
-            return BadRequest("Missing IAM id");
-        }
-        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == iamId);
+        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Id == id);
         if (user == null)
         {
             return NotFound();
