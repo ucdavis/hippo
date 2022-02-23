@@ -52,7 +52,9 @@ export const AdminUsers = () => {
 
     if (response.ok) {
       const newUser = await response.json();
-      alert(`${newUser.username} has been added as an admin`);
+      //Add the user to the list
+      setUsers((r) => (r ? [...r, newUser] : [newUser]));
+      setRequest((r) => ({ ...r, id: "" }));
     } else {
       if (response.status === 400) {
         const errorText = await response.text(); //Bad Request Text
@@ -78,6 +80,7 @@ export const AdminUsers = () => {
               className="form-control"
               id="emailLookup"
               placeholder="example@ucdavis.edu"
+              defaultValue={request.id}
               onChange={(e) =>
                 setRequest((r) => ({ ...r, id: e.target.value }))
               }

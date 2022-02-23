@@ -33,26 +33,31 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> Create(string id)
     {
-        var user = id.Contains("@")
+        var userLookup = id.Contains("@")
                     ? await _identityService.GetByEmail(id)
                     : await _identityService.GetByKerberos(id);
-        if (user == null)
+        if (userLookup == null)
         {
             return BadRequest("User Not Found");
         }
 
-        var dbUser = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == user.Iam);
-        if (dbUser != null)
+        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == userLookup.Iam);
+        if (user != null)
         {
-            dbUser.IsAdmin = true;
+            if (user.IsAdmin)
+            {
+                return BadRequest("User is already an admin.");
+            }
+            user.IsAdmin = true;
         }
         else
         {
+            user = userLookup;
             user.IsAdmin = true;
             await _dbContext.Users.AddAsync(user);
         }
         await _dbContext.SaveChangesAsync();
-        return Ok();
+        return Ok(user);
 
     }
 
