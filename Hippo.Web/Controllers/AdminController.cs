@@ -64,6 +64,12 @@ public class AdminController : SuperController
         {
             return NotFound();
         }
+
+        if(user.Id == (await _userService.GetCurrentUser()).Id)
+        {
+            return BadRequest("Can't remove yourself");
+        }
+
         user.IsAdmin = false;
         await _dbContext.SaveChangesAsync();
         return Ok();
