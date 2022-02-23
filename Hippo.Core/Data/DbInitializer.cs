@@ -68,6 +68,18 @@ namespace Hippo.Core.Data
                 IsAdmin   = true,
             });
 
+            for(int i = 1; i <= 5; i++)
+            {
+                var user = new User { Email = $"fake{i}@ucdavis.edu",
+                    FirstName = $"Fake{i}",
+                    LastName = "Fake",
+                    Kerberos = $"fake{i}",
+                    Iam = $"100000000{i}",
+                    IsAdmin = true,
+                };
+                await CheckAndCreateUser(user);
+            }
+
 
 
             await _dbContext.SaveChangesAsync();

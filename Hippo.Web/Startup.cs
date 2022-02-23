@@ -224,7 +224,6 @@ namespace Hippo.Web
                 );
 
                 // API routes map to all other controllers
-                // API routes map to all other controllers
                 endpoints.MapControllerRoute(
                     name: "API",
                     pattern: "/api/{controller=Account}/{action=Index}/{id?}");
