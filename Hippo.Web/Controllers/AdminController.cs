@@ -30,6 +30,12 @@ public class AdminController : SuperController
         return Ok(await _dbContext.Users.Where(a => a.IsAdmin).AsNoTracking().ToListAsync());
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Sponsors()
+    {
+        return Ok(await _dbContext.Accounts.Include(a => a.Owner).Where(a => a.CanSponsor).AsNoTracking().ToListAsync());
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(string id)
     {
