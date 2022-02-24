@@ -150,4 +150,20 @@ public class AdminController : SuperController
 
     }
 
+    [HttpPost]
+    public async Task<IActionResult> RemoveSponsor(int id)
+    {
+        var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Id == id);
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+
+        account.CanSponsor = false;
+        await _historyService.AddHistory(account, "RemovedSponsor");
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
 }
