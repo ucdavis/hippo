@@ -13,6 +13,7 @@ import { PendingApproval } from "./components/PendingApproval";
 import { ApproveAccounts } from "./components/ApproveAccounts";
 import { authenticatedFetch } from "./util/api";
 import { AdminUsers } from "./Admin/AdminUsers";
+import { Sponsors } from "./Admin/Sponsors";
 
 declare var Hippo: AppContextShape;
 
@@ -68,6 +69,7 @@ const App = () => {
             <Route path="/create" component={RequestForm} />
             <Route path="/approve" component={ApproveAccounts} />
             <Route path="/admin" component={AdminUsers} />
+            <Route path="/adminsponsors" component={Sponsors} />
           </Switch>
         </div>
       </AppContext.Provider>

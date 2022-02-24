@@ -22,6 +22,11 @@ export interface RequestPostModel {
   sshKey: string;
 }
 
+export interface CreateSponsorPostModel {
+  lookup: string;
+  name: string;
+}
+
 export interface AppContextShape {
   antiForgeryToken: string;
   user: {
