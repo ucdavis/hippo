@@ -155,7 +155,7 @@ public class AccountController : SuperController
             SponsorId = model.SponsorId,
             SshKey = model.SshKey,
             IsActive = true,
-            Name = currentUser.Name,
+            Name = $"{currentUser.Name} ({currentUser.Email})",
             Status = Account.Statuses.PendingApproval,
         };
 

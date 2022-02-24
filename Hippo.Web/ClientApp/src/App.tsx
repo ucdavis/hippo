@@ -12,7 +12,7 @@ import { RequestForm } from "./components/RequstForm";
 import { PendingApproval } from "./components/PendingApproval";
 import { ApproveAccounts } from "./components/ApproveAccounts";
 import { authenticatedFetch } from "./util/api";
-import { AdminUsers } from "./components/AdminUsers";
+import { AdminUsers } from "./Admin/AdminUsers";
 
 declare var Hippo: AppContextShape;
 
