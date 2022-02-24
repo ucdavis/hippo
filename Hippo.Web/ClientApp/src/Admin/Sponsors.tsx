@@ -49,7 +49,6 @@ export const Sponsors = () => {
   };
 
   const handleSubmit = async () => {
-    alert(JSON.stringify(request));
     const response = await authenticatedFetch("/api/admin/createSponsor", {
       method: "POST",
       body: JSON.stringify(request),

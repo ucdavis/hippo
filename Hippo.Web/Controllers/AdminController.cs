@@ -143,9 +143,10 @@ public class AdminController : SuperController
                 CanSponsor = true,
             };
             await _historyService.AddHistory(account, "CreatedSponsor");
+            await _dbContext.Accounts.AddAsync(account);
         }
         await _dbContext.SaveChangesAsync();
-        return Ok(user);
+        return Ok(account);
 
     }
 
