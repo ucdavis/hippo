@@ -14,6 +14,7 @@ export interface Account {
   status: string;
   canSponsor: boolean;
   createdOn: string;
+  owner?: User;
 }
 
 export interface RequestPostModel {
