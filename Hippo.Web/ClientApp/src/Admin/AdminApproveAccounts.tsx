@@ -9,7 +9,8 @@ export const AdminApproveAccounts = () => {
   // allow user to approve or reject each account
 
   const [accounts, setAccounts] = useState<Account[]>();
-  const [accountSubmitting, setAccountSubmitting] = useState<number>();
+  const [accountApproving, setAccountApproving] = useState<number>();
+  const [accountRejecting, setAccountRejecting] = useState<number>();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -24,15 +25,15 @@ export const AdminApproveAccounts = () => {
   }, []);
 
   const handleApprove = async (account: Account) => {
-    setAccountSubmitting(account.id);
+    setAccountApproving(account.id);
 
     const response = await authenticatedFetch(
-      `/api/account/approve/${account.id}`,
+      `/api/admin/approve/${account.id}`,
       { method: "POST" }
     );
 
     if (response.ok) {
-      setAccountSubmitting(undefined);
+      setAccountApproving(undefined);
 
       // remove the account from the list
       setAccounts(accounts?.filter((a) => a.id !== account.id));
@@ -40,15 +41,15 @@ export const AdminApproveAccounts = () => {
   };
 
   const handleReject = async (account: Account) => {
-    setAccountSubmitting(account.id);
+    setAccountRejecting(account.id);
 
     const response = await authenticatedFetch(
-      `/api/account/reject/${account.id}`,
+      `/api/admin/reject/${account.id}`,
       { method: "POST" }
     );
 
     if (response.ok) {
-      setAccountSubmitting(undefined);
+      setAccountRejecting(undefined);
 
       // remove the account from the list
       setAccounts(accounts?.filter((a) => a.id !== account.id));
@@ -81,20 +82,26 @@ export const AdminApproveAccounts = () => {
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
                     <button
-                      disabled={accountSubmitting !== undefined}
+                      disabled={
+                        accountApproving !== undefined &&
+                        accountRejecting !== undefined
+                      }
                       onClick={() => handleApprove(account)}
                       className="btn btn-primary"
                     >
-                      {accountSubmitting === account.id
+                      {accountApproving === account.id
                         ? "Approving..."
                         : "Approve"}
                     </button>{" "}
                     <button
-                      disabled={accountSubmitting !== undefined}
+                      disabled={
+                        accountApproving !== undefined &&
+                        accountRejecting !== undefined
+                      }
                       onClick={() => handleReject(account)}
                       className="btn btn-danger"
                     >
-                      {accountSubmitting === account.id
+                      {accountRejecting === account.id
                         ? "Rejecting..."
                         : "Reject"}
                     </button>
