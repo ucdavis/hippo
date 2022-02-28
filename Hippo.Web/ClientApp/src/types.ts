@@ -14,11 +14,17 @@ export interface Account {
   status: string;
   canSponsor: boolean;
   createdOn: string;
+  owner?: User;
 }
 
 export interface RequestPostModel {
   sponsorId: number;
   sshKey: string;
+}
+
+export interface CreateSponsorPostModel {
+  lookup: string;
+  name: string;
 }
 
 export interface AppContextShape {

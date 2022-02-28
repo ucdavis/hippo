@@ -4,7 +4,7 @@ import AppContext from "../Shared/AppContext";
 
 export const AccountInfo = () => {
   const [{ account }] = useContext(AppContext);
-  const [context, setContext] = useContext(AppContext);
+  const [context] = useContext(AppContext);
 
   return (
     <div className="row justify-content-center">
