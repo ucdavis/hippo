@@ -31,6 +31,7 @@ namespace Hippo.Core.Data
                 FirstName = "Jason",
                 LastName  = "Sylvestre",
                 Iam       = "1000009309",
+                IsAdmin   = true,
             });
             var ScottUser = await CheckAndCreateUser(new User
             {
