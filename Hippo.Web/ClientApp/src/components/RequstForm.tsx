@@ -79,6 +79,8 @@ export const RequestForm = () => {
                   ...r,
                   sponsorId: Object.values(selected[0])[0],
                 }));
+              } else {
+                setRequest((r) => ({ ...r, sponsorId: 0 }));
               }
             }}
             options={sponsors.map(({ id, name }) => ({ id, name }))}
