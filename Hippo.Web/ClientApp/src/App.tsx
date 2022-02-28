@@ -68,8 +68,8 @@ const App = () => {
             <Route path="/pendingapproval" component={PendingApproval} />
             <Route path="/create" component={RequestForm} />
             <Route path="/approve" component={ApproveAccounts} />
-            <Route path="/admin" component={AdminUsers} />
-            <Route path="/adminsponsors" component={Sponsors} />
+            <Route path="/admin/index" component={AdminUsers} />
+            <Route path="/admin/sponsors" component={Sponsors} />
           </Switch>
         </div>
       </AppContext.Provider>
