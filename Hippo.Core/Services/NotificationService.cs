@@ -18,7 +18,7 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecision(Account account, bool isApproved);
+        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null);
     }
 
     public class NotificationService : INotificationService
@@ -34,8 +34,17 @@ namespace Hippo.Core.Services
             _emailSettings = emailSettings.Value;
         }
 
-        public async Task<bool> AccountDecision(Account account, bool isApproved)
+        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null)
         {
+            var sponser = String.Empty;
+            if (!string.IsNullOrWhiteSpace(overrideSponsor))
+            {
+                sponser = overrideSponsor;
+            }
+            else
+            {
+                sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
+            }
             try
             {
                 account = await GetCompleteAccount(account);
@@ -44,7 +53,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    SponsorName = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name,
+                    SponsorName = sponser,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),

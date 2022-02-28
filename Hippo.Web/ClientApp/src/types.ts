@@ -18,6 +18,7 @@ export interface Account {
   canSponsor: boolean;
   createdOn: string;
   owner?: User;
+  sponsor?: Account;
 }
 
 export interface RequestPostModel {
