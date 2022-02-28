@@ -166,4 +166,11 @@ public class AdminController : SuperController
         return Ok();
     }
 
+    // Return all accounts that are waiting for any sponsor to approve
+    [HttpGet]
+    public async Task<ActionResult> Pending()
+    {
+        return Ok(await _dbContext.Accounts.Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().ToListAsync());
+    }
+
 }
