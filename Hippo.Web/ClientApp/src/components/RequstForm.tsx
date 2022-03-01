@@ -63,7 +63,7 @@ export const RequestForm = () => {
         </h3>
         <p>
           You don't seem to have an account on Farm yet. If you’d like access,
-          please answer the questions below
+          please answer the&nbsp;questions&nbsp;below
         </p>
         <hr />
         <div className="form-group">
