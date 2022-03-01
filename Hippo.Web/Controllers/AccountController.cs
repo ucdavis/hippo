@@ -93,6 +93,11 @@ public class AccountController : SuperController
     [HttpPost]
     public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
+        if(String.IsNullOrWhiteSpace(model.Reason))
+        {
+            return BadRequest("Missing Reject Reason");
+        }
+
         var currentUser = await _userService.GetCurrentUser();
 
         var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
