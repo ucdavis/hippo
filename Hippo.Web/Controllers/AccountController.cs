@@ -114,7 +114,7 @@ public class AccountController : SuperController
         account.Status = Account.Statuses.Rejected;
         account.IsActive = false;
 
-        var success = await _notificationService.AccountDecision(account, false);
+        var success = await _notificationService.AccountDecision(account, false, reason: model.Reason);
         if (!success)
         {
             Log.Error("Error creating Account Decision email");
