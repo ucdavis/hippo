@@ -9,6 +9,7 @@ import { notEmptyOrFalsey } from "../util/ValueChecks";
 
 interface Props {
   account: Account;
+  removeAccount: (account: Account) => void;
 }
 
 export const RejectRequest = (props: Props) => {
@@ -64,6 +65,7 @@ export const RejectRequest = (props: Props) => {
 
     if (response.ok) {
       //history.replace(`/project/details/${props.project.id}`);
+      props.removeAccount(props.account);
     }
   };
   return (

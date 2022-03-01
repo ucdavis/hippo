@@ -57,6 +57,11 @@ export const ApproveAccounts = () => {
     }
   };
 
+  const handleReject1 = async (account: Account) => {
+    // remove the account from the list
+    setAccounts(accounts?.filter((a) => a.id !== account.id));
+  };
+
   if (accounts === undefined) {
     return <div>Loading...</div>;
   } else {
@@ -90,7 +95,10 @@ export const ApproveAccounts = () => {
                         ? "Approving..."
                         : "Approve"}
                     </button>{" "}
-                    <RejectRequest account={account}></RejectRequest>
+                    <RejectRequest
+                      account={account}
+                      removeAccount={() => handleReject1(account)}
+                    ></RejectRequest>
                   </td>
                 </tr>
               ))}
