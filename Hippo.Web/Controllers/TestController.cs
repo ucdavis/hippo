@@ -44,11 +44,11 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestBody()
         {
-            var model = new NewRequestModel();
+            var model = new DecisionModel();
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest_mjml.cshtml", model);
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission_mjml.cshtml", model);
 
             return Content(results);
         }
@@ -65,10 +65,10 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestAccountDecision()
         {
-            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
+            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 4);
             if (await _notificationService.AccountDecision(account, true))
             {
-                await _notificationService.AccountDecision(account, false);
+                await _notificationService.AccountDecision(account, false, reason: "Fake reject Reason here.");
                 return Content("Emails Sent");
             }
             return Content("Houston we have a problem");

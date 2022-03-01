@@ -342,7 +342,10 @@
                             <tr>
                               <td align="left" style="font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:5px;padding-left:0px;word-break:break-word;">
                                 <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
-                                  <h1>@Model?.Decision</h1>
+                                  <h1>@Model?.Decision</h1> @if(!string.IsNullOrWhiteSpace(Model?.Reason)) { <mj-text padding-top="0px" padding-left="0px" padding-bottom="5px">
+                                    <p><b>Reject Reason</b></p>
+                                    <p>@Model?.Reason</p>
+                                  </mj-text> }
                                 </div>
                               </td>
                             </tr>
