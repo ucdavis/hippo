@@ -14,6 +14,8 @@ import { ApproveAccounts } from "./components/ApproveAccounts";
 import { authenticatedFetch } from "./util/api";
 import { AdminUsers } from "./Admin/AdminUsers";
 import { Sponsors } from "./Admin/Sponsors";
+import { AdminApproveAccounts } from "./Admin/AdminApproveAccounts";
+import { ConditionalRoute } from "./ConditionalRoute";
 
 declare var Hippo: AppContextShape;
 
@@ -67,9 +69,26 @@ const App = () => {
             <Route path="/active" component={AccountInfo} />
             <Route path="/pendingapproval" component={PendingApproval} />
             <Route path="/create" component={RequestForm} />
-            <Route path="/approve" component={ApproveAccounts} />
-            <Route path="/admin/index" component={AdminUsers} />
-            <Route path="/admin/sponsors" component={Sponsors} />
+            <ConditionalRoute
+              roles={["Sponsor"]}
+              path="/approve"
+              component={ApproveAccounts}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/admin/index"
+              component={AdminUsers}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/admin/sponsors"
+              component={Sponsors}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/admin/approvals"
+              component={AdminApproveAccounts}
+            />
           </Switch>
         </div>
       </AppContext.Provider>

@@ -1,9 +1,11 @@
 import { useContext, useEffect, useState } from "react";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory } from "react-router-dom";
 
 import AppContext from "../Shared/AppContext";
 import { Account, RequestPostModel } from "../types";
 import { authenticatedFetch } from "../util/api";
+import { Typeahead } from "react-bootstrap-typeahead";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
@@ -68,19 +70,21 @@ export const RequestForm = () => {
         <hr />
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
-          <select
-            onChange={(e) =>
-              setRequest((r) => ({ ...r, sponsorId: Number(e.target.value) }))
-            }
-            className="form-select"
-            aria-label="Default select example"
-          >
-            {sponsors.map((sponsor) => (
-              <option key={sponsor.id} value={sponsor.id}>
-                {sponsor.name}
-              </option>
-            ))}
-          </select>
+          <Typeahead
+            id="sponsorLookup"
+            labelKey="name"
+            onChange={(selected) => {
+              if (selected.length > 0) {
+                setRequest((r) => ({
+                  ...r,
+                  sponsorId: Object.values(selected[0])[0],
+                }));
+              } else {
+                setRequest((r) => ({ ...r, sponsorId: 0 }));
+              }
+            }}
+            options={sponsors.map(({ id, name }) => ({ id, name }))}
+          />
           <p className="form-helper">Help text</p>
         </div>
         <div className="form-group">

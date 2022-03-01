@@ -6,7 +6,10 @@ export interface User {
   iam: string;
   kerberos: string;
   name: string;
+  IsAdmin: boolean;
 }
+
+export type RoleName = "Admin" | "Sponsor";
 
 export interface Account {
   id: number;
@@ -15,6 +18,7 @@ export interface Account {
   canSponsor: boolean;
   createdOn: string;
   owner?: User;
+  sponsor?: Account;
 }
 
 export interface RequestPostModel {
