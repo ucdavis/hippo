@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Services;
+using Hippo.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -108,7 +109,6 @@ public class AccountController : SuperController
             return NotFound();
         }
 
-        Console.WriteLine($"Rejecting account {account.Owner.Iam} with ssh key {account.SshKey}");
 
 
         account.Status = Account.Statuses.Rejected;
@@ -184,8 +184,5 @@ public class AccountController : SuperController
         public string SshKey { get; set; } = String.Empty;
     }
 
-    public class RequestRejectionModel
-    {
-        public string Reason { get; set; } = String.Empty;
-    }
+
 }

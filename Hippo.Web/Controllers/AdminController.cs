@@ -217,8 +217,13 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
-    public async Task<ActionResult> Reject(int id)
+    public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
+        if (String.IsNullOrWhiteSpace(model.Reason))
+        {
+            return BadRequest("Missing Reject Reason");
+        }
+
         var currentUser = await _userService.GetCurrentUser();
 
         var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
@@ -229,19 +234,17 @@ public class AdminController : SuperController
             return NotFound();
         }
 
-        Console.WriteLine($"Rejecting account {account.Owner.Iam} with ssh key {account.SshKey}");
-
 
         account.Status = Account.Statuses.Rejected;
         account.IsActive = false;
 
-        var success = await _notificationService.AccountDecision(account, false, "Admin Override");
+        var success = await _notificationService.AccountDecision(account, false, "Admin Override", reason: model.Reason);
         if (!success)
         {
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Rejected(account);
+        await _historyService.Rejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();

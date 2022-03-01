@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { Account } from "../types";
-
 import { authenticatedFetch } from "../util/api";
+import { RejectRequest } from "../Shared/RejectRequest";
 
 export const AdminApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -10,7 +9,6 @@ export const AdminApproveAccounts = () => {
 
   const [accounts, setAccounts] = useState<Account[]>();
   const [accountApproving, setAccountApproving] = useState<number>();
-  const [accountRejecting, setAccountRejecting] = useState<number>();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -41,19 +39,8 @@ export const AdminApproveAccounts = () => {
   };
 
   const handleReject = async (account: Account) => {
-    setAccountRejecting(account.id);
-
-    const response = await authenticatedFetch(
-      `/api/admin/reject/${account.id}`,
-      { method: "POST" }
-    );
-
-    if (response.ok) {
-      setAccountRejecting(undefined);
-
-      // remove the account from the list
-      setAccounts(accounts?.filter((a) => a.id !== account.id));
-    }
+    // remove the account from the list
+    setAccounts(accounts?.filter((a) => a.id !== account.id));
   };
 
   if (accounts === undefined) {
@@ -82,10 +69,7 @@ export const AdminApproveAccounts = () => {
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
                     <button
-                      disabled={
-                        accountApproving !== undefined &&
-                        accountRejecting !== undefined
-                      }
+                      disabled={accountApproving !== undefined}
                       onClick={() => handleApprove(account)}
                       className="btn btn-primary"
                     >
@@ -93,18 +77,11 @@ export const AdminApproveAccounts = () => {
                         ? "Approving..."
                         : "Approve"}
                     </button>{" "}
-                    <button
-                      disabled={
-                        accountApproving !== undefined &&
-                        accountRejecting !== undefined
-                      }
-                      onClick={() => handleReject(account)}
-                      className="btn btn-danger"
-                    >
-                      {accountRejecting === account.id
-                        ? "Rejecting..."
-                        : "Reject"}
-                    </button>
+                    <RejectRequest
+                      account={account}
+                      removeAccount={() => handleReject(account)}
+                      updateUrl={"/api/admin/reject/"}
+                    ></RejectRequest>
                   </td>
                 </tr>
               ))}

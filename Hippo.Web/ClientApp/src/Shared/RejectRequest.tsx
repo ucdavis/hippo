@@ -10,6 +10,7 @@ import { notEmptyOrFalsey } from "../util/ValueChecks";
 interface Props {
   account: Account;
   removeAccount: (account: Account) => void;
+  updateUrl: string;
 }
 
 export const RejectRequest = (props: Props) => {
@@ -52,7 +53,7 @@ export const RejectRequest = (props: Props) => {
     }
 
     const request = authenticatedFetch(
-      `/api/Account/Reject/${props.account.id}`,
+      `${props.updateUrl}${props.account.id}`,
       {
         method: "POST",
         body: JSON.stringify({ reason }),
