@@ -59,7 +59,7 @@ const App = () => {
       <AppContext.Provider value={[context, setContext]}>
         <div className={`account-status-${accountClassName}`}>
           <AppNav></AppNav>
-          <div className="bottom-svg">
+          <div className="top-svg">
             <BottomSvg />
           </div>
           <Switch>

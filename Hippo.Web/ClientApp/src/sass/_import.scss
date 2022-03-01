@@ -1,8 +1,8 @@
 @import "bootstrap/scss/_functions";
 @import "bootstrap/scss/_variables";
 @import "@ucdavis/gunrockin/sass/gunrockin.scss";
-$primary-color: $tahoe;
-$secondary-color: $sunflower;
+$primary-color: $cabernet;
+$secondary-color: $poppy;
 $theme-colors: (
   primary: $primary-color,
   secondary: $secondary-color,
@@ -12,9 +12,9 @@ $theme-colors: (
 
 $primary-bg: #fefefe;
 $borders: #c9c3ce;
-$primary-font: rgba(67, 67, 67, 0.99); //
-$secondary-font: rgba(67, 67, 67, 0.7); //
-$tertiary-font: rgba(67, 67, 67, 0.48); //
+$primary-font: rgba(31, 31, 31, 0.99); //
+$secondary-font: rgba(31, 31, 31, 0.7); //
+$tertiary-font: rgba(31, 31, 31, 0.48); //
 
 $danger: $merlot;
 $error-color: $danger;
