@@ -19,13 +19,17 @@ public class AdminController : SuperController
     private IUserService _userService;
     private IIdentityService _identityService;
     private IHistoryService _historyService;
+    private ISshService _sshService;
+    private INotificationService _notificationService;
 
-    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, IHistoryService historyService)
+    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _identityService = identityService;
-        _historyService = historyService;
+        _historyService = historyService; 
+        _sshService = sshService;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -166,4 +170,82 @@ public class AdminController : SuperController
         return Ok();
     }
 
+    // Return all accounts that are waiting for any sponsor to approve
+    [HttpGet]
+    public async Task<ActionResult> Pending()
+    {
+        return Ok(await _dbContext.Accounts.Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().ToListAsync());
+    }
+
+    // Approve a given pending account 
+    [HttpPost]
+    public async Task<ActionResult> Approve(int id)
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id && a.Status == Account.Statuses.PendingApproval);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        Console.WriteLine($"Approving account {account.Owner.Iam} with ssh key {account.SshKey}");
+
+        var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
+        var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
+
+        _sshService.PlaceFile(account.SshKey, tempFileName);
+        _sshService.RenameFile(tempFileName, fileName);
+
+        account.Status = Account.Statuses.Active;
+
+
+        var success = await _notificationService.AccountDecision(account, true, "Admin Override");
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        await _historyService.Approved(account);
+
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> Reject(int id)
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id && a.Status == Account.Statuses.PendingApproval);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        Console.WriteLine($"Rejecting account {account.Owner.Iam} with ssh key {account.SshKey}");
+
+
+        account.Status = Account.Statuses.Rejected;
+        account.IsActive = false;
+
+        var success = await _notificationService.AccountDecision(account, false, "Admin Override");
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        await _historyService.Rejected(account);
+
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
 }
