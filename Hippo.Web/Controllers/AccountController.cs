@@ -69,7 +69,7 @@ public class AccountController : SuperController
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
 
-        _sshService.PlaceFile(account.SshKey, tempFileName); 
+        _sshService.PlaceFile(account.SshKey, tempFileName);
         _sshService.RenameFile(tempFileName, fileName);
 
         account.Status = Account.Statuses.Active;
@@ -83,7 +83,7 @@ public class AccountController : SuperController
         }
 
         await _historyService.Approved(account);
-        
+
 
         await _dbContext.SaveChangesAsync();
 
@@ -91,7 +91,7 @@ public class AccountController : SuperController
     }
 
     [HttpPost]
-    public async Task<ActionResult> Reject(int id)
+    public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
 
@@ -135,7 +135,7 @@ public class AccountController : SuperController
             return BadRequest("You already have an account");
         }
 
-        if(!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
+        if (!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
             return BadRequest("Bad Sponsor Id");
         }
@@ -143,7 +143,7 @@ public class AccountController : SuperController
         {
             return BadRequest("Missing SSH Key");
         }
-        if(!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
+        if (!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
         {
             return BadRequest("Invalid SSH key");
         }
@@ -176,6 +176,11 @@ public class AccountController : SuperController
     public class CreateModel
     {
         public int SponsorId { get; set; }
-        public string SshKey { get; set; } = string.Empty;
+        public string SshKey { get; set; } = String.Empty;
+    }
+
+    public class RequestRejectionModel
+    {
+        public string Reason { get; set; } = String.Empty;
     }
 }

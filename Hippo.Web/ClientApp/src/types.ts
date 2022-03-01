@@ -38,3 +38,8 @@ export interface AppContextShape {
   };
   account: Account;
 }
+
+export interface PromiseStatus {
+  pending: boolean;
+  success: boolean;
+}

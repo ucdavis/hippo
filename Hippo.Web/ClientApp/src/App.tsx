@@ -16,6 +16,8 @@ import { AdminUsers } from "./Admin/AdminUsers";
 import { Sponsors } from "./Admin/Sponsors";
 import { AdminApproveAccounts } from "./Admin/AdminApproveAccounts";
 import { ConditionalRoute } from "./ConditionalRoute";
+import { ModalProvider } from "react-modal-hook";
+import { Toaster } from "react-hot-toast";
 
 declare var Hippo: AppContextShape;
 
@@ -59,38 +61,41 @@ const App = () => {
   if (context.account) {
     return (
       <AppContext.Provider value={[context, setContext]}>
-        <div className={`account-status-${accountClassName}`}>
-          <AppNav></AppNav>
-          <div className="bottom-svg">
-            <BottomSvg />
+        <ModalProvider>
+          <Toaster />
+          <div className={`account-status-${accountClassName}`}>
+            <AppNav></AppNav>
+            <div className="bottom-svg">
+              <BottomSvg />
+            </div>
+            <Switch>
+              <Route exact path="/" component={Home} />
+              <Route path="/active" component={AccountInfo} />
+              <Route path="/pendingapproval" component={PendingApproval} />
+              <Route path="/create" component={RequestForm} />
+              <ConditionalRoute
+                roles={["Sponsor"]}
+                path="/approve"
+                component={ApproveAccounts}
+              />
+              <ConditionalRoute
+                roles={["Admin"]}
+                path="/admin/index"
+                component={AdminUsers}
+              />
+              <ConditionalRoute
+                roles={["Admin"]}
+                path="/admin/sponsors"
+                component={Sponsors}
+              />
+              <ConditionalRoute
+                roles={["Admin"]}
+                path="/admin/approvals"
+                component={AdminApproveAccounts}
+              />
+            </Switch>
           </div>
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/active" component={AccountInfo} />
-            <Route path="/pendingapproval" component={PendingApproval} />
-            <Route path="/create" component={RequestForm} />
-            <ConditionalRoute
-              roles={["Sponsor"]}
-              path="/approve"
-              component={ApproveAccounts}
-            />
-            <ConditionalRoute
-              roles={["Admin"]}
-              path="/admin/index"
-              component={AdminUsers}
-            />
-            <ConditionalRoute
-              roles={["Admin"]}
-              path="/admin/sponsors"
-              component={Sponsors}
-            />
-            <ConditionalRoute
-              roles={["Admin"]}
-              path="/admin/approvals"
-              component={AdminApproveAccounts}
-            />
-          </Switch>
-        </div>
+        </ModalProvider>
       </AppContext.Provider>
     );
   } else {

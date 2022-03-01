@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Account } from "../types";
+import { RejectRequest } from "../Shared/RejectRequest";
 
 import { authenticatedFetch } from "../util/api";
 
@@ -89,18 +90,7 @@ export const ApproveAccounts = () => {
                         ? "Approving..."
                         : "Approve"}
                     </button>{" "}
-                    <button
-                      disabled={
-                        accountApproving !== undefined &&
-                        accountRejecting !== undefined
-                      }
-                      onClick={() => handleReject(account)}
-                      className="btn btn-danger"
-                    >
-                      {accountRejecting === account.id
-                        ? "Rejecting..."
-                        : "Reject"}
-                    </button>
+                    <RejectRequest account={account}></RejectRequest>
                   </td>
                 </tr>
               ))}
