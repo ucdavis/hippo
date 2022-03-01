@@ -120,7 +120,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Rejected(account);
+        await _historyService.Rejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();

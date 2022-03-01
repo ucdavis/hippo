@@ -20,6 +20,7 @@ namespace Hippo.Email.Models
 
         public string Decision { get; set; } = String.Empty ;
         public string DecisionColor { get; set; } = Colors.Approved;
+        public string Reason { get; set; } = String.Empty;
 
         public class Colors
         {

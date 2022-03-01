@@ -18,7 +18,7 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null);
+        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null);
     }
 
     public class NotificationService : INotificationService
@@ -34,7 +34,7 @@ namespace Hippo.Core.Services
             _emailSettings = emailSettings.Value;
         }
 
-        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null)
+        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null)
         {
             var sponser = String.Empty;
             if (!string.IsNullOrWhiteSpace(overrideSponsor))
