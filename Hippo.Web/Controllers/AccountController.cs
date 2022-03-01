@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Services;
+using Hippo.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +70,7 @@ public class AccountController : SuperController
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
 
-        _sshService.PlaceFile(account.SshKey, tempFileName); 
+        _sshService.PlaceFile(account.SshKey, tempFileName);
         _sshService.RenameFile(tempFileName, fileName);
 
         account.Status = Account.Statuses.Active;
@@ -83,7 +84,7 @@ public class AccountController : SuperController
         }
 
         await _historyService.Approved(account);
-        
+
 
         await _dbContext.SaveChangesAsync();
 
@@ -91,8 +92,13 @@ public class AccountController : SuperController
     }
 
     [HttpPost]
-    public async Task<ActionResult> Reject(int id)
+    public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
+        if(String.IsNullOrWhiteSpace(model.Reason))
+        {
+            return BadRequest("Missing Reject Reason");
+        }
+
         var currentUser = await _userService.GetCurrentUser();
 
         var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
@@ -103,19 +109,18 @@ public class AccountController : SuperController
             return NotFound();
         }
 
-        Console.WriteLine($"Rejecting account {account.Owner.Iam} with ssh key {account.SshKey}");
 
 
         account.Status = Account.Statuses.Rejected;
         account.IsActive = false;
 
-        var success = await _notificationService.AccountDecision(account, false);
+        var success = await _notificationService.AccountDecision(account, false, reason: model.Reason);
         if (!success)
         {
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Rejected(account);
+        await _historyService.Rejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();
@@ -135,7 +140,7 @@ public class AccountController : SuperController
             return BadRequest("You already have an account");
         }
 
-        if(!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
+        if (!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
             return BadRequest("Bad Sponsor Id");
         }
@@ -143,7 +148,7 @@ public class AccountController : SuperController
         {
             return BadRequest("Missing SSH Key");
         }
-        if(!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
+        if (!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
         {
             return BadRequest("Invalid SSH key");
         }
@@ -176,6 +181,8 @@ public class AccountController : SuperController
     public class CreateModel
     {
         public int SponsorId { get; set; }
-        public string SshKey { get; set; } = string.Empty;
+        public string SshKey { get; set; } = String.Empty;
     }
+
+
 }

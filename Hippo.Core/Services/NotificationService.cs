@@ -18,7 +18,7 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null);
+        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null);
     }
 
     public class NotificationService : INotificationService
@@ -34,20 +34,22 @@ namespace Hippo.Core.Services
             _emailSettings = emailSettings.Value;
         }
 
-        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null)
+        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null)
         {
-            var sponser = String.Empty;
-            if (!string.IsNullOrWhiteSpace(overrideSponsor))
-            {
-                sponser = overrideSponsor;
-            }
-            else
-            {
-                sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
-            }
+
             try
             {
                 account = await GetCompleteAccount(account);
+                var sponser = String.Empty;
+                if (!string.IsNullOrWhiteSpace(overrideSponsor))
+                {
+                    sponser = overrideSponsor;
+                }
+                else
+                {
+                    sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
+                }
+                
                 var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
                 var emailTo = account.Owner.Email;
 
@@ -60,6 +62,7 @@ namespace Hippo.Core.Services
                     RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
+                    Reason = reason,
                 };
 
                 if (!isApproved)

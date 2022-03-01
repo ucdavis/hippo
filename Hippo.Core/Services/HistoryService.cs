@@ -10,10 +10,10 @@ namespace Hippo.Core.Services
 {
     public interface IHistoryService
     {
-        Task<Account> AddHistory(Account account, string action);
+        Task<Account> AddHistory(Account account, string action, string note = null);
         Task<Account> Requested(Account account);
         Task<Account> Approved(Account account);
-        Task<Account> Rejected(Account account);
+        Task<Account> Rejected(Account account, string note = null);
     }
 
     public class HistoryService : IHistoryService
@@ -24,7 +24,7 @@ namespace Hippo.Core.Services
             _userService = userService;
         }
 
-        public async Task<Account> AddHistory(Account account, string action)
+        public async Task<Account> AddHistory(Account account, string action, string note = null)
         {
             var currentUser = await _userService.GetCurrentUser();
             var history = new AccountHistory
@@ -32,6 +32,7 @@ namespace Hippo.Core.Services
                 Action = action,
                 Status = account.Status,
                 Account = account,
+                Note = note,
             };
             if (currentUser != null)
             {
@@ -51,9 +52,9 @@ namespace Hippo.Core.Services
             return AddHistory(account, Actions.Approved);
         }
 
-        public Task<Account> Rejected(Account account)
+        public Task<Account> Rejected(Account account, string note = null)
         {
-            return AddHistory(account, Actions.Rejected);
+            return AddHistory(account, Actions.Rejected, note);
         }
     }
 }

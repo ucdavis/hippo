@@ -91,7 +91,8 @@ export const RequestForm = () => {
           <label className="form-label">What is your Public SSH key</label>
           <textarea
             className="form-control"
-            id="exampleFormControlTextarea1"
+            id="sharedKey"
+            required
             onChange={(e) =>
               setRequest((r) => ({ ...r, sshKey: e.target.value }))
             }

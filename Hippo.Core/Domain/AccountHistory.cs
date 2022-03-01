@@ -21,6 +21,8 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(500)]
         public string Action { get; set; }
+        [MaxLength(1500)]
+        public string Note { get; set; }
         [Required]
         [MaxLength(50)]
         public string Status { get; set; }
