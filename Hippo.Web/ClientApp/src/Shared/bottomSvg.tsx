@@ -7,7 +7,7 @@ export const BottomSvg = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <title>geo</title>
-    <g id="Main" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Main" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="Artboard" transform="translate(-131.000000, -89.000000)">
         <g
           id="geo"
@@ -18,8 +18,8 @@ export const BottomSvg = () => (
             transform="translate(492.333485, 39.008267) rotate(-180.000000) translate(-492.333485, -39.008267) translate(44.720753, 0.000000)"
             fill="#2C0C3F"
             stroke="#FFFFFF"
-            stroke-linejoin="round"
-            stroke-width="2"
+            strokeLinejoin="round"
+            strokeWidth="2"
           >
             <polygon
               id="cut3"
@@ -63,8 +63,8 @@ export const BottomSvg = () => (
             transform="translate(566.084964, 39.008267) rotate(-180.000000) translate(-566.084964, -39.008267) translate(113.139665, 0.000000)"
             fill="#3B1054"
             stroke="#FFFFFF"
-            stroke-linejoin="round"
-            stroke-width="2"
+            strokeLinejoin="round"
+            strokeWidth="2"
           >
             <polygon
               id="cut2"
@@ -92,8 +92,8 @@ export const BottomSvg = () => (
             transform="translate(469.973108, 39.008267) rotate(-180.000000) translate(-469.973108, -39.008267) "
             fill="#4A156A"
             stroke="#FFFFFF"
-            stroke-linejoin="round"
-            stroke-width="2"
+            strokeLinejoin="round"
+            strokeWidth="2"
           >
             <polygon
               id="cut1"
