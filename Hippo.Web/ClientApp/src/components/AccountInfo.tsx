@@ -13,9 +13,6 @@ export const AccountInfo = () => {
           Welcome {context.user.detail.firstName} you already have an account,
           enjoy farm
         </p>
-        {account.canSponsor && (
-          <Link to="/approve">Click here to view any pending approvals</Link>
-        )}
       </div>
     </div>
   );
