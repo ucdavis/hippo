@@ -76,8 +76,11 @@ namespace Hippo.Web
 
                     // Sometimes CAS doesn't return the required IAM ID
                     // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
-                    if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID"))
-                    { 
+                    if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID") || 
+                        !identity.HasClaim(c => c.Type == ClaimTypes.Surname) || 
+                        !identity.HasClaim(c => c.Type == ClaimTypes.GivenName) || 
+                        !identity.HasClaim(c => c.Type == ClaimTypes.Email))
+                    {
                         var identityService = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
                         var kerbId = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
                         if (kerbId != null)
@@ -87,7 +90,23 @@ namespace Hippo.Web
 
                             if (identityUser != null)
                             {
-                                identity.AddClaim(new Claim("ucdPersonIAMID", identityUser.Iam));
+                                if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID"))
+                                {
+                                    identity.AddClaim(new Claim("ucdPersonIAMID", identityUser.Iam));
+                                }
+                                //Check for other missing claims
+                                if (!identity.HasClaim(c => c.Type == ClaimTypes.Surname))
+                                {
+                                    identity.AddClaim(new Claim(ClaimTypes.Surname, identityUser.LastName));
+                                }
+                                if (!identity.HasClaim(c => c.Type == ClaimTypes.GivenName))
+                                {
+                                    identity.AddClaim(new Claim(ClaimTypes.GivenName, identityUser.FirstName));
+                                }
+                                if (!identity.HasClaim(c => c.Type == ClaimTypes.Email))
+                                {
+                                    identity.AddClaim(new Claim(ClaimTypes.Email, identityUser.Email));
+                                }
                             }
                             else
                             {
