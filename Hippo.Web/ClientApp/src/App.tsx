@@ -65,7 +65,7 @@ const App = () => {
           <Toaster />
           <div className={`account-status-${accountClassName}`}>
             <AppNav></AppNav>
-          <div className="top-svg">
+            <div className="top-svg">
               <BottomSvg />
             </div>
             <Switch>

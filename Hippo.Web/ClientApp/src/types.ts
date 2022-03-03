@@ -6,7 +6,7 @@ export interface User {
   iam: string;
   kerberos: string;
   name: string;
-  IsAdmin: boolean;
+  isAdmin: boolean;
 }
 
 export type RoleName = "Admin" | "Sponsor";

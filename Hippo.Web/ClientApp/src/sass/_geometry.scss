@@ -17,10 +17,80 @@
 #piece4 {
   fill: darken($primary-color, 6);
 }
-#piece2 {
-  animation: vertical-out 4s linear infinite;
+#piece1 {
+  animation: vertical-out 10s ease-in-out infinite;
 }
-
+// #piece2 {
+//   animation: slowburn 5s ease-in-out infinite;
+// }
+#piece3 {
+  animation: ladder 20s ease-in-out infinite;
+}
+#piece4 {
+  animation: rotator 10s ease-in-out infinite;
+  transform-origin: bottom right;
+}
+@keyframes vertical-out {
+  0%,
+  25%,
+  55%,
+  100% {
+    transform: translate(0%);
+    transform-origin: 50% 50%;
+  }
+  50% {
+    transform: translateY(20%);
+  }
+}
+@keyframes slowburn {
+  0%,
+  10%,
+  90%,
+  100% {
+    transform: translate(0%, 0%);
+    transform-origin: 50% 50%;
+  }
+  50% {
+    transform: translate(4%, 4%);
+  }
+}
+@keyframes rotator {
+  0%,
+  65%,
+  90%,
+  100% {
+    transform: translate(0%, 0%);
+  }
+  70% {
+    transform: rotate(356deg);
+  }
+}
+@keyframes ladder {
+  0%,
+  19%,
+  53%,
+  100% {
+    transform: translate(0%, 0%);
+  }
+  20% {
+    transform: translateY(4%);
+  }
+  30% {
+    transform: translateY(4%);
+  }
+  31% {
+    transform: translateY(8%);
+  }
+  41% {
+    transform: translateY(8%);
+  }
+  42% {
+    transform: translateY(16%);
+  }
+  52% {
+    transform: translateY(16%);
+  }
+}
 @keyframes colormorph {
   0% {
     fill: $primary-color;
@@ -42,58 +112,25 @@
   }
 }
 
-@keyframes vertical-out {
+@keyframes vibrate {
   0%,
+  30%,
+  56%,
   100% {
-    -webkit-transform: translateX(0%);
     transform: translateX(0%);
-    -webkit-transform-origin: 50% 50%;
     transform-origin: 50% 50%;
   }
-  50% {
-    transform: translateY(5px);
-  }
-}
-
-@keyframes slide-rotate-hor-top {
-  0% {
-    -webkit-transform: translateY(0) translateX(0px);
-    transform: translateY(0) translateX(0px);
-  }
-  50% {
-    -webkit-transform: translateY(-10px) translateX(6px);
-    transform: translateY(-10px) translateX(6px);
-  }
-  100% {
-    -webkit-transform: translateY(0) translateX(0px);
-    transform: translateY(0) translateX(0px);
-  }
-}
-
-@keyframes vibrate-1 {
-  0% {
-    -webkit-transform: translate(0);
-    transform: translate(0);
-  }
-  20% {
-    -webkit-transform: translate(-2px, 2px);
-    transform: translate(-2px, 2px);
-  }
   40% {
-    -webkit-transform: translate(-2px, -2px);
-    transform: translate(-2px, -2px);
+    transform: translate(-1px, 1px);
   }
-  60% {
-    -webkit-transform: translate(2px, 2px);
-    transform: translate(2px, 2px);
+  42% {
+    transform: translate(-1px, -1px);
   }
-  80% {
-    -webkit-transform: translate(2px, -2px);
-    transform: translate(2px, -2px);
+  44% {
+    transform: translate(1px, 1px);
   }
-  100% {
-    -webkit-transform: translate(0);
-    transform: translate(0);
+  46% {
+    transform: translate(1px, -1px);
   }
 }
 
