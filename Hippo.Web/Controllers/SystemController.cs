@@ -68,6 +68,7 @@ namespace Hippo.Web.Controllers
                 new Claim("name", user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(IamIdClaimType, user.Iam),
+                new Claim("hippoAdmin", user.IsAdmin.ToString()),
             }, CookieAuthenticationDefaults.AuthenticationScheme);
 
             // kill old login
