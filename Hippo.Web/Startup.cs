@@ -102,7 +102,8 @@ namespace Hippo.Web
 
                     // Ensure user exists in the db
                     var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                    await userService.GetUser(identity.Claims.ToArray());
+                    var usr = await userService.GetUser(identity.Claims.ToArray());
+                    identity.AddClaim(new Claim("hippoAdmin", usr.IsAdmin.ToString()));
                 };
             });
 
