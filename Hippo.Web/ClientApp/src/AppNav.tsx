@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import AppContext from "./Shared/AppContext";
 import {
   Collapse,
   DropdownItem,
@@ -18,6 +20,7 @@ import HippoLogo from "./Shared/hippoLogo";
 export const AppNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
+  const [context] = useContext(AppContext);
 
   return (
     <div>
@@ -35,15 +38,26 @@ export const AppNav = () => {
       <div className="row justify-content-center">
         <div className="col-md-6">
           <nav className="simple-nav">
-            <a className="nav-item nav-link active" href="#">
-              Manage Accounts
-            </a>
-            <a className="nav-item nav-link" href="#">
-              Manage Admins
-            </a>
-            <a className="nav-item nav-link" href="#">
-              Manage Sponsors
-            </a>
+            {context.account.canSponsor && (
+              <Link to="/approve" className="nav-item nav-link active">
+                Pending Approvals
+              </Link>
+            )}
+            {context.user.detail.IsAdmin && (
+              <Link className="nav-item nav-link active" to="/admin/approvals">
+                Manage Accounts
+              </Link>
+            )}
+            {context.user.detail.IsAdmin && (
+              <Link className="nav-item nav-link" to="/admin/index">
+                Manage Admins
+              </Link>
+            )}
+            {context.user.detail.IsAdmin && (
+              <Link className="nav-item nav-link" to="/admin/sponsors">
+                Manage Sponsors
+              </Link>
+            )}
           </nav>
         </div>
       </div>
