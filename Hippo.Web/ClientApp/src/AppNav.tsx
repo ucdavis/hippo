@@ -43,17 +43,17 @@ export const AppNav = () => {
                 Pending Approvals
               </Link>
             )}
-            {context.user.detail.IsAdmin && (
+            {context.user.detail.isAdmin && (
               <Link className="nav-item nav-link active" to="/admin/approvals">
                 Manage Accounts
               </Link>
             )}
-            {context.user.detail.IsAdmin && (
+            {context.user.detail.isAdmin && (
               <Link className="nav-item nav-link" to="/admin/index">
                 Manage Admins
               </Link>
             )}
-            {context.user.detail.IsAdmin && (
+            {context.user.detail.isAdmin && (
               <Link className="nav-item nav-link" to="/admin/sponsors">
                 Manage Sponsors
               </Link>

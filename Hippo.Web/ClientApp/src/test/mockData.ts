@@ -8,7 +8,7 @@ const fakeUser: User = {
   iam: "1000037182",
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
-  IsAdmin: true,
+  isAdmin: true,
 };
 
 export const fakeAccounts: Account[] = [

@@ -15,7 +15,7 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
   // if the user has System role they can see everything (But we don't have a roles table yet)
   const systemUsers = ["jsylvest", "postit", "cydoval", "sweber"];
   if (
-    context.user.detail.IsAdmin ||
+    context.user.detail.isAdmin ||
     systemUsers.includes(context.user.detail.kerberos)
   ) {
     return <Route {...props} />;
