@@ -36,7 +36,24 @@ header {
     }
   }
 }
-
+// nav
+.simple-nav {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 4%;
+  a.nav-item {
+    padding: 1% 1.5%;
+    margin: 2%;
+    color: $primary-font;
+    border-bottom: 2px solid $primary-color;
+    box-shadow: $box-shadow;
+    transition: background-color 0.5s ease;
+    &:hover {
+      color: $primary-font;
+      background-color: transparentize($primary-color, 0.9);
+    }
+  }
+}
 footer {
   margin-bottom: 3%;
 }

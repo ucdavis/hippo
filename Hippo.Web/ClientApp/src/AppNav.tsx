@@ -20,15 +20,32 @@ export const AppNav = () => {
   const toggle = () => setIsOpen(!isOpen);
 
   return (
-    <div className="row appheader justify-content-center">
-      <div className="col-md-6 hippo">
-        <HippoLogo />
+    <div>
+      <div className="row appheader justify-content-center">
+        <div className="col-md-6 hippo">
+          <HippoLogo />
 
-        <h1>
-          <img src="/media/ucdavis.svg" />
-          HiPPO
-        </h1>
-        <p className="lede">High Performance Personnel Onboarding</p>
+          <h1>
+            <img src="/media/ucdavis.svg" />
+            HiPPO
+          </h1>
+          <p className="lede">High Performance Personnel Onboarding</p>
+        </div>
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <nav className="simple-nav">
+            <a className="nav-item nav-link active" href="#">
+              Manage Accounts
+            </a>
+            <a className="nav-item nav-link" href="#">
+              Manage Admins
+            </a>
+            <a className="nav-item nav-link" href="#">
+              Manage Sponsors
+            </a>
+          </nav>
+        </div>
       </div>
     </div>
   );
