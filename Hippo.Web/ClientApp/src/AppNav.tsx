@@ -39,22 +39,38 @@ export const AppNav = () => {
         <div className="col-md-6">
           <nav className="simple-nav">
             {context.account.canSponsor && (
-              <Link to="/approve" className="nav-item nav-link active">
+              <Link
+                id="sponsorApprove"
+                to="/approve"
+                className="nav-item nav-link active"
+              >
                 Pending Approvals
               </Link>
             )}
             {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link active" to="/admin/approvals">
+              <Link
+                id="adminApprovals"
+                className="nav-item nav-link active"
+                to="/admin/approvals"
+              >
                 Manage Accounts
               </Link>
             )}
             {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link" to="/admin/index">
+              <Link
+                id="AdminIndex"
+                className="nav-item nav-link"
+                to="/admin/index"
+              >
                 Manage Admins
               </Link>
             )}
             {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link" to="/admin/sponsors">
+              <Link
+                id="adminSponsors"
+                className="nav-item nav-link"
+                to="/admin/sponsors"
+              >
                 Manage Sponsors
               </Link>
             )}
