@@ -7,6 +7,7 @@ import {
   fakeAdminAppContext,
   fakeAppContext,
   fakeAdminUsers,
+  fakeAppContextNoAccount,
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
 
@@ -143,5 +144,67 @@ describe("Home Redirect when Sponsor", () => {
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain("Pending Approvals");
+  });
+});
+
+describe("Home Redirect no account", () => {
+  beforeEach(() => {
+    const accountResponse = Promise.resolve({
+      status: 204, // no content
+      ok: true,
+      json: () => Promise.resolve(fakeAccounts[0]),
+    });
+
+    const sponsorsResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeAccounts),
+    });
+
+    (global as any).Hippo = fakeAppContextNoAccount;
+
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        "/api/account/get": accountResponse,
+        "/api/account/sponsors": sponsorsResponse,
+      })
+    );
+  });
+  it("renders without crashing", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  });
+
+  it("Shows welcome message", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(div.textContent).toContain("Welcome, Bob");
+    expect(div.textContent).toContain(
+      "You don't seem to have an account on Farm yet."
+    );
+  });
+
+  it("Does not shows pending approvals button", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(div.textContent).not.toContain("Pending Approvals");
   });
 });

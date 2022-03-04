@@ -72,3 +72,19 @@ export const fakeAdminUsers: User[] = [
     isAdmin: true,
   },
 ];
+
+export const fakeAppContextNoAccount: AppContextShape = {
+  antiForgeryToken: "fakeAntiForgeryToken",
+  user: {
+    detail: {
+      ...fakeUser,
+    },
+  },
+  account: {
+    id: 3,
+    name: "Account 3",
+    status: "Create",
+    canSponsor: false,
+    createdOn: "2020-01-01T00:00:00.000Z",
+  },
+};
