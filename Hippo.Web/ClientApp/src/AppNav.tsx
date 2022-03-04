@@ -51,7 +51,7 @@ export const AppNav = () => {
               <Link
                 id="adminApprovals"
                 className="nav-item nav-link active"
-                to="/admin/approvals"
+                to="/admin/accountApprovals"
               >
                 Manage Accounts
               </Link>
@@ -60,7 +60,7 @@ export const AppNav = () => {
               <Link
                 id="AdminIndex"
                 className="nav-item nav-link"
-                to="/admin/index"
+                to="/admin/users"
               >
                 Manage Admins
               </Link>

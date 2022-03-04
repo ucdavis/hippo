@@ -80,7 +80,7 @@ const App = () => {
               />
               <ConditionalRoute
                 roles={["Admin"]}
-                path="/admin/index"
+                path="/admin/users"
                 component={AdminUsers}
               />
               <ConditionalRoute
@@ -90,7 +90,7 @@ const App = () => {
               />
               <ConditionalRoute
                 roles={["Admin"]}
-                path="/admin/approvals"
+                path="/admin/accountApprovals"
                 component={AdminApproveAccounts}
               />
             </Switch>

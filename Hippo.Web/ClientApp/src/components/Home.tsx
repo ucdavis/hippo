@@ -6,7 +6,7 @@ import AppContext from "../Shared/AppContext";
 export const Home = () => {
   const [{ account, user }] = useContext(AppContext);
   if (user?.detail?.isAdmin) {
-    return <Redirect to="/admin/index" />;
+    return <Redirect to="/admin/users" />;
   }
 
   return <Redirect to={`/${account.status.toLocaleLowerCase()}`} />;
