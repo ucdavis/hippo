@@ -11,6 +11,17 @@ const fakeUser: User = {
   isAdmin: false,
 };
 
+const fakeAdminUser: User = {
+  id: 1,
+  firstName: "Bob",
+  lastName: "Dobalina",
+  email: "bdobalina@ucdavis.edu",
+  iam: "1000037182",
+  kerberos: "bdobalina",
+  name: "Mr Mr Mr Bob Dobalina",
+  isAdmin: true,
+};
+
 export const fakeAccounts: Account[] = [
   {
     id: 1,
@@ -37,3 +48,27 @@ export const fakeAppContext: AppContextShape = {
   },
   account: fakeAccounts[0],
 };
+
+export const fakeAdminAppContext: AppContextShape = {
+  antiForgeryToken: "fakeAntiForgeryToken",
+  user: {
+    detail: {
+      ...fakeAdminUser,
+    },
+  },
+  account: fakeAccounts[0],
+};
+
+export const fakeAdminUsers: User[] = [
+  fakeAdminUser,
+  {
+    id: 4,
+    firstName: "Bobby",
+    lastName: "Dob",
+    email: "bdob@ucdavis.edu",
+    iam: "1000037199",
+    kerberos: "bdob",
+    name: "A Fake Admin User",
+    isAdmin: true,
+  },
+];
