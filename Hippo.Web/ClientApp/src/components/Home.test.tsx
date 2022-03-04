@@ -45,7 +45,7 @@ it("renders without crashing", async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 });
 
-describe("Home Redirect", () => {
+describe("Home Redirect when Admin", () => {
   beforeEach(() => {
     const accountResponse = Promise.resolve({
       status: 200,
@@ -79,7 +79,7 @@ describe("Home Redirect", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
-  it("Redirects to AdminUsers when user is Admin", async () => {
+  it("Redirects to AdminUsers", async () => {
     const div = document.createElement("div");
     ReactDOM.render(
       <MemoryRouter>
@@ -89,5 +89,59 @@ describe("Home Redirect", () => {
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain("There are 2 users with admin access");
+  });
+});
+
+describe("Home Redirect when Sponsor", () => {
+  beforeEach(() => {
+    const accountResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeAccounts[0]),
+    });
+
+    (global as any).Hippo = fakeAppContext;
+
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        "/api/account/get": accountResponse,
+      })
+    );
+  });
+  it("renders without crashing", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  });
+
+  it("Shows welcome message", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(div.textContent).toContain(
+      "Welcome Bob you already have an account, enjoy farm"
+    );
+  });
+
+  it("Shows pending approvals button", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(div.textContent).toContain("Pending Approvals");
   });
 });
