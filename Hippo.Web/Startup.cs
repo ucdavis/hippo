@@ -24,6 +24,9 @@ namespace Hippo.Web
 {
     public class Startup
     {
+        public const string HippoAdminClaimType = "hippoAdmin";
+        public const string IamIdClaimType = "ucdPersonIAMID";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -76,7 +79,7 @@ namespace Hippo.Web
 
                     // Sometimes CAS doesn't return the required IAM ID
                     // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
-                    if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID") || 
+                    if (!identity.HasClaim(c => c.Type == IamIdClaimType) || 
                         !identity.HasClaim(c => c.Type == ClaimTypes.Surname) || 
                         !identity.HasClaim(c => c.Type == ClaimTypes.GivenName) || 
                         !identity.HasClaim(c => c.Type == ClaimTypes.Email))
@@ -90,9 +93,9 @@ namespace Hippo.Web
 
                             if (identityUser != null)
                             {
-                                if (!identity.HasClaim(c => c.Type == "ucdPersonIAMID"))
+                                if (!identity.HasClaim(c => c.Type == IamIdClaimType))
                                 {
-                                    identity.AddClaim(new Claim("ucdPersonIAMID", identityUser.Iam));
+                                    identity.AddClaim(new Claim(IamIdClaimType, identityUser.Iam));
                                 }
                                 //Check for other missing claims
                                 if (!identity.HasClaim(c => c.Type == ClaimTypes.Surname))
@@ -122,7 +125,7 @@ namespace Hippo.Web
                     // Ensure user exists in the db
                     var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
                     var usr = await userService.GetUser(identity.Claims.ToArray());
-                    identity.AddClaim(new Claim("hippoAdmin", usr.IsAdmin.ToString()));
+                    identity.AddClaim(new Claim(HippoAdminClaimType, usr.IsAdmin.ToString()));
                 };
             });
 
