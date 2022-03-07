@@ -50,7 +50,7 @@ namespace Hippo.Core.Services
                     sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
                 }
                 
-                var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
+                var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
                 var emailTo = account.Owner.Email;
 
                 var model = new DecisionModel()
@@ -59,7 +59,7 @@ namespace Hippo.Core.Services
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
+                    RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
@@ -88,7 +88,7 @@ namespace Hippo.Core.Services
             try 
             { 
                 account = await GetCompleteAccount(account);
-                var requestUrl = $"{_emailSettings.BaseUrl}/approve"; //TODO: Replace when we know it
+                var requestUrl = $"{_emailSettings.BaseUrl}/approve";
                 var emailTo = account.Sponsor.Owner.Email; 
 
                 var model = new NewRequestModel()
@@ -96,7 +96,7 @@ namespace Hippo.Core.Services
                     SponsorName = account.Sponsor.Owner.Name,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = requestUrl, //TODO: Use correct URL
+                    RequestUrl = requestUrl, 
                 };
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
