@@ -88,7 +88,7 @@ namespace Hippo.Core.Services
             try 
             { 
                 account = await GetCompleteAccount(account);
-                var requestUrl = $"{_emailSettings.BaseUrl}/Fake/Request/"; //TODO: Replace when we know it
+                var requestUrl = $"{_emailSettings.BaseUrl}/approve"; //TODO: Replace when we know it
                 var emailTo = account.Sponsor.Owner.Email; 
 
                 var model = new NewRequestModel()
@@ -96,7 +96,7 @@ namespace Hippo.Core.Services
                     SponsorName = account.Sponsor.Owner.Name,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = $"{requestUrl}{account.Id}", //TODO: Use correct URL
+                    RequestUrl = requestUrl, //TODO: Use correct URL
                 };
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
