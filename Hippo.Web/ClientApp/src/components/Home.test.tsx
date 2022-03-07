@@ -11,22 +11,6 @@ import {
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
 
-beforeEach(() => {
-  const accountResponse = Promise.resolve({
-    status: 200,
-    ok: true,
-    json: () => Promise.resolve(fakeAccounts[0]),
-  });
-
-  (global as any).Hippo = fakeAppContext;
-
-  global.fetch = jest.fn().mockImplementation((x) =>
-    responseMap(x, {
-      "/api/account/get": accountResponse,
-    })
-  );
-});
-
 afterEach(() => {
   // cleanup on exiting
   // clear any mocks living on fetch
@@ -35,15 +19,34 @@ afterEach(() => {
   }
 });
 
-it("renders without crashing", async () => {
-  const div = document.createElement("div");
-  ReactDOM.render(
-    <MemoryRouter>
-      <App />
-    </MemoryRouter>,
-    div
-  );
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+describe("Basic render", () => {
+  beforeEach(() => {
+    const accountResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeAccounts[0]),
+    });
+
+    (global as any).Hippo = fakeAppContext;
+
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        "/api/account/get": accountResponse,
+      })
+    );
+  });
+
+  it("renders without crashing", async () => {
+    const div = document.createElement("div");
+    ReactDOM.render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+      div
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  });
 });
 
 describe("Home Redirect when Admin", () => {
