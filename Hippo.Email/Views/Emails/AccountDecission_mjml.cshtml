@@ -18,7 +18,7 @@
     </mj-column>
 </mj-section>
 
-@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel("@Model?.ButtonText", "https://github.com/ucdavis/hippo"))
+@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel("@Model?.ButtonText", "@Model?.RequestUrl"))
 
 <mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff" padding-bottom="10px" padding-top="5px">
     <mj-column width="90%" vertical-align="top" border-bottom="1px solid #c7c8cc">
