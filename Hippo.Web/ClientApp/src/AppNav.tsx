@@ -1,27 +1,8 @@
-import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import AppContext from "./Shared/AppContext";
-import {
-  Collapse,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarText,
-  NavbarToggler,
-  NavItem,
-  NavLink,
-  UncontrolledDropdown,
-} from "reactstrap";
+import { NavLink } from "react-router-dom";
 import HippoLogo from "./Shared/hippoLogo";
+import { ShowFor } from "./Shared/ShowFor";
 
 export const AppNav = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(!isOpen);
-  const [context] = useContext(AppContext);
-
   return (
     <div>
       <div className="row appheader justify-content-center">
@@ -29,7 +10,7 @@ export const AppNav = () => {
           <HippoLogo />
 
           <h1>
-            <img src="/media/ucdavis.svg" />
+            <img src="/media/ucdavis.svg" alt="UC DAVIS" />
             HiPPO
           </h1>
           <p className="lede">High Performance Personnel Onboarding</p>
@@ -38,26 +19,52 @@ export const AppNav = () => {
       <div className="row justify-content-center">
         <div className="col-md-6">
           <nav className="simple-nav">
-            {context.account.canSponsor && (
-              <Link to="/approve" className="nav-item nav-link active">
+            <ShowFor roles={["Sponsor"]}>
+              <NavLink
+                id="sponsorApprove"
+                to="/approve"
+                className="nav-item nav-link"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
+              >
                 Pending Approvals
-              </Link>
-            )}
-            {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link active" to="/admin/approvals">
+              </NavLink>
+            </ShowFor>
+            <ShowFor roles={["Admin"]}>
+              <NavLink
+                id="adminApprovals"
+                className="nav-item nav-link"
+                to="/admin/accountApprovals"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
+              >
                 Manage Accounts
-              </Link>
-            )}
-            {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link" to="/admin/index">
+              </NavLink>
+
+              <NavLink
+                id="AdminIndex"
+                className="nav-item nav-link"
+                to="/admin/users"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
+              >
                 Manage Admins
-              </Link>
-            )}
-            {context.user.detail.isAdmin && (
-              <Link className="nav-item nav-link" to="/admin/sponsors">
+              </NavLink>
+
+              <NavLink
+                id="adminSponsors"
+                className="nav-item nav-link"
+                to="/admin/sponsors"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
+              >
                 Manage Sponsors
-              </Link>
-            )}
+              </NavLink>
+            </ShowFor>
           </nav>
         </div>
       </div>
