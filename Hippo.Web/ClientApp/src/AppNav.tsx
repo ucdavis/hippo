@@ -1,13 +1,8 @@
-import { useState, useContext } from "react";
 import { NavLink } from "react-router-dom";
-import AppContext from "./Shared/AppContext";
 import HippoLogo from "./Shared/hippoLogo";
+import { ShowFor } from "./Shared/ShowFor";
 
 export const AppNav = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(!isOpen);
-  const [context] = useContext(AppContext);
-
   return (
     <div>
       <div className="row appheader justify-content-center">
@@ -15,7 +10,7 @@ export const AppNav = () => {
           <HippoLogo />
 
           <h1>
-            <img src="/media/ucdavis.svg" />
+            <img src="/media/ucdavis.svg" alt="UC DAVIS" />
             HiPPO
           </h1>
           <p className="lede">High Performance Personnel Onboarding</p>
@@ -24,7 +19,7 @@ export const AppNav = () => {
       <div className="row justify-content-center">
         <div className="col-md-6">
           <nav className="simple-nav">
-            {context.account.canSponsor && (
+            <ShowFor roles={["Sponsor"]}>
               <NavLink
                 id="sponsorApprove"
                 to="/approve"
@@ -35,8 +30,8 @@ export const AppNav = () => {
               >
                 Pending Approvals
               </NavLink>
-            )}
-            {context.user.detail.isAdmin && (
+            </ShowFor>
+            <ShowFor roles={["Admin"]}>
               <NavLink
                 id="adminApprovals"
                 className="nav-item nav-link"
@@ -47,8 +42,7 @@ export const AppNav = () => {
               >
                 Manage Accounts
               </NavLink>
-            )}
-            {context.user.detail.isAdmin && (
+
               <NavLink
                 id="AdminIndex"
                 className="nav-item nav-link"
@@ -59,8 +53,7 @@ export const AppNav = () => {
               >
                 Manage Admins
               </NavLink>
-            )}
-            {context.user.detail.isAdmin && (
+
               <NavLink
                 id="adminSponsors"
                 className="nav-item nav-link"
@@ -71,7 +64,7 @@ export const AppNav = () => {
               >
                 Manage Sponsors
               </NavLink>
-            )}
+            </ShowFor>
           </nav>
         </div>
       </div>
