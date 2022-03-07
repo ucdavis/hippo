@@ -1,20 +1,6 @@
 import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import AppContext from "./Shared/AppContext";
-import {
-  Collapse,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarText,
-  NavbarToggler,
-  NavItem,
-  NavLink,
-  UncontrolledDropdown,
-} from "reactstrap";
 import HippoLogo from "./Shared/hippoLogo";
 
 export const AppNav = () => {
@@ -39,40 +25,52 @@ export const AppNav = () => {
         <div className="col-md-6">
           <nav className="simple-nav">
             {context.account.canSponsor && (
-              <Link
+              <NavLink
                 id="sponsorApprove"
                 to="/approve"
-                className="nav-item nav-link active"
+                className="nav-item nav-link"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
               >
                 Pending Approvals
-              </Link>
+              </NavLink>
             )}
             {context.user.detail.isAdmin && (
-              <Link
+              <NavLink
                 id="adminApprovals"
-                className="nav-item nav-link active"
+                className="nav-item nav-link"
                 to="/admin/accountApprovals"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
               >
                 Manage Accounts
-              </Link>
+              </NavLink>
             )}
             {context.user.detail.isAdmin && (
-              <Link
+              <NavLink
                 id="AdminIndex"
                 className="nav-item nav-link"
                 to="/admin/users"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
               >
                 Manage Admins
-              </Link>
+              </NavLink>
             )}
             {context.user.detail.isAdmin && (
-              <Link
+              <NavLink
                 id="adminSponsors"
                 className="nav-item nav-link"
                 to="/admin/sponsors"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
               >
                 Manage Sponsors
-              </Link>
+              </NavLink>
             )}
           </nav>
         </div>
