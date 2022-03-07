@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory } from "react-router-dom";
 
-import AppContext from "../Shared/AppContext";
-import { Account, RequestPostModel } from "../types";
-import { authenticatedFetch } from "../util/api";
+import AppContext from "../../Shared/AppContext";
+import { Account, RequestPostModel } from "../../types";
+import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
 
 export const RequestForm = () => {
