@@ -11,6 +11,7 @@ import { AccountInfo } from "./components/AccountInfo";
 import { RequestForm } from "./components/RequstForm";
 import { PendingApproval } from "./components/PendingApproval";
 import { ApproveAccounts } from "./components/ApproveAccounts";
+import { SponsoredAccounts } from "./components/SponsoredAccounts";
 import { authenticatedFetch } from "./util/api";
 import { AdminUsers } from "./Admin/AdminUsers";
 import { Sponsors } from "./Admin/Sponsors";
@@ -77,6 +78,11 @@ const App = () => {
                 roles={["Sponsor"]}
                 path="/approve"
                 component={ApproveAccounts}
+              />
+              <ConditionalRoute
+                roles={["Sponsor"]}
+                path="/sponsored"
+                component={SponsoredAccounts}
               />
               <ConditionalRoute
                 roles={["Admin"]}

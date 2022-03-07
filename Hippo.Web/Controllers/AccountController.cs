@@ -51,6 +51,14 @@ public class AccountController : SuperController
         return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().ToListAsync());
     }
 
+    [HttpGet]
+    public async Task<ActionResult> Sponsored()
+    {
+        var currentUser = await _userService.GetCurrentUser();
+
+        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().ToListAsync());
+    }
+
     // Approve a given pending account if you are the sponsor
     [HttpPost]
     public async Task<ActionResult> Approve(int id)
@@ -94,7 +102,7 @@ public class AccountController : SuperController
     [HttpPost]
     public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
-        if(String.IsNullOrWhiteSpace(model.Reason))
+        if (String.IsNullOrWhiteSpace(model.Reason))
         {
             return BadRequest("Missing Reject Reason");
         }
