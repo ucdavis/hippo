@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 
 import { Account } from "../types";
 import { authenticatedFetch } from "../util/api";
@@ -14,7 +13,6 @@ interface Props {
 }
 
 export const RejectRequest = (props: Props) => {
-  //const history = useHistory();
   const [reason, setReason] = useState("");
 
   const [notification, setNotification] = usePromiseNotification();
@@ -65,7 +63,6 @@ export const RejectRequest = (props: Props) => {
     const response = await request;
 
     if (response.ok) {
-      //history.replace(`/project/details/${props.project.id}`);
       props.removeAccount(props.account);
     }
   };

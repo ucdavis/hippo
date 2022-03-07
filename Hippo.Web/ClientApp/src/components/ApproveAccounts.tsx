@@ -9,7 +9,6 @@ export const ApproveAccounts = () => {
 
   const [accounts, setAccounts] = useState<Account[]>();
   const [accountApproving, setAccountApproving] = useState<number>();
-  //const [accountRejecting, setAccountRejecting] = useState<number>();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -38,22 +37,6 @@ export const ApproveAccounts = () => {
       setAccounts(accounts?.filter((a) => a.id !== account.id));
     }
   };
-
-  // const handleReject = async (account: Account) => {
-  //   setAccountRejecting(account.id);
-
-  //   const response = await authenticatedFetch(
-  //     `/api/account/reject/${account.id}`,
-  //     { method: "POST" }
-  //   );
-
-  //   if (response.ok) {
-  //     setAccountRejecting(undefined);
-
-  //     // remove the account from the list
-  //     setAccounts(accounts?.filter((a) => a.id !== account.id));
-  //   }
-  // };
 
   const handleReject = async (account: Account) => {
     // remove the account from the list

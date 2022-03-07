@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AppContext from "../Shared/AppContext";
 
 export const PendingApproval = () => {
-  const [context, setContext] = useContext(AppContext);
+  const [context] = useContext(AppContext);
 
   return (
     <div className="row justify-content-center">

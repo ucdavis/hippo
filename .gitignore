@@ -350,3 +350,5 @@ MigrationBackup/
 .ionide/
 
 /Hippo.Web/hippo.db*
+
+/.vscode/settings.json

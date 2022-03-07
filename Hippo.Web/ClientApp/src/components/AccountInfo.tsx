@@ -1,9 +1,7 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
 import AppContext from "../Shared/AppContext";
 
 export const AccountInfo = () => {
-  const [{ account }] = useContext(AppContext);
   const [context] = useContext(AppContext);
 
   return (
