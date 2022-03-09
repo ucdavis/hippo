@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { User } from "../types";
+import { User } from "../../types";
 
-import { authenticatedFetch } from "../util/api";
+import { authenticatedFetch } from "../../util/api";
 
 export const AdminUsers = () => {
   // get all accounts that need approval and list them

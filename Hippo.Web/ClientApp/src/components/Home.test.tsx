@@ -10,6 +10,7 @@ import {
   fakeAppContextNoAccount,
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
+import { act } from "react-dom/test-utils";
 
 afterEach(() => {
   // cleanup on exiting
@@ -38,12 +39,14 @@ describe("Basic render", () => {
 
   it("renders without crashing", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
@@ -74,23 +77,27 @@ describe("Home Redirect when Admin", () => {
   });
   it("renders without crashing", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it("Redirects to AdminUsers", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain("There are 2 users with admin access");
   });
@@ -114,23 +121,27 @@ describe("Home Redirect when Sponsor", () => {
   });
   it("renders without crashing", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it("Shows welcome message", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain(
       "Welcome Bob you already have an account, enjoy farm"
@@ -139,12 +150,14 @@ describe("Home Redirect when Sponsor", () => {
 
   it("Shows pending approvals button", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain("Pending Approvals");
   });
@@ -175,23 +188,27 @@ describe("Home Redirect no account", () => {
   });
   it("renders without crashing", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it("Shows welcome message", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).toContain("Welcome, Bob");
     expect(div.textContent).toContain(
@@ -201,12 +218,14 @@ describe("Home Redirect no account", () => {
 
   it("Does not shows pending approvals button", async () => {
     const div = document.createElement("div");
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
+    await act(async () => {
+      ReactDOM.render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+        div
+      );
+    });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(div.textContent).not.toContain("Pending Approvals");
   });

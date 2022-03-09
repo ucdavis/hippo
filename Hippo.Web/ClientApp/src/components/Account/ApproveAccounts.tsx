@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Account } from "../types";
-import { authenticatedFetch } from "../util/api";
-import { RejectRequest } from "../Shared/RejectRequest";
+import { Account } from "../../types";
+import { RejectRequest } from "../../Shared/RejectRequest";
+import { authenticatedFetch } from "../../util/api";
 
-export const AdminApproveAccounts = () => {
+export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
@@ -12,7 +12,7 @@ export const AdminApproveAccounts = () => {
 
   useEffect(() => {
     const fetchAccounts = async () => {
-      const response = await authenticatedFetch("/api/admin/pending");
+      const response = await authenticatedFetch("/api/account/pending");
 
       if (response.ok) {
         setAccounts(await response.json());
@@ -26,7 +26,7 @@ export const AdminApproveAccounts = () => {
     setAccountApproving(account.id);
 
     const response = await authenticatedFetch(
-      `/api/admin/approve/${account.id}`,
+      `/api/account/approve/${account.id}`,
       { method: "POST" }
     );
 
@@ -49,12 +49,11 @@ export const AdminApproveAccounts = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <p>There are {accounts.length} account(s) awaiting approval</p>
+          <p>There are {accounts.length} account(s) awaiting your approval</p>
           <table className="table">
             <thead>
               <tr>
-                <th>Requestor</th>
-                <th>Sponsor</th>
+                <th>Name</th>
                 <th>Submitted</th>
                 <th>Action</th>
               </tr>
@@ -63,9 +62,6 @@ export const AdminApproveAccounts = () => {
               {accounts.map((account) => (
                 <tr key={account.id}>
                   <td>{account.name}</td>
-                  <td>
-                    {account.sponsor?.name} ({account.sponsor?.owner?.email})
-                  </td>
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
                     <button
@@ -77,11 +73,13 @@ export const AdminApproveAccounts = () => {
                         ? "Approving..."
                         : "Approve"}
                     </button>{" "}
-                    <RejectRequest
-                      account={account}
-                      removeAccount={() => handleReject(account)}
-                      updateUrl={"/api/admin/reject/"}
-                    ></RejectRequest>
+                    {accountApproving !== account.id && (
+                      <RejectRequest
+                        account={account}
+                        removeAccount={() => handleReject(account)}
+                        updateUrl={"/api/Account/Reject/"}
+                      ></RejectRequest>
+                    )}
                   </td>
                 </tr>
               ))}

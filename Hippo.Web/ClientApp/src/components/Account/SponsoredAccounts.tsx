@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Account } from "../types";
-import { authenticatedFetch } from "../util/api";
+import { Account } from "../../types";
+import { authenticatedFetch } from "../../util/api";
 
 export const SponsoredAccounts = () => {
   const [accounts, setAccounts] = useState<Account[]>();

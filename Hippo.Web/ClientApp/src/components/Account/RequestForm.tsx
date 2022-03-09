@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory } from "react-router-dom";
 
-import AppContext from "../Shared/AppContext";
-import { Account, RequestPostModel } from "../types";
-import { authenticatedFetch } from "../util/api";
+import AppContext from "../../Shared/AppContext";
+import { Account, RequestPostModel } from "../../types";
+import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
 
 export const RequestForm = () => {
@@ -85,7 +85,10 @@ export const RequestForm = () => {
             }}
             options={sponsors.map(({ id, name }) => ({ id, name }))}
           />
-          <p className="form-helper">Help text</p>
+          <p className="form-helper">
+            Your sponsor is probably your PI or your Department. You can filter
+            this list by typing in it.
+          </p>
         </div>
         <div className="form-group">
           <label className="form-label">What is your Public SSH key</label>
@@ -108,6 +111,27 @@ export const RequestForm = () => {
         <button onClick={handleSubmit} className="btn btn-primary">
           Submit
         </button>
+        <div>
+          <br />
+          <br />
+          <p className="form-helper">
+            To generate a ssh key pair please see this link:{" "}
+            <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
+              https://hpc.ucdavis.edu/faq#ssh-key
+            </a>
+          </p>
+          <p className="form-helper">
+            You will find instructions here for Windows, OS X, and Linux
+            environments. Windows users: an openssh or SSH2 formatted ssh public
+            key is required. See screenshots.
+          </p>
+          <p className="form-helper">
+            (If your public key resides in the default location for OS X and
+            Linux, ~/.ssh/, right click in the Name column of the window that
+            will open when you click "Choose File" above. Select "Show Hidden
+            Files".)
+          </p>
+        </div>
       </div>
     </div>
   );
