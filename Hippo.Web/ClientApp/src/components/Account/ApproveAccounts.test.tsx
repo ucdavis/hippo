@@ -6,7 +6,7 @@ import { fakeAccounts, fakeAppContext } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 import { ApproveAccounts } from "./ApproveAccounts";
 
-import { act } from "react-dom/test-utils";
+import { act, Simulate } from "react-dom/test-utils";
 
 import AppContext from "../../Shared/AppContext";
 import { ModalProvider } from "react-modal-hook";
@@ -142,4 +142,29 @@ it("table header has expected text", async () => {
   expect(container.querySelector("tr")?.textContent).toBe(
     "NameSubmittedAction"
   );
+});
+
+//Enable this when the test works
+xit("displays dialog when reject is clicked", async () => {
+  await act(async () => {
+    render(
+      <AppContext.Provider value={(global as any).Hippo}>
+        <ModalProvider>
+          <MemoryRouter>
+            <ApproveAccounts />
+          </MemoryRouter>
+        </ModalProvider>
+      </AppContext.Provider>,
+      container
+    );
+  });
+  console.log(container.innerHTML);
+  const rejectButton = container.querySelector(
+    "button.btn.btn-danger"
+  ) as HTMLButtonElement;
+  expect(rejectButton).toBeTruthy();
+
+  Simulate.click(rejectButton);
+  console.log(container.innerHTML);
+  expect(container.querySelector("div.modal-dialog")).toBeTruthy();
 });
