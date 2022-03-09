@@ -19,6 +19,10 @@ beforeEach(() => {
     ok: true,
     json: () => Promise.resolve(fakeAccounts),
   });
+  const approveResponse = Promise.resolve({
+    status: 200,
+    ok: true,
+  });
 
   (global as any).Hippo = fakeAppContext;
   container = document.createElement("div");
@@ -27,6 +31,7 @@ beforeEach(() => {
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
       "/api/account/pending": accountResponse,
+      "api/account/approve/1": approveResponse,
     })
   );
 });
@@ -167,4 +172,35 @@ xit("displays dialog when reject is clicked", async () => {
   Simulate.click(rejectButton);
   console.log(container.innerHTML);
   expect(container.querySelector("div.modal-dialog")).toBeTruthy();
+});
+
+it("does something when approve is clicked", async () => {
+  await act(async () => {
+    render(
+      <AppContext.Provider value={(global as any).Hippo}>
+        <ModalProvider>
+          <MemoryRouter>
+            <ApproveAccounts />
+          </MemoryRouter>
+        </ModalProvider>
+      </AppContext.Provider>,
+      container
+    );
+  });
+  expect(container.textContent).toContain(
+    "There are 2 account(s) awaiting your approval"
+  );
+  //console.log(container.innerHTML);
+  const approveButton = container.querySelector(
+    "button.btn.btn-primary"
+  ) as HTMLButtonElement;
+  expect(approveButton).toBeTruthy();
+  await act(async () => {
+    Simulate.click(approveButton);
+  });
+  //console.log(container.innerHTML);
+  expect(container.textContent).toContain(
+    "There are 1 account(s) awaiting your approval"
+  );
+  //How do I validate the the approve API was called just once? Do I care as I can see that the page got updated?
 });
