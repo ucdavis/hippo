@@ -174,7 +174,7 @@ xit("displays dialog when reject is clicked", async () => {
   expect(container.querySelector("div.modal-dialog")).toBeTruthy();
 });
 
-it("does something when approve is clicked", async () => {
+it("calls approve and filters list when approve is clicked", async () => {
   await act(async () => {
     render(
       <AppContext.Provider value={(global as any).Hippo}>
@@ -202,5 +202,23 @@ it("does something when approve is clicked", async () => {
   expect(container.textContent).toContain(
     "There are 1 account(s) awaiting your approval"
   );
-  //How do I validate the the approve API was called just once? Do I care as I can see that the page got updated?
+
+  expect(global.fetch).toHaveBeenCalledTimes(2);
+  expect(global.fetch).toHaveBeenCalledWith("/api/account/pending", {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      RequestVerificationToken: "fakeAntiForgeryToken",
+    },
+  });
+  expect(global.fetch).toHaveBeenLastCalledWith("/api/account/approve/1", {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      RequestVerificationToken: "fakeAntiForgeryToken",
+    },
+    method: "POST",
+  });
 });
