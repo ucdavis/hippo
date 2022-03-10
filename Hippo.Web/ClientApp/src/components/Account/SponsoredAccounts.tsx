@@ -18,7 +18,11 @@ export const SponsoredAccounts = () => {
   }, []);
 
   if (accounts === undefined) {
-    return <div>Loading...</div>;
+    return (
+      <div className="row justify-content-center">
+        <div className="col-md-6">Loading...</div>
+      </div>
+    );
   } else {
     return (
       <div className="row justify-content-center">

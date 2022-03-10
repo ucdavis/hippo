@@ -105,7 +105,12 @@ const App = () => {
       </AppContext.Provider>
     );
   } else {
-    return <div>Loading...</div>;
+    //center div
+    return (
+      <div className="row justify-content-center">
+        <div className="col-md-6">Loading...</div>
+      </div>
+    );
   }
 };
 
