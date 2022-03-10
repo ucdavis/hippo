@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Hippo.Core.Services
 {
@@ -15,6 +16,7 @@ namespace Hippo.Core.Services
     {
         Task<User> GetUser(Claim[] userClaims);
         Task<User> GetCurrentUser();
+        Task<string> GetCurrentUserJsonAsync();
     }
 
     public class UserService : IUserService
@@ -43,6 +45,11 @@ namespace Hippo.Core.Services
             return await GetUser(userClaims);
         }
 
+        public async Task<string> GetCurrentUserJsonAsync()
+        {
+            var user = await GetCurrentUser();
+            return JsonSerializer.Serialize(user, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
         // Get any user based on their claims, creating if necessary
         public async Task<User> GetUser(Claim[] userClaims)
         {

@@ -9,7 +9,6 @@ namespace Hippo.Web.Extensions
     {
 
         public const string IamIdClaimType = "ucdPersonIAMID";
-        public const string HippoAdminClaimType = "hippoAdmin";
 
         public static string? GetNameClaim(this ClaimsPrincipal claimsPrincipal)
         {
@@ -27,7 +26,6 @@ namespace Hippo.Web.Extensions
             var iam = claimsPrincipal.Claims.SingleOrDefault(a => a.Type == IamIdClaimType);
             //Need this when I was testing my own login. was blank if I just used the first value
             var first = claimsPrincipal.Claims.FirstOrDefault(a => a.Type == ClaimTypes.GivenName && !string.IsNullOrWhiteSpace(a.Value));
-            var isAdmin = claimsPrincipal.FindFirstValue(HippoAdminClaimType);
             return new User
             {
                 FirstName = first != null ? first.Value : string.Empty,
@@ -35,7 +33,6 @@ namespace Hippo.Web.Extensions
                 Email = claimsPrincipal.FindFirstValue(ClaimTypes.Email),
                 Kerberos = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier), //???
                 Iam = iam?.Value,
-                IsAdmin = isAdmin != null && isAdmin == "True" ? true : false,
             };
         }
     }
