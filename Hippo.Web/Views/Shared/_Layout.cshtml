@@ -46,7 +46,7 @@
     <script>
         var Hippo = { user: {}};
 
-        Hippo.user.detail = @Html.Raw(Context.GetUserDetails());
+        Hippo.user.detail = @Html.Raw(await UserService.GetCurrentUserJsonAsync());
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";
     </script>
 

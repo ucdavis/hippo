@@ -24,7 +24,6 @@ namespace Hippo.Web
 {
     public class Startup
     {
-        public const string HippoAdminClaimType = "hippoAdmin";
         public const string IamIdClaimType = "ucdPersonIAMID";
 
         public Startup(IConfiguration configuration)
@@ -124,8 +123,7 @@ namespace Hippo.Web
 
                     // Ensure user exists in the db
                     var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                    var usr = await userService.GetUser(identity.Claims.ToArray());
-                    identity.AddClaim(new Claim(HippoAdminClaimType, usr.IsAdmin.ToString()));
+                    await userService.GetUser(identity.Claims.ToArray());
                 };
             });
 

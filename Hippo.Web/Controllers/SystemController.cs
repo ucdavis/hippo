@@ -19,7 +19,6 @@ namespace Hippo.Web.Controllers
         private readonly IIdentityService _identityService;
         private readonly IUserService _userService;
         public const string IamIdClaimType = "ucdPersonIAMID";
-        public const string HippoAdminClaimType = "hippoAdmin";
 
         public SystemController(AppDbContext dbContext, IIdentityService identityService, IUserService userService)
         {
@@ -69,7 +68,6 @@ namespace Hippo.Web.Controllers
                 new Claim("name", user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(IamIdClaimType, user.Iam),
-                new Claim(HippoAdminClaimType, user.IsAdmin.ToString()),
             }, CookieAuthenticationDefaults.AuthenticationScheme);
 
             // kill old login
