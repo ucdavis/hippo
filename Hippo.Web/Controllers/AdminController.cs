@@ -35,7 +35,7 @@ public class AdminController : SuperController
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        return Ok(await _dbContext.Users.Where(a => a.IsAdmin).AsNoTracking().ToListAsync());
+        return Ok(await _dbContext.Users.Where(a => a.IsAdmin).AsNoTracking().OrderBy(a => a.FirstName).ThenBy(a => a.LastName).ToListAsync());
     }
 
     [HttpPost]
@@ -96,7 +96,7 @@ public class AdminController : SuperController
     [HttpGet]
     public async Task<IActionResult> Sponsors()
     {
-        return Ok(await _dbContext.Accounts.Include(a => a.Owner).Where(a => a.CanSponsor).AsNoTracking().ToListAsync());
+        return Ok(await _dbContext.Accounts.Include(a => a.Owner).Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     [HttpPost]
@@ -174,7 +174,7 @@ public class AdminController : SuperController
     [HttpGet]
     public async Task<ActionResult> Pending()
     {
-        return Ok(await _dbContext.Accounts.Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().ToListAsync());
+        return Ok(await _dbContext.Accounts.Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     // Approve a given pending account 
@@ -190,8 +190,6 @@ public class AdminController : SuperController
         {
             return NotFound();
         }
-
-        Console.WriteLine($"Approving account {account.Owner.Iam} with ssh key {account.SshKey}");
 
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";

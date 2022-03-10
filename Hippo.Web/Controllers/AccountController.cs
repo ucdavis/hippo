@@ -39,7 +39,7 @@ public class AccountController : SuperController
     [HttpGet]
     public async Task<ActionResult> Sponsors()
     {
-        return Ok(await _dbContext.Accounts.Where(a => a.CanSponsor).AsNoTracking().ToListAsync());
+        return Ok(await _dbContext.Accounts.Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     // Return all accounts that are waiting for the current user to approve
@@ -47,8 +47,8 @@ public class AccountController : SuperController
     public async Task<ActionResult> Pending()
     {
         var currentUser = await _userService.GetCurrentUser();
-
-        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().ToListAsync());
+        //Make this one order by date? Or stay consistent and just by name?
+        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     [HttpGet]
@@ -56,7 +56,7 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().ToListAsync());
+        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     // Approve a given pending account if you are the sponsor
@@ -73,7 +73,6 @@ public class AccountController : SuperController
             return NotFound();
         }
 
-        Console.WriteLine($"Approving account {account.Owner.Iam} with ssh key {account.SshKey}");
 
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
@@ -83,8 +82,6 @@ public class AccountController : SuperController
 
         account.Status = Account.Statuses.Active;
 
-        // TODO: send notification
-        // TODO: save history of approval
         var success = await _notificationService.AccountDecision(account, true);
         if (!success)
         {
