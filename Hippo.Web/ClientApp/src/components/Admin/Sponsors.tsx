@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { Account, CreateSponsorPostModel } from "../types";
+import { Account, CreateSponsorPostModel } from "../../types";
 
-import { authenticatedFetch } from "../util/api";
+import { authenticatedFetch } from "../../util/api";
 
 export const Sponsors = () => {
   // get all accounts that need approval and list them

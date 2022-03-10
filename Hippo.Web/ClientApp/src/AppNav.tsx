@@ -30,6 +30,16 @@ export const AppNav = () => {
               >
                 Pending Approvals
               </NavLink>
+              <NavLink
+                id="sponsored"
+                to="/sponsored"
+                className="nav-item nav-link"
+                activeStyle={{
+                  fontWeight: "bold",
+                }}
+              >
+                Sponsored Accounts
+              </NavLink>
             </ShowFor>
             <ShowFor roles={["Admin"]}>
               <NavLink

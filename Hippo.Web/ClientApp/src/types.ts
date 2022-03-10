@@ -19,6 +19,7 @@ export interface Account {
   createdOn: string;
   owner?: User;
   sponsor?: Account;
+  updatedOn: string;
 }
 
 export interface RequestPostModel {

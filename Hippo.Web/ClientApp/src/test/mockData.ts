@@ -29,6 +29,7 @@ export const fakeAccounts: Account[] = [
     status: "Active",
     canSponsor: true,
     createdOn: "2020-01-01T00:00:00.000Z",
+    updatedOn: "2020-01-01T00:00:00.000Z",
   },
   {
     id: 2,
@@ -36,6 +37,7 @@ export const fakeAccounts: Account[] = [
     status: "Active",
     canSponsor: true,
     createdOn: "2020-01-01T00:00:00.000Z",
+    updatedOn: "2020-01-01T00:00:00.000Z",
   },
 ];
 
@@ -86,5 +88,6 @@ export const fakeAppContextNoAccount: AppContextShape = {
     status: "Create",
     canSponsor: false,
     createdOn: "2020-01-01T00:00:00.000Z",
+    updatedOn: "2020-01-01T00:00:00.000Z",
   },
 };
