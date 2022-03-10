@@ -113,17 +113,17 @@ export const Sponsors = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
                 <th>Account Name</th>
+                <th>Sponsor</th>
+                <th>Email</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id}>
+                  <td>{account.name}</td>
                   <td>{account.owner?.name}</td>
                   <td>{account.owner?.email}</td>
-                  <td>{account.name}</td>
                   <td>
                     <button
                       disabled={adminRemoving !== undefined}
