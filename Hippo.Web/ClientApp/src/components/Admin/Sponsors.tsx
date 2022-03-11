@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-
 import { Account, CreateSponsorPostModel } from "../../types";
-
 import { authenticatedFetch } from "../../util/api";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const Sponsors = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
-
+  const [notification, setNotification] = usePromiseNotification();
   const [accounts, setAccounts] = useState<Account[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
   const [request, setRequest] = useState<CreateSponsorPostModel>({
@@ -49,10 +48,14 @@ export const Sponsors = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await authenticatedFetch("/api/admin/createSponsor", {
+    const req = authenticatedFetch("/api/admin/createSponsor", {
       method: "POST",
       body: JSON.stringify(request),
     });
+
+    setNotification(req, "Saving", "Sponsor Added/Updated");
+
+    const response = await req;
 
     if (response.ok) {
       const newAccount = await response.json();
