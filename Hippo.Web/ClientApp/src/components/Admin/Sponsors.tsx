@@ -82,8 +82,7 @@ export const Sponsors = () => {
             updatedAccounts.sort((a, b) => a.name.localeCompare(b.name))
           );
 
-          setRequest((r) => ({ ...r, lookup: "" }));
-          setRequest((r) => ({ ...r, name: "" }));
+          setRequest(r=>({ ...r, lookup: "", name: ""}));
         }
         return message;
       },
@@ -98,7 +97,6 @@ export const Sponsors = () => {
           return "An error happened, please try again.";
         }
       }
-    );
   };
 
   if (accounts === undefined) {
