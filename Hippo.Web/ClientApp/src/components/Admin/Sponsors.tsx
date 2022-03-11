@@ -92,15 +92,6 @@ export const Sponsors = () => {
       //sort the list
       setAccounts(updatedAccounts.sort((a, b) => a.name.localeCompare(b.name)));
       setRequest((r) => ({ ...r, lookup: "", name: "" }));
-    } else {
-      if (response.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        console.error(errorText);
-        alert(errorText);
-      } else {
-        // const errorText = await response.text(); //This can contain exception info
-        alert("An error happened, please try again.");
-      }
     }
   };
 
