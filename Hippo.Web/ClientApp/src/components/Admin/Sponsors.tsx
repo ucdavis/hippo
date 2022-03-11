@@ -59,22 +59,19 @@ export const Sponsors = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
+      let updatedAccounts = [];
       //check if the newAccount is already in the list
       if (accounts?.find((a) => a.id === newAccount.id)) {
         //if it is, update the account
-        setAccounts((r) =>
-          r
-            ? r.map((a) => (a.id === newAccount.id ? newAccount : a))
-            : [newAccount]
-        );
+        updatedAccounts = accounts
+          ? accounts.map((a) => (a.id === newAccount.id ? newAccount : a))
+          : [newAccount];
       } else {
         //if it is not, add it to the list and sort it
-        setAccounts((r) => (r ? [...r, newAccount] : [newAccount]));
+        updatedAccounts = accounts ? [...accounts, newAccount] : [newAccount];
       }
       //sort the list
-      setAccounts((r) =>
-        r ? [...r].sort((a, b) => a.name.localeCompare(b.name)) : [newAccount]
-      );
+      setAccounts(updatedAccounts.sort((a, b) => a.name.localeCompare(b.name)));
 
       setRequest((r) => ({ ...r, lookup: "" }));
       setRequest((r) => ({ ...r, name: "" }));
