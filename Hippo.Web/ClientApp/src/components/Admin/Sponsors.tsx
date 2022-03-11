@@ -53,7 +53,26 @@ export const Sponsors = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Sponsor Added/Updated");
+    setNotification(
+      req,
+      "Saving",
+      (r) => {
+        // HTTP 201 is "created"
+        if (r.status === 201) {
+          return "Sponsor Created";
+        } else {
+          return "Sponsor Updated";
+        }
+      },
+      async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      }
+    );
 
     const response = await req;
 
