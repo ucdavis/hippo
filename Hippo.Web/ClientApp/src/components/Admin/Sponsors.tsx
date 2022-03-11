@@ -31,13 +31,13 @@ export const Sponsors = () => {
   const handleRemove = async (account: Account) => {
     setAdminRemoving(account.id);
 
-    const response = await authenticatedFetch(
-      `/api/admin/RemoveSponsor/${account.id}`,
-      {
-        method: "POST",
-      }
-    );
+    const req = authenticatedFetch(`/api/admin/RemoveSponsor/${account.id}`, {
+      method: "POST",
+    });
 
+    setNotification(req, "Removing", "Sponsor Removed");
+
+    const response = await req;
     if (response.ok) {
       setAdminRemoving(undefined);
 
