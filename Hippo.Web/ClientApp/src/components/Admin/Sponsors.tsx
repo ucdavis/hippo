@@ -72,9 +72,7 @@ export const Sponsors = () => {
       }
       //sort the list
       setAccounts(updatedAccounts.sort((a, b) => a.name.localeCompare(b.name)));
-
-      setRequest((r) => ({ ...r, lookup: "" }));
-      setRequest((r) => ({ ...r, name: "" }));
+      setRequest((r) => ({ ...r, lookup: "", name: "" }));
     } else {
       if (response.status === 400) {
         const errorText = await response.text(); //Bad Request Text
