@@ -53,38 +53,52 @@ export const Sponsors = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Sponsor Added/Updated");
+    setNotification(
+      req,
+      "Saving",
+      async () => {
+        const response = await req;
+        let message = "";
+        if (response.ok) {
+          const newAccount = await response.json();
+          let updatedAccounts = [];
 
-    const response = await req;
+          //check if the newAccount is already in the list
+          if (accounts?.find((a) => a.id === newAccount.id)) {
+            //if it is, update the account
+            updatedAccounts = accounts
+              ? accounts.map((a) => (a.id === newAccount.id ? newAccount : a))
+              : [newAccount];
+            message = "Sponsor Updated";
+          } else {
+            //if it is not, add it to the list and sort it
+            updatedAccounts = accounts
+              ? [...accounts, newAccount]
+              : [newAccount];
+            message = "Sponsor Added";
+          }
+          //sort the list
+          setAccounts(
+            updatedAccounts.sort((a, b) => a.name.localeCompare(b.name))
+          );
 
-    if (response.ok) {
-      const newAccount = await response.json();
-      let updatedAccounts = [];
-      //check if the newAccount is already in the list
-      if (accounts?.find((a) => a.id === newAccount.id)) {
-        //if it is, update the account
-        updatedAccounts = accounts
-          ? accounts.map((a) => (a.id === newAccount.id ? newAccount : a))
-          : [newAccount];
-      } else {
-        //if it is not, add it to the list and sort it
-        updatedAccounts = accounts ? [...accounts, newAccount] : [newAccount];
+          setRequest((r) => ({ ...r, lookup: "" }));
+          setRequest((r) => ({ ...r, name: "" }));
+        }
+        return message;
+      },
+      async () => {
+        const response = await req;
+        if (response.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          console.error(errorText);
+          return errorText;
+        } else {
+          // const errorText = await response.text(); //This can contain exception info
+          return "An error happened, please try again.";
+        }
       }
-      //sort the list
-      setAccounts(updatedAccounts.sort((a, b) => a.name.localeCompare(b.name)));
-
-      setRequest((r) => ({ ...r, lookup: "" }));
-      setRequest((r) => ({ ...r, name: "" }));
-    } else {
-      if (response.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        console.error(errorText);
-        alert(errorText);
-      } else {
-        // const errorText = await response.text(); //This can contain exception info
-        alert("An error happened, please try again.");
-      }
-    }
+    );
   };
 
   if (accounts === undefined) {
