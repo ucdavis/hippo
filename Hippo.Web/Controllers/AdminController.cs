@@ -122,6 +122,8 @@ public class AdminController : SuperController
             await _dbContext.Users.AddAsync(user);
         }
 
+        var isNewAccount = false;
+
         var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.OwnerId == user.Id);
         if(account != null)
         {
@@ -148,10 +150,12 @@ public class AdminController : SuperController
             };
             await _historyService.AddHistory(account, "CreatedSponsor");
             await _dbContext.Accounts.AddAsync(account);
+
+            isNewAccount = true;
         }
         await _dbContext.SaveChangesAsync();
-        return Ok(account);
 
+        return StatusCode(isNewAccount ? StatusCodes.Status201Created : StatusCodes.Status200OK, account);
     }
 
     [HttpPost]

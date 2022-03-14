@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-
 import { Account, CreateSponsorPostModel } from "../../types";
-
 import { authenticatedFetch } from "../../util/api";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const Sponsors = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
-
+  const [notification, setNotification] = usePromiseNotification();
   const [accounts, setAccounts] = useState<Account[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
   const [request, setRequest] = useState<CreateSponsorPostModel>({
@@ -32,13 +31,13 @@ export const Sponsors = () => {
   const handleRemove = async (account: Account) => {
     setAdminRemoving(account.id);
 
-    const response = await authenticatedFetch(
-      `/api/admin/RemoveSponsor/${account.id}`,
-      {
-        method: "POST",
-      }
-    );
+    const req = authenticatedFetch(`/api/admin/RemoveSponsor/${account.id}`, {
+      method: "POST",
+    });
 
+    setNotification(req, "Removing", "Sponsor Removed");
+
+    const response = await req;
     if (response.ok) {
       setAdminRemoving(undefined);
 
@@ -49,26 +48,50 @@ export const Sponsors = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await authenticatedFetch("/api/admin/createSponsor", {
+    const req = authenticatedFetch("/api/admin/createSponsor", {
       method: "POST",
       body: JSON.stringify(request),
     });
 
+    setNotification(
+      req,
+      "Saving",
+      (r) => {
+        // HTTP 201 is "created"
+        if (r.status === 201) {
+          return "Sponsor Created";
+        } else {
+          return "Sponsor Updated";
+        }
+      },
+      async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      }
+    );
+
+    const response = await req;
+
     if (response.ok) {
       const newAccount = await response.json();
-      //Add the user to the list
-      setAccounts((r) => (r ? [...r, newAccount] : [newAccount]));
-      setRequest((r) => ({ ...r, lookup: "" }));
-      setRequest((r) => ({ ...r, name: "" }));
-    } else {
-      if (response.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        console.error(errorText);
-        alert(errorText);
+      let updatedAccounts = [];
+      //check if the newAccount is already in the list
+      if (accounts?.find((a) => a.id === newAccount.id)) {
+        //if it is, update the account
+        updatedAccounts = accounts
+          ? accounts.map((a) => (a.id === newAccount.id ? newAccount : a))
+          : [newAccount];
       } else {
-        // const errorText = await response.text(); //This can contain exception info
-        alert("An error happened, please try again.");
+        //if it is not, add it to the list and sort it
+        updatedAccounts = accounts ? [...accounts, newAccount] : [newAccount];
       }
+      //sort the list
+      setAccounts(updatedAccounts.sort((a, b) => a.name.localeCompare(b.name)));
+      setRequest((r) => ({ ...r, lookup: "", name: "" }));
     }
   };
 
