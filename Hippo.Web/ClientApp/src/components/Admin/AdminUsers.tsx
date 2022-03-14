@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { User } from "../../types";
-
 import { authenticatedFetch } from "../../util/api";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const AdminUsers = () => {
   // get all accounts that need approval and list them
@@ -13,6 +12,7 @@ export const AdminUsers = () => {
   const [request, setRequest] = useState({
     id: "",
   });
+  const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     const fetchAdminUsers = async () => {
@@ -43,27 +43,25 @@ export const AdminUsers = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await authenticatedFetch(
-      `/api/admin/create/${request.id}`,
-      {
-        method: "POST",
+    const req = authenticatedFetch(`/api/admin/create/${request.id}`, {
+      method: "POST",
+    });
+
+    setNotification(req, "Saving", "Admin Added", async (r) => {
+      if (r.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        return errorText;
+      } else {
+        return "An error happened, please try again.";
       }
-    );
+    });
+    const response = await req;
 
     if (response.ok) {
       const newUser = await response.json();
       //Add the user to the list
       setUsers((r) => (r ? [...r, newUser] : [newUser]));
       setRequest((r) => ({ ...r, id: "" }));
-    } else {
-      if (response.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        console.error(errorText);
-        alert(errorText);
-      } else {
-        // const errorText = await response.text(); //This can contain exception info
-        alert("An error happened, please try again.");
-      }
     }
   };
 
