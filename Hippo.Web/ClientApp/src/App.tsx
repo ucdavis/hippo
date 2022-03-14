@@ -108,7 +108,7 @@ const App = () => {
     //center div
     return (
       <div className="row justify-content-center">
-        <div className="col-md-6">Loading...</div>
+        <div className="col-md-8">Loading...</div>
       </div>
     );
   }

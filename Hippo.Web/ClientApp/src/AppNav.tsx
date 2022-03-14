@@ -6,7 +6,7 @@ export const AppNav = () => {
   return (
     <div>
       <div className="row appheader justify-content-center">
-        <div className="col-md-6 hippo">
+        <div className="col-md-8 hippo">
           <HippoLogo />
 
           <h1>
@@ -17,7 +17,7 @@ export const AppNav = () => {
         </div>
       </div>
       <div className="row justify-content-center">
-        <div className="col-md-6">
+        <div className="col-md-8">
           <nav className="simple-nav">
             <ShowFor roles={["Sponsor"]}>
               <NavLink
