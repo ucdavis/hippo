@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Account } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { RejectRequest } from "../../Shared/RejectRequest";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const AdminApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -9,6 +10,7 @@ export const AdminApproveAccounts = () => {
 
   const [accounts, setAccounts] = useState<Account[]>();
   const [accountApproving, setAccountApproving] = useState<number>();
+  const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -25,10 +27,13 @@ export const AdminApproveAccounts = () => {
   const handleApprove = async (account: Account) => {
     setAccountApproving(account.id);
 
-    const response = await authenticatedFetch(
-      `/api/admin/approve/${account.id}`,
-      { method: "POST" }
-    );
+    const req = authenticatedFetch(`/api/admin/approve/${account.id}`, {
+      method: "POST",
+    });
+
+    setNotification(req, "Approving", "Account Approved");
+
+    var response = await req;
 
     if (response.ok) {
       setAccountApproving(undefined);
@@ -73,7 +78,7 @@ export const AdminApproveAccounts = () => {
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
                     <button
-                      disabled={accountApproving !== undefined}
+                      disabled={notification.pending}
                       onClick={() => handleApprove(account)}
                       className="btn btn-primary"
                     >
@@ -85,6 +90,7 @@ export const AdminApproveAccounts = () => {
                       account={account}
                       removeAccount={() => handleReject(account)}
                       updateUrl={"/api/admin/reject/"}
+                      disabled={notification.pending}
                     ></RejectRequest>
                   </td>
                 </tr>
