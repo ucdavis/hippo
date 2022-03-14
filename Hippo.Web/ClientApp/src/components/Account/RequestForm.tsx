@@ -111,7 +111,11 @@ export const RequestForm = () => {
             </code>
           </p>
         </div>
-        <button onClick={handleSubmit} className="btn btn-primary">
+        <button
+          disabled={notification.pending}
+          onClick={handleSubmit}
+          className="btn btn-primary"
+        >
           Submit
         </button>
         <div>
