@@ -58,7 +58,14 @@ export const RejectRequest = (props: Props) => {
       }
     );
 
-    setNotification(request, "Saving", "Request Rejection Saved");
+    setNotification(request, "Saving", "Request Rejection Saved", async (r) => {
+      if (r.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        return errorText;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
 
     const response = await request;
 
