@@ -352,3 +352,6 @@ MigrationBackup/
 /Hippo.Web/hippo.db*
 
 /.vscode/settings.json
+
+.DS_Store
+/Hippo.Web/.DS_Store
