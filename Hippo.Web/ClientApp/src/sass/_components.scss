@@ -26,6 +26,18 @@
   }
 }
 .btn-primary {
+  .table & {
+    font-size: 0.9rem;
+    color: $primary-color !important;
+    background-color: #fff;
+    box-shadow: none;
+    padding: 1% 2%;
+    &:hover {
+      transform: none;
+      color: $primary-color;
+      background-color: transparentize($primary-color, 0.9);
+    }
+  }
   &:hover {
     background-color: lighten($primary-color, 7);
     border-color: lighten($primary-color, 7);
@@ -89,6 +101,18 @@
     background-color: lighten($merlot, 7);
     border-color: lighten($merlot, 7);
     color: #fff;
+  }
+  .table & {
+    font-size: 0.9rem;
+    color: $merlot !important;
+    background-color: #fff;
+    box-shadow: none;
+    padding: 1% 2%;
+    &:hover {
+      transform: none;
+      color: $merlot;
+      background-color: transparentize($merlot, 0.9);
+    }
   }
 }
 .btn-sm {

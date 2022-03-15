@@ -48,9 +48,22 @@ header {
     border-bottom: 2px solid $primary-color;
     box-shadow: $box-shadow;
     transition: background-color 0.5s ease;
+    &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
     &:hover {
       color: $primary-font;
       background-color: transparentize($primary-color, 0.9);
+    }
+  }
+  a.active {
+    background-color: $primary-color;
+    color: #fff !important;
+    &:hover {
+      background-color: $primary-color;
     }
   }
 }

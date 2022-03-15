@@ -51,13 +51,13 @@ export const AdminApproveAccounts = () => {
   if (accounts === undefined) {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-6">Loading...</div>
+        <div className="col-md-8">Loading...</div>
       </div>
     );
   } else {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-6">
+        <div className="col-md-8">
           <p>There are {accounts.length} account(s) awaiting approval</p>
           <table className="table">
             <thead>

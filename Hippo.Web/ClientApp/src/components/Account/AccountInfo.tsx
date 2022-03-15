@@ -6,7 +6,7 @@ export const AccountInfo = () => {
 
   return (
     <div className="row justify-content-center">
-      <div className="col-md-6">
+      <div className="col-md-8">
         <p>
           Welcome {context.user.detail.firstName} you already have an account,
           enjoy farm

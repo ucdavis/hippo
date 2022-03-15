@@ -18,7 +18,7 @@
   fill: darken($primary-color, 6);
 }
 #piece1 {
-  animation: vertical-out 10s ease-in-out infinite;
+  animation: vertical-out 20s ease-in-out infinite;
 }
 // #piece2 {
 //   animation: slowburn 5s ease-in-out infinite;
@@ -27,19 +27,45 @@
   animation: ladder 20s ease-in-out infinite;
 }
 #piece4 {
-  animation: rotator 10s ease-in-out infinite;
+  animation: rotator 20s ease-in-out infinite;
   transform-origin: bottom right;
 }
 @keyframes vertical-out {
   0%,
-  25%,
-  55%,
+  5%,
+  20%,
   100% {
     transform: translate(0%);
     transform-origin: 50% 50%;
   }
-  50% {
+  7% {
     transform: translateY(20%);
+  }
+}
+@keyframes ladder {
+  0%,
+  25%,
+  38%,
+  100% {
+    transform: translate(0%, 0%);
+  }
+  27% {
+    transform: translateY(4%);
+  }
+  29% {
+    transform: translateY(4%);
+  }
+  31% {
+    transform: translateY(8%);
+  }
+  33% {
+    transform: translateY(8%);
+  }
+  35% {
+    transform: translateY(16%);
+  }
+  37% {
+    transform: translateY(16%);
   }
 }
 @keyframes slowburn {
@@ -56,41 +82,16 @@
 }
 @keyframes rotator {
   0%,
-  65%,
-  90%,
+  40%,
+  50%,
   100% {
     transform: translate(0%, 0%);
   }
-  70% {
+  42% {
     transform: rotate(356deg);
   }
 }
-@keyframes ladder {
-  0%,
-  19%,
-  53%,
-  100% {
-    transform: translate(0%, 0%);
-  }
-  20% {
-    transform: translateY(4%);
-  }
-  30% {
-    transform: translateY(4%);
-  }
-  31% {
-    transform: translateY(8%);
-  }
-  41% {
-    transform: translateY(8%);
-  }
-  42% {
-    transform: translateY(16%);
-  }
-  52% {
-    transform: translateY(16%);
-  }
-}
+
 @keyframes colormorph {
   0% {
     fill: $primary-color;
