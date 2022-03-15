@@ -131,7 +131,11 @@ export const Sponsors = () => {
             ></input>
           </div>
           <br />
-          <button className="btn btn-primary" onClick={handleSubmit}>
+          <button
+            disabled={notification.pending}
+            className="btn btn-primary"
+            onClick={handleSubmit}
+          >
             Add Sponsor
           </button>
           <hr />
@@ -153,7 +157,7 @@ export const Sponsors = () => {
                   <td>{account.owner?.email}</td>
                   <td>
                     <button
-                      disabled={adminRemoving !== undefined}
+                      disabled={notification.pending}
                       onClick={() => handleRemove(account)}
                       className="btn btn-primary"
                     >

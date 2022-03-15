@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Account } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -9,6 +10,7 @@ export const ApproveAccounts = () => {
 
   const [accounts, setAccounts] = useState<Account[]>();
   const [accountApproving, setAccountApproving] = useState<number>();
+  const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -25,11 +27,13 @@ export const ApproveAccounts = () => {
   const handleApprove = async (account: Account) => {
     setAccountApproving(account.id);
 
-    const response = await authenticatedFetch(
-      `/api/account/approve/${account.id}`,
-      { method: "POST" }
-    );
+    const req = authenticatedFetch(`/api/account/approve/${account.id}`, {
+      method: "POST",
+    });
 
+    setNotification(req, "Approving", "Account Approved");
+
+    const response = await req;
     if (response.ok) {
       setAccountApproving(undefined);
 
@@ -69,7 +73,7 @@ export const ApproveAccounts = () => {
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
                     <button
-                      disabled={accountApproving !== undefined}
+                      disabled={notification.pending}
                       onClick={() => handleApprove(account)}
                       className="btn btn-primary"
                     >
@@ -82,6 +86,7 @@ export const ApproveAccounts = () => {
                         account={account}
                         removeAccount={() => handleReject(account)}
                         updateUrl={"/api/Account/Reject/"}
+                        disabled={notification.pending}
                       ></RejectRequest>
                     )}
                   </td>

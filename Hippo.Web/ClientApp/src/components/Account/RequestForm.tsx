@@ -1,14 +1,15 @@
 import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory } from "react-router-dom";
-
 import AppContext from "../../Shared/AppContext";
 import { Account, RequestPostModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
+  const [notification, setNotification] = usePromiseNotification();
 
   const [sponsors, setSponsors] = useState<Account[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({
@@ -27,7 +28,6 @@ export const RequestForm = () => {
 
       if (response.ok) {
         setSponsors(sponsorResult);
-        setRequest((r) => ({ ...r, sponsorId: sponsorResult[0].id }));
       }
     };
 
@@ -35,24 +35,26 @@ export const RequestForm = () => {
   }, []);
 
   const handleSubmit = async () => {
-    const response = await authenticatedFetch("/api/account/create", {
+    const req = authenticatedFetch("/api/account/create", {
       method: "POST",
       body: JSON.stringify(request),
     });
+
+    setNotification(req, "Saving", "Request Created", async (r) => {
+      if (r.status === 400) {
+        const errorText = await response.text(); //Bad Request Text
+        return errorText;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
 
     if (response.ok) {
       const newAccount = await response.json();
       setContext((ctx) => ({ ...ctx, account: newAccount }));
       history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
-    } else {
-      if (response.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        console.error(errorText);
-        alert(errorText);
-      } else {
-        // const errorText = await response.text(); //This can contain exception info
-        alert("An error happened, please try again.");
-      }
     }
   };
 
@@ -73,6 +75,7 @@ export const RequestForm = () => {
           <Typeahead
             id="sponsorLookup"
             labelKey="name"
+            placeholder="Select a sponsor"
             onChange={(selected) => {
               if (selected.length > 0) {
                 setRequest((r) => ({
@@ -108,7 +111,11 @@ export const RequestForm = () => {
             </code>
           </p>
         </div>
-        <button onClick={handleSubmit} className="btn btn-primary">
+        <button
+          disabled={notification.pending}
+          onClick={handleSubmit}
+          className="btn btn-primary"
+        >
           Submit
         </button>
         <div>

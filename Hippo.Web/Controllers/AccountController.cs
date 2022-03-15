@@ -139,6 +139,11 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
+        if(model.SponsorId == 0)
+        {
+            return BadRequest("Please select a sponsor from the list.");
+        }
+
         // make sure current user doesn't already have another account
         if (await _dbContext.Accounts.AnyAsync(a => a.Owner.Iam == currentUser.Iam))
         {
@@ -147,7 +152,7 @@ public class AccountController : SuperController
 
         if (!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
-            return BadRequest("Bad Sponsor Id");
+            return BadRequest("Sponsor not found.");
         }
         if (string.IsNullOrWhiteSpace(model.SshKey))
         {
