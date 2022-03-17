@@ -6,7 +6,6 @@ export const hippoLogo = () => (
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <title>hippo-logo</title>
     <g id="Main" stroke="none" fill="none" fillRule="evenodd">
       <g id="light" transform="translate(-682.000000, -127.000000)">
         <g id="hippo-logo" transform="translate(682.000000, 127.000000)">
