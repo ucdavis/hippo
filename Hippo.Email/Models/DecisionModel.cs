@@ -24,7 +24,7 @@ namespace Hippo.Email.Models
 
         public class Colors
         {
-            public const string Approved = "#266041"; //Change to 481268 (Purple for approved?)
+            public const string Approved = "#481268";
             public const string Rejected = "#cf3c3c";
 
         }
