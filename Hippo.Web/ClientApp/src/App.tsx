@@ -4,7 +4,7 @@ import { Route, Switch, useLocation } from "react-router-dom";
 import { AppNav } from "./AppNav";
 import AppContext from "./Shared/AppContext";
 import { Account, AppContextShape } from "./types";
-import BottomSvg from "./Shared/bottomSvg";
+import TopSvg from "./Shared/topSvg";
 
 import { Home } from "./components/Home";
 import { AccountInfo } from "./components/Account/AccountInfo";
@@ -67,7 +67,7 @@ const App = () => {
           <div className={`account-status-${accountClassName}`}>
             <AppNav></AppNav>
             <div className="top-svg">
-              <BottomSvg />
+              <TopSvg />
             </div>
             <Switch>
               <Route exact path="/" component={Home} />

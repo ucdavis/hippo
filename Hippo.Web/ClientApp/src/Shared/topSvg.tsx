@@ -1,4 +1,4 @@
-export const BottomSvg = () => (
+export const TopSvg = () => (
   <svg
     width="1022px"
     height="81px"
@@ -158,4 +158,4 @@ export const BottomSvg = () => (
     </g>
   </svg>
 );
-export default BottomSvg;
+export default TopSvg;
