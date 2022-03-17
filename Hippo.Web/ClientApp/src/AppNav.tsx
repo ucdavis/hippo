@@ -50,7 +50,7 @@ export const AppNav = () => {
                   fontWeight: "bold",
                 }}
               >
-                Pending Accounts
+                Override Approvals
               </NavLink>
 
               <NavLink
