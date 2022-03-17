@@ -58,7 +58,10 @@ export const AdminApproveAccounts = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>There are {accounts.length} account(s) awaiting approval</p>
+          <p>
+            There are {accounts.length} account(s) awaiting sponsor approval.
+            You may override the sponsor and approve or reject them.
+          </p>
           <table className="table">
             <thead>
               <tr>
