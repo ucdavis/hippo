@@ -8,7 +8,7 @@ namespace Hippo.Email.Models
 {
     public class NewRequestModel
     {
-        public string UcdLogoUrl { get; set; } = "https://harvest.caes.ucdavis.edu/media/caes-logo-gray.png";
+        public string UcdLogoUrl { get; set; } = "https://hippo-test.azurewebsites.net/media/caes-logo-gray.png";
         public string SponsorName { get; set; } = String.Empty;
         public string RequesterName { get; set; } = String.Empty;
         public string ClusterName { get; set; } = "FARM/CAES";
