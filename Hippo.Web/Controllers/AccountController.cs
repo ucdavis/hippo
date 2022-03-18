@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Text;
 
 namespace Hippo.Web.Controllers;
 
@@ -163,12 +164,34 @@ public class AccountController : SuperController
             return BadRequest("Invalid SSH key");
         }
 
+        var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.OwnerId == model.SponsorId);
+
+
+        var sb = new StringBuilder();
+        sb.AppendLine("sponsor:");
+        sb.AppendLine($"    accountname: {sponsorAccount.Name}");
+        sb.AppendLine($"    name: {sponsorAccount.Owner.Name}");
+        sb.AppendLine($"    email: {sponsorAccount.Owner.Email}");
+        sb.AppendLine($"    kerb: {sponsorAccount.Owner.Kerberos}");
+        sb.AppendLine($"    iam: {sponsorAccount.Owner.Iam}");
+        sb.AppendLine($"    mothra: TODO"); //TODO
+        sb.AppendLine();
+        sb.AppendLine("Account:");
+        sb.AppendLine($"    name: {currentUser.Name}");
+        sb.AppendLine($"    email: {currentUser.Email}");
+        sb.AppendLine($"    kerb: {currentUser.Kerberos}");
+        sb.AppendLine($"    iam: {currentUser.Iam}");
+        sb.AppendLine($"    mothra: TODO"); //TODO
+        sb.AppendLine($"    key: {model.SshKey}");
+        
+
+
         var account = new Account()
         {
             CanSponsor = false, // TOOD: determine how new sponsors are created
             Owner = currentUser,
             SponsorId = model.SponsorId,
-            SshKey = model.SshKey,
+            SshKey = sb.ToString(),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             Status = Account.Statuses.PendingApproval,
