@@ -164,7 +164,7 @@ public class AccountController : SuperController
             return BadRequest("Invalid SSH key");
         }
 
-        var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.OwnerId == model.SponsorId);
+        var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.Id == model.SponsorId);
 
 
         var sb = new StringBuilder();
