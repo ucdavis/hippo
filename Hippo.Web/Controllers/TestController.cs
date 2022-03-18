@@ -48,7 +48,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission_mjml.cshtml", model);
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
 
             return Content(results);
         }

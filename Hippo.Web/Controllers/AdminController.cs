@@ -209,6 +209,12 @@ public class AdminController : SuperController
         {
             Log.Error("Error creating Account Decision email");
         }
+        
+        success = await _notificationService.AdminOverrideDecision(account, true, currentUser); //Notify sponsor
+        if (!success)
+        {
+            Log.Error("Error creating Admin Override Decision email");
+        }
 
         await _historyService.Approved(account);
 
@@ -244,6 +250,11 @@ public class AdminController : SuperController
         if (!success)
         {
             Log.Error("Error creating Account Decision email");
+        }
+        success = await _notificationService.AdminOverrideDecision(account, false, currentUser, reason: model.Reason); //Notify sponsor
+        if (!success)
+        {
+            Log.Error("Error creating Admin Override Decision email");
         }
 
         await _historyService.Rejected(account, model.Reason);
