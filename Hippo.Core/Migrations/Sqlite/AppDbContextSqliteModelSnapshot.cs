@@ -140,6 +140,10 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MothraId")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email");

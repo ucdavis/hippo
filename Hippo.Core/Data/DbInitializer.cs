@@ -24,49 +24,54 @@ namespace Hippo.Core.Data
                 //do what needs to be done?
             }
 
-            var JasonUser = await CheckAndCreateUser(new User
+            var JasonUser   = await CheckAndCreateUser(new User
             {
-                Email     = "jsylvestre@ucdavis.edu",
-                Kerberos  = "jsylvest",
-                FirstName = "Jason",
-                LastName  = "Sylvestre",
-                Iam       = "1000009309",
-                IsAdmin   = true,
+                Email       = "jsylvestre@ucdavis.edu",
+                Kerberos    = "jsylvest",
+                FirstName   = "Jason",
+                LastName    = "Sylvestre",
+                Iam         = "1000009309",
+                IsAdmin     = true,
+                MothraId    = "00600825",
             });
-            var ScottUser = await CheckAndCreateUser(new User
+            var ScottUser   = await CheckAndCreateUser(new User
             {
-                Email     = "srkirkland@ucdavis.edu",
-                Kerberos  = "postit",
-                FirstName = "Scott",
-                LastName  = "Kirkland",
-                Iam       = "1000029584",
+                Email       = "srkirkland@ucdavis.edu",
+                Kerberos    = "postit",
+                FirstName   = "Scott",
+                LastName    = "Kirkland",
+                Iam         = "1000029584",
+                MothraId    = "00183873",
             });
-            var JamesUser = await CheckAndCreateUser(new User
+            var JamesUser   = await CheckAndCreateUser(new User
             {
-                Email     = "jscubbage@ucdavis.edu",
-                Kerberos  = "jscub",
-                FirstName = "James",
-                LastName  = "Cubbage",
-                Iam       = "1000025056",
+                Email       = "jscubbage@ucdavis.edu",
+                Kerberos    = "jscub",
+                FirstName   = "James",
+                LastName    = "Cubbage",
+                Iam         = "1000025056",
+                MothraId    = "00047699",
             });
 
             var SlupskyUser = await CheckAndCreateUser(new User
             {
-                Email = "cslupsky@ucdavis.edu",
-                Kerberos = "cslupsky",
-                FirstName = "Carolyn",
-                LastName = "Slupsky",
-                Iam = "1000012183",
+                Email       = "cslupsky@ucdavis.edu",
+                Kerberos    = "cslupsky",
+                FirstName   = "Carolyn",
+                LastName    = "Slupsky",
+                Iam         = "1000012183",
+                MothraId    = "00598045",
             });
 
-            var OmenAdmin = await CheckAndCreateUser(new User
+            var OmenAdmin   = await CheckAndCreateUser(new User
             {
-                Email     = "omen@ucdavis.edu",
-                Kerberos  = "omen",
-                Iam       = "1000019756",
-                FirstName = "Omen",
-                LastName  = "Wild",
-                IsAdmin   = true,
+                Email       = "omen@ucdavis.edu",
+                Kerberos    = "omen",
+                Iam         = "1000019756",
+                FirstName   = "Omen",
+                LastName    = "Wild",
+                IsAdmin     = true,
+                MothraId    = "00457597",
             });
 
             for(int i = 1; i <= 5; i++)

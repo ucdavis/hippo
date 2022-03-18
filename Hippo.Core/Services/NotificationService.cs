@@ -19,6 +19,7 @@ namespace Hippo.Core.Services
     {
         Task<bool> AccountRequested(Account account);
         Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null);
+        Task<bool> AdminOverrideDecision(Account account, bool isApproved, User adminUser, string reason = null);
     }
 
     public class NotificationService : INotificationService
@@ -108,6 +109,44 @@ namespace Hippo.Core.Services
             catch (Exception ex)
             {
                 Log.Error("Error emailing Account Request", ex) ;
+                return false;
+            }
+        }
+
+        public async Task<bool> AdminOverrideDecision(Account account, bool isApproved, User adminUser, string reason = null)
+        {
+            try
+            {
+                account = await GetCompleteAccount(account);
+
+
+                //var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
+                var emailTo = account.Sponsor.Owner.Email;
+
+                var model = new DecisionModel()
+                {
+                    SponsorName = account.Sponsor.Owner.Name,
+                    RequesterName = account.Owner.Name,
+                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
+                    DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
+                    //RequestUrl = requestUrl,
+                    Decision = isApproved ? "Approved" : "Rejected",
+                    DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
+                    Reason = reason,
+                    AdminName = adminUser.Name,
+                    Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor."
+                };
+
+
+                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission.cshtml", model);
+
+                await _emailService.SendEmail(new[] { emailTo },ccEmails: new[] {adminUser.Email}, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Account Request", ex);
                 return false;
             }
         }
