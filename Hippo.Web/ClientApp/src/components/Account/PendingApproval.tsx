@@ -9,7 +9,8 @@ export const PendingApproval = () => {
       <div className="col-md-8">
         <p>
           Welcome {context.user.detail.firstName} your account is pending
-          approval. Please wait...
+          approval. Your sponsor has been emailed and your will be notified when
+          it has been acted on. Please check back later.
         </p>
       </div>
     </div>

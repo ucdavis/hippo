@@ -158,7 +158,7 @@ public class AccountController : SuperController
         {
             return BadRequest("Missing SSH Key");
         }
-        if (!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
+        if (!model.SshKey.StartsWith("ssh-rsa ") || model.SshKey.Trim().Length < 25)
         {
             return BadRequest("Invalid SSH key");
         }

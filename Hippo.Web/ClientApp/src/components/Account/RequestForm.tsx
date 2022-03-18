@@ -106,9 +106,7 @@ export const RequestForm = () => {
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:
             <br></br>
-            <code>
-              -----BEGIN RSA PRIVATE KEY-----ABC123-----END RSA PRIVATE KEY-----
-            </code>
+            <code>ssh-rsa some long line of characters</code>
           </p>
         </div>
         <button
