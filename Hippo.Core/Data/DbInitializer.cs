@@ -111,8 +111,22 @@ namespace Hippo.Core.Data
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.Active,
                     Cluster        = cluster,
+                    IsAdmin        = true,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
+
+                var owenAccount = new Account()
+                {
+                    CanSponsor = false,
+                    Owner = OmenAdmin,
+                    IsActive = true,
+                    Name = OmenAdmin.Name,
+                    SshKey = null,
+                    Status = Account.Statuses.Active,
+                    Cluster = cluster,
+                    IsAdmin = true,
+                };
+                await _dbContext.Accounts.AddAsync(owenAccount);
 
                 var slupskyAccount = new Account()
                 {
