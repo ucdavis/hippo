@@ -228,7 +228,7 @@ public class AdminController : SuperController
 
         await _historyService.AccountApproved(account);
 
-        await _historyService.AddHistory("Account override", "Decision: Approve", account);
+        await _historyService.AddHistory("Account override approve", $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name}", account);
 
 
         await _dbContext.SaveChangesAsync();
@@ -271,7 +271,7 @@ public class AdminController : SuperController
 
         await _historyService.AccountRejected(account, model.Reason);
 
-        await _historyService.AddHistory("Account override", $"Decision: Rejected Reason: {model.Reason}", account);
+        await _historyService.AddHistory("Account override rejected", $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name} Reason: {model.Reason}", account);
 
 
         await _dbContext.SaveChangesAsync();
