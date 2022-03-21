@@ -30,6 +30,7 @@ namespace Hippo.Core.Data
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<AccountHistory> AccountHistories { get; set; }
+        public virtual DbSet<History> Histories { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
