@@ -36,9 +36,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ClusterId1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
@@ -74,8 +71,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("CanSponsor");
 
                     b.HasIndex("ClusterId");
-
-                    b.HasIndex("ClusterId1");
 
                     b.HasIndex("CreatedOn");
 
@@ -245,14 +240,10 @@ namespace Hippo.Core.Migrations.SqlServer
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
-                        .WithMany()
-                        .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Hippo.Core.Domain.Cluster", null)
                         .WithMany("Accounts")
-                        .HasForeignKey("ClusterId1");
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")

@@ -79,7 +79,6 @@ namespace Hippo.Core.Domain
 
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
-            modelBuilder.Entity<Account>().HasOne(a => a.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
         }
 
         public class Statuses
