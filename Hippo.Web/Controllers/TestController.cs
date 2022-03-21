@@ -94,7 +94,7 @@ namespace Hippo.Web.Controllers
 
         public IActionResult TestScd()
         {
-            using var stream = _sshService.DownloadFile("jcstest.txt"); 
+            using var stream = _sshService.DownloadFile("xxxx.txt"); 
             
             return File(stream.ToArray(), "application/force-download");
         }
