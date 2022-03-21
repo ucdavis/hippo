@@ -91,7 +91,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Approved(account);
+        await _historyService.AccountApproved(account);
 
 
         await _dbContext.SaveChangesAsync();
@@ -128,7 +128,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Rejected(account, model.Reason);
+        await _historyService.AccountRejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();
@@ -179,7 +179,7 @@ public class AccountController : SuperController
             Status = Account.Statuses.PendingApproval,
         };
 
-        account = await _historyService.Requested(account);
+        account = await _historyService.AccountRequested(account);
 
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();

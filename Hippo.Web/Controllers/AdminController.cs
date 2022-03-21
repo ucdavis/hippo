@@ -135,9 +135,9 @@ public class AdminController : SuperController
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 account.Name = model.Name;
-                await _historyService.AddHistory(account, "NameUpdated");
+                await _historyService.AddAccountHistory(account, "NameUpdated");
             }
-            await _historyService.AddHistory(account, "MadeSponsor");
+            await _historyService.AddAccountHistory(account, "MadeSponsor");
         }
         else
         {
@@ -148,7 +148,7 @@ public class AdminController : SuperController
                 Owner = user,
                 CanSponsor = true,
             };
-            await _historyService.AddHistory(account, "CreatedSponsor");
+            await _historyService.AddAccountHistory(account, "CreatedSponsor");
             await _dbContext.Accounts.AddAsync(account);
 
             isNewAccount = true;
@@ -169,7 +169,7 @@ public class AdminController : SuperController
 
 
         account.CanSponsor = false;
-        await _historyService.AddHistory(account, "RemovedSponsor");
+        await _historyService.AddAccountHistory(account, "RemovedSponsor");
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -216,7 +216,7 @@ public class AdminController : SuperController
             Log.Error("Error creating Admin Override Decision email");
         }
 
-        await _historyService.Approved(account);
+        await _historyService.AccountApproved(account);
 
 
         await _dbContext.SaveChangesAsync();
@@ -257,7 +257,7 @@ public class AdminController : SuperController
             Log.Error("Error creating Admin Override Decision email");
         }
 
-        await _historyService.Rejected(account, model.Reason);
+        await _historyService.AccountRejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();

@@ -10,10 +10,10 @@ namespace Hippo.Core.Services
 {
     public interface IHistoryService
     {
-        Task<Account> AddHistory(Account account, string action, string note = null);
-        Task<Account> Requested(Account account);
-        Task<Account> Approved(Account account);
-        Task<Account> Rejected(Account account, string note = null);
+        Task<Account> AddAccountHistory(Account account, string action, string note = null);
+        Task<Account> AccountRequested(Account account);
+        Task<Account> AccountApproved(Account account);
+        Task<Account> AccountRejected(Account account, string note = null);
     }
 
     public class HistoryService : IHistoryService
@@ -24,7 +24,7 @@ namespace Hippo.Core.Services
             _userService = userService;
         }
 
-        public async Task<Account> AddHistory(Account account, string action, string note = null)
+        public async Task<Account> AddAccountHistory(Account account, string action, string note = null)
         {
             var currentUser = await _userService.GetCurrentUser();
             var history = new AccountHistory
@@ -42,19 +42,19 @@ namespace Hippo.Core.Services
             return account;
         }
 
-        public Task<Account> Requested(Account account)
+        public Task<Account> AccountRequested(Account account)
         {
-            return AddHistory(account, Actions.Requested);
+            return AddAccountHistory(account, Actions.Requested);
         }
 
-        public Task<Account> Approved(Account account)
+        public Task<Account> AccountApproved(Account account)
         {
-            return AddHistory(account, Actions.Approved);
+            return AddAccountHistory(account, Actions.Approved);
         }
 
-        public Task<Account> Rejected(Account account, string note = null)
+        public Task<Account> AccountRejected(Account account, string note = null)
         {
-            return AddHistory(account, Actions.Rejected, note);
+            return AddAccountHistory(account, Actions.Rejected, note);
         }
     }
 }
