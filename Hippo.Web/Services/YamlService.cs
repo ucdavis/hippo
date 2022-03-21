@@ -41,7 +41,7 @@ namespace Hippo.Web.Services
             sb.AppendLine($"    kerb: {currentUser.Kerberos}");
             sb.AppendLine($"    iam: {currentUser.Iam}");
             sb.AppendLine($"    mothra: {currentUser.MothraId}");
-            sb.AppendLine($"    key: {accountCreateModel.SshKey}");
+            sb.AppendLine($"    key: \"{accountCreateModel.SshKey}\"");
 
             return sb.ToString();
         }
