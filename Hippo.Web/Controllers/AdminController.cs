@@ -69,6 +69,9 @@ public class AdminController : SuperController
             user.IsAdmin = true;
             await _dbContext.Users.AddAsync(user);
         }
+
+        await _historyService.AddHistory("Admin role added", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}");
+
         await _dbContext.SaveChangesAsync();
         return Ok(user);
 
@@ -89,6 +92,9 @@ public class AdminController : SuperController
         }
 
         user.IsAdmin = false;
+
+        await _historyService.AddHistory("Admin role removed", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}");
+
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -153,6 +159,9 @@ public class AdminController : SuperController
 
             isNewAccount = true;
         }
+
+        await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount}", account);
+
         await _dbContext.SaveChangesAsync();
 
         return StatusCode(isNewAccount ? StatusCodes.Status201Created : StatusCodes.Status200OK, account);
@@ -170,6 +179,7 @@ public class AdminController : SuperController
 
         account.CanSponsor = false;
         await _historyService.AddAccountHistory(account, "RemovedSponsor");
+        await _historyService.AddHistory("Sponsor role removed", null, account);
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -218,6 +228,8 @@ public class AdminController : SuperController
 
         await _historyService.AccountApproved(account);
 
+        await _historyService.AddHistory("Account override", "Decision: Approve", account);
+
 
         await _dbContext.SaveChangesAsync();
 
@@ -258,6 +270,8 @@ public class AdminController : SuperController
         }
 
         await _historyService.AccountRejected(account, model.Reason);
+
+        await _historyService.AddHistory("Account override", $"Decision: Rejected Reason: {model.Reason}", account);
 
 
         await _dbContext.SaveChangesAsync();

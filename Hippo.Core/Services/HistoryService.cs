@@ -1,4 +1,5 @@
-﻿using Hippo.Core.Domain;
+﻿using Hippo.Core.Data;
+using Hippo.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,19 @@ namespace Hippo.Core.Services
         Task<Account> AccountRequested(Account account);
         Task<Account> AccountApproved(Account account);
         Task<Account> AccountRejected(Account account, string note = null);
+
+        Task AddHistory(string action, string details, Account account = null, bool adminAction = true);
     }
 
     public class HistoryService : IHistoryService
     {
         public IUserService _userService { get; }
-        public HistoryService(IUserService userService)
+        public AppDbContext _dbContext { get; }
+
+        public HistoryService(IUserService userService, AppDbContext dbContext)
         {
             _userService = userService;
+            _dbContext = dbContext;
         }
 
         public async Task<Account> AddAccountHistory(Account account, string action, string note = null)
@@ -55,6 +61,20 @@ namespace Hippo.Core.Services
         public Task<Account> AccountRejected(Account account, string note = null)
         {
             return AddAccountHistory(account, Actions.Rejected, note);
+        }
+
+        public async Task AddHistory(string action, string details, Account account = null, bool adminAction = true)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+
+            var history = new History { Action = action,
+                Details = details,
+                AdminAction = adminAction,
+                Account = account,
+                ActedBy = currentUser,
+            };
+
+            await _dbContext.Histories.AddAsync(history);
         }
     }
 }
