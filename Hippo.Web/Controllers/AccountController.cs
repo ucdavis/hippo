@@ -2,11 +2,11 @@ using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Services;
 using Hippo.Web.Models;
+using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System.Text;
 
 namespace Hippo.Web.Controllers;
 
@@ -18,14 +18,16 @@ public class AccountController : SuperController
     private ISshService _sshService;
     private INotificationService _notificationService;
     private IHistoryService _historyService;
+    private readonly IYamlService _yamlService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, IYamlService yamlService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _sshService = sshService;
         _notificationService = notificationService;
         _historyService = historyService;
+        _yamlService = yamlService;
     }
 
     // Return account info for the currently logged in user
@@ -136,7 +138,7 @@ public class AccountController : SuperController
 
 
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody] CreateModel model)
+    public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
 
@@ -164,34 +166,14 @@ public class AccountController : SuperController
             return BadRequest("Invalid SSH key");
         }
 
-        var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.Id == model.SponsorId);
-
-
-        var sb = new StringBuilder();
-        sb.AppendLine("sponsor:");
-        sb.AppendLine($"    accountname: {sponsorAccount.Name}");
-        sb.AppendLine($"    name: {sponsorAccount.Owner.Name}");
-        sb.AppendLine($"    email: {sponsorAccount.Owner.Email}");
-        sb.AppendLine($"    kerb: {sponsorAccount.Owner.Kerberos}");
-        sb.AppendLine($"    iam: {sponsorAccount.Owner.Iam}");
-        sb.AppendLine($"    mothra: {sponsorAccount.Owner.MothraId}"); 
-        sb.AppendLine();
-        sb.AppendLine("Account:");
-        sb.AppendLine($"    name: {currentUser.Name}");
-        sb.AppendLine($"    email: {currentUser.Email}");
-        sb.AppendLine($"    kerb: {currentUser.Kerberos}");
-        sb.AppendLine($"    iam: {currentUser.Iam}");
-        sb.AppendLine($"    mothra: {currentUser.MothraId}"); 
-        sb.AppendLine($"    key: {model.SshKey}");
-        
 
 
         var account = new Account()
         {
-            CanSponsor = false, // TOOD: determine how new sponsors are created
+            CanSponsor = false, 
             Owner = currentUser,
             SponsorId = model.SponsorId,
-            SshKey = sb.ToString(),
+            SshKey = await _yamlService.Get(currentUser, model),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             Status = Account.Statuses.PendingApproval,
@@ -211,11 +193,6 @@ public class AccountController : SuperController
         return Ok(account);
     }
 
-    public class CreateModel
-    {
-        public int SponsorId { get; set; }
-        public string SshKey { get; set; } = String.Empty;
-    }
 
 
 }
