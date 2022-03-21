@@ -74,21 +74,28 @@ namespace Hippo.Core.Data
                 MothraId    = "00457597",
             });
 
-            for(int i = 1; i <= 5; i++)
+            //for(int i = 1; i <= 5; i++)
+            //{
+            //    var user = new User { Email = $"fake{i}@ucdavis.edu",
+            //        FirstName = $"Fake{i}",
+            //        LastName = "Fake",
+            //        Kerberos = $"fake{i}",
+            //        Iam = $"100000000{i}",
+            //        IsAdmin = true,
+            //    };
+            //    await CheckAndCreateUser(user);
+            //}
+
+            var cluster     = new Cluster()
             {
-                var user = new User { Email = $"fake{i}@ucdavis.edu",
-                    FirstName = $"Fake{i}",
-                    LastName = "Fake",
-                    Kerberos = $"fake{i}",
-                    Iam = $"100000000{i}",
-                    IsAdmin = true,
-                };
-                await CheckAndCreateUser(user);
-            }
-
-
+                Name        = "Farm-CAES",
+                Description = "Farm CAES",
+            };
+            await CheckAndCreateCluster(cluster);
 
             await _dbContext.SaveChangesAsync();
+
+            cluster = await _dbContext.Clusters.FirstAsync();
 
             if (!(await _dbContext.Accounts.AnyAsync()))
             {
@@ -103,17 +110,19 @@ namespace Hippo.Core.Data
                     Name           = "Scott's Account",
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.Active,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
 
                 var slupskyAccount = new Account()
                 {
-                    CanSponsor = true,
-                    Owner = SlupskyUser,
-                    IsActive = true,
-                    Name = "Slupsky",
-                    SshKey = sampleSsh,
-                    Status = Account.Statuses.Active,
+                    CanSponsor     = true,
+                    Owner          = SlupskyUser,
+                    IsActive       = true,
+                    Name           = "Slupsky",
+                    SshKey         = sampleSsh,
+                    Status         = Account.Statuses.Active,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(slupskyAccount);
 
@@ -126,6 +135,7 @@ namespace Hippo.Core.Data
                     IsActive       = true,
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
 
@@ -138,6 +148,7 @@ namespace Hippo.Core.Data
                     IsActive       = true,
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);
             }
@@ -154,6 +165,15 @@ namespace Hippo.Core.Data
                 await _dbContext.Users.AddAsync(userToCreate);
             }
             return userToCreate;
+        }
+
+        private async Task CheckAndCreateCluster(Cluster cluster)
+        {
+            if(await _dbContext.Clusters.AnyAsync(a => a.Name == cluster.Name))
+            {
+                return;
+            }
+            await _dbContext.Clusters.AddAsync(cluster);
         }
     }
 }

@@ -33,8 +33,6 @@ namespace Hippo.Core.Domain
                 .WithMany(a => a.Accounts)
                 .HasForeignKey(a => a.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
         }
     }
 }
