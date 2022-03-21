@@ -117,6 +117,42 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.ToTable("AccountHistories");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ActedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ActedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Action")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("AdminAction")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ActedById");
+
+                    b.ToTable("Histories");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -200,6 +236,23 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Navigation("Account");
 
                     b.Navigation("Actor");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
+                    b.HasOne("Hippo.Core.Domain.User", "ActedBy")
+                        .WithMany()
+                        .HasForeignKey("ActedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("ActedBy");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
