@@ -26,5 +26,4 @@ it("renders without crashing", async () => {
       div
     );
   });
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 });

@@ -11,6 +11,7 @@ import { act, Simulate } from "react-dom/test-utils";
 import AppContext from "../../Shared/AppContext";
 import { ModalProvider } from "react-modal-hook";
 
+const testCluster = fakeAccounts[0].cluster;
 let container: Element;
 
 beforeEach(() => {
@@ -30,8 +31,8 @@ beforeEach(() => {
 
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
-      "/api/account/pending": accountResponse,
-      "api/account/approve/1": approveResponse,
+      [`/api/caesfarm/account/pending`]: accountResponse,
+      [`api/caesfarm/account/approve/1`]: approveResponse,
     })
   );
 });
@@ -51,7 +52,7 @@ it("shows pending approvals count", async () => {
     render(
       <AppContext.Provider value={(global as any).Hippo}>
         <ModalProvider>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={['/caesfarm/approve']}>
             <ApproveAccounts />
           </MemoryRouter>
         </ModalProvider>
@@ -204,7 +205,7 @@ it("calls approve and filters list when approve is clicked", async () => {
   );
 
   expect(global.fetch).toHaveBeenCalledTimes(2);
-  expect(global.fetch).toHaveBeenCalledWith("/api/account/pending", {
+  expect(global.fetch).toHaveBeenCalledWith(`/api/${testCluster}/account/pending`, {
     credentials: "include",
     headers: {
       Accept: "application/json",
@@ -212,7 +213,7 @@ it("calls approve and filters list when approve is clicked", async () => {
       RequestVerificationToken: "fakeAntiForgeryToken",
     },
   });
-  expect(global.fetch).toHaveBeenLastCalledWith("/api/account/approve/1", {
+  expect(global.fetch).toHaveBeenLastCalledWith(`/api/${testCluster}/account/approve/1`, {
     credentials: "include",
     headers: {
       Accept: "application/json",
