@@ -122,7 +122,7 @@ describe("Home Redirect no account", () => {
     });
     expect(div.textContent).toContain("Welcome, Bob");
     expect(div.textContent).toContain(
-      "You don't seem to have an account on Farm yet."
+      "You don't seem to have an account"
     );
   });
 

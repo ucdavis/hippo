@@ -72,7 +72,7 @@ export const RequestForm = () => {
           <span className="status-color">{context.user.detail.firstName}</span>
         </h3>
         <p>
-          You don't seem to have an account on Farm yet. If you'd like access,
+          You don't seem to have an account on the {cluster} cluster yet. If you'd like access,
           please answer the&nbsp;questions&nbsp;below
         </p>
         <hr />
