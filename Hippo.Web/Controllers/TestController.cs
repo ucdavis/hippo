@@ -48,7 +48,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission_mjml.cshtml", model);
+            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
 
             return Content(results);
         }
@@ -94,7 +94,7 @@ namespace Hippo.Web.Controllers
 
         public IActionResult TestScd()
         {
-            using var stream = _sshService.DownloadFile("jcstest.txt"); 
+            using var stream = _sshService.DownloadFile("xxxx.txt"); 
             
             return File(stream.ToArray(), "application/force-download");
         }

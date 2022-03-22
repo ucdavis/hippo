@@ -38,13 +38,16 @@ namespace Hippo.Core.Domain
         [StringLength(20)]
         public string Kerberos { get; set; }
 
+        [StringLength(20)] //It probably isn't this long....
+        public string MothraId { get;set;}
+
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
 
         [Display(Name = "Name")]
         public string Name => FirstName + " " + LastName;
 
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin { get; set; } //Potentially use this for a super admin?
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -33,10 +33,16 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<bool>("CanSponsor")
                         .HasColumnType("bit");
 
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -64,7 +70,11 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.HasIndex("CanSponsor");
 
+                    b.HasIndex("ClusterId");
+
                     b.HasIndex("CreatedOn");
+
+                    b.HasIndex("IsAdmin");
 
                     b.HasIndex("Name");
 
@@ -117,6 +127,65 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.ToTable("AccountHistories");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clusters");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ActedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ActedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Action")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("AdminAction")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ActedById");
+
+                    b.ToTable("Histories");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -151,6 +220,10 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("MothraId")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email");
@@ -166,6 +239,12 @@ namespace Hippo.Core.Migrations.SqlServer
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany("Accounts")
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
@@ -175,6 +254,8 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasOne("Hippo.Core.Domain.Account", "Sponsor")
                         .WithMany()
                         .HasForeignKey("SponsorId");
+
+                    b.Navigation("Cluster");
 
                     b.Navigation("Owner");
 
@@ -198,9 +279,31 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Navigation("Actor");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
+                    b.HasOne("Hippo.Core.Domain.User", "ActedBy")
+                        .WithMany()
+                        .HasForeignKey("ActedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("ActedBy");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
                     b.Navigation("Histories");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
+                {
+                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>

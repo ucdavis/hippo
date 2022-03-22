@@ -3,6 +3,7 @@ using System;
 using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hippo.Core.Migrations.Sqlite
 {
     [DbContext(typeof(AppDbContextSqlite))]
-    partial class AppDbContextSqliteModelSnapshot : ModelSnapshot
+    [Migration("20220318202641_mothra")]
+    partial class mothra
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
@@ -26,16 +28,10 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<bool>("CanSponsor")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ClusterId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -63,11 +59,7 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("CanSponsor");
 
-                    b.HasIndex("ClusterId");
-
                     b.HasIndex("CreatedOn");
-
-                    b.HasIndex("IsAdmin");
 
                     b.HasIndex("Name");
 
@@ -116,61 +108,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("ActorId");
 
                     b.ToTable("AccountHistories");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Clusters");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ActedById")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ActedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Action")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("AdminAction")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("ActedById");
-
-                    b.ToTable("Histories");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
@@ -223,12 +160,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
-                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
-                        .WithMany("Accounts")
-                        .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
@@ -238,8 +169,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.Account", "Sponsor")
                         .WithMany()
                         .HasForeignKey("SponsorId");
-
-                    b.Navigation("Cluster");
 
                     b.Navigation("Owner");
 
@@ -263,31 +192,9 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Actor");
                 });
 
-            modelBuilder.Entity("Hippo.Core.Domain.History", b =>
-                {
-                    b.HasOne("Hippo.Core.Domain.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId");
-
-                    b.HasOne("Hippo.Core.Domain.User", "ActedBy")
-                        .WithMany()
-                        .HasForeignKey("ActedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("ActedBy");
-                });
-
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
                     b.Navigation("Histories");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>

@@ -3,6 +3,7 @@ using System;
 using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hippo.Core.Migrations.Sqlite
 {
     [DbContext(typeof(AppDbContextSqlite))]
-    partial class AppDbContextSqliteModelSnapshot : ModelSnapshot
+    [Migration("20220321212509_cluster")]
+    partial class cluster
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
@@ -27,6 +29,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ClusterId1")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedOn")
@@ -64,6 +69,8 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("CanSponsor");
 
                     b.HasIndex("ClusterId");
+
+                    b.HasIndex("ClusterId1");
 
                     b.HasIndex("CreatedOn");
 
@@ -224,10 +231,14 @@ namespace Hippo.Core.Migrations.Sqlite
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
-                        .WithMany("Accounts")
+                        .WithMany()
                         .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Cluster", null)
+                        .WithMany("Accounts")
+                        .HasForeignKey("ClusterId1");
 
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")

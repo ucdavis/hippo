@@ -66,7 +66,7 @@ export const RequestForm = () => {
           <span className="status-color">{context.user.detail.firstName}</span>
         </h3>
         <p>
-          You don't seem to have an account on Farm yet. If you’d like access,
+          You don't seem to have an account on Farm yet. If you'd like access,
           please answer the&nbsp;questions&nbsp;below
         </p>
         <hr />
@@ -92,6 +92,13 @@ export const RequestForm = () => {
             Your sponsor is probably your PI or your Department. You can filter
             this list by typing in it.
           </p>
+          <p className="form-helper">
+            If you don't see your sponsor, you may contact IT help to request
+            they be added.{" "}
+            <a href="mailto: ithelp@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
+              Click here to contact IET Help
+            </a>
+          </p>
         </div>
         <div className="form-group">
           <label className="form-label">What is your Public SSH key</label>
@@ -106,9 +113,7 @@ export const RequestForm = () => {
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:
             <br></br>
-            <code>
-              -----BEGIN RSA PRIVATE KEY-----ABC123-----END RSA PRIVATE KEY-----
-            </code>
+            <code>ssh-rsa some long line of characters</code>
           </p>
         </div>
         <button

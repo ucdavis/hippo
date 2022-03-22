@@ -2,6 +2,7 @@ using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Services;
 using Hippo.Web.Models;
+using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +18,16 @@ public class AccountController : SuperController
     private ISshService _sshService;
     private INotificationService _notificationService;
     private IHistoryService _historyService;
+    private readonly IYamlService _yamlService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, IYamlService yamlService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _sshService = sshService;
         _notificationService = notificationService;
         _historyService = historyService;
+        _yamlService = yamlService;
     }
 
     // Return account info for the currently logged in user
@@ -88,7 +91,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Approved(account);
+        await _historyService.AccountApproved(account);
 
 
         await _dbContext.SaveChangesAsync();
@@ -125,7 +128,7 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.Rejected(account, model.Reason);
+        await _historyService.AccountRejected(account, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();
@@ -135,7 +138,7 @@ public class AccountController : SuperController
 
 
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody] CreateModel model)
+    public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
 
@@ -158,23 +161,25 @@ public class AccountController : SuperController
         {
             return BadRequest("Missing SSH Key");
         }
-        if (!model.SshKey.StartsWith("-----BEGIN RSA PRIVATE KEY-----") || !model.SshKey.EndsWith("-----END RSA PRIVATE KEY-----"))
+        if (!model.SshKey.StartsWith("ssh-") || model.SshKey.Trim().Length < 25)
         {
             return BadRequest("Invalid SSH key");
         }
 
+
+
         var account = new Account()
         {
-            CanSponsor = false, // TOOD: determine how new sponsors are created
+            CanSponsor = false, 
             Owner = currentUser,
             SponsorId = model.SponsorId,
-            SshKey = model.SshKey,
+            SshKey = await _yamlService.Get(currentUser, model),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             Status = Account.Statuses.PendingApproval,
         };
 
-        account = await _historyService.Requested(account);
+        account = await _historyService.AccountRequested(account);
 
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
@@ -188,11 +193,6 @@ public class AccountController : SuperController
         return Ok(account);
     }
 
-    public class CreateModel
-    {
-        public int SponsorId { get; set; }
-        public string SshKey { get; set; } = String.Empty;
-    }
 
 
 }

@@ -97,7 +97,8 @@ namespace Hippo.Web.Services
                 LastName = ucdKerbPerson.LastName,
                 Kerberos = ucdKerbPerson.UserId,
                 Email = email,
-                Iam = iamId
+                Iam = iamId,
+                MothraId = ucdKerbPerson.MothraId
             };
             return user;
         }

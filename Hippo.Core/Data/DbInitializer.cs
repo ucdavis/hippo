@@ -24,66 +24,78 @@ namespace Hippo.Core.Data
                 //do what needs to be done?
             }
 
-            var JasonUser = await CheckAndCreateUser(new User
+            var JasonUser   = await CheckAndCreateUser(new User
             {
-                Email     = "jsylvestre@ucdavis.edu",
-                Kerberos  = "jsylvest",
-                FirstName = "Jason",
-                LastName  = "Sylvestre",
-                Iam       = "1000009309",
-                IsAdmin   = true,
+                Email       = "jsylvestre@ucdavis.edu",
+                Kerberos    = "jsylvest",
+                FirstName   = "Jason",
+                LastName    = "Sylvestre",
+                Iam         = "1000009309",
+                IsAdmin     = true,
+                MothraId    = "00600825",
             });
-            var ScottUser = await CheckAndCreateUser(new User
+            var ScottUser   = await CheckAndCreateUser(new User
             {
-                Email     = "srkirkland@ucdavis.edu",
-                Kerberos  = "postit",
-                FirstName = "Scott",
-                LastName  = "Kirkland",
-                Iam       = "1000029584",
+                Email       = "srkirkland@ucdavis.edu",
+                Kerberos    = "postit",
+                FirstName   = "Scott",
+                LastName    = "Kirkland",
+                Iam         = "1000029584",
+                MothraId    = "00183873",
             });
-            var JamesUser = await CheckAndCreateUser(new User
+            var JamesUser   = await CheckAndCreateUser(new User
             {
-                Email     = "jscubbage@ucdavis.edu",
-                Kerberos  = "jscub",
-                FirstName = "James",
-                LastName  = "Cubbage",
-                Iam       = "1000025056",
+                Email       = "jscubbage@ucdavis.edu",
+                Kerberos    = "jscub",
+                FirstName   = "James",
+                LastName    = "Cubbage",
+                Iam         = "1000025056",
+                MothraId    = "00047699",
             });
 
             var SlupskyUser = await CheckAndCreateUser(new User
             {
-                Email = "cslupsky@ucdavis.edu",
-                Kerberos = "cslupsky",
-                FirstName = "Carolyn",
-                LastName = "Slupsky",
-                Iam = "1000012183",
+                Email       = "cslupsky@ucdavis.edu",
+                Kerberos    = "cslupsky",
+                FirstName   = "Carolyn",
+                LastName    = "Slupsky",
+                Iam         = "1000012183",
+                MothraId    = "00598045",
             });
 
-            var OmenAdmin = await CheckAndCreateUser(new User
+            var OmenAdmin   = await CheckAndCreateUser(new User
             {
-                Email     = "omen@ucdavis.edu",
-                Kerberos  = "omen",
-                Iam       = "1000019756",
-                FirstName = "Omen",
-                LastName  = "Wild",
-                IsAdmin   = true,
+                Email       = "omen@ucdavis.edu",
+                Kerberos    = "omen",
+                Iam         = "1000019756",
+                FirstName   = "Omen",
+                LastName    = "Wild",
+                IsAdmin     = true,
+                MothraId    = "00457597",
             });
 
-            for(int i = 1; i <= 5; i++)
+            //for(int i = 1; i <= 5; i++)
+            //{
+            //    var user = new User { Email = $"fake{i}@ucdavis.edu",
+            //        FirstName = $"Fake{i}",
+            //        LastName = "Fake",
+            //        Kerberos = $"fake{i}",
+            //        Iam = $"100000000{i}",
+            //        IsAdmin = true,
+            //    };
+            //    await CheckAndCreateUser(user);
+            //}
+
+            var cluster     = new Cluster()
             {
-                var user = new User { Email = $"fake{i}@ucdavis.edu",
-                    FirstName = $"Fake{i}",
-                    LastName = "Fake",
-                    Kerberos = $"fake{i}",
-                    Iam = $"100000000{i}",
-                    IsAdmin = true,
-                };
-                await CheckAndCreateUser(user);
-            }
-
-
+                Name        = "caesfarm",
+                Description = "CAES Farm Cluster",
+            };
+            await CheckAndCreateCluster(cluster);
 
             await _dbContext.SaveChangesAsync();
+
+            cluster = await _dbContext.Clusters.FirstAsync();
 
             if (!(await _dbContext.Accounts.AnyAsync()))
             {
@@ -98,17 +110,33 @@ namespace Hippo.Core.Data
                     Name           = "Scott's Account",
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.Active,
+                    Cluster        = cluster,
+                    IsAdmin        = true,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
 
+                var owenAccount = new Account()
+                {
+                    CanSponsor = false,
+                    Owner = OmenAdmin,
+                    IsActive = true,
+                    Name = OmenAdmin.Name,
+                    SshKey = null,
+                    Status = Account.Statuses.Active,
+                    Cluster = cluster,
+                    IsAdmin = true,
+                };
+                await _dbContext.Accounts.AddAsync(owenAccount);
+
                 var slupskyAccount = new Account()
                 {
-                    CanSponsor = true,
-                    Owner = SlupskyUser,
-                    IsActive = true,
-                    Name = "Slupsky",
-                    SshKey = sampleSsh,
-                    Status = Account.Statuses.Active,
+                    CanSponsor     = true,
+                    Owner          = SlupskyUser,
+                    IsActive       = true,
+                    Name           = "Slupsky",
+                    SshKey         = sampleSsh,
+                    Status         = Account.Statuses.Active,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(slupskyAccount);
 
@@ -121,6 +149,7 @@ namespace Hippo.Core.Data
                     IsActive       = true,
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
 
@@ -133,6 +162,7 @@ namespace Hippo.Core.Data
                     IsActive       = true,
                     SshKey         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
+                    Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);
             }
@@ -149,6 +179,15 @@ namespace Hippo.Core.Data
                 await _dbContext.Users.AddAsync(userToCreate);
             }
             return userToCreate;
+        }
+
+        private async Task CheckAndCreateCluster(Cluster cluster)
+        {
+            if(await _dbContext.Clusters.AnyAsync(a => a.Name == cluster.Name))
+            {
+                return;
+            }
+            await _dbContext.Clusters.AddAsync(cluster);
         }
     }
 }

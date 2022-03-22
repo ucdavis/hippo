@@ -69,6 +69,9 @@ public class AdminController : SuperController
             user.IsAdmin = true;
             await _dbContext.Users.AddAsync(user);
         }
+
+        await _historyService.AddHistory("Admin role added", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}");
+
         await _dbContext.SaveChangesAsync();
         return Ok(user);
 
@@ -89,6 +92,9 @@ public class AdminController : SuperController
         }
 
         user.IsAdmin = false;
+
+        await _historyService.AddHistory("Admin role removed", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}");
+
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -135,9 +141,9 @@ public class AdminController : SuperController
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 account.Name = model.Name;
-                await _historyService.AddHistory(account, "NameUpdated");
+                await _historyService.AddAccountHistory(account, "NameUpdated");
             }
-            await _historyService.AddHistory(account, "MadeSponsor");
+            await _historyService.AddAccountHistory(account, "MadeSponsor");
         }
         else
         {
@@ -148,11 +154,14 @@ public class AdminController : SuperController
                 Owner = user,
                 CanSponsor = true,
             };
-            await _historyService.AddHistory(account, "CreatedSponsor");
+            await _historyService.AddAccountHistory(account, "CreatedSponsor");
             await _dbContext.Accounts.AddAsync(account);
 
             isNewAccount = true;
         }
+
+        await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount}", account);
+
         await _dbContext.SaveChangesAsync();
 
         return StatusCode(isNewAccount ? StatusCodes.Status201Created : StatusCodes.Status200OK, account);
@@ -169,7 +178,8 @@ public class AdminController : SuperController
 
 
         account.CanSponsor = false;
-        await _historyService.AddHistory(account, "RemovedSponsor");
+        await _historyService.AddAccountHistory(account, "RemovedSponsor");
+        await _historyService.AddHistory("Sponsor role removed", null, account);
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -209,8 +219,16 @@ public class AdminController : SuperController
         {
             Log.Error("Error creating Account Decision email");
         }
+        
+        success = await _notificationService.AdminOverrideDecision(account, true, currentUser); //Notify sponsor
+        if (!success)
+        {
+            Log.Error("Error creating Admin Override Decision email");
+        }
 
-        await _historyService.Approved(account);
+        await _historyService.AccountApproved(account);
+
+        await _historyService.AddHistory("Account override approve", $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name}", account);
 
 
         await _dbContext.SaveChangesAsync();
@@ -245,8 +263,15 @@ public class AdminController : SuperController
         {
             Log.Error("Error creating Account Decision email");
         }
+        success = await _notificationService.AdminOverrideDecision(account, false, currentUser, reason: model.Reason); //Notify sponsor
+        if (!success)
+        {
+            Log.Error("Error creating Admin Override Decision email");
+        }
 
-        await _historyService.Rejected(account, model.Reason);
+        await _historyService.AccountRejected(account, model.Reason);
+
+        await _historyService.AddHistory("Account override rejected", $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name} Reason: {model.Reason}", account);
 
 
         await _dbContext.SaveChangesAsync();
