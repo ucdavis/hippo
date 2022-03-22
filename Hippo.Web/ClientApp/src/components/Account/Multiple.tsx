@@ -9,7 +9,7 @@ export const Multiple = () => {
     <div className="row justify-content-center">
       <div className="col-md-8">
         <p>
-          TODO TODO: You have multiple accounts, this will be implemented soon
+          TODO TODO: You have multiple accounts, this will be implemented soon.  For now, please use /caesfarm
         </p>
         <ul>
           {accounts.map((account) => (

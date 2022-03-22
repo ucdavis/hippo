@@ -1,8 +1,15 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useRouteMatch } from "react-router-dom";
 import HippoLogo from "./Shared/hippoLogo";
 import { ShowFor } from "./Shared/ShowFor";
 
+interface IRouteParams {
+  cluster: string;
+}
+
 export const AppNav = () => {
+  const match = useRouteMatch<IRouteParams>("/:cluster/:path");
+  const cluster = match?.params.cluster;
+
   return (
     <div>
       <div className="row appheader justify-content-center">
@@ -22,7 +29,7 @@ export const AppNav = () => {
             <ShowFor roles={["Sponsor"]}>
               <NavLink
                 id="sponsorApprove"
-                to="/approve"
+                to={`/${cluster}/approve`}
                 className="nav-item nav-link"
                 activeStyle={{
                   fontWeight: "bold",
@@ -32,7 +39,7 @@ export const AppNav = () => {
               </NavLink>
               <NavLink
                 id="sponsored"
-                to="/sponsored"
+                to={`/${cluster}/sponsored`}
                 className="nav-item nav-link"
                 activeStyle={{
                   fontWeight: "bold",
@@ -45,7 +52,7 @@ export const AppNav = () => {
               <NavLink
                 id="adminApprovals"
                 className="nav-item nav-link"
-                to="/admin/accountApprovals"
+                to={`/${cluster}/admin/accountApprovals`}
                 activeStyle={{
                   fontWeight: "bold",
                 }}
@@ -56,7 +63,7 @@ export const AppNav = () => {
               <NavLink
                 id="AdminIndex"
                 className="nav-item nav-link"
-                to="/admin/users"
+                to={`/${cluster}/admin/users`}
                 activeStyle={{
                   fontWeight: "bold",
                 }}
@@ -67,7 +74,7 @@ export const AppNav = () => {
               <NavLink
                 id="adminSponsors"
                 className="nav-item nav-link"
-                to="/admin/sponsors"
+                to={`/${cluster}/admin/sponsors`}
                 activeStyle={{
                   fontWeight: "bold",
                 }}
