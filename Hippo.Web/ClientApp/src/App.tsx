@@ -50,7 +50,7 @@ const App = () => {
               <Route path="/multiple" component={Multiple} />
               <ConditionalRoute
                 roles={["Sponsor"]}
-                path="/approve"
+                path="/:cluster/approve"
                 component={ApproveAccounts}
               />
               <ConditionalRoute

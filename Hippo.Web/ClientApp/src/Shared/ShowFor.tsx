@@ -7,9 +7,11 @@ import { isBoolean, isFunction } from "../util/TypeChecks";
 interface Props {
   children: any;
   roles: RoleName[];
+  cluster: string;
   condition?: boolean | (() => boolean);
 }
 
+// Determines if the user has access to the route based on roles and cluster
 export const ShowFor = (props: Props) => {
   const { children, roles } = props;
   const [context] = useContext(AppContext);

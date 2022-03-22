@@ -45,3 +45,7 @@ export interface PromiseStatus {
   pending: boolean;
   success: boolean;
 }
+
+export interface IRouteParams {
+  cluster: string;
+}
