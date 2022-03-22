@@ -32,17 +32,7 @@ export const fakeAccounts: Account[] = [
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
     isAdmin: false,
-  },
-  {
-    id: 2,
-    name: "Account 2",
-    status: "Active",
-    canSponsor: true,
-    cluster: "caesfarm",
-    createdOn: "2020-01-01T00:00:00.000Z",
-    updatedOn: "2020-01-01T00:00:00.000Z",
-    isAdmin: false,
-  },
+  }
 ];
 
 export const fakeAppContext: AppContextShape = {
