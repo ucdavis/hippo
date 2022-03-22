@@ -22,7 +22,7 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
   }
 
   if (props.roles.includes("Sponsor")) {
-    if (context.account.canSponsor) {
+    if (context.accounts[0].canSponsor) {
       return <Route {...props} />;
     }
   }

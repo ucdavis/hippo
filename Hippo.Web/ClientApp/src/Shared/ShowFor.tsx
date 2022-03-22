@@ -27,8 +27,9 @@ export const ShowFor = (props: Props) => {
     return <>{children}</>;
   }
 
+  // TODO: handle multiple accounts
   if (conditionSatisfied && roles.includes("Sponsor")) {
-    if (context.account.canSponsor) {
+    if (context.accounts[0].canSponsor) {
       return <>{children}</>;
     }
   }

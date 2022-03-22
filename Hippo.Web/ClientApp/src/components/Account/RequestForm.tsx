@@ -53,7 +53,7 @@ export const RequestForm = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
-      setContext((ctx) => ({ ...ctx, account: newAccount }));
+      setContext((ctx) => ({ ...ctx, accounts: [...ctx.accounts, newAccount] }));
       history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
     }
   };

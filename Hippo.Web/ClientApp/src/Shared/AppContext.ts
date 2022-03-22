@@ -7,7 +7,7 @@ const AppContext = React.createContext<
   {
     antiForgeryToken: "",
     user: { detail: {} as User },
-    account: {} as Account,
+    accounts: [] as Account[]
   },
   () => {},
 ]);

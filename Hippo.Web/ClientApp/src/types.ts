@@ -17,6 +17,7 @@ export interface Account {
   status: string;
   canSponsor: boolean;
   createdOn: string;
+  cluster: string;
   owner?: User;
   sponsor?: Account;
   updatedOn: string;
@@ -37,7 +38,7 @@ export interface AppContextShape {
   user: {
     detail: User;
   };
-  account: Account;
+  accounts: Account[];
 }
 
 export interface PromiseStatus {
