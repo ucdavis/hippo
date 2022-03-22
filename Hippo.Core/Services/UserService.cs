@@ -67,6 +67,7 @@ namespace Hippo.Core.Services
             var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail {
                 Id = a.Id,
                 Name = a.Name,
+                CanSponsor = a.CanSponsor,
                 Status = a.Status,
                 Owner = a.Owner.Name,
                 Cluster = a.Cluster.Name,

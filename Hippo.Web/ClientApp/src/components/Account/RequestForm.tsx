@@ -60,7 +60,7 @@ export const RequestForm = () => {
         ...ctx,
         accounts: [...ctx.accounts, newAccount],
       }));
-      history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
+      history.replace(`/${cluster}/pendingapproval`);
     }
   };
 
