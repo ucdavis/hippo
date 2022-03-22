@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { Account, RequestPostModel } from "../../types";
+import { Account, IRouteParams, RequestPostModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -18,11 +18,14 @@ export const RequestForm = () => {
   });
 
   const history = useHistory();
+  const { cluster } = useParams<IRouteParams>();
 
   // load up possible sponsors
   useEffect(() => {
     const fetchSponsors = async () => {
-      const response = await authenticatedFetch("/api/account/sponsors");
+      const response = await authenticatedFetch(
+        `/api/${cluster}/account/sponsors`
+      );
 
       const sponsorResult = await response.json();
 
@@ -32,10 +35,10 @@ export const RequestForm = () => {
     };
 
     fetchSponsors();
-  }, []);
+  }, [cluster]);
 
   const handleSubmit = async () => {
-    const req = authenticatedFetch("/api/account/create", {
+    const req = authenticatedFetch(`/api/${cluster}/account/create`, {
       method: "POST",
       body: JSON.stringify(request),
     });
@@ -53,7 +56,10 @@ export const RequestForm = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
-      setContext((ctx) => ({ ...ctx, accounts: [...ctx.accounts, newAccount] }));
+      setContext((ctx) => ({
+        ...ctx,
+        accounts: [...ctx.accounts, newAccount],
+      }));
       history.replace("/"); // could also push straight to pending, but home will redirect there immediately anyway
     }
   };

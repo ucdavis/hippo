@@ -32,60 +32,54 @@ const App = () => {
     [loc.pathname]
   );
 
-  if (context.accounts.length > 0) {
-    return (
-      <AppContext.Provider value={[context, setContext]}>
-        <ModalProvider>
-          <Toaster />
-          <div className={`account-status-${accountClassName}`}>
-            <AppNav></AppNav>
-            <div className="top-svg">
-              <BottomSvg />
-            </div>
-            <Switch>
-              <Route exact path="/" component={Home} />
-              <Route path="/:cluster/active" component={AccountInfo} />
-              <Route path="/:cluster/pendingapproval" component={PendingApproval} />
-              <Route path="/create" component={RequestForm} />
-              <Route path="/multiple" component={Multiple} />
-              <ConditionalRoute
-                roles={["Sponsor"]}
-                path="/:cluster/approve"
-                component={ApproveAccounts}
-              />
-              <ConditionalRoute
-                roles={["Sponsor"]}
-                path="/:cluster/sponsored"
-                component={SponsoredAccounts}
-              />
-              <ConditionalRoute
-                roles={["Admin"]}
-                path="/:cluster/admin/users"
-                component={AdminUsers}
-              />
-              <ConditionalRoute
-                roles={["Admin"]}
-                path="/:cluster/admin/sponsors"
-                component={Sponsors}
-              />
-              <ConditionalRoute
-                roles={["Admin"]}
-                path="/:cluster/admin/accountApprovals"
-                component={AdminApproveAccounts}
-              />
-            </Switch>
+  return (
+    <AppContext.Provider value={[context, setContext]}>
+      <ModalProvider>
+        <Toaster />
+        <div className={`account-status-${accountClassName}`}>
+          <AppNav></AppNav>
+          <div className="top-svg">
+            <BottomSvg />
           </div>
-        </ModalProvider>
-      </AppContext.Provider>
-    );
-  } else {
-    //center div
-    return (
-      <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
-      </div>
-    );
-  }
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route path="/:cluster/active" component={AccountInfo} />
+            <Route
+              path="/:cluster/pendingapproval"
+              component={PendingApproval}
+            />
+            <Route path="/:cluster/create" component={RequestForm} />
+            <Route path="/multiple" component={Multiple} />
+            <ConditionalRoute
+              roles={["Sponsor"]}
+              path="/:cluster/approve"
+              component={ApproveAccounts}
+            />
+            <ConditionalRoute
+              roles={["Sponsor"]}
+              path="/:cluster/sponsored"
+              component={SponsoredAccounts}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/:cluster/admin/users"
+              component={AdminUsers}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/:cluster/admin/sponsors"
+              component={Sponsors}
+            />
+            <ConditionalRoute
+              roles={["Admin"]}
+              path="/:cluster/admin/accountApprovals"
+              component={AdminApproveAccounts}
+            />
+          </Switch>
+        </div>
+      </ModalProvider>
+    </AppContext.Provider>
+  );
 };
 
 export default App;

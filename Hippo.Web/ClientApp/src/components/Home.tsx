@@ -8,7 +8,8 @@ export const Home = () => {
 
   if (accounts.length === 0) {
     // no accounts, show request form
-    return <Redirect to="/create" />;
+    // TODO: default to caesfarm, since it's the only one.  eventually build a dropdown or route through cluster selection
+    return <Redirect to="/caesfarm/create" />;
   } else if (accounts.length === 1) {
     // one account, show page depending on status
     return (
