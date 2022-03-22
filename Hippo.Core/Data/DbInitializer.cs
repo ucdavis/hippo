@@ -88,8 +88,8 @@ namespace Hippo.Core.Data
 
             var cluster     = new Cluster()
             {
-                Name        = "Farm-CAES",
-                Description = "Farm CAES",
+                Name        = "caesfarm",
+                Description = "CAES Farm Cluster",
             };
             await CheckAndCreateCluster(cluster);
 
