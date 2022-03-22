@@ -47,7 +47,7 @@ namespace Hippo.Core.Domain
         [Display(Name = "Name")]
         public string Name => FirstName + " " + LastName;
 
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin { get; set; } //Potentially use this for a super admin?
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {

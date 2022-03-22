@@ -16,6 +16,8 @@ namespace Hippo.Core.Domain
             IsActive = true;
             Status = Statuses.PendingApproval;
             Histories = new List<AccountHistory>();
+            CanSponsor = false;
+            IsAdmin = false;
         }
 
         [Key]
@@ -25,6 +27,7 @@ namespace Hippo.Core.Domain
         public DateTime UpdatedOn { get; set; }
 
         public bool CanSponsor { get; set; }
+        public bool IsAdmin { get; set; }
 
         /// <summary>
         /// Sponsor must resolve to a user (or at least an email?) 
@@ -50,6 +53,10 @@ namespace Hippo.Core.Domain
         public int? SponsorId { get; set; }
         public Account Sponsor { get; set; }
 
+        public int ClusterId { get;set;}
+        [Required]
+        public Cluster Cluster { get; set; }
+
         [JsonIgnore]
         public List<AccountHistory> Histories { get; set; }
 
@@ -62,6 +69,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
             modelBuilder.Entity<Account>().HasIndex(a => a.CanSponsor);
+            modelBuilder.Entity<Account>().HasIndex(a => a.IsAdmin);
 
             modelBuilder.Entity<AccountHistory>()
                 .HasOne(a => a.Account)
