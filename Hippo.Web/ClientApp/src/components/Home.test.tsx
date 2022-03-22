@@ -22,19 +22,7 @@ afterEach(() => {
 
 describe("Basic render", () => {
   beforeEach(() => {
-    const accountResponse = Promise.resolve({
-      status: 200,
-      ok: true,
-      json: () => Promise.resolve(fakeAccounts[0]),
-    });
-
     (global as any).Hippo = fakeAppContext;
-
-    global.fetch = jest.fn().mockImplementation((x) =>
-      responseMap(x, {
-        "/api/account/get": accountResponse,
-      })
-    );
   });
 
   it("renders without crashing", async () => {
@@ -54,12 +42,6 @@ describe("Basic render", () => {
 
 describe("Home Redirect when Admin", () => {
   beforeEach(() => {
-    const accountResponse = Promise.resolve({
-      status: 200,
-      ok: true,
-      json: () => Promise.resolve(fakeAccounts[0]),
-    });
-
     const adminUsersResponse = Promise.resolve({
       status: 200,
       ok: true,
@@ -70,8 +52,8 @@ describe("Home Redirect when Admin", () => {
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        "/api/account/get": accountResponse,
-        "/api/admin/index": adminUsersResponse,
+        [`/api/${fakeAdminAppContext.accounts[0].cluster}/admin/index`]:
+          adminUsersResponse,
       })
     );
   });
@@ -105,19 +87,7 @@ describe("Home Redirect when Admin", () => {
 
 describe("Home Redirect when Sponsor", () => {
   beforeEach(() => {
-    const accountResponse = Promise.resolve({
-      status: 200,
-      ok: true,
-      json: () => Promise.resolve(fakeAccounts[0]),
-    });
-
     (global as any).Hippo = fakeAppContext;
-
-    global.fetch = jest.fn().mockImplementation((x) =>
-      responseMap(x, {
-        "/api/account/get": accountResponse,
-      })
-    );
   });
   it("renders without crashing", async () => {
     const div = document.createElement("div");
@@ -165,12 +135,6 @@ describe("Home Redirect when Sponsor", () => {
 
 describe("Home Redirect no account", () => {
   beforeEach(() => {
-    const accountResponse = Promise.resolve({
-      status: 204, // no content
-      ok: true,
-      json: () => Promise.resolve(fakeAccounts[0]),
-    });
-
     const sponsorsResponse = Promise.resolve({
       status: 200,
       ok: true,
@@ -181,8 +145,7 @@ describe("Home Redirect no account", () => {
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        "/api/account/get": accountResponse,
-        "/api/account/sponsors": sponsorsResponse,
+        [`/api/${fakeAccounts[0].cluster}/account/sponsors`]: sponsorsResponse,
       })
     );
   });

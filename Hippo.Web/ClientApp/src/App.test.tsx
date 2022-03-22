@@ -1,25 +1,11 @@
-import React from "react";
 import ReactDOM from "react-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "./App";
-import { fakeAccounts, fakeAppContext } from "./test/mockData";
-import { responseMap } from "./test/testHelpers";
+import { fakeAppContext } from "./test/mockData";
 import { act } from "react-dom/test-utils";
 
 beforeEach(() => {
-  const accountResponse = Promise.resolve({
-    status: 200,
-    ok: true,
-    json: () => Promise.resolve(fakeAccounts[0]),
-  });
-
   (global as any).Hippo = fakeAppContext;
-
-  global.fetch = jest.fn().mockImplementation((x) =>
-    responseMap(x, {
-      "/api/account/get": accountResponse,
-    })
-  );
 });
 
 afterEach(() => {
