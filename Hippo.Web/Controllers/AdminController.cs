@@ -86,7 +86,7 @@ public class AdminController : SuperController
                 Owner = user,
                 IsAdmin = true,
                 IsActive = true,
-                Status = Account.Statuses.PendingApproval,
+                Status = Account.Statuses.Active,
                 ClusterId = (await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster)).Id
             };
 
