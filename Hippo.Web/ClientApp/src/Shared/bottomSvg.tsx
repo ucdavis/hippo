@@ -6,7 +6,6 @@ export const BottomSvg = () => (
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <title>topgeo</title>
     <g id="Main" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="light" transform="translate(-227.000000, -2.000000)">
         <g id="topgeo" transform="translate(227.304979, 2.000000)">
