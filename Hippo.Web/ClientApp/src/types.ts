@@ -21,6 +21,7 @@ export interface Account {
   owner?: User;
   sponsor?: Account;
   updatedOn: string;
+  isAdmin: boolean;
 }
 
 export interface RequestPostModel {

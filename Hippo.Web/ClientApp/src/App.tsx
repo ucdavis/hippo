@@ -55,22 +55,22 @@ const App = () => {
               />
               <ConditionalRoute
                 roles={["Sponsor"]}
-                path="/sponsored"
+                path="/:cluster/sponsored"
                 component={SponsoredAccounts}
               />
               <ConditionalRoute
                 roles={["Admin"]}
-                path="/admin/users"
+                path="/:cluster/admin/users"
                 component={AdminUsers}
               />
               <ConditionalRoute
                 roles={["Admin"]}
-                path="/admin/sponsors"
+                path="/:cluster/admin/sponsors"
                 component={Sponsors}
               />
               <ConditionalRoute
                 roles={["Admin"]}
-                path="/admin/accountApprovals"
+                path="/:cluster/admin/accountApprovals"
                 component={AdminApproveAccounts}
               />
             </Switch>
