@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Account, CreateSponsorPostModel } from "../../types";
+import { useParams } from "react-router-dom";
+import { Account, CreateSponsorPostModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 
@@ -13,10 +14,11 @@ export const Sponsors = () => {
     lookup: "",
     name: "",
   });
+  const { cluster } = useParams<IRouteParams>();
 
   useEffect(() => {
     const fetchSponsors = async () => {
-      const response = await authenticatedFetch("/api/admin/sponsors");
+      const response = await authenticatedFetch(`/api/${cluster}/admin/sponsors`);
 
       if (response.ok) {
         setAccounts(await response.json());
@@ -26,12 +28,12 @@ export const Sponsors = () => {
     };
 
     fetchSponsors();
-  }, []);
+  }, [cluster]);
 
   const handleRemove = async (account: Account) => {
     setAdminRemoving(account.id);
 
-    const req = authenticatedFetch(`/api/admin/RemoveSponsor/${account.id}`, {
+    const req = authenticatedFetch(`/api/${cluster}/admin/RemoveSponsor/${account.id}`, {
       method: "POST",
     });
 
@@ -48,7 +50,7 @@ export const Sponsors = () => {
   };
 
   const handleSubmit = async () => {
-    const req = authenticatedFetch("/api/admin/createSponsor", {
+    const req = authenticatedFetch(`/api/${cluster}/admin/createSponsor`, {
       method: "POST",
       body: JSON.stringify(request),
     });
