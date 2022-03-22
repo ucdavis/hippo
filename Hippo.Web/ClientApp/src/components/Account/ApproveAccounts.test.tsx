@@ -1,15 +1,15 @@
 import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route } from "react-router-dom";
 
 import { fakeAccounts, fakeAppContext } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
 import { act, Simulate } from "react-dom/test-utils";
 
-import AppContext from "../../Shared/AppContext";
-import { ModalProvider } from "react-modal-hook";
 import App from "../../App";
+import { ApproveAccounts } from "./ApproveAccounts";
+import { ModalProvider } from "react-modal-hook";
 
 const testCluster = fakeAccounts[0].cluster;
 const approveUrl = `/${testCluster}/approve`;
@@ -149,53 +149,57 @@ xit("displays dialog when reject is clicked", async () => {
   expect(container.querySelector("div.modal-dialog")).toBeTruthy();
 });
 
-// it("calls approve and filters list when approve is clicked", async () => {
-//   await act(async () => {
-//     render(
-//       <MemoryRouter initialEntries={[approveUrl]}>
-//         <App />
-//       </MemoryRouter>,
-//       container
-//     );
-//   });
-//   expect(container.textContent).toContain(
-//     "There are 2 account(s) awaiting your approval"
-//   );
-//   //console.log(container.innerHTML);
-//   const approveButton = container.querySelector(
-//     "button.btn.btn-primary"
-//   ) as HTMLButtonElement;
-//   expect(approveButton).toBeTruthy();
-//   await act(async () => {
-//     Simulate.click(approveButton);
-//   });
-//   //console.log(container.innerHTML);
-//   expect(container.textContent).toContain(
-//     "There are 1 account(s) awaiting your approval"
-//   );
+it("calls approve and filters list when approve is clicked", async () => {
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <ModalProvider>
+          <Route path={"/:cluster/approve"}>
+            <ApproveAccounts />
+          </Route>
+        </ModalProvider>
+      </MemoryRouter>,
+      container
+    );
+  });
+  expect(container.textContent).toContain(
+    "There are 2 account(s) awaiting your approval"
+  );
+  //console.log(container.innerHTML);
+  const approveButton = container.querySelector(
+    "button.btn.btn-primary"
+  ) as HTMLButtonElement;
+  expect(approveButton).toBeTruthy();
+  await act(async () => {
+    Simulate.click(approveButton);
+  });
+  //console.log(container.innerHTML);
+  expect(container.textContent).toContain(
+    "There are 1 account(s) awaiting your approval"
+  );
 
-//   expect(global.fetch).toHaveBeenCalledTimes(2);
-//   expect(global.fetch).toHaveBeenCalledWith(
-//     `/api/${testCluster}/account/pending`,
-//     {
-//       credentials: "include",
-//       headers: {
-//         Accept: "application/json",
-//         "Content-Type": "application/json",
-//         RequestVerificationToken: "fakeAntiForgeryToken",
-//       },
-//     }
-//   );
-//   expect(global.fetch).toHaveBeenLastCalledWith(
-//     `/api/${testCluster}/account/approve/1`,
-//     {
-//       credentials: "include",
-//       headers: {
-//         Accept: "application/json",
-//         "Content-Type": "application/json",
-//         RequestVerificationToken: "fakeAntiForgeryToken",
-//       },
-//       method: "POST",
-//     }
-//   );
-// });
+  expect(global.fetch).toHaveBeenCalledTimes(2);
+  expect(global.fetch).toHaveBeenCalledWith(
+    `/api/${testCluster}/account/pending`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        RequestVerificationToken: "fakeAntiForgeryToken",
+      },
+    }
+  );
+  expect(global.fetch).toHaveBeenLastCalledWith(
+    `/api/${testCluster}/account/approve/1`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        RequestVerificationToken: "fakeAntiForgeryToken",
+      },
+      method: "POST",
+    }
+  );
+});
