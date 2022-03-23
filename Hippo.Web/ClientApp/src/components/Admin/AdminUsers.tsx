@@ -32,7 +32,7 @@ export const AdminUsers = () => {
     setAdminRemoving(account.id);
 
     const req = authenticatedFetch(
-      `/api/${cluster}/admin/Remove/${account.id}`,
+      `/api/${cluster}/admin/Remove/${account.owner?.id}`,
       {
         method: "POST",
       }
@@ -135,9 +135,7 @@ export const AdminUsers = () => {
                       onClick={() => handleRemove(account)}
                       className="btn btn-primary"
                     >
-                      {adminRemoving === account.owner?.id
-                        ? "Removing..."
-                        : "Remove"}
+                      {adminRemoving === account.id ? "Removing..." : "Remove"}
                     </button>
                   </td>
                 </tr>
