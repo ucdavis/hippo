@@ -28,16 +28,20 @@ export const fakeAccounts: Account[] = [
     name: "Account 1",
     status: "Active",
     canSponsor: true,
+    cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
+    isAdmin: false,
   },
   {
     id: 2,
     name: "Account 2",
     status: "Active",
     canSponsor: true,
+    cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
+    isAdmin: false,
   },
 ];
 
@@ -48,7 +52,7 @@ export const fakeAppContext: AppContextShape = {
       ...fakeUser,
     },
   },
-  account: fakeAccounts[0],
+  accounts: [fakeAccounts[0]],
 };
 
 export const fakeAdminAppContext: AppContextShape = {
@@ -58,7 +62,7 @@ export const fakeAdminAppContext: AppContextShape = {
       ...fakeAdminUser,
     },
   },
-  account: fakeAccounts[0],
+  accounts: [fakeAccounts[0]],
 };
 
 export const fakeAdminUsers: User[] = [
@@ -82,12 +86,5 @@ export const fakeAppContextNoAccount: AppContextShape = {
       ...fakeUser,
     },
   },
-  account: {
-    id: 3,
-    name: "Account 3",
-    status: "Create",
-    canSponsor: false,
-    createdOn: "2020-01-01T00:00:00.000Z",
-    updatedOn: "2020-01-01T00:00:00.000Z",
-  },
+  accounts: [],
 };

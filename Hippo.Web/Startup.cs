@@ -245,10 +245,10 @@ namespace Hippo.Web
                     constraints: new { controller = "(home|test|system)" }
                 );
 
-                // API routes map to all other controllers
+                // API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(
                     name: "API",
-                    pattern: "/api/{controller=Account}/{action=Index}/{id?}");
+                    pattern: "/api/{cluster}/{controller=Account}/{action=Index}/{id?}");
 
                 // any other nonfile route should be handled by the spa, except leave the sockjs route alone if we are in dev mode (hot reloading)
                 if (env.IsDevelopment())
