@@ -11,5 +11,6 @@ namespace Hippo.Core.Models
         public string Owner { get; set; }
         public string Cluster { get; set; }
         public string Sponsor { get; set; }
+        public bool IsAdmin { get; set; }
     }
 }

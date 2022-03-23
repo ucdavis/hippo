@@ -71,7 +71,8 @@ namespace Hippo.Core.Services
                 Status = a.Status,
                 Owner = a.Owner.Name,
                 Cluster = a.Cluster.Name,
-                Sponsor = a.Sponsor.Name
+                Sponsor = a.Sponsor.Name,
+                IsAdmin = a.IsAdmin,
             }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
