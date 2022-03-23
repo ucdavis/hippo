@@ -167,13 +167,20 @@ public class AdminController : SuperController
             {
                 return BadRequest($"Existing Account for user is not in the Active status: {account.Status}");
             }
+            var saveCanSponsor = account.CanSponsor;
+            var saveName = account.Name;
             account.CanSponsor = true;
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 account.Name = model.Name;
                 await _historyService.AddAccountHistory(account, "NameUpdated");
+                await _historyService.AddHistory("Sponsor name updated", $"Old Name: {saveName} New Name: {account.Name}", account);
             }
-            await _historyService.AddAccountHistory(account, "MadeSponsor");
+            if (!saveCanSponsor) 
+            { 
+                await _historyService.AddAccountHistory(account, "MadeSponsor");
+                await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount}", account);
+            }
         }
         else
         {
@@ -191,9 +198,10 @@ public class AdminController : SuperController
             await _historyService.AddAccountHistory(account, "CreatedSponsor");
 
             isNewAccount = true;
+            await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount} Name Used: {account.Name}", account);
         }
 
-        await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount}", account);
+        
 
         await _dbContext.SaveChangesAsync();
 
