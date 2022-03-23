@@ -32,14 +32,15 @@ namespace Hippo.Core.Domain
         public int? AccountId { get; set; }
         public Account Account { get; set; }
 
-        //public int ClusterId { get; set; } //When we have a cluster identifier 
-        //public Cluster Cluster { get;set;}
+        public int ClusterId { get; set; } //When we have a cluster identifier 
+        public Cluster Cluster { get;set;}
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
 
             modelBuilder.Entity<History>().HasOne(a => a.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(a => a.Account).WithMany().HasForeignKey(a => a.AccountId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(a => a.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
 
         }
     }
