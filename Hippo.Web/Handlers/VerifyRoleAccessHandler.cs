@@ -29,7 +29,7 @@ namespace Hippo.Web.Handlers
                 return;
             }
 
-            var systemUsers = new[] { "jsylvest", "postit", "cydoval", "sweber" };
+            var systemUsers = new[] { "jsylvest", "postit", "cydoval", "sweber" }; //TODO: Change this to use the user.IsAdmin?
             if (systemUsers.Contains(kerbId))
             {
                 context.Succeed(requirement);
@@ -38,7 +38,12 @@ namespace Hippo.Web.Handlers
 
             if (requirement.RoleStrings.Contains(RoleCodes.AdminRole))
             {
-                if (await _dbContext.Users.AnyAsync(a => a.IsAdmin && a.Iam == userIamId))
+                var clusterName = _httpContext?.HttpContext?.GetRouteValue("cluster") as string;
+                if (string.IsNullOrWhiteSpace(clusterName))
+                {
+                    return;
+                }
+                if (await _dbContext.Accounts.AnyAsync(a => a.Cluster.Name == clusterName && a.IsAdmin && a.Owner.Iam == userIamId))
                 {
                     context.Succeed(requirement);
                     return;
