@@ -141,6 +141,8 @@ public class AdminController : SuperController
             return BadRequest("You must supply either an email or kerb id to lookup.");
         }
 
+        
+
         var userLookup = model.Lookup.Contains("@")
                     ? await _identityService.GetByEmail(model.Lookup)
                     : await _identityService.GetByKerberos(model.Lookup);
@@ -158,7 +160,7 @@ public class AdminController : SuperController
 
         var isNewAccount = false;
 
-        var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.OwnerId == user.Id);
+        var account = await _dbContext.Accounts.InCluster(Cluster).SingleOrDefaultAsync(a => a.OwnerId == user.Id);
         if (account != null)
         {
             if (account.Status != Statuses.Active)
@@ -175,15 +177,18 @@ public class AdminController : SuperController
         }
         else
         {
+            var cluster = await _dbContext.Clusters.SingleAsync(a => a.Name == Cluster);
             account = new Account
             {
                 Status = Statuses.Active,
                 Name = string.IsNullOrWhiteSpace(model.Name) ? user.Name : model.Name,
                 Owner = user,
                 CanSponsor = true,
+                Cluster = cluster,
             };
-            await _historyService.AddAccountHistory(account, "CreatedSponsor");
+            
             await _dbContext.Accounts.AddAsync(account);
+            await _historyService.AddAccountHistory(account, "CreatedSponsor");
 
             isNewAccount = true;
         }
