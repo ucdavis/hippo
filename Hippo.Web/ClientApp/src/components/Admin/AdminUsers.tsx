@@ -31,9 +31,12 @@ export const AdminUsers = () => {
   const handleRemove = async (account: Account) => {
     setAdminRemoving(account.id);
 
-    const req = authenticatedFetch(`/api/${cluster}/admin/Remove/${account.id}`, {
-      method: "POST",
-    });
+    const req = authenticatedFetch(
+      `/api/${cluster}/admin/Remove/${account.id}`,
+      {
+        method: "POST",
+      }
+    );
 
     setNotification(req, "Removing", "Admin Removed", async (r) => {
       if (r.status === 400) {
@@ -54,9 +57,12 @@ export const AdminUsers = () => {
   };
 
   const handleSubmit = async () => {
-    const req = authenticatedFetch(`/api/${cluster}/admin/create/${request.id}`, {
-      method: "POST",
-    });
+    const req = authenticatedFetch(
+      `/api/${cluster}/admin/create/${request.id}`,
+      {
+        method: "POST",
+      }
+    );
 
     setNotification(req, "Saving", "Admin Added", async (r) => {
       if (r.status === 400) {
@@ -129,7 +135,9 @@ export const AdminUsers = () => {
                       onClick={() => handleRemove(account)}
                       className="btn btn-primary"
                     >
-                      {adminRemoving === account.id ? "Removing..." : "Remove"}
+                      {adminRemoving === account.owner?.id
+                        ? "Removing..."
+                        : "Remove"}
                     </button>
                   </td>
                 </tr>
