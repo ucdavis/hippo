@@ -56,7 +56,7 @@ public class AdminController : SuperController
         }
 
         // try to find user account in the cluster
-        var clusterAccount = await _dbContext.Accounts.Include(a => a.Owner).InCluster(Cluster).Where(a => a.Owner.Iam == userLookup.Iam).SingleOrDefaultAsync();
+        var clusterAccount = await _dbContext.Accounts.Include(a => a.Owner).Include(a => a.Cluster).InCluster(Cluster).Where(a => a.Owner.Iam == userLookup.Iam).SingleOrDefaultAsync();
 
         if (clusterAccount != null)
         {
@@ -87,7 +87,7 @@ public class AdminController : SuperController
                 IsAdmin = true,
                 IsActive = true,
                 Status = Account.Statuses.Active,
-                ClusterId = (await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster)).Id
+                Cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster)
             };
 
             _dbContext.Accounts.Add(clusterAccount);
