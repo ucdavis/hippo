@@ -93,7 +93,7 @@ public class AdminController : SuperController
             _dbContext.Accounts.Add(clusterAccount);
         }
 
-        await _historyService.AddHistory("Admin role added", $"Kerb: {clusterAccount.Owner.Kerberos} IAM: {clusterAccount.Owner.Iam} Email: {clusterAccount.Owner.Email} Name: {clusterAccount.Owner.Name}");
+        await _historyService.AddHistory("Admin role added", $"Kerb: {clusterAccount.Owner.Kerberos} IAM: {clusterAccount.Owner.Iam} Email: {clusterAccount.Owner.Email} Name: {clusterAccount.Owner.Name}", clusterAccount);
 
         await _dbContext.SaveChangesAsync();
         return Ok(clusterAccount);
@@ -105,7 +105,7 @@ public class AdminController : SuperController
         // TODO: change from userID to account ID
 
         // try to find user account in the cluster
-        var clusterAccount = await _dbContext.Accounts.Include(a => a.Owner).InCluster(Cluster).Where(a => a.Owner.Id == id).SingleOrDefaultAsync();
+        var clusterAccount = await _dbContext.Accounts.Include(a => a.Owner).Include(a => a.Cluster).InCluster(Cluster).Where(a => a.Owner.Id == id).SingleOrDefaultAsync();
 
         if (clusterAccount == null)
         {
@@ -119,18 +119,18 @@ public class AdminController : SuperController
 
         clusterAccount.IsAdmin = false;
 
-        await _historyService.AddHistory("Admin role removed", $"Kerb: {clusterAccount.Owner.Kerberos} IAM: {clusterAccount.Owner.Iam} Email: {clusterAccount.Owner.Email} Name: {clusterAccount.Owner.Name}");
+        await _historyService.AddHistory("Admin role removed", $"Kerb: {clusterAccount.Owner.Kerberos} IAM: {clusterAccount.Owner.Iam} Email: {clusterAccount.Owner.Email} Name: {clusterAccount.Owner.Name}", clusterAccount);
 
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
 
-    // TODO: FROM HERE DOWN the methods need to be updated for the new cluster and account isAdmin feature
+ 
 
     [HttpGet]
     public async Task<IActionResult> Sponsors()
     {
-        return Ok(await _dbContext.Accounts.Include(a => a.Owner).Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
+        return Ok(await _dbContext.Accounts.Include(a => a.Owner).InCluster(Cluster).Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     [HttpPost]
@@ -160,7 +160,7 @@ public class AdminController : SuperController
 
         var isNewAccount = false;
 
-        var account = await _dbContext.Accounts.InCluster(Cluster).SingleOrDefaultAsync(a => a.OwnerId == user.Id);
+        var account = await _dbContext.Accounts.Include(a => a.Cluster).InCluster(Cluster).SingleOrDefaultAsync(a => a.OwnerId == user.Id);
         if (account != null)
         {
             if (account.Status != Statuses.Active)
@@ -203,7 +203,7 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> RemoveSponsor(int id)
     {
-        var account = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Id == id);
+        var account = await _dbContext.Accounts.Include(a => a.Cluster).InCluster(Cluster).SingleOrDefaultAsync(a => a.Id == id);
         if (account == null)
         {
             return NotFound();
@@ -217,11 +217,11 @@ public class AdminController : SuperController
         return Ok();
     }
 
-    // Return all accounts that are waiting for any sponsor to approve
+    // Return all accounts that are waiting for any sponsor to approve for cluster
     [HttpGet]
     public async Task<ActionResult> Pending()
     {
-        return Ok(await _dbContext.Accounts.Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
+        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
     }
 
     // Approve a given pending account 
@@ -230,7 +230,7 @@ public class AdminController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+        var account = await _dbContext.Accounts.Include(a => a.Owner).Include(a => a.Cluster).InCluster(Cluster).AsSingleQuery()
             .SingleOrDefaultAsync(a => a.Id == id && a.Status == Account.Statuses.PendingApproval);
 
         if (account == null)
@@ -238,10 +238,12 @@ public class AdminController : SuperController
             return NotFound();
         }
 
+        //TODO: Need to change this when we support multiple clusters
+
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
 
-        _sshService.PlaceFile(account.SshKey, tempFileName);
+        _sshService.PlaceFile(account.SshKey, tempFileName); 
         _sshService.RenameFile(tempFileName, fileName);
 
         account.Status = Account.Statuses.Active;
@@ -279,7 +281,7 @@ public class AdminController : SuperController
 
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+        var account = await _dbContext.Accounts.Include(a => a.Owner).Include(a => a.Cluster).InCluster(Cluster).AsSingleQuery()
             .SingleOrDefaultAsync(a => a.Id == id && a.Status == Account.Statuses.PendingApproval);
 
         if (account == null)
