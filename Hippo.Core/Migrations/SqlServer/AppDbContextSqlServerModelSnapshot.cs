@@ -174,6 +174,9 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<bool>("AdminAction")
                         .HasColumnType("bit");
 
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
 
@@ -182,6 +185,8 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("AccountId");
 
                     b.HasIndex("ActedById");
+
+                    b.HasIndex("ClusterId");
 
                     b.ToTable("Histories");
                 });
@@ -291,9 +296,17 @@ namespace Hippo.Core.Migrations.SqlServer
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
 
                     b.Navigation("ActedBy");
+
+                    b.Navigation("Cluster");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
