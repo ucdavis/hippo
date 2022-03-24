@@ -8,7 +8,7 @@ import { IRouteParams } from "./types";
 export const AppNav = () => {
   const [{ clusters }] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
-  const cluster = clusters.find(c => c.name === match?.params.cluster);
+  const cluster = clusters.find((c) => c.name === match?.params.cluster);
 
   return (
     <div>
@@ -21,7 +21,12 @@ export const AppNav = () => {
             HiPPO
           </h1>
           <p className="lede">High Performance Personnel Onboarding</p>
-          {cluster && <p>{cluster.description}</p>}
+          {cluster && (
+            <p>
+              <strong>{cluster.description}</strong> |{" "}
+              <NavLink to="/multiple">Change Cluster</NavLink>
+            </p>
+          )}
         </div>
       </div>
       {/* Only show links if a cluster has been identified */}

@@ -6,7 +6,7 @@ import AppContext from "./Shared/AppContext";
 import { AppContextShape } from "./types";
 import BottomSvg from "./Shared/bottomSvg";
 
-import { Home } from "./components/Home";
+import { ClusterHome, Home } from "./components/Home";
 import { AccountInfo } from "./components/Account/AccountInfo";
 import { RequestForm } from "./components/Account/RequestForm";
 import { PendingApproval } from "./components/Account/PendingApproval";
@@ -18,7 +18,7 @@ import { AdminApproveAccounts } from "./components/Admin/AdminApproveAccounts";
 import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
-import { Multiple } from "./components/Account/Multiple";
+import { Clusters } from "./components/Account/Clusters";
 
 declare var Hippo: AppContextShape;
 
@@ -43,13 +43,14 @@ const App = () => {
           </div>
           <Switch>
             <Route exact path="/" component={Home} />
+            <Route path="/clusters" component={Clusters} />
+            <Route exact path="/:cluster" component={ClusterHome} />
             <Route path="/:cluster/active" component={AccountInfo} />
             <Route
               path="/:cluster/pendingapproval"
               component={PendingApproval}
             />
-            <Route path="/:cluster/create" component={RequestForm} />
-            <Route path="/multiple" component={Multiple} />
+            <Route path="/:cluster/create" component={RequestForm} />            
             <ConditionalRoute
               roles={["Sponsor"]}
               path="/:cluster/approve"
