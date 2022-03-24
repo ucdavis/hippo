@@ -5,12 +5,18 @@ import { IRouteParams } from "../types";
 
 // redirect to the proper page depending on current account status
 export const Home = () => {
-  const [{ accounts }] = useContext(AppContext);
+  const [{ accounts, clusters }] = useContext(AppContext);
 
   if (accounts.length === 0) {
-    // no accounts, show request form
-    // default to caesfarm, since it's the only one.  eventually build a dropdown or route through cluster selection
-    return <Redirect to="/caesfarm/create" />;
+    // no accounts and no cluster selected
+
+    // since we only have one cluster for now, let's just redirect to it
+    if (clusters.length === 1) {
+      return <Redirect to={`/${clusters[0].name}/create`} />;
+    } else {
+      // if we ever get more than one, we need to start with the cluster selection
+      return <Redirect to="/clusters" />;
+    }
   } else if (accounts.length === 1) {
     // one account, show page depending on status
     return (
