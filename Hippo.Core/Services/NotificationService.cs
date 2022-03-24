@@ -51,7 +51,7 @@ namespace Hippo.Core.Services
                     sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
                 }
                 
-                var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
+                var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}"; //TODO: Only have button if approved?
                 var emailTo = account.Owner.Email;
 
                 var model = new DecisionModel()
@@ -90,7 +90,7 @@ namespace Hippo.Core.Services
             try 
             { 
                 account = await GetCompleteAccount(account);
-                var requestUrl = $"{_emailSettings.BaseUrl}/approve";
+                var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}/approve";
                 var emailTo = account.Sponsor.Owner.Email; 
 
                 var model = new NewRequestModel()
