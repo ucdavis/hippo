@@ -91,7 +91,13 @@ namespace Hippo.Core.Data
                 Name        = "caesfarm",
                 Description = "CAES Farm Cluster",
             };
+            var fakeCluster = new Cluster()
+            {
+                Name = "fakefarm",
+                Description = "Fake Farm Cluster",
+            };
             await CheckAndCreateCluster(cluster);
+            await CheckAndCreateCluster(fakeCluster);
 
             await _dbContext.SaveChangesAsync();
 

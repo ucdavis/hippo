@@ -64,6 +64,7 @@ namespace Hippo.Core.Services
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
+                    ClusterName = account.Cluster.Description,
                 };
 
                 if (!isApproved)
@@ -97,7 +98,8 @@ namespace Hippo.Core.Services
                     SponsorName = account.Sponsor.Owner.Name,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    RequestUrl = requestUrl, 
+                    RequestUrl = requestUrl,
+                    ClusterName = account.Cluster.Description,
                 };
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
@@ -134,7 +136,8 @@ namespace Hippo.Core.Services
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
                     AdminName = adminUser.Name,
-                    Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor."
+                    Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
+                    ClusterName = account.Cluster.Description,
                 };
 
 
@@ -153,9 +156,9 @@ namespace Hippo.Core.Services
 
         private async Task<Account> GetCompleteAccount(Account account)
         {
-            if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null)
+            if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null || account.Cluster == null)
             {
-                return await _dbContext.Accounts.AsNoTracking().AsSingleQuery().Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
+                return await _dbContext.Accounts.AsNoTracking().AsSingleQuery().Include(a => a.Cluster).Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
             }
             return account;
         }

@@ -1,4 +1,4 @@
-import { AppContextShape, User, Account } from "../types";
+import { AppContextShape, User, Account, Cluster } from "../types";
 
 const fakeUser: User = {
   id: 1,
@@ -45,6 +45,12 @@ export const fakeAccounts: Account[] = [
   },
 ];
 
+const fakeCluster: Cluster = {
+  id: 1,
+  name: "caesfarm",
+  description: "The farm cluster",
+};
+
 export const fakeAppContext: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",
   user: {
@@ -53,6 +59,7 @@ export const fakeAppContext: AppContextShape = {
     },
   },
   accounts: [fakeAccounts[0]],
+  clusters: [fakeCluster],
 };
 
 export const fakeAdminAppContext: AppContextShape = {
@@ -63,6 +70,7 @@ export const fakeAdminAppContext: AppContextShape = {
     },
   },
   accounts: [fakeAccounts[0]],
+  clusters: [fakeCluster],
 };
 
 export const fakeAdminUsers: User[] = [
@@ -87,4 +95,5 @@ export const fakeAppContextNoAccount: AppContextShape = {
     },
   },
   accounts: [],
+  clusters: [fakeCluster],
 };

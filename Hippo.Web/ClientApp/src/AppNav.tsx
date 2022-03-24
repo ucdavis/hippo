@@ -1,11 +1,14 @@
+import { useContext } from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
+import AppContext from "./Shared/AppContext";
 import HippoLogo from "./Shared/hippoLogo";
 import { ShowFor } from "./Shared/ShowFor";
 import { IRouteParams } from "./types";
 
 export const AppNav = () => {
+  const [{ clusters }] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
-  const cluster = match?.params.cluster;
+  const cluster = clusters.find((c) => c.name === match?.params.cluster);
 
   return (
     <div>
@@ -18,6 +21,12 @@ export const AppNav = () => {
             HiPPO
           </h1>
           <p className="lede">High Performance Personnel Onboarding</p>
+          {cluster && (
+            <p>
+              <strong>{cluster.description}</strong> |{" "}
+              <NavLink to="/multiple">Change Cluster</NavLink>
+            </p>
+          )}
         </div>
       </div>
       {/* Only show links if a cluster has been identified */}
@@ -25,10 +34,10 @@ export const AppNav = () => {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <nav className="simple-nav">
-              <ShowFor cluster={cluster} roles={["Sponsor"]}>
+              <ShowFor cluster={cluster.name} roles={["Sponsor"]}>
                 <NavLink
                   id="sponsorApprove"
-                  to={`/${cluster}/approve`}
+                  to={`/${cluster.name}/approve`}
                   className="nav-item nav-link"
                   activeStyle={{
                     fontWeight: "bold",
@@ -38,7 +47,7 @@ export const AppNav = () => {
                 </NavLink>
                 <NavLink
                   id="sponsored"
-                  to={`/${cluster}/sponsored`}
+                  to={`/${cluster.name}/sponsored`}
                   className="nav-item nav-link"
                   activeStyle={{
                     fontWeight: "bold",
@@ -47,11 +56,11 @@ export const AppNav = () => {
                   Sponsored Accounts
                 </NavLink>
               </ShowFor>
-              <ShowFor cluster={cluster} roles={["Admin"]}>
+              <ShowFor cluster={cluster.name} roles={["Admin"]}>
                 <NavLink
                   id="adminApprovals"
                   className="nav-item nav-link"
-                  to={`/${cluster}/admin/accountApprovals`}
+                  to={`/${cluster.name}/admin/accountApprovals`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
@@ -62,7 +71,7 @@ export const AppNav = () => {
                 <NavLink
                   id="AdminIndex"
                   className="nav-item nav-link"
-                  to={`/${cluster}/admin/users`}
+                  to={`/${cluster.name}/admin/users`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
@@ -73,7 +82,7 @@ export const AppNav = () => {
                 <NavLink
                   id="adminSponsors"
                   className="nav-item nav-link"
-                  to={`/${cluster}/admin/sponsors`}
+                  to={`/${cluster.name}/admin/sponsors`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}

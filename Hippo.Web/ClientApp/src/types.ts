@@ -24,6 +24,12 @@ export interface Account {
   isAdmin: boolean;
 }
 
+export interface Cluster {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface RequestPostModel {
   sponsorId: number;
   sshKey: string;
@@ -40,6 +46,7 @@ export interface AppContextShape {
     detail: User;
   };
   accounts: Account[];
+  clusters: Cluster[];
 }
 
 export interface PromiseStatus {
