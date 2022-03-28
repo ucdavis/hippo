@@ -120,6 +120,7 @@ export const Sponsors = () => {
               }
             ></input>
           </div>
+          <br />
           <div className="form-group">
             <label className="form-label">Override Account Name</label>
             <input

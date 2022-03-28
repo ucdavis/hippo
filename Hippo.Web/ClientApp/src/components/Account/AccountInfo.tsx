@@ -1,14 +1,17 @@
 import { useContext } from "react";
+import { useRouteMatch } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
+import { IRouteParams } from "../../types";
 
 export const AccountInfo = () => {
   const [context] = useContext(AppContext);
+  const match = useRouteMatch<IRouteParams>("/:cluster/:path");
 
   return (
     <div className="row justify-content-center">
-      <div className="col-md-8">
+      <div className="col-md-8 text-center">
         <p>
-          Welcome {context.user.detail.firstName} you already have an account.
+          Welcome {context.user.detail.firstName} you have an account on {match?.params.cluster}.
           Enjoy!
         </p>
         <p>
