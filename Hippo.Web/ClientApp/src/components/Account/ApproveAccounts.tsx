@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Account } from "../../types";
+import { Account, IRouteParams } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
+import { useParams } from "react-router-dom";
 
 export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -12,9 +13,11 @@ export const ApproveAccounts = () => {
   const [accountApproving, setAccountApproving] = useState<number>();
   const [notification, setNotification] = usePromiseNotification();
 
+  const { cluster } = useParams<IRouteParams>();
+
   useEffect(() => {
     const fetchAccounts = async () => {
-      const response = await authenticatedFetch("/api/account/pending");
+      const response = await authenticatedFetch(`/api/${cluster}/account/pending`);
 
       if (response.ok) {
         setAccounts(await response.json());
@@ -22,12 +25,12 @@ export const ApproveAccounts = () => {
     };
 
     fetchAccounts();
-  }, []);
+  }, [cluster]);
 
   const handleApprove = async (account: Account) => {
     setAccountApproving(account.id);
 
-    const req = authenticatedFetch(`/api/account/approve/${account.id}`, {
+    const req = authenticatedFetch(`/api/${cluster}/account/approve/${account.id}`, {
       method: "POST",
     });
 
@@ -85,7 +88,7 @@ export const ApproveAccounts = () => {
                       <RejectRequest
                         account={account}
                         removeAccount={() => handleReject(account)}
-                        updateUrl={"/api/Account/Reject/"}
+                        updateUrl={`/api/${cluster}/Account/Reject/`}
                         disabled={notification.pending}
                       ></RejectRequest>
                     )}

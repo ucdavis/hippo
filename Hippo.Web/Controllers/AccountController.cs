@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Services;
+using Hippo.Web.Extensions;
 using Hippo.Web.Models;
 using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -32,17 +33,17 @@ public class AccountController : SuperController
 
     // Return account info for the currently logged in user
     [HttpGet]
-    public async Task<ActionResult> Get()
+    public async Task<ActionResult> Get(string cluster)
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        return Ok(await _dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(a => a.Owner.Iam == currentUser.Iam));
+        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Owner.Iam == currentUser.Iam).AsNoTracking().ToArrayAsync());
     }
 
     [HttpGet]
     public async Task<ActionResult> Sponsors()
     {
-        return Ok(await _dbContext.Accounts.Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
+        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
     }
 
     // Return all accounts that are waiting for the current user to approve
@@ -51,7 +52,7 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
         //Make this one order by date? Or stay consistent and just by name?
-        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
+        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
     }
 
     [HttpGet]
@@ -59,7 +60,7 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        return Ok(await _dbContext.Accounts.Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
+        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
     }
 
     // Approve a given pending account if you are the sponsor
@@ -68,14 +69,13 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+        var account = await _dbContext.Accounts.InCluster(Cluster).Include(a => a.Owner).AsSingleQuery()
             .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
 
         if (account == null)
         {
             return NotFound();
         }
-
 
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
@@ -93,7 +93,6 @@ public class AccountController : SuperController
 
         await _historyService.AccountApproved(account);
 
-
         await _dbContext.SaveChangesAsync();
 
         return Ok();
@@ -109,15 +108,13 @@ public class AccountController : SuperController
 
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.Include(a => a.Owner).AsSingleQuery()
+        var account = await _dbContext.Accounts.InCluster(Cluster).Include(a => a.Owner).AsSingleQuery()
             .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
 
         if (account == null)
         {
             return NotFound();
         }
-
-
 
         account.Status = Account.Statuses.Rejected;
         account.IsActive = false;
@@ -148,12 +145,12 @@ public class AccountController : SuperController
         }
 
         // make sure current user doesn't already have another account
-        if (await _dbContext.Accounts.AnyAsync(a => a.Owner.Iam == currentUser.Iam))
+        if (await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Owner.Iam == currentUser.Iam))
         {
             return BadRequest("You already have an account");
         }
 
-        if (!(await _dbContext.Accounts.AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
+        if (!(await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
             return BadRequest("Sponsor not found.");
         }
@@ -166,7 +163,12 @@ public class AccountController : SuperController
             return BadRequest("Invalid SSH key");
         }
 
+        var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
 
+        if (cluster == null)
+        {
+            return BadRequest("Cluster not found");
+        }
 
         var account = new Account()
         {
@@ -176,6 +178,7 @@ public class AccountController : SuperController
             SshKey = await _yamlService.Get(currentUser, model),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
+            ClusterId = cluster.Id,
             Status = Account.Statuses.PendingApproval,
         };
 
@@ -192,7 +195,4 @@ public class AccountController : SuperController
 
         return Ok(account);
     }
-
-
-
 }

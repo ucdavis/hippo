@@ -1,5 +1,5 @@
 import React from "react";
-import { Account, AppContextShape, User } from "../types";
+import { Account, AppContextShape, Cluster, User } from "../types";
 
 const AppContext = React.createContext<
   [AppContextShape, React.Dispatch<React.SetStateAction<AppContextShape>>]
@@ -7,7 +7,8 @@ const AppContext = React.createContext<
   {
     antiForgeryToken: "",
     user: { detail: {} as User },
-    account: {} as Account,
+    accounts: [] as Account[],
+    clusters: [] as Cluster[],
   },
   () => {},
 ]);

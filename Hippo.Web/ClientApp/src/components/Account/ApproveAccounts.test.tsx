@@ -1,15 +1,18 @@
 import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route } from "react-router-dom";
 
 import { fakeAccounts, fakeAppContext } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
-import { ApproveAccounts } from "./ApproveAccounts";
 
 import { act, Simulate } from "react-dom/test-utils";
 
-import AppContext from "../../Shared/AppContext";
+import App from "../../App";
+import { ApproveAccounts } from "./ApproveAccounts";
 import { ModalProvider } from "react-modal-hook";
+
+const testCluster = fakeAccounts[0].cluster;
+const approveUrl = `/${testCluster}/approve`;
 
 let container: Element;
 
@@ -30,8 +33,8 @@ beforeEach(() => {
 
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
-      "/api/account/pending": accountResponse,
-      "api/account/approve/1": approveResponse,
+      [`/api/${testCluster}/account/pending`]: accountResponse,
+      [`api/${testCluster}/account/approve/1`]: approveResponse,
     })
   );
 });
@@ -49,13 +52,9 @@ afterEach(() => {
 it("shows pending approvals count", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -67,13 +66,9 @@ it("shows pending approvals count", async () => {
 it("shows approval button for each pending account", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -83,13 +78,9 @@ it("shows approval button for each pending account", async () => {
 it("shows reject button for each pending account", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -99,13 +90,9 @@ it("shows reject button for each pending account", async () => {
 it("approve button has expected text", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -116,13 +103,9 @@ it("approve button has expected text", async () => {
 it("reject button has expected text", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -134,13 +117,9 @@ it("reject button has expected text", async () => {
 it("table header has expected text", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -153,13 +132,9 @@ it("table header has expected text", async () => {
 xit("displays dialog when reject is clicked", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
-        <ModalProvider>
-          <MemoryRouter>
-            <ApproveAccounts />
-          </MemoryRouter>
-        </ModalProvider>
-      </AppContext.Provider>,
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
       container
     );
   });
@@ -177,13 +152,13 @@ xit("displays dialog when reject is clicked", async () => {
 it("calls approve and filters list when approve is clicked", async () => {
   await act(async () => {
     render(
-      <AppContext.Provider value={(global as any).Hippo}>
+      <MemoryRouter initialEntries={[approveUrl]}>
         <ModalProvider>
-          <MemoryRouter>
+          <Route path={"/:cluster/approve"}>
             <ApproveAccounts />
-          </MemoryRouter>
+          </Route>
         </ModalProvider>
-      </AppContext.Provider>,
+      </MemoryRouter>,
       container
     );
   });
@@ -204,21 +179,27 @@ it("calls approve and filters list when approve is clicked", async () => {
   );
 
   expect(global.fetch).toHaveBeenCalledTimes(2);
-  expect(global.fetch).toHaveBeenCalledWith("/api/account/pending", {
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      RequestVerificationToken: "fakeAntiForgeryToken",
-    },
-  });
-  expect(global.fetch).toHaveBeenLastCalledWith("/api/account/approve/1", {
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      RequestVerificationToken: "fakeAntiForgeryToken",
-    },
-    method: "POST",
-  });
+  expect(global.fetch).toHaveBeenCalledWith(
+    `/api/${testCluster}/account/pending`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        RequestVerificationToken: "fakeAntiForgeryToken",
+      },
+    }
+  );
+  expect(global.fetch).toHaveBeenLastCalledWith(
+    `/api/${testCluster}/account/approve/1`,
+    {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        RequestVerificationToken: "fakeAntiForgeryToken",
+      },
+      method: "POST",
+    }
+  );
 });

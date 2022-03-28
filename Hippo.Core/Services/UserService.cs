@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Hippo.Core.Models;
 
 namespace Hippo.Core.Services
 {
@@ -17,6 +18,9 @@ namespace Hippo.Core.Services
         Task<User> GetUser(Claim[] userClaims);
         Task<User> GetCurrentUser();
         Task<string> GetCurrentUserJsonAsync();
+        string GetCurrentUserId();
+        Task<string> GetCurrentAccountsJsonAsync();
+        Task<string> GetAvailableClustersJsonAsync();
     }
 
     public class UserService : IUserService
@@ -29,6 +33,12 @@ namespace Hippo.Core.Services
         {
             _httpContextAccessor = httpContextAccessor;
             _dbContext = dbContext;
+        }
+
+        public string GetCurrentUserId()
+        {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(IamIdClaimType);
+            return userId;
         }
 
         public async Task<User> GetCurrentUser()
@@ -50,6 +60,24 @@ namespace Hippo.Core.Services
             var user = await GetCurrentUser();
             return JsonSerializer.Serialize(user, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
+
+        public async Task<string> GetCurrentAccountsJsonAsync()
+        {
+            string iamId = GetCurrentUserId();
+
+            var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail {
+                Id = a.Id,
+                Name = a.Name,
+                CanSponsor = a.CanSponsor,
+                Status = a.Status,
+                Owner = a.Owner.Name,
+                Cluster = a.Cluster.Name,
+                Sponsor = a.Sponsor.Name,
+                IsAdmin = a.IsAdmin,
+            }).ToListAsync();
+            return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
         // Get any user based on their claims, creating if necessary
         public async Task<User> GetUser(Claim[] userClaims)
         {
@@ -79,6 +107,11 @@ namespace Hippo.Core.Services
 
                 return newUser;
             }
+        }
+
+        public async Task<string> GetAvailableClustersJsonAsync() {
+            var clusters = await _dbContext.Clusters.ToArrayAsync();
+            return JsonSerializer.Serialize(clusters, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
     }
 }

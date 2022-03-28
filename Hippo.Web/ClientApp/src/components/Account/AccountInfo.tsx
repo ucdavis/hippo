@@ -9,7 +9,7 @@ export const AccountInfo = () => {
       <div className="col-md-8">
         <p>
           Welcome {context.user.detail.firstName} you already have an account,
-          enjoy farm
+          enjoy!
         </p>
       </div>
     </div>

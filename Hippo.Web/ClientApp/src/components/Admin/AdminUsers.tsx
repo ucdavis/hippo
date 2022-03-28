@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { User } from "../../types";
+import { useParams } from "react-router-dom";
+import { Account, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 
@@ -7,31 +8,35 @@ export const AdminUsers = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
-  const [users, setUsers] = useState<User[]>();
+  const [accounts, setAccounts] = useState<Account[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
   const [request, setRequest] = useState({
     id: "",
   });
+  const { cluster } = useParams<IRouteParams>();
   const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
-    const fetchAdminUsers = async () => {
-      const response = await authenticatedFetch("/api/admin/index");
+    const fetchAdminAccounts = async () => {
+      const response = await authenticatedFetch(`/api/${cluster}/admin/index`);
 
       if (response.ok) {
-        setUsers(await response.json());
+        setAccounts(await response.json());
       }
     };
 
-    fetchAdminUsers();
-  }, []);
+    fetchAdminAccounts();
+  }, [cluster]);
 
-  const handleRemove = async (user: User) => {
-    setAdminRemoving(user.id);
+  const handleRemove = async (account: Account) => {
+    setAdminRemoving(account.id);
 
-    const req = authenticatedFetch(`/api/admin/Remove/${user.id}`, {
-      method: "POST",
-    });
+    const req = authenticatedFetch(
+      `/api/${cluster}/admin/Remove/${account.owner?.id}`,
+      {
+        method: "POST",
+      }
+    );
 
     setNotification(req, "Removing", "Admin Removed", async (r) => {
       if (r.status === 400) {
@@ -46,15 +51,18 @@ export const AdminUsers = () => {
 
     if (response.ok) {
       // remove the user from the list
-      setUsers(users?.filter((a) => a.id !== user.id));
+      setAccounts(accounts?.filter((a) => a.id !== account.id));
     }
     setAdminRemoving(undefined);
   };
 
   const handleSubmit = async () => {
-    const req = authenticatedFetch(`/api/admin/create/${request.id}`, {
-      method: "POST",
-    });
+    const req = authenticatedFetch(
+      `/api/${cluster}/admin/create/${request.id}`,
+      {
+        method: "POST",
+      }
+    );
 
     setNotification(req, "Saving", "Admin Added", async (r) => {
       if (r.status === 400) {
@@ -67,14 +75,14 @@ export const AdminUsers = () => {
     const response = await req;
 
     if (response.ok) {
-      const newUser = await response.json();
+      const newAccount = await response.json();
       //Add the user to the list
-      setUsers((r) => (r ? [...r, newUser] : [newUser]));
+      setAccounts((r) => (r ? [...r, newAccount] : [newAccount]));
       setRequest((r) => ({ ...r, id: "" }));
     }
   };
 
-  if (users === undefined) {
+  if (accounts === undefined) {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">Loading...</div>
@@ -107,7 +115,7 @@ export const AdminUsers = () => {
           </button>
           <hr />
 
-          <p>There are {users.length} users with admin access</p>
+          <p>There are {accounts.length} users with admin access</p>
           <table className="table">
             <thead>
               <tr>
@@ -117,17 +125,17 @@ export const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
+              {accounts.map((account) => (
+                <tr key={account.id}>
+                  <td>{account.owner?.name}</td>
+                  <td>{account.owner?.email}</td>
                   <td>
                     <button
                       disabled={notification.pending}
-                      onClick={() => handleRemove(user)}
+                      onClick={() => handleRemove(account)}
                       className="btn btn-primary"
                     >
-                      {adminRemoving === user.id ? "Removing..." : "Remove"}
+                      {adminRemoving === account.id ? "Removing..." : "Remove"}
                     </button>
                   </td>
                 </tr>

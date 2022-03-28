@@ -17,9 +17,17 @@ export interface Account {
   status: string;
   canSponsor: boolean;
   createdOn: string;
+  cluster: string;
   owner?: User;
   sponsor?: Account;
   updatedOn: string;
+  isAdmin: boolean;
+}
+
+export interface Cluster {
+  id: number;
+  name: string;
+  description: string;
 }
 
 export interface RequestPostModel {
@@ -37,10 +45,15 @@ export interface AppContextShape {
   user: {
     detail: User;
   };
-  account: Account;
+  accounts: Account[];
+  clusters: Cluster[];
 }
 
 export interface PromiseStatus {
   pending: boolean;
   success: boolean;
+}
+
+export interface IRouteParams {
+  cluster: string;
 }
