@@ -56,9 +56,10 @@ export const RequestForm = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
+
       setContext((ctx) => ({
         ...ctx,
-        accounts: [...ctx.accounts, newAccount],
+        accounts: [...ctx.accounts, { ...newAccount, cluster: newAccount.cluster.name }],
       }));
       history.replace(`/${cluster}/pendingapproval`);
     }
