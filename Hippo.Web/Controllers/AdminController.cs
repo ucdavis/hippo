@@ -225,6 +225,55 @@ public class AdminController : SuperController
         return Ok();
     }
 
+    [HttpPost]
+    public async Task<IActionResult> ChangeSponsorOwner(int id, [FromBody] SponsorCreateModel model)
+    {
+        var sponsorToChange = await _dbContext.Accounts.InCluster(Cluster).SingleAsync(a => a.Id == id && a.CanSponsor);
+        var originalOwner = await _dbContext.Users.SingleAsync(a => a.Id == sponsorToChange.OwnerId);
+
+
+        if (string.IsNullOrWhiteSpace(model.Lookup))
+        {
+            return BadRequest("You must supply either an email or kerb id to lookup.");
+        }
+
+
+        var userLookup = model.Lookup.Contains("@")
+                    ? await _identityService.GetByEmail(model.Lookup)
+                    : await _identityService.GetByKerberos(model.Lookup);
+        if (userLookup == null)
+        {
+            return BadRequest("User Not Found");
+        }
+
+        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == userLookup.Iam);
+        if (user == null)
+        {
+            user = userLookup;
+            await _dbContext.Users.AddAsync(user);
+        }
+
+        sponsorToChange.OwnerId = user.Id;
+
+
+        if (sponsorToChange.Status != Statuses.Active)
+        {
+            return BadRequest($"Existing Account for user is not in the Active status: {sponsorToChange.Status}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(model.Name))
+        {
+            sponsorToChange.Name = model.Name;
+        }
+        await _historyService.AddAccountHistory(sponsorToChange, "Owner Changed");
+        await _historyService.AddHistory("Sponsor owner updated. Old Owner:", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}", sponsorToChange);
+        await _historyService.AddHistory("Sponsor owner updated. New Owner:", $"Kerb: {sponsorToChange.Owner.Kerberos} IAM: {sponsorToChange.Owner.Iam} Email: {sponsorToChange.Owner.Email} Name: {sponsorToChange.Owner.Name}", sponsorToChange);
+
+        await _dbContext.SaveChangesAsync();
+
+        return StatusCode(StatusCodes.Status200OK, sponsorToChange);
+    }
+
     // Return all accounts that are waiting for any sponsor to approve for cluster
     [HttpGet]
     public async Task<ActionResult> Pending()
