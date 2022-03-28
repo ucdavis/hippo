@@ -14,10 +14,9 @@ export const AppNav = () => {
     <div>
       <div className="row appheader justify-content-center">
         <div className="col-md-8 hippo">
-          <NavLink to="/">
+          <NavLink to={cluster ? `/${cluster?.name}/` : "/clusters"}>
             <HippoLogo />
           </NavLink>
-
           <h1>
             <img src="/media/ucdavis.svg" alt="UC DAVIS" />
             HiPPO
