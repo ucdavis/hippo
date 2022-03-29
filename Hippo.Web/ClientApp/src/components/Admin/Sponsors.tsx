@@ -70,8 +70,12 @@ export const Sponsors = () => {
   };
 
   const handleTransfer = async (oldAccount: Account, newAccount: Account) => {
-    // update old->new 
-    // setAccounts(accounts?.filter((a) => a.id !== account.id));
+    // filter out old account and push new account at the front
+    setAccounts((accts) =>
+      accts
+        ? [newAccount, ...accts.filter((a) => a.id !== oldAccount.id)]
+        : [newAccount]
+    );
   };
 
   const handleSubmit = async () => {
