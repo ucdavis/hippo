@@ -178,10 +178,17 @@ export const Sponsors = () => {
                   <td>{account.owner?.name}</td>
                   <td>{account.owner?.email}</td>
                   <td>
-                    <button
+                  <button
                       disabled={notification.pending}
                       onClick={() => handleRemove(account)}
                       className="btn btn-primary"
+                    >
+                      {adminRemoving === account.id ? "Removing..." : "Transfer"}
+                    </button>{" | "}
+                    <button
+                      disabled={notification.pending}
+                      onClick={() => handleRemove(account)}
+                      className="btn btn-danger"
                     >
                       {adminRemoving === account.id ? "Removing..." : "Remove"}
                     </button>

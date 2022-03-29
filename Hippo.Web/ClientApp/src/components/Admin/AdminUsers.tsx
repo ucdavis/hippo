@@ -147,7 +147,7 @@ export const AdminUsers = () => {
                     <button
                       disabled={notification.pending}
                       onClick={() => handleRemove(account)}
-                      className="btn btn-primary"
+                      className="btn btn-danger"
                     >
                       {adminRemoving === account.id ? "Removing..." : "Remove"}
                     </button>
