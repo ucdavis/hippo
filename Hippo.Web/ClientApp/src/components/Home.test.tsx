@@ -64,7 +64,7 @@ describe("Home Redirect when Sponsor", () => {
       );
     });
     expect(div.textContent).toContain(
-      "Welcome Bob you already have an account"
+      "Welcome Bob you have an account"
     );
   });
 

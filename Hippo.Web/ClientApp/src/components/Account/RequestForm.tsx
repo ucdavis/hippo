@@ -56,9 +56,13 @@ export const RequestForm = () => {
 
     if (response.ok) {
       const newAccount = await response.json();
+
       setContext((ctx) => ({
         ...ctx,
-        accounts: [...ctx.accounts, newAccount],
+        accounts: [
+          ...ctx.accounts,
+          { ...newAccount, cluster: newAccount.cluster.name },
+        ],
       }));
       history.replace(`/${cluster}/pendingapproval`);
     }
@@ -72,8 +76,8 @@ export const RequestForm = () => {
           <span className="status-color">{context.user.detail.firstName}</span>
         </h3>
         <p>
-          You don't seem to have an account on this cluster yet. If you'd like access,
-          please answer the&nbsp;questions&nbsp;below
+          You don't seem to have an account on this cluster yet. If you'd like
+          access, please answer the&nbsp;questions&nbsp;below
         </p>
         <hr />
         <div className="form-group">
@@ -97,8 +101,7 @@ export const RequestForm = () => {
           <p className="form-helper">
             Your sponsor is probably your PI or your Department. You can filter
             this list by typing in it.
-          </p>
-          <p className="form-helper">
+            <br />
             If you don't see your sponsor, you may contact IT help to request
             they be added.{" "}
             <a href="mailto: ithelp@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
@@ -119,7 +122,9 @@ export const RequestForm = () => {
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:
             <br></br>
-            <code>ssh-rsa some long line of characters</code>
+            <code>
+              ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
+            </code>
           </p>
         </div>
         <button

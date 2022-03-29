@@ -6,11 +6,15 @@ export const PendingApproval = () => {
 
   return (
     <div className="row justify-content-center">
-      <div className="col-md-8">
+      <div className="col-md-8 text-center">
         <p>
           Welcome {context.user.detail.firstName} your account is pending
-          approval. Your sponsor has been emailed and you will be notified when
-          it has been acted on. Please check back later.
+          approval.
+          <br />
+          Your sponsor has been emailed and you will be notified when it has
+          been acted on.
+          <br />
+          Please check back later.
         </p>
       </div>
     </div>
