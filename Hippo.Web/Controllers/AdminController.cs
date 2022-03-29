@@ -285,7 +285,6 @@ public class AdminController : SuperController
 
             // now we have a user and account for the new sponsor
             // need to find everyone who was sponsored by old sponsor and transfer to new sponsor
-
             var accountsSponsoredByOriginal = await _dbContext.Accounts.InCluster(Cluster).Where(a => a.SponsorId == originalSponsorAccount.Id).ToListAsync();
 
             foreach (var acct in accountsSponsoredByOriginal)
@@ -295,6 +294,8 @@ public class AdminController : SuperController
                 await _historyService.AddAccountHistory(acct, "SponsorChanged");
             }
 
+            // now let's mark our old sponsor as no longer a sponsor
+            originalSponsorAccount.CanSponsor = false;
             await _historyService.AddAccountHistory(originalSponsorAccount, "RemovedSponsor");
 
             await _historyService.AddHistory("Sponsor Account Transfered", $"Sponsored accounts transfered from owner: {originalSponsorAccount.Owner.Kerberos} IAM: {originalSponsorAccount.Owner.Iam} Email: {originalSponsorAccount.Owner.Email} Name: {originalSponsorAccount.Owner.Name}", originalSponsorAccount);
