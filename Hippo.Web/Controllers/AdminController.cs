@@ -269,6 +269,7 @@ public class AdminController : SuperController
                 };
 
                 await _dbContext.Accounts.AddAsync(newSponsorAccount);
+                await _historyService.AddAccountHistory(newSponsorAccount, "MadeSponsor");
             }
             else
             {
