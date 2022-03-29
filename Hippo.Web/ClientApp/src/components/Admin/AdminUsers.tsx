@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { Account, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -16,6 +17,14 @@ export const AdminUsers = () => {
   const { cluster } = useParams<IRouteParams>();
   const [notification, setNotification] = usePromiseNotification();
 
+  const [getConfirmation] = useConfirmationDialog<string>(
+    {
+      title: "Remove Admin",
+      message: "Are you sure you want to remove this administrator?",
+    },
+    []
+  );
+
   useEffect(() => {
     const fetchAdminAccounts = async () => {
       const response = await authenticatedFetch(`/api/${cluster}/admin/index`);
@@ -29,6 +38,11 @@ export const AdminUsers = () => {
   }, [cluster]);
 
   const handleRemove = async (account: Account) => {
+    const [confirmed] = await getConfirmation();
+    if (!confirmed) {
+      return;
+    }
+
     setAdminRemoving(account.id);
 
     const req = authenticatedFetch(
