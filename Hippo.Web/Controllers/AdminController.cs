@@ -273,12 +273,16 @@ public class AdminController : SuperController
             }
             else
             {
+                newSponsorAccount.Name = string.IsNullOrWhiteSpace(model.Name) ? newSponsorAccount.Name : model.Name;
+
                 // they already have an account.  if they can't sponsor yet then add that role
                 if (!newSponsorAccount.CanSponsor)
                 {
                     newSponsorAccount.CanSponsor = true;
                     await _historyService.AddAccountHistory(newSponsorAccount, "MadeSponsor");
                 }
+
+
             }
 
             // save our changes to ensure we have user and account Ids
