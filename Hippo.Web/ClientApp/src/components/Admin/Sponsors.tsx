@@ -4,6 +4,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { Account, CreateSponsorPostModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
+import { TransferSponsor } from "./TransferSponsor";
 
 export const Sponsors = () => {
   // get all accounts that need approval and list them
@@ -66,6 +67,11 @@ export const Sponsors = () => {
       setAccounts(accounts?.filter((a) => a.id !== account.id));
     }
     //todo deal with error
+  };
+
+  const handleTransfer = async (oldAccount: Account, newAccount: Account) => {
+    // update old->new 
+    // setAccounts(accounts?.filter((a) => a.id !== account.id));
   };
 
   const handleSubmit = async () => {
@@ -178,13 +184,13 @@ export const Sponsors = () => {
                   <td>{account.owner?.name}</td>
                   <td>{account.owner?.email}</td>
                   <td>
-                  <button
+                    <TransferSponsor
+                      account={account}
+                      transferSponsor={handleTransfer}
+                      transferUrl={`/api/${cluster}/admin/changeSponsorOwner/`}
                       disabled={notification.pending}
-                      onClick={() => handleRemove(account)}
-                      className="btn btn-primary"
-                    >
-                      {adminRemoving === account.id ? "Removing..." : "Transfer"}
-                    </button>{" | "}
+                    ></TransferSponsor>
+                    {" | "}
                     <button
                       disabled={notification.pending}
                       onClick={() => handleRemove(account)}
