@@ -72,7 +72,7 @@ namespace Hippo.Core.Services
                 AdminAction = adminAction,
                 Account = account,
                 ActedBy = currentUser,
-                Cluster = account.Cluster,
+                ClusterId = account.ClusterId,
             };
 
             await _dbContext.Histories.AddAsync(history);
