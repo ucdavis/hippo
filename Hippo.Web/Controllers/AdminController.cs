@@ -274,11 +274,12 @@ public class AdminController : SuperController
             else
             {
                 newSponsorAccount.Name = string.IsNullOrWhiteSpace(model.Name) ? newSponsorAccount.Name : model.Name;
-
+                newSponsorAccount.SponsorId = null;
                 // they already have an account.  if they can't sponsor yet then add that role
                 if (!newSponsorAccount.CanSponsor)
                 {
                     newSponsorAccount.CanSponsor = true;
+                    newSponsorAccount.Status = Statuses.Active; //Force to active if there is a pending account
                     await _historyService.AddAccountHistory(newSponsorAccount, "MadeSponsor");
                 }
 
@@ -295,7 +296,6 @@ public class AdminController : SuperController
             foreach (var acct in accountsSponsoredByOriginal)
             {
                 acct.SponsorId = newSponsorAccount.Id;
-
                 await _historyService.AddAccountHistory(acct, "SponsorChanged");
             }
 
