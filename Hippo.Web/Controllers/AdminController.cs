@@ -125,7 +125,7 @@ public class AdminController : SuperController
         return Ok();
     }
 
- 
+
 
     [HttpGet]
     public async Task<IActionResult> Sponsors()
@@ -141,7 +141,7 @@ public class AdminController : SuperController
             return BadRequest("You must supply either an email or kerb id to lookup.");
         }
 
-        
+
 
         var userLookup = model.Lookup.Contains("@")
                     ? await _identityService.GetByEmail(model.Lookup)
@@ -170,14 +170,15 @@ public class AdminController : SuperController
             var saveCanSponsor = account.CanSponsor;
             var saveName = account.Name;
             account.CanSponsor = true;
+            account.SponsorId = null; //They are being made so clear out the sponsor id on their account.
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 account.Name = model.Name;
                 await _historyService.AddAccountHistory(account, "NameUpdated");
                 await _historyService.AddHistory("Sponsor name updated", $"Old Name: {saveName} New Name: {account.Name}", account);
             }
-            if (!saveCanSponsor) 
-            { 
+            if (!saveCanSponsor)
+            {
                 await _historyService.AddAccountHistory(account, "MadeSponsor");
                 await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount}", account);
             }
@@ -193,7 +194,7 @@ public class AdminController : SuperController
                 CanSponsor = true,
                 Cluster = cluster,
             };
-            
+
             await _dbContext.Accounts.AddAsync(account);
             await _historyService.AddAccountHistory(account, "CreatedSponsor");
 
@@ -201,7 +202,7 @@ public class AdminController : SuperController
             await _historyService.AddHistory("Sponsor role added", $"New Account: {isNewAccount} Name Used: {account.Name}", account);
         }
 
-        
+
 
         await _dbContext.SaveChangesAsync();
 
@@ -228,15 +229,13 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> ChangeSponsorOwner(int id, [FromBody] SponsorCreateModel model)
     {
-        var sponsorToChange = await _dbContext.Accounts.InCluster(Cluster).SingleAsync(a => a.Id == id && a.CanSponsor);
-        var originalOwner = await _dbContext.Users.SingleAsync(a => a.Id == sponsorToChange.OwnerId);
-
+        var clusterId = await _dbContext.Clusters.Where(a => a.Name == Cluster).Select(c => c.Id).SingleAsync();
+        var originalSponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).InCluster(Cluster).SingleAsync(a => a.Id == id);
 
         if (string.IsNullOrWhiteSpace(model.Lookup))
         {
             return BadRequest("You must supply either an email or kerb id to lookup.");
         }
-
 
         var userLookup = model.Lookup.Contains("@")
                     ? await _identityService.GetByEmail(model.Lookup)
@@ -246,32 +245,74 @@ public class AdminController : SuperController
             return BadRequest("User Not Found");
         }
 
-        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == userLookup.Iam);
-        if (user == null)
+        using (var txn = await _dbContext.Database.BeginTransactionAsync())
         {
-            user = userLookup;
-            await _dbContext.Users.AddAsync(user);
+            // get the user represented by lookup values and create if not found 
+            var newOwner = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == userLookup.Iam);
+            if (newOwner == null)
+            {
+                newOwner = userLookup;
+                await _dbContext.Users.AddAsync(newOwner);
+            }
+
+            // new we need to ensure this user has an account with a sponsor role
+            var newSponsorAccount = await _dbContext.Accounts.InCluster(Cluster).SingleOrDefaultAsync(a => a.Owner.Iam == userLookup.Iam);
+            if (newSponsorAccount == null)
+            {
+                // no account in ths cluster, create one
+                newSponsorAccount = new Account
+                {
+                    Status = Statuses.Active,
+                    Name = string.IsNullOrWhiteSpace(model.Name) ? newOwner.Name : model.Name,
+                    Owner = newOwner,
+                    CanSponsor = true,
+                    ClusterId = clusterId,
+                };
+
+                await _dbContext.Accounts.AddAsync(newSponsorAccount);
+                await _historyService.AddAccountHistory(newSponsorAccount, "MadeSponsor");
+            }
+            else
+            {
+                newSponsorAccount.Name = string.IsNullOrWhiteSpace(model.Name) ? newSponsorAccount.Name : model.Name;
+                newSponsorAccount.SponsorId = null;
+                // they already have an account.  if they can't sponsor yet then add that role
+                if (!newSponsorAccount.CanSponsor)
+                {
+                    newSponsorAccount.CanSponsor = true;
+                    newSponsorAccount.Status = Statuses.Active; //Force to active if there is a pending account
+                    await _historyService.AddAccountHistory(newSponsorAccount, "MadeSponsor");
+                }
+
+
+            }
+
+            // save our changes to ensure we have user and account Ids
+            await _dbContext.SaveChangesAsync();
+
+            // now we have a user and account for the new sponsor
+            // need to find everyone who was sponsored by old sponsor and transfer to new sponsor
+            var accountsSponsoredByOriginal = await _dbContext.Accounts.InCluster(Cluster).Where(a => a.SponsorId == originalSponsorAccount.Id).ToListAsync();
+
+            foreach (var acct in accountsSponsoredByOriginal)
+            {
+                acct.SponsorId = newSponsorAccount.Id;
+                await _historyService.AddAccountHistory(acct, "SponsorChanged");
+            }
+
+            // now let's mark our old sponsor as no longer a sponsor
+            originalSponsorAccount.CanSponsor = false;
+            await _historyService.AddAccountHistory(originalSponsorAccount, "RemovedSponsor");
+
+            await _historyService.AddHistory("Sponsor Account Transfered", $"Sponsored accounts transfered from owner: {originalSponsorAccount.Owner.Kerberos} IAM: {originalSponsorAccount.Owner.Iam} Email: {originalSponsorAccount.Owner.Email} Name: {originalSponsorAccount.Owner.Name}", originalSponsorAccount);
+            await _historyService.AddHistory("Sponsor Account Transfered", $"Sponsored accounts transfered to owner: {newSponsorAccount.Owner.Kerberos} IAM: {newSponsorAccount.Owner.Iam} Email: {newSponsorAccount.Owner.Email} Name: {newSponsorAccount.Owner.Name}", newSponsorAccount);
+
+            await _dbContext.SaveChangesAsync();
+
+            await txn.CommitAsync();
+
+            return StatusCode(StatusCodes.Status200OK, newSponsorAccount);
         }
-
-        sponsorToChange.OwnerId = user.Id;
-
-
-        if (sponsorToChange.Status != Statuses.Active)
-        {
-            return BadRequest($"Existing Account for user is not in the Active status: {sponsorToChange.Status}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(model.Name))
-        {
-            sponsorToChange.Name = model.Name;
-        }
-        await _historyService.AddAccountHistory(sponsorToChange, "Owner Changed");
-        await _historyService.AddHistory("Sponsor owner updated. Old Owner:", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}", sponsorToChange);
-        await _historyService.AddHistory("Sponsor owner updated. New Owner:", $"Kerb: {sponsorToChange.Owner.Kerberos} IAM: {sponsorToChange.Owner.Iam} Email: {sponsorToChange.Owner.Email} Name: {sponsorToChange.Owner.Name}", sponsorToChange);
-
-        await _dbContext.SaveChangesAsync();
-
-        return StatusCode(StatusCodes.Status200OK, sponsorToChange);
     }
 
     // Return all accounts that are waiting for any sponsor to approve for cluster
@@ -300,7 +341,7 @@ public class AdminController : SuperController
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
 
-        _sshService.PlaceFile(account.SshKey, tempFileName); 
+        _sshService.PlaceFile(account.SshKey, tempFileName);
         _sshService.RenameFile(tempFileName, fileName);
 
         account.Status = Account.Statuses.Active;

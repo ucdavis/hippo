@@ -91,7 +91,7 @@ export const AdminApproveAccounts = () => {
                       {accountApproving === account.id
                         ? "Approving..."
                         : "Approve"}
-                    </button>{" "}
+                    </button>{" | "}
                     <RejectRequest
                       account={account}
                       removeAccount={() => handleReject(account)}

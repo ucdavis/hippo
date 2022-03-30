@@ -83,7 +83,7 @@ export const ApproveAccounts = () => {
                       {accountApproving === account.id
                         ? "Approving..."
                         : "Approve"}
-                    </button>{" "}
+                    </button>{" | "}
                     {accountApproving !== account.id && (
                       <RejectRequest
                         account={account}
