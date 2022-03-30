@@ -77,8 +77,6 @@ export const TransferSponsor = (props: Props) => {
       return;
     }
 
-    console.log("going to transfer", props.account, transferData);
-
     const request = authenticatedFetch(
       `${props.transferUrl}${props.account.id}`,
       {

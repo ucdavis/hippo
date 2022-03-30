@@ -73,7 +73,7 @@ export const Sponsors = () => {
     // filter out old account and push new account at the front
     setAccounts((accts) =>
       accts
-        ? [newAccount, ...accts.filter((a) => a.id !== oldAccount.id)]
+        ? [newAccount, ...accts.filter((a) => a.id !== oldAccount.id && a.id !== newAccount.id)]
         : [newAccount]
     );
   };
