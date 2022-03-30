@@ -170,6 +170,7 @@ public class AdminController : SuperController
             var saveCanSponsor = account.CanSponsor;
             var saveName = account.Name;
             account.CanSponsor = true;
+            account.SponsorId = null; //They are being made so clear out the sponsor id on their account.
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 account.Name = model.Name;
