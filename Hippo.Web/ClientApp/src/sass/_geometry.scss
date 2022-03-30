@@ -82,12 +82,12 @@
 }
 @keyframes rotator {
   0%,
-  40%,
-  50%,
+  70%,
+  80%,
   100% {
     transform: translate(0%, 0%);
   }
-  42% {
+  72% {
     transform: rotate(356deg);
   }
 }
