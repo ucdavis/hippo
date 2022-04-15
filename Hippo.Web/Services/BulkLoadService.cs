@@ -37,8 +37,8 @@ namespace Hippo.Web.Services
             foreach(var pair in pairs)
             {
                 var kerbIs = pair.Split("-");
-                kerbs.Add(kerbIs[0]);
-                kerbs.Add(kerbIs[1]);
+                kerbs.Add(kerbIs[0].Trim());
+                kerbs.Add(kerbIs[1].Trim());
             }
             kerbs = kerbs.Distinct().ToList();
             Log.Information($"Unique Kerbs: {kerbs.Count()}");
@@ -46,7 +46,7 @@ namespace Hippo.Web.Services
             foreach(var kerb in kerbs)
             {
                 var user = await _identityService.GetByKerberos(kerb);
-                if(user != null)
+                if(user == null)
                 {
                     Log.Error($"Kerb not found: {kerb}");
                     continue;
@@ -65,8 +65,8 @@ namespace Hippo.Web.Services
             {
                 var accounts = pair.Split("-");
                 if (
-                    !kerbsInDb.Contains(accounts[0]) || 
-                    !kerbsInDb.Contains(accounts[1])
+                    !kerbsInDb.Contains(accounts[0].Trim()) || 
+                    !kerbsInDb.Contains(accounts[1].Trim())
                     ){
                     Log.Error($"Skipping {accounts[0]}-{accounts[1]} because of missing kerb");
                     continue;
@@ -77,8 +77,8 @@ namespace Hippo.Web.Services
                     continue;
                 }
 
-                var sponsorUser = await _dbContext.Users.SingleAsync(a => a.Kerberos == accounts[1]);
-                var accountUser = await _dbContext.Users.SingleAsync(a => a.Kerberos == accounts[0]);
+                var sponsorUser = await _dbContext.Users.SingleAsync(a => a.Kerberos == accounts[1].Trim());
+                var accountUser = await _dbContext.Users.SingleAsync(a => a.Kerberos == accounts[0].Trim());
 
                 var sponsorAccount = await _dbContext.Accounts.Where(a => a.ClusterId == cluster.Id && a.OwnerId == sponsorUser.Id).SingleOrDefaultAsync();
                 if(sponsorAccount == null)
