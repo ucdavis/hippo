@@ -34,13 +34,16 @@ namespace Hippo.Web.Services
             //Create missing users
             var kerbs = new List<string>();
             var kerbsInDb = new List<string>();
+            var sponsorKerbs = new List<string>();
             foreach(var pair in pairs)
             {
                 var kerbIs = pair.Split("-");
                 kerbs.Add(kerbIs[0].Trim());
                 kerbs.Add(kerbIs[1].Trim());
+                sponsorKerbs.Add(kerbIs[1].Trim()); //Load sponsors
             }
             kerbs = kerbs.Distinct().ToList();
+            sponsorKerbs = sponsorKerbs.Distinct().ToList();
             Log.Information($"Unique Kerbs: {kerbs.Count()}");
 
             foreach(var kerb in kerbs)
@@ -59,6 +62,35 @@ namespace Hippo.Web.Services
                 kerbsInDb.Add(kerb);
             }
             await _dbContext.SaveChangesAsync();
+
+            //Load Sponsors:
+            foreach (var spons in sponsorKerbs)
+            {
+
+                var sponsorUser = await _dbContext.Users.SingleAsync(a => a.Kerberos == spons.Trim());
+
+                var sponsorAccount = await _dbContext.Accounts.Where(a => a.ClusterId == cluster.Id && a.OwnerId == sponsorUser.Id).SingleOrDefaultAsync();
+                if (sponsorAccount == null)
+                {
+                    sponsorAccount = new Account()
+                    {
+                        CanSponsor = true,
+                        OwnerId = sponsorUser.Id,
+                        ClusterId = cluster.Id,
+                        Name = $"{sponsorUser.Name} ({sponsorUser.Email})",
+                        Status = Statuses.Active,
+                    };
+                    await _dbContext.Accounts.AddAsync(sponsorAccount);
+                }
+                else
+                {
+                    sponsorAccount.CanSponsor = true;
+                    _dbContext.Accounts.Update(sponsorAccount);
+                }
+            }
+
+            await _dbContext.SaveChangesAsync(); //Save sponsors
+
 
 
             foreach (var pair in pairs)
@@ -83,19 +115,8 @@ namespace Hippo.Web.Services
                 var sponsorAccount = await _dbContext.Accounts.Where(a => a.ClusterId == cluster.Id && a.OwnerId == sponsorUser.Id).SingleOrDefaultAsync();
                 if(sponsorAccount == null)
                 {
-                    sponsorAccount = new Account()
-                    {
-                        CanSponsor = true,
-                        OwnerId = sponsorUser.Id,
-                        ClusterId =  cluster.Id,
-                        Name = $"{sponsorUser.Name} ({sponsorUser.Email})",
-                        Status = Statuses.Active,
-                    };
-                    await _dbContext.Accounts.AddAsync(sponsorAccount);
-                }
-                else
-                {
-                    sponsorAccount.CanSponsor = true;
+                    Log.Error($"Skipping {accounts[0]}-{accounts[1]} because of missing sponsor");
+                    continue;
                 }
 
                 var newAccount = await _dbContext.Accounts.Where(a => a.ClusterId == cluster.Id && a.OwnerId == accountUser.Id).SingleOrDefaultAsync();
@@ -107,7 +128,7 @@ namespace Hippo.Web.Services
                         OwnerId = accountUser.Id,
                         ClusterId = cluster.Id,
                         Name = $"{accountUser.Name} ({accountUser.Email})",
-                        Sponsor = sponsorAccount,
+                        SponsorId = sponsorAccount.Id,
                         Status = Statuses.Active,
                     };
                     await _dbContext.Accounts.AddAsync(newAccount);
