@@ -2,6 +2,7 @@
 using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Email.Models;
+using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +18,15 @@ namespace Hippo.Web.Controllers
         public ISshService _sshService { get; }
         public INotificationService _notificationService { get; }
         public AppDbContext _dbContext { get; }
+        public IBulkLoadService BulkLoadService { get; }
 
-        public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext)
+        public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext, IBulkLoadService bulkLoadService)
         {
             _emailService = emailService;
             _sshService = sshService;
             _notificationService = notificationService;
             _dbContext = dbContext;
+            BulkLoadService = bulkLoadService;
         }
 
         public async Task<IActionResult> TestEmail()
@@ -126,6 +129,26 @@ namespace Hippo.Web.Controllers
             }
 
             return Content(sb.ToString());
+        }
+
+        [HttpGet]
+        public IActionResult BulkLoad()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkLoad(string id)
+        {
+            var cluster = await _dbContext.Clusters.Where(c => c.Name == "caesfarm").SingleAsync();
+            //var data = "tucoterv-cslupsky,dsondag-cslupsky,nacuriel-cslupsky,marikab-clmark,cshiang-clmark,tmfranci-lgmastac,jdowen-clmark,jshkaur-clmark,amzepeda-lgmastac,siocrubs-lgmastac,jchillho-lgmastac,mdhawort-lgmastac,helvic-lgmastac,orendain-lgmastac,noelle-lgmastac,dwfujino-lgmastac,tdickins-lgmastac,nmreynol-lgmastac,vjebanez-lgmastac,aeht-lgmastac";
+
+            var data = id.Replace("\r", string.Empty);
+            data = data.Replace("\n", string.Empty);
+
+            var count = await BulkLoadService.Load(cluster, data);
+
+            return Content(count.ToString());
         }
 
         [Authorize(Policy = AccessCodes.AdminAccess)]
