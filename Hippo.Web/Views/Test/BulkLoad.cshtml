@@ -1,0 +1,22 @@
+﻿@{
+
+    ViewData["Title"] = "Bulky";
+
+    Layout = null;
+}
+<div class="card-wrapper col-md-6">
+    <div class="card-content">
+        <h2>Bulk Load</h2>
+            <form asp-action="BulkLoad">
+
+            <div class="form-group">
+               
+                <textarea name="id" id="id" rows=30></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Bulk Load Sumbit" class="btn btn-primary" />
+                
+            </div>
+        </form>
+    </div>
+</div>
