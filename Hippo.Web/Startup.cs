@@ -188,6 +188,7 @@ namespace Hippo.Web
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
             services.AddScoped<IYamlService, YamlService>();
+            services.AddScoped<IBulkLoadService, BulkLoadService>();
 
         }
 
