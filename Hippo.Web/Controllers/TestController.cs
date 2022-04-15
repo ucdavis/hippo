@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Hippo.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
     public class TestController : Controller
     {
         public IEmailService _emailService { get; }

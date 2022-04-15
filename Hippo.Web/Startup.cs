@@ -242,7 +242,7 @@ namespace Hippo.Web
                     name: "default",
                     pattern: "{controller}/{action}/{id?}",
                     defaults: new { controller = "Home", action = "Index" },
-                    constraints: new { controller = "(home|test|system)" }
+                    constraints: new { controller = "(home|system)" }
                 );
 
                 // API routes map to all other controllers and require cluster
