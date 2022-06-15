@@ -77,11 +77,13 @@ public class AccountController : SuperController
             return NotFound();
         }
 
+        var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
 
-        _sshService.PlaceFile(account.SshKey, tempFileName);
-        _sshService.RenameFile(tempFileName, fileName);
+        await _sshService.PlaceFile(account.SshKey, tempFileName, connectionInfo);
+        await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
         account.Status = Account.Statuses.Active;
 

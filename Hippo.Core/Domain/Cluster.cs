@@ -20,6 +20,12 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(250)]
         public string Description { get; set; } = String.Empty;
+        [MaxLength(250)]
+        public string SshName { get; set; } = String.Empty;
+        [MaxLength(40)]
+        public string SshKeyId { get; set; } = String.Empty;
+        [MaxLength(250)]
+        public string SshUrl { get; set; } = String.Empty;
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }

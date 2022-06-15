@@ -4,6 +4,7 @@ using Hippo.Core.Services;
 using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.KeyVault.Models;
 using Microsoft.EntityFrameworkCore;
 using Razor.Templating.Core;
 using System.Text;
@@ -11,19 +12,22 @@ using System.Text;
 namespace Hippo.Web.Controllers
 {
     [Authorize(Policy = AccessCodes.SystemAccess)]
-    public class TestController : Controller
+    public class TestController : SuperController
     {
         public IEmailService _emailService { get; }
         public ISshService _sshService { get; }
         public INotificationService _notificationService { get; }
         public AppDbContext _dbContext { get; }
+        public ISecretsService _secretsService { get; }
 
-        public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext)
+        public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext,
+            ISecretsService secretsService)
         {
             _emailService = emailService;
             _sshService = sshService;
             _notificationService = notificationService;
             _dbContext = dbContext;
+            _secretsService = secretsService;
         }
 
         public async Task<IActionResult> TestEmail()
@@ -56,7 +60,7 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> TestAccountRequest()
         {
             var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
-            if(await _notificationService.AccountRequested(account))
+            if (await _notificationService.AccountRequested(account))
             {
                 return Content("Email Sent");
             }
@@ -74,9 +78,15 @@ namespace Hippo.Web.Controllers
             return Content("Houston we have a problem");
         }
 
-        public IActionResult TestSsh()
+        public async Task<IActionResult> TestSsh()
         {
-            var testValue = _sshService.Test();
+            if (Cluster == null)
+            {
+                return Content("No cluster in route");
+            }
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+
+            var testValue = await _sshService.Test(connectionInfo);
             var sb = new StringBuilder();
             foreach (var result in testValue)
             {
@@ -86,25 +96,42 @@ namespace Hippo.Web.Controllers
             return Content(sb.ToString());
         }
 
-        public IActionResult TestScp()
+        public async Task<IActionResult> TestScp()
         {
-            _sshService.PlaceFile("This is a test file 123.", "/var/lib/remote-api/test.txt");
+            if (Cluster == null)
+            {
+                return Content("No cluster in route");
+            }
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+
+            await _sshService.PlaceFile("This is a test file 123.", "/var/lib/remote-api/test.txt", connectionInfo);
             return Content("file placed");
         }
 
-        public IActionResult TestScd()
+        public async Task<IActionResult> TestScd()
         {
-            using var stream = _sshService.DownloadFile("xxxx.txt"); 
-            
+            if (Cluster == null)
+            {
+                return Content("No cluster in route");
+            }
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+
+            using var stream = await _sshService.DownloadFile("xxxx.txt", connectionInfo);
+
             return File(stream.ToArray(), "application/force-download");
         }
 
-        public IActionResult TestRename1()
+        public async Task<IActionResult> TestRename1()
         {
+            if (Cluster == null)
+            {
+                return Content("No cluster in route");
+            }
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
 
-            _sshService.RenameFile("jcstest.txt", ".jcstest.txt");
+            await _sshService.RenameFile("jsylvest.txt", ".jsylvest.txt", connectionInfo);
 
-            var testValue = _sshService.Test();
+            var testValue = await _sshService.Test(connectionInfo);
             var sb = new StringBuilder();
             foreach (var result in testValue)
             {
@@ -113,16 +140,44 @@ namespace Hippo.Web.Controllers
 
             return Content(sb.ToString());
         }
-        public IActionResult TestRename2()
+        public async Task<IActionResult> TestRename2()
         {
+            if (Cluster == null)
+            {
+                return Content("No cluster in route");
+            }
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
 
-            _sshService.RenameFile(".jcstest.txt", "jcstest.txt");
+            await _sshService.RenameFile(".jsylvest.txt", "jsylvest.txt", connectionInfo);
 
-            var testValue = _sshService.Test();
+            var testValue = await _sshService.Test(connectionInfo);
             var sb = new StringBuilder();
             foreach (var result in testValue)
             {
                 sb.AppendLine(result);
+            }
+
+            return Content(sb.ToString());
+        }
+
+        public async Task<IActionResult> TestSecret()
+        {
+            var sb = new StringBuilder();
+            var id = "test-" + Guid.NewGuid().ToString();
+            await _secretsService.SetSecret("id", "Hello Secret!");
+
+            var secret = await _secretsService.GetSecret(id);
+            sb.AppendLine(secret);
+            await _secretsService.DeleteSecret(id);
+            try
+            {
+                secret = await _secretsService.GetSecret(id);
+                sb.Append(secret);
+                sb.AppendLine(" (This should not be here)");
+            }
+            catch (KeyVaultErrorException ex) when (ex.Message.Contains("NotFound"))
+            {
+                sb.AppendLine("Secret successfully deleted");
             }
 
             return Content(sb.ToString());

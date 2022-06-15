@@ -6,75 +6,133 @@ using System.Threading.Tasks;
 using Renci.SshNet;
 using Microsoft.Extensions.Options;
 using Hippo.Core.Models.Settings;
+using Hippo.Core.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Services
 {
     public interface ISshService
     {
-        IEnumerable<string> Test();
-        void PlaceFile(string contents, string path);
-        void RenameFile(string origPath, string newPath);
-
-        MemoryStream DownloadFile(string fileName);
+        Task<IEnumerable<string>> Test(SshConnectionInfo connectionInfo);
+        Task PlaceFile(string contents, string path, SshConnectionInfo connectionInfo);
+        Task RenameFile(string origPath, string newPath, SshConnectionInfo connectionInfo);
+        Task<MemoryStream> DownloadFile(string fileName, SshConnectionInfo connectionInfo);
     }
 
     public class SshService : ISshService
     {
-        private readonly SshSettings _sshSettings;
-        private readonly PrivateKeyFile _pkFile;
+        private readonly ISecretsService _secretsService;
+        private PrivateKeyFile _pkFile = null;
 
-        public SshService(IOptions<SshSettings> sshSettings)
+        public SshService(ISecretsService secretsService)
         {
-            _sshSettings = sshSettings.Value;
-            using (var stream = new MemoryStream(Convert.FromBase64String(_sshSettings.Key)))
-            {
-                _pkFile = new PrivateKeyFile(stream);
-            }
+            _secretsService = secretsService;
         }
 
-        public void PlaceFile(string contents, string path)
+        public async Task PlaceFile(string contents, string path, SshConnectionInfo connectionInfo)
         {
-            using var client = GetScpClient();
+            using var client = await GetScpClient(connectionInfo);
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(contents));
             client.Upload(ms, path);
         }
 
-        public IEnumerable<string> Test()
+        public async Task<IEnumerable<string>> Test(SshConnectionInfo connectionInfo)
         {
-            using var client = GetSshClient();
+            using var client = await GetSshClient(connectionInfo);
             var result = client.RunCommand("ls -l"); // ls -alR
             return result.Result.Split('\n');
         }
 
-        // for running shell commands
-        private SshClient GetSshClient()
+        private async Task<PrivateKeyFile> GetPrivateKeyFile(string keyId)
         {
-            var client = new SshClient(_sshSettings.Url, _sshSettings.Name, _pkFile);
+            if (keyId == null)
+            {
+                throw new ArgumentNullException(nameof(keyId));
+            }
+
+            if (_pkFile != null)
+            {
+                return _pkFile;
+            }
+
+            var key = await _secretsService.GetSecret(keyId);
+            using (var stream = new MemoryStream(Convert.FromBase64String(key)))
+            {
+                _pkFile = new PrivateKeyFile(stream);
+            }
+
+            return _pkFile;
+        }
+
+        // for running shell commands
+        private async Task<SshClient> GetSshClient(SshConnectionInfo connectionInfo)
+        {
+            var pkFile = await GetPrivateKeyFile(connectionInfo.KeyId);
+            var client = new SshClient(connectionInfo.Url, connectionInfo.Name, pkFile);
             client.Connect();
             return client;
         }
 
         // for file transfer
-        private ScpClient GetScpClient()
+        private async Task<ScpClient> GetScpClient(SshConnectionInfo connectionInfo)
         {
-            var client = new ScpClient(_sshSettings.Url, _sshSettings.Name, _pkFile);
+            var pkFile = await GetPrivateKeyFile(connectionInfo.KeyId);
+            var client = new ScpClient(connectionInfo.Url, connectionInfo.Name, pkFile);
             client.Connect();
             return client;
         }
 
-        public MemoryStream DownloadFile(string fileName)
+        public async Task<MemoryStream> DownloadFile(string fileName, SshConnectionInfo connectionInfo)
         {
-            using var client = GetScpClient();
+            using var client = await GetScpClient(connectionInfo);
             var stream = new MemoryStream();
             client.Download(fileName, stream );
 
             return stream;
         }
 
-        public void RenameFile(string origPath, string newPath)
+        public async Task RenameFile(string origPath, string newPath, SshConnectionInfo connectionInfo)
         {
-            using var client = GetSshClient();
+            using var client = await GetSshClient(connectionInfo);
             var result = client.RunCommand($"mv \"{origPath}\" \"{newPath}\"");
+        }
+    }
+
+    public class SshConnectionInfo
+    {
+        public string Url { get; set; }
+        public string Name { get; set; }
+        public string KeyId { get; set; }
+    }
+
+    public static class ClusterExtensions
+    {
+        public static async Task<SshConnectionInfo> GetSshConnectionInfo(this IQueryable<Cluster> clusters, string clusterName)
+        {
+            if (clusters == null)
+            {
+                throw new ArgumentNullException(nameof(clusters));
+            }
+
+            if (clusterName == null)
+            {
+                throw new ArgumentNullException(nameof(clusterName));
+            }
+
+            var connectionInfo = await clusters.Where(c => c.Name == clusterName).Select(c =>
+                new SshConnectionInfo
+                {
+                    Url = c.SshUrl,
+                    Name = c.SshName,
+                    KeyId = c.SshKeyId
+                }).SingleOrDefaultAsync();
+
+            if (connectionInfo == null)
+            {
+                throw new ArgumentException($"No cluster found with name {clusterName}");
+            }
+
+            return connectionInfo;
         }
     }
 }

@@ -177,7 +177,7 @@ namespace Hippo.Web
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
-            services.Configure<SshSettings>(Configuration.GetSection("SSH"));
+            services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<IEmailService, EmailService>();
@@ -188,7 +188,7 @@ namespace Hippo.Web
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
             services.AddScoped<IYamlService, YamlService>();
-
+            services.AddSingleton<ISecretsService, SecretsService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
