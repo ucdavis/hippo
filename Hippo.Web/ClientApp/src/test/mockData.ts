@@ -49,6 +49,9 @@ const fakeCluster: Cluster = {
   id: 1,
   name: "caesfarm",
   description: "The farm cluster",
+  sshKeyId: "90775ee7-1117-43ce-a02a-d335075e040d",
+  sshName: "ssh-name",
+  sshUrl: "ssh-url.com",
 };
 
 export const fakeAppContext: AppContextShape = {

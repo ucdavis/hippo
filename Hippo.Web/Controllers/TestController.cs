@@ -164,7 +164,7 @@ namespace Hippo.Web.Controllers
         {
             var sb = new StringBuilder();
             var id = "test-" + Guid.NewGuid().ToString();
-            await _secretsService.SetSecret("id", "Hello Secret!");
+            await _secretsService.SetSecret(id, "Hello Secret!");
 
             var secret = await _secretsService.GetSecret(id);
             sb.AppendLine(secret);

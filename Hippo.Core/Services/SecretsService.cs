@@ -1,8 +1,10 @@
 using System;
 using Hippo.Core.Models.Settings;
 using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Rest.Azure;
 
 namespace Hippo.Core.Services
 {
@@ -11,9 +13,10 @@ namespace Hippo.Core.Services
         Task SetSecret(string name, string value);
         Task<string> GetSecret(string name);
         Task DeleteSecret(string name);
+        Task<List<string>> GetSecretNames();
     }
-    
-    public class SecretsService: ISecretsService
+
+    public class SecretsService : ISecretsService
     {
         private readonly AzureSettings _azureSettings;
         private readonly KeyVaultClient _vault;
@@ -46,7 +49,7 @@ namespace Hippo.Core.Services
 
             await _vault.SetSecretAsync(_azureSettings.KeyVaultUrl, name, value);
         }
-        
+
         public async Task<string> GetSecret(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -66,6 +69,31 @@ namespace Hippo.Core.Services
             }
 
             await _vault.DeleteSecretAsync(_azureSettings.KeyVaultUrl, name);
+        }
+
+        public async Task<List<string>> GetSecretNames()
+        {
+            var ids = new List<string>();
+            IPage<SecretItem> items = await _vault.GetSecretsAsync(_azureSettings.KeyVaultUrl);
+
+            while (items.Any())
+            {
+                foreach (var item in items)
+                {
+                    var id = item.Id.Replace(_azureSettings.KeyVaultUrl + "secrets/", "").Split('/')[0];
+                    ids.Add(id);
+                }
+
+                if (!string.IsNullOrEmpty(items.NextPageLink))
+                {
+                    items = await _vault.GetSecretsNextAsync(items.NextPageLink);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return ids;
         }
     }
 }

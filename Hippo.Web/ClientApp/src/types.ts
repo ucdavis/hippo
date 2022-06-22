@@ -9,7 +9,7 @@ export interface User {
   isAdmin: boolean;
 }
 
-export type RoleName = "Admin" | "Sponsor";
+export type RoleName = "Admin" | "Sponsor" | "System";
 
 export interface Account {
   id: number;
@@ -28,6 +28,9 @@ export interface Cluster {
   id: number;
   name: string;
   description: string;
+  sshName: string;
+  sshKeyId: string;
+  sshUrl: string;
 }
 
 export interface RequestPostModel {
@@ -56,4 +59,9 @@ export interface PromiseStatus {
 
 export interface IRouteParams {
   cluster: string;
+}
+
+export interface ClusterModel {
+  cluster: Cluster;
+  sshKey?: string;
 }
