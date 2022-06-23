@@ -96,11 +96,7 @@ namespace Hippo.Web.Controllers
 
             if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && !string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
             {
-                var currentSshKey = await _secretsService.GetSecret(clusterModel.Cluster.SshKeyId);
-                if (!string.Equals(clusterModel.SshKey, currentSshKey, StringComparison.OrdinalIgnoreCase))
-                {
-                    await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
-                }
+                await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
             }
 
             return Ok(clusterModel);
