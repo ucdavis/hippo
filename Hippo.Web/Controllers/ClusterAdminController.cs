@@ -121,17 +121,13 @@ namespace Hippo.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var cluster = await _dbContext.Clusters.AsNoTracking().SingleOrDefaultAsync(c => c.Id == id);
+            var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Id == id);
             if (cluster == null)
             {
                 return NotFound();
             }
-            _dbContext.Remove(cluster);
+            cluster.IsInactive = true;
             await _dbContext.SaveChangesAsync();
-            if(!string.IsNullOrEmpty(cluster.SshKeyId))
-            {
-                await _secretsService.DeleteSecret(cluster.SshKeyId);
-            }
             return Ok();
         }
     }

@@ -186,7 +186,7 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IYamlService, YamlService>();
             services.AddSingleton<ISecretsService, SecretsService>();
         }

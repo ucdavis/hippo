@@ -129,6 +129,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsInactive")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(20)

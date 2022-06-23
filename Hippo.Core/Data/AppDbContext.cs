@@ -38,6 +38,8 @@ namespace Hippo.Core.Data
             base.OnModelCreating(builder);
             Account.OnModelCreating(builder);
             User.OnModelCreating(builder);
+            History.OnModelCreating(builder);
+            Cluster.OnModelCreating(builder);
         }
     }
  }
