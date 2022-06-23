@@ -245,7 +245,13 @@ namespace Hippo.Web
                     constraints: new { controller = "(home|system)" }
                 );
 
-                // API routes map to all other controllers and require cluster
+                // clusteradmin API routes don't include a {cluster} segment
+                endpoints.MapControllerRoute(
+                    name: "clusteradminAPI",
+                    pattern: "/api/{controller}/{action=Index}/{id?}",
+                    constraints: new { controller = "(clusteradmin)" });
+
+                // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(
                     name: "API",
                     pattern: "/api/{cluster}/{controller=Account}/{action=Index}/{id?}");

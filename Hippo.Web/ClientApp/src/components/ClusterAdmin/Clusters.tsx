@@ -149,7 +149,7 @@ export const Clusters = () => {
 
   useEffect(() => {
     const fetchClusters = async () => {
-      const response = await authenticatedFetch(`/api/_/clusteradmin/clusters`);
+      const response = await authenticatedFetch(`/api/clusteradmin/clusters`);
 
       if (response.ok) {
         setClusters(await response.json());
@@ -167,7 +167,7 @@ export const Clusters = () => {
       return;
     }
 
-    const req = authenticatedFetch(`/api/_/clusteradmin/delete/${id}`, {
+    const req = authenticatedFetch(`/api/clusteradmin/delete/${id}`, {
       method: "POST",
     });
 
@@ -190,7 +190,7 @@ export const Clusters = () => {
       return;
     }
 
-    const req = authenticatedFetch(`/api/_/clusteradmin/create`, {
+    const req = authenticatedFetch(`/api/clusteradmin/create`, {
       method: "POST",
       body: JSON.stringify(newModel),
     });
@@ -232,7 +232,7 @@ export const Clusters = () => {
       return;
     }
 
-    const req = authenticatedFetch(`/api/_/clusteradmin/update`, {
+    const req = authenticatedFetch(`/api/clusteradmin/update`, {
       method: "POST",
       body: JSON.stringify(newModel),
     });
