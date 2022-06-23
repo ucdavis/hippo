@@ -140,8 +140,10 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<bool>("IsInactive")
-                        .HasColumnType("bit");
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -161,6 +163,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name");
 
                     b.ToTable("Clusters");
                 });
@@ -262,7 +266,7 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany("Accounts")
                         .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
@@ -303,18 +307,19 @@ namespace Hippo.Core.Migrations.SqlServer
                 {
                     b.HasOne("Hippo.Core.Domain.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Hippo.Core.Domain.User", "ActedBy")
                         .WithMany()
                         .HasForeignKey("ActedById")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany()
                         .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Account");

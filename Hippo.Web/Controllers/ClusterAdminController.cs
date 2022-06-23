@@ -126,7 +126,7 @@ namespace Hippo.Web.Controllers
             {
                 return NotFound();
             }
-            cluster.IsInactive = true;
+            cluster.IsActive = false;
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
