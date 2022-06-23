@@ -39,14 +39,6 @@ namespace Hippo.Web.Controllers
                 .Select(c => new ClusterModel(c, string.Empty))
                 .ToArray();
 
-            foreach (var model in clusterModels)
-            {
-                if (!string.IsNullOrEmpty(model.Cluster.SshKeyId) && currentSecretKeyIds.Contains(model.Cluster.SshKeyId))
-                {
-                    model.SshKey = await _secretsService.GetSecret(model.Cluster.SshKeyId);
-                }
-            }
-
             return Ok(clusterModels);
         }
 
@@ -58,11 +50,7 @@ namespace Hippo.Web.Controllers
             {
                 return NotFound();
             }
-            var sshKey = !string.IsNullOrEmpty(cluster.SshKeyId)
-                ? await _secretsService.GetSecret(cluster.SshKeyId)
-                : string.Empty;
-
-            var clusterModel = new ClusterModel(cluster, sshKey);
+            var clusterModel = new ClusterModel(cluster, string.Empty);
             return Ok(clusterModel);
         }
 
