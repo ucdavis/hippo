@@ -8,7 +8,7 @@ import { useRouteMatch } from "react-router-dom";
 interface Props {
   children: any;
   roles: RoleName[];
-  cluster: string;
+  cluster?: string;
   condition?: boolean | (() => boolean);
 }
 
@@ -35,7 +35,7 @@ export const ShowFor = (props: Props) => {
 
   // not admin, need to check roles within the cluster
   const clusterAccount = context.accounts.find((a) => a.cluster === cluster);
-  
+
   if (clusterAccount) {
     if (conditionSatisfied && roles.includes("Sponsor")) {
       if (clusterAccount.canSponsor) {

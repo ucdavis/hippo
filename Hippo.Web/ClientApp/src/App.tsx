@@ -19,6 +19,7 @@ import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
 import { Clusters } from "./components/Account/Clusters";
+import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 
 declare var Hippo: AppContextShape;
 
@@ -50,7 +51,7 @@ const App = () => {
               path="/:cluster/pendingapproval"
               component={PendingApproval}
             />
-            <Route path="/:cluster/create" component={RequestForm} />            
+            <Route path="/:cluster/create" component={RequestForm} />
             <ConditionalRoute
               roles={["Sponsor"]}
               path="/:cluster/approve"
@@ -75,6 +76,11 @@ const App = () => {
               roles={["Admin"]}
               path="/:cluster/admin/accountApprovals"
               component={AdminApproveAccounts}
+            />
+            <ConditionalRoute
+              roles={["System"]}
+              path="/clusteradmin/clusters"
+              component={AdminClusters}
             />
           </Switch>
         </div>

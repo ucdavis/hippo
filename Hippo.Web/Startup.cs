@@ -177,7 +177,7 @@ namespace Hippo.Web
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
-            services.Configure<SshSettings>(Configuration.GetSection("SSH"));
+            services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<IEmailService, EmailService>();
@@ -186,9 +186,9 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddSingleton<IHttpContextAccessor, NullHttpContextAccessor>();
             services.AddScoped<IYamlService, YamlService>();
-
+            services.AddSingleton<ISecretsService, SecretsService>();
+            services.AddHttpContextAccessor();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
@@ -245,7 +245,13 @@ namespace Hippo.Web
                     constraints: new { controller = "(home|system)" }
                 );
 
-                // API routes map to all other controllers and require cluster
+                // clusteradmin API routes don't include a {cluster} segment
+                endpoints.MapControllerRoute(
+                    name: "clusteradminAPI",
+                    pattern: "/api/{controller}/{action=Index}/{id?}",
+                    constraints: new { controller = "(clusteradmin)" });
+
+                // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(
                     name: "API",
                     pattern: "/api/{cluster}/{controller=Account}/{action=Index}/{id?}");
