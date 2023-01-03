@@ -35,7 +35,7 @@ namespace Hippo.Web.Services
             sb.AppendLine($"    iam: {sponsorAccount.Owner.Iam}");
             sb.AppendLine($"    mothra: {sponsorAccount.Owner.MothraId}");
             sb.AppendLine();
-            sb.AppendLine("Account:");
+            sb.AppendLine("account:");
             sb.AppendLine($"    name: {currentUser.Name}");
             sb.AppendLine($"    email: {currentUser.Email}");
             sb.AppendLine($"    kerb: {currentUser.Kerberos}");
