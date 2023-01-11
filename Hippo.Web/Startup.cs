@@ -300,10 +300,13 @@ namespace Hippo.Web
 
             dbContext.Database.Migrate();
 
-
-            var initializer = new DbInitializer(dbContext);
-            initializer.Initialize(recreateDb).GetAwaiter().GetResult();
-
+            var initializeDb = Configuration.GetValue<bool>("Dev:InitializeDb");
+            
+            if (initializeDb)
+            {
+                var initializer = new DbInitializer(dbContext);
+                initializer.Initialize(recreateDb).GetAwaiter().GetResult();
+            }
         }
     }
 }
