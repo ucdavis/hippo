@@ -19,17 +19,13 @@ export const ShowFor = (props: Props) => {
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = match?.params.cluster;
 
-  const systemUsers = ["jsylvest", "postit", "cydoval", "sweber"];
   const conditionSatisfied = isBoolean(props.condition)
     ? props.condition
     : isFunction(props.condition)
     ? props.condition()
     : true;
 
-  if (
-    conditionSatisfied &&
-    systemUsers.includes(context.user.detail.kerberos)
-  ) {
+  if (conditionSatisfied && context.user.detail.isAdmin) {
     return <>{children}</>;
   }
 

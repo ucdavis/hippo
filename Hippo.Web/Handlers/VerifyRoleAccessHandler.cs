@@ -29,8 +29,7 @@ namespace Hippo.Web.Handlers
                 return;
             }
 
-            var systemUsers = new[] { "jsylvest", "postit", "cydoval", "sweber" }; //TODO: Change this to use the user.IsAdmin?
-            if (systemUsers.Contains(kerbId))
+            if (await _dbContext.Users.AnyAsync(u => u.Iam == userIamId && u.IsAdmin))
             {
                 context.Succeed(requirement);
                 return;
