@@ -30,12 +30,7 @@ namespace Hippo.Web.Controllers
         [Authorize(Policy = AccessCodes.SystemAccess)]
         public async Task<IActionResult> Emulate(string id)
         {
-            //var allowedUsers = new[] {"jsylvest", "postit", "cydoval", "sweber" };
             var currentUser = await _userService.GetCurrentUser();
-            //if(currentUser == null || !allowedUsers.Contains(currentUser.Kerberos))
-            //{
-            //    return Unauthorized();
-            //}
             Log.Information($"Emulation attempted for {id} by {currentUser.Name}");
             var lookupVal = id.Trim();
 
