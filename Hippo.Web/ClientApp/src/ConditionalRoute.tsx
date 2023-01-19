@@ -14,9 +14,8 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = match?.params.cluster;
 
-  // if the user has System role they can see everything (But we don't have a roles table yet)
-  const systemUsers = ["jsylvest", "postit", "cydoval", "sweber"];
-  if (systemUsers.includes(context.user.detail.kerberos)) {
+  // if the user is admin they can see everything
+  if (context.user.detail.isAdmin) {
     return <Route {...props} />;
   }
 
