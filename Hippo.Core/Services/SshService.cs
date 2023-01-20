@@ -56,7 +56,7 @@ namespace Hippo.Core.Services
             }
 
             var key = await _secretsService.GetSecret(keyId);
-            using (var stream = new MemoryStream(Convert.FromBase64String(key)))
+            using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(key)))
             {
                 _pkFile = new PrivateKeyFile(stream);
             }
