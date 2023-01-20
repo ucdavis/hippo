@@ -1,10 +1,10 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
-using Hippo.Web.Models.Settings;
+using Hippo.Core.Models.Settings;
 using Ietws;
 using Microsoft.Extensions.Options;
 
-namespace Hippo.Web.Services
+namespace Hippo.Core.Services
 {
     public interface IIdentityService
     {
