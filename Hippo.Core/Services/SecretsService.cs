@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Hippo.Core.Models.Settings;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
@@ -46,6 +47,7 @@ namespace Hippo.Core.Services
             {
                 throw new ArgumentException(nameof(value));
             }
+            value = Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
 
             await _vault.SetSecretAsync(_azureSettings.KeyVaultUrl, name, value);
         }
