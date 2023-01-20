@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Hippo.Web.Models.Settings;
 using Hippo.Web.Services;
 using System.Security.Claims;
 using Hippo.Core.Utilities;
@@ -19,6 +18,7 @@ using Hippo.Web.Middleware;
 using Hippo.Core.Models;
 using Hippo.Web.Handlers;
 using Microsoft.AspNetCore.Authorization;
+
 
 namespace Hippo.Web
 {

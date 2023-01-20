@@ -26,12 +26,14 @@ namespace Hippo.Core.Services
     public class UserService : IUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityService _identityService;
         private readonly AppDbContext _dbContext;
         public const string IamIdClaimType = "ucdPersonIAMID";
 
-        public UserService(AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public UserService(AppDbContext dbContext, IHttpContextAccessor httpContextAccessor, IIdentityService identityService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _identityService = identityService;
             _dbContext = dbContext;
         }
 
@@ -87,6 +89,13 @@ namespace Hippo.Core.Services
 
             if (dbUser != null)
             {
+                if (dbUser.MothraId == null)
+                {
+                    var foundUser = await _identityService.GetByKerberos(dbUser.Kerberos);
+                    dbUser.MothraId = foundUser.MothraId;
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 return dbUser; // already in the db, just return straight away
             }
             else
@@ -100,6 +109,9 @@ namespace Hippo.Core.Services
                     Iam = iamId,
                     Kerberos = userClaims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value
                 };
+
+                var foundUser = await _identityService.GetByKerberos(newUser.Kerberos);
+                newUser.MothraId = foundUser.MothraId;
 
                 _dbContext.Users.Add(newUser);
 

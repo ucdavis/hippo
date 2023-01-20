@@ -1,4 +1,4 @@
-﻿namespace Hippo.Web.Models.Settings
+﻿namespace Hippo.Core.Models.Settings
 {
     public class AuthSettings
     {
