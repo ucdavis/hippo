@@ -47,7 +47,8 @@ namespace Hippo.Web
             {
                 loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(elasticUri)
                 {
-                    IndexFormat = "aspnet-hippo-{0:yyyy.MM}"
+                    IndexFormat = "aspnet-hippo-{0:yyyy.MM}",
+                    TypeName = null,
                 });
             }
 
