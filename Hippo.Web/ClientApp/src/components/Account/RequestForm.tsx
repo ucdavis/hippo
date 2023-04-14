@@ -102,10 +102,10 @@ export const RequestForm = () => {
             Your sponsor is probably your PI or your Department. You can filter
             this list by typing in it.
             <br />
-            If you don't see your sponsor, you may contact IT help to request
+            If you don't see your sponsor, you may contact HPC help to request
             they be added.{" "}
-            <a href="mailto: ithelp@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
-              Click here to contact IET Help
+            <a href="mailto: hpc-help@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
+              Click here to contact HPC Help
             </a>
           </p>
         </div>
