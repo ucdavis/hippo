@@ -172,6 +172,25 @@ public class AccountController : SuperController
             return BadRequest("Cluster not found");
         }
 
+        var existingAccount = await _dbContext.Accounts
+            .Include(a => a.Owner)
+            .Include(a => a.Cluster)
+            .InCluster(Cluster)
+            .AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == currentUser.Id && a.Status == Account.Statuses.Active);
+
+        if (existingAccount != null) 
+        {
+            existingAccount.SshKey = await _yamlService.Get(currentUser, model);
+
+            await _historyService.AccountApproved(existingAccount);
+            await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
+
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(existingAccount);
+        }
+
         var account = new Account()
         {
             CanSponsor = false, 
