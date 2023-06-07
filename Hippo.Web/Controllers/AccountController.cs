@@ -4,6 +4,7 @@ using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
 using Hippo.Web.Services;
+using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -187,6 +188,13 @@ public class AccountController : SuperController
             await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
 
             await _dbContext.SaveChangesAsync();
+
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+            var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.txt";
+            var fileName = $"/var/lib/remote-api/{existingAccount.Owner.Kerberos}.txt";
+
+            await _sshService.PlaceFile(existingAccount.SshKey, tempFileName, connectionInfo);
+            await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
             return Ok(existingAccount);
         }
