@@ -4,6 +4,7 @@ using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
 using Hippo.Web.Services;
+using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -145,13 +146,6 @@ public class AccountController : SuperController
         {
             return BadRequest("Please select a sponsor from the list.");
         }
-
-        // make sure current user doesn't already have another account
-        if (await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Owner.Iam == currentUser.Iam))
-        {
-            return BadRequest("You already have an account");
-        }
-
         if (!(await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
             return BadRequest("Sponsor not found.");
@@ -170,6 +164,32 @@ public class AccountController : SuperController
         if (cluster == null)
         {
             return BadRequest("Cluster not found");
+        }
+
+        var existingAccount = await _dbContext.Accounts
+            .Include(a => a.Owner)
+            .Include(a => a.Cluster)
+            .InCluster(Cluster)
+            .AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == currentUser.Id && a.Status == Account.Statuses.Active);
+
+        if (existingAccount != null) 
+        {
+            existingAccount.SshKey = await _yamlService.Get(currentUser, model);
+
+            await _historyService.AccountApproved(existingAccount);
+            await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
+
+            await _dbContext.SaveChangesAsync();
+
+            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+            var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.txt";
+            var fileName = $"/var/lib/remote-api/{existingAccount.Owner.Kerberos}.txt";
+
+            await _sshService.PlaceFile(existingAccount.SshKey, tempFileName, connectionInfo);
+            await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
+
+            return Ok(existingAccount);
         }
 
         var account = new Account()
