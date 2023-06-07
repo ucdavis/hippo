@@ -146,13 +146,6 @@ public class AccountController : SuperController
         {
             return BadRequest("Please select a sponsor from the list.");
         }
-
-        // make sure current user doesn't already have another account
-        if (await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Owner.Iam == currentUser.Iam))
-        {
-            return BadRequest("You already have an account");
-        }
-
         if (!(await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
         {
             return BadRequest("Sponsor not found.");
