@@ -80,8 +80,8 @@ public class AccountController : SuperController
 
         var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
 
-        var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.txt"; //Leading .
-        var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.txt";
+        var tempFileName = $"/var/lib/remote-api/.{Cluster}{account.Owner.Kerberos}.yaml"; //Leading .
+        var fileName = $"/var/lib/remote-api/{Cluster}{account.Owner.Kerberos}.yaml";
 
         await _sshService.PlaceFile(account.SshKey, tempFileName, connectionInfo);
         await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
@@ -183,8 +183,8 @@ public class AccountController : SuperController
             await _dbContext.SaveChangesAsync();
 
             var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
-            var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.txt";
-            var fileName = $"/var/lib/remote-api/{existingAccount.Owner.Kerberos}.txt";
+            var tempFileName = $"/var/lib/remote-api/.{Cluster}{existingAccount.Owner.Kerberos}.yaml"; //Leading .
+            var fileName = $"/var/lib/remote-api/{Cluster}{existingAccount.Owner.Kerberos}.yaml";
 
             await _sshService.PlaceFile(existingAccount.SshKey, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
