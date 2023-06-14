@@ -108,9 +108,12 @@ When you run `create-react-app`, it always creates the project with the latest v
 
 To update an existing project to a new version of `react-scripts`, [open the changelog](https://github.com/facebookincubator/create-react-app/blob/master/CHANGELOG.md), find the version you’re currently on (check `package.json` in this folder if you’re not sure), and apply the migration instructions for the newer versions.
 
-In most cases bumping the `react-scripts` version in `package.json` and running `npm install` in this folder should be enough, but it’s good to consult the [changelog](https://github.com/facebookincubator/create-react-app/blob/master/CHANGELOG.md) for potential breaking changes.
+In most cases bumping the `react-scripts` version in `package.json` and running `npm install --legacy-peer-deps` in this folder should be enough, but it’s good to consult the [changelog](https://github.com/facebookincubator/create-react-app/blob/master/CHANGELOG.md) for potential breaking changes.
 
 We commit to keeping the breaking changes minimal so you can upgrade `react-scripts` painlessly.
+
+**Note: There's currently an unresolved CRA issue that sometimes crops up when running `npm run build`. If you receive an error similar to
+"TypeError: Ajv is not a constructor," try deleting `node_modules` and `package-lock.json` and reinstalling with `npm install --legacy-peer-deps`**
 
 ## Sending Feedback
 
