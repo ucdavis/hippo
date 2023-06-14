@@ -23,7 +23,7 @@ stages:
     steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '14.x'
+        versionSpec: '18.x'
 
     - task: Npm@1
       displayName: 'Install Npm Packages'
@@ -70,7 +70,7 @@ stages:
     steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '14.x'
+        versionSpec: '18.x'
         
     - task: UseDotNet@2
       displayName: 'Use .NET 6 sdk'

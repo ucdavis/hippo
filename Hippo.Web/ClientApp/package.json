@@ -10,8 +10,8 @@
     "react-hot-toast": "^2.2.0",
     "react-modal-hook": "^3.0.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.3",
-    "reactstrap": "^9.0.1",
+    "react-scripts": "^5.0.1",
+    "reactstrap": "^9.1.6",
     "rimraf": "^2.6.2",
     "web-vitals": "^0.2.4"
   },
@@ -58,5 +58,9 @@
     ">0.2%",
     "not dead",
     "not op_mini all"
-  ]
+  ],
+  "engines": {
+    "npm": ">=9.5.1",
+    "node": ">=18.16.0"
+  }
 }
