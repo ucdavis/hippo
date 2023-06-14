@@ -28,7 +28,8 @@ stages:
     - task: Npm@1
       displayName: 'Install Npm Packages'
       inputs:
-        command: 'install'
+        command: 'custom'
+        customCommand: 'install --legacy-peer-deps'
         workingDir: './Hippo.Web/ClientApp'
 
     - task: UseDotNet@2
