@@ -3,6 +3,7 @@ using Hippo.Core.Domain;
 using Hippo.Web.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using YamlDotNet.Serialization;
 
 namespace Hippo.Web.Services
 {
@@ -26,24 +27,32 @@ namespace Hippo.Web.Services
         {
             var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.Id == accountCreateModel.SponsorId);
 
-            var sb = new StringBuilder();
-            sb.AppendLine("sponsor:");
-            sb.AppendLine($"    accountname: {sponsorAccount.Name}");
-            sb.AppendLine($"    name: {sponsorAccount.Owner.Name}");
-            sb.AppendLine($"    email: {sponsorAccount.Owner.Email}");
-            sb.AppendLine($"    kerb: {sponsorAccount.Owner.Kerberos}");
-            sb.AppendLine($"    iam: {sponsorAccount.Owner.Iam}");
-            sb.AppendLine($"    mothra: {sponsorAccount.Owner.MothraId}");
-            sb.AppendLine();
-            sb.AppendLine("account:");
-            sb.AppendLine($"    name: {currentUser.Name}");
-            sb.AppendLine($"    email: {currentUser.Email}");
-            sb.AppendLine($"    kerb: {currentUser.Kerberos}");
-            sb.AppendLine($"    iam: {currentUser.Iam}");
-            sb.AppendLine($"    mothra: {currentUser.MothraId}");
-            sb.AppendLine($"    key: \"{accountCreateModel.SshKey}\"");
-
-            return sb.ToString();
+            var yaml =  new Serializer();
+            
+            return yaml.Serialize(
+                new
+                {
+                    sponsor = new
+                    {
+                        accountname = sponsorAccount.Name,
+                        name = sponsorAccount.Owner.Name,
+                        email = sponsorAccount.Owner.Email,
+                        kerb = sponsorAccount.Owner.Kerberos,
+                        iam = sponsorAccount.Owner.Iam,
+                        mothra = sponsorAccount.Owner.MothraId,
+                        cluster = sponsorAccount.Cluster
+                    },
+                    account = new
+                    {
+                        name = currentUser.Name,
+                        email = currentUser.Email,
+                        kerb = currentUser.Kerberos,
+                        iam = currentUser.Iam,
+                        mothra = currentUser.MothraId,
+                        key = accountCreateModel.SshKey
+                    }
+                }
+            );
         }
     }
 }
