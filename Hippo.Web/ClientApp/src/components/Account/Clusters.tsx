@@ -26,10 +26,18 @@ export const Clusters = () => {
         <p>
           HiPPO supports multiple clusters. Please select a cluster to view.
         </p>
-        <ul>
+        <ul className="list-clusters">
           {clusters.map((cluster) => (
             <li key={cluster.name}>
-              <NavLink to={`/${cluster.name}`}>{cluster.description}</NavLink>
+              <NavLink 
+                to={`/${cluster.name}`}
+                style={{
+                  fontWeight: "bolder"
+                }}
+              >
+                {`${cluster.name}:`}
+              </NavLink>
+              <p>{cluster.description}</p>
             </li>
           ))}
         </ul>

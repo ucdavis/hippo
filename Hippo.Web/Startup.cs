@@ -18,7 +18,8 @@ using Hippo.Web.Middleware;
 using Hippo.Core.Models;
 using Hippo.Web.Handlers;
 using Microsoft.AspNetCore.Authorization;
-
+using MvcReact;
+using Microsoft.Extensions.Options;
 
 namespace Hippo.Web
 {
@@ -41,11 +42,8 @@ namespace Hippo.Web
                 options.Filters.Add<SerilogControllerActionFilter>();
             });
 
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            // Init services for hybrid mvc/react app
+            services.AddMvcReact();
 
             services.AddAuthentication(options =>
             {
@@ -191,7 +189,7 @@ namespace Hippo.Web
             services.AddHttpContextAccessor();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)
         {
             // TODO: DB config/init
             ConfigureDb(dbContext);
@@ -211,21 +209,7 @@ namespace Hippo.Web
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles(new StaticFileOptions()
-            {
-                OnPrepareResponse = (context) =>
-                {
-                    if (context.Context.Request.Path.StartsWithSegments("/static"))
-                    {
-                        var headers = context.Context.Response.GetTypedHeaders();
-                        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
-                        {
-                            Public = true,
-                            MaxAge = TimeSpan.FromDays(365)
-                        };
-                    }
-                }
-            });
+            app.UseMvcReactStaticFiles();
 
             app.UseRouting();
 
@@ -254,7 +238,8 @@ namespace Hippo.Web
                 // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(
                     name: "API",
-                    pattern: "/api/{cluster}/{controller=Account}/{action=Index}/{id?}");
+                    pattern: "/api/{cluster}/{controller=Account}/{action=Index}/{id?}",
+                    constraints: new { controller = mvcReactOptions.Value.ExcludeHmrPathsRegex });
 
                 // any other nonfile route should be handled by the spa, except leave the sockjs route alone if we are in dev mode (hot reloading)
                 if (env.IsDevelopment())
@@ -263,7 +248,7 @@ namespace Hippo.Web
                         name: "react",
                         pattern: "{*path:nonfile}",
                         defaults: new { controller = "Home", action = "Index" },
-                        constraints: new { path = new RegexRouteConstraint("^(?!sockjs-node).*$") }
+                        constraints: new { path = new RegexRouteConstraint(mvcReactOptions.Value.ExcludeHmrPathsRegex) }
                     );
                 }
                 else
@@ -276,16 +261,8 @@ namespace Hippo.Web
                 }
             });
 
-            // SPA needs to kick in for all paths during development
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
-            });
+            // During development, SPA will kick in for all remaining paths
+            app.UseMvcReact();
         }
 
         private void ConfigureDb(AppDbContext dbContext)
