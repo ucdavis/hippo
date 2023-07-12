@@ -40,7 +40,7 @@ namespace Hippo.Web.Services
                         kerb = sponsorAccount.Owner.Kerberos,
                         iam = sponsorAccount.Owner.Iam,
                         mothra = sponsorAccount.Owner.MothraId,
-                        cluster = sponsorAccount.Cluster
+                        cluster = sponsorAccount.Cluster.Name
                     },
                     account = new
                     {
