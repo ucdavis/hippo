@@ -88,14 +88,6 @@ namespace Hippo.Jobs.Core
             }
 
             throw new Exception("Couldn't get log configured");
-
-            //return logConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(esUrl))
-            //{
-            //    //AutoRegisterTemplate = true,
-            //    //AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7
-            //    IndexFormat = "aspnet-Hippo-{0:yyyy.MM.dd}",
-            //    TypeName = null
-            //});
         }
     }
 }
