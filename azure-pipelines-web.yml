@@ -5,6 +5,7 @@
 
 trigger:
 - main
+- dev
 
 name: 1.1.$(Date:yyMM).$(build.buildId)
 
