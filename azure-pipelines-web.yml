@@ -100,8 +100,8 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/app_data/jobs/triggered'
 
     - task: PublishBuildArtifacts@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-      displayName: 'Publish Build Artifacts for main branch builds'
+      condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+      displayName: 'Publish Build Artifacts for main or dev branch builds'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
