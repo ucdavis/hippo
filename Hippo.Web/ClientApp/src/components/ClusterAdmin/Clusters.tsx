@@ -12,6 +12,7 @@ const defaultCluster: Cluster = {
   sshName: "",
   sshKeyId: "",
   sshUrl: "",
+  domain: "",
 };
 
 export const Clusters = () => {
@@ -118,6 +119,25 @@ export const Clusters = () => {
                   ...editClusterModel,
                   cluster: { ...editClusterModel.cluster },
                   sshKey: e.target.value,
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldDomain">Domain</label>
+            <input
+              className="form-control"
+              id="fieldDomain"
+              value={editClusterModel.cluster.domain}
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  cluster: {
+                    ...editClusterModel.cluster,
+                    domain: e.target.value,
+                  },
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -285,6 +305,7 @@ export const Clusters = () => {
                   <th>SSH URL</th>
                   <th>SSH Name</th>
                   <th>SSH Key ID</th>
+                  <th>Domain</th>
                 </tr>
               </thead>
               <tbody>
@@ -295,6 +316,7 @@ export const Clusters = () => {
                     <td>{m.cluster.sshUrl}</td>
                     <td>{m.cluster.sshName}</td>
                     <td>{m.cluster.sshKeyId}</td>
+                    <td>{m.cluster.domain}</td>
                     <td>
                       <button
                         disabled={notification.pending}

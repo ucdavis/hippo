@@ -31,6 +31,7 @@ export interface Cluster {
   sshName: string;
   sshKeyId: string;
   sshUrl: string;
+  domain: string;
 }
 
 export interface RequestPostModel {

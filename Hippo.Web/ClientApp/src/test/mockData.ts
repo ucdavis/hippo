@@ -52,6 +52,7 @@ const fakeCluster: Cluster = {
   sshKeyId: "90775ee7-1117-43ce-a02a-d335075e040d",
   sshName: "ssh-name",
   sshUrl: "ssh-url.com",
+  domain: "repo/yaml/path.yml",
 };
 
 export const fakeAppContext: AppContextShape = {

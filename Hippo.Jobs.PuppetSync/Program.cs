@@ -31,9 +31,9 @@ namespace Hippo.Jobs.PuppetSync
             // setup di
             var provider = ConfigureServices();
 
-            var puppetService = provider.GetRequiredService<IPuppetService>();
+            var syncService = provider.GetRequiredService<IAccountSyncService>();
 
-            SyncPuppetAccounts(puppetService).GetAwaiter().GetResult();
+            SyncPuppetAccounts(syncService).GetAwaiter().GetResult();
         }
 
 
@@ -75,18 +75,17 @@ namespace Hippo.Jobs.PuppetSync
 
             services.Configure<PuppetSettings>(Configuration.GetSection("Puppet"));
             services.AddSingleton<IPuppetService, PuppetService>();
+            services.AddSingleton<IAccountSyncService, AccountSyncService>();
 
 
             return services.BuildServiceProvider();
         }
 
-        private static async Task SyncPuppetAccounts(IPuppetService puppetService)
+        private static async Task SyncPuppetAccounts(IAccountSyncService syncService)
         {
             _log.Information("Syncing Puppet accounts");
 
-            var accounts = await puppetService.GetPuppetDetails("tbd...");
-
-            _log.Information("Found {count} users", accounts.Users.Count);
+            await syncService.SyncAccounts();
         }
     }
 }

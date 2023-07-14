@@ -8,7 +8,7 @@
       "name": ".NET Core Launch (web)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "buildWeb",
       // If you have changed target frameworks, make sure to update the program path.
       "program": "${workspaceFolder}/Hippo.Web/bin/Debug/net6.0/Hippo.Web.dll",
       "args": [],
@@ -35,7 +35,7 @@
       "name": ".NET Core Launch (puppet sync job)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "buildPuppetSync",
       "program": "${workspaceFolder}/Hippo.Jobs.PuppetSync/bin/Debug/net6.0/Hippo.Jobs.PuppetSync.dll",
       "args": [],
       "cwd": "${workspaceFolder}/Hippo.Jobs.PuppetSync",

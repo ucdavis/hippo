@@ -9,7 +9,7 @@ namespace Hippo.Core.Services
 {
     public interface IPuppetService
     {
-        Task<PuppetDetails> GetPuppetDetails(string yamlPath);
+        Task<PuppetDetails> GetPuppetDetails(string domain);
     }
     
     public class PuppetService : IPuppetService
@@ -25,9 +25,10 @@ namespace Hippo.Core.Services
         }
 
 
-        public async Task<PuppetDetails> GetPuppetDetails(string yamlPath)
+        public async Task<PuppetDetails> GetPuppetDetails(string domain)
         {
             var details = new PuppetDetails();
+            var yamlPath = $"domains/{domain}/merged/all.yaml";
 
             // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
             var contents = await _gitHubClient.Repository.Content.GetAllContents(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath);
