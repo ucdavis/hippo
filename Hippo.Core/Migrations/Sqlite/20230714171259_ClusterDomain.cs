@@ -4,12 +4,12 @@
 
 namespace Hippo.Core.Migrations.Sqlite
 {
-    public partial class ClusterRepoYamlPath : Migration
+    public partial class ClusterDomain : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "RepoYamlPath",
+                name: "Domain",
                 table: "Clusters",
                 type: "TEXT",
                 maxLength: 250,
@@ -19,7 +19,7 @@ namespace Hippo.Core.Migrations.Sqlite
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "RepoYamlPath",
+                name: "Domain",
                 table: "Clusters");
         }
     }

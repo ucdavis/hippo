@@ -150,7 +150,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("RepoYamlPath")
+                    b.Property<string>("Domain")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 

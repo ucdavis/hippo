@@ -31,7 +31,7 @@ export interface Cluster {
   sshName: string;
   sshKeyId: string;
   sshUrl: string;
-  repoYamlPath: string;
+  domain: string;
 }
 
 export interface RequestPostModel {

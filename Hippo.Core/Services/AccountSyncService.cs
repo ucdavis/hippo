@@ -25,7 +25,7 @@ namespace Hippo.Core.Services
         public async Task SyncAccounts()
         {
             foreach (var cluster in await _dbContext.Clusters
-                .Where(c => !string.IsNullOrEmpty(c.RepoYamlPath))
+                .Where(c => !string.IsNullOrEmpty(c.Domain))
                 .AsNoTracking()
                 .ToArrayAsync())
             {
@@ -37,7 +37,7 @@ namespace Hippo.Core.Services
         {
             Log.Information("Syncing accounts for cluster {Cluster}", cluster.Name);
 
-            var details = await _puppetService.GetPuppetDetails(cluster.RepoYamlPath);
+            var details = await _puppetService.GetPuppetDetails(cluster.Domain);
 
             Log.Information("Found {Users} users and {Clusters} groups for cluster {Cluster}", details.Users.Count, details.Groups.Count, cluster.Name);
         }

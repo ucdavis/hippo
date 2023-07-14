@@ -139,7 +139,7 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RepoYamlPath")
+                    b.Property<string>("Domain")
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
