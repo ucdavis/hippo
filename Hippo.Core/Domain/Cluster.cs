@@ -27,6 +27,8 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         public string SshUrl { get; set; } = String.Empty;
         public bool IsActive { get; set; } = true;
+        [MaxLength(250)]
+        public string RepoYamlPath { get; set; } = String.Empty;
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }

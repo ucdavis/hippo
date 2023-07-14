@@ -139,6 +139,10 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("RepoYamlPath")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SshKeyId")
                         .HasMaxLength(40)
                         .HasColumnType("TEXT");

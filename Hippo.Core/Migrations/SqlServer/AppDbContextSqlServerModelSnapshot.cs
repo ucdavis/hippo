@@ -150,6 +150,10 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("RepoYamlPath")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("SshKeyId")
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
