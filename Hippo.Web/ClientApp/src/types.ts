@@ -6,10 +6,9 @@ export interface User {
   iam: string;
   kerberos: string;
   name: string;
-  isAdmin: boolean;
 }
 
-export type RoleName = "Admin" | "Sponsor" | "System";
+export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
 export interface Account {
   id: number;
@@ -21,7 +20,6 @@ export interface Account {
   owner?: User;
   sponsor?: Account;
   updatedOn: string;
-  isAdmin: boolean;
 }
 
 export interface Cluster {
@@ -35,7 +33,7 @@ export interface Cluster {
 }
 
 export interface RequestPostModel {
-  sponsorId: number;
+  groupId: number;
   sshKey: string;
 }
 
@@ -48,9 +46,16 @@ export interface AppContextShape {
   antiForgeryToken: string;
   user: {
     detail: User;
+    permissions: Permission[];
   };
   accounts: Account[];
   clusters: Cluster[];
+}
+
+export interface Permission {
+  role: RoleName;
+  cluster?: string;
+  group?: string;
 }
 
 export interface PromiseStatus {

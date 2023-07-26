@@ -33,6 +33,9 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
 
+        [JsonIgnore]
+        public List<Group> Groups { get; set; }
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cluster>().HasQueryFilter(a => a.IsActive);
@@ -44,6 +47,18 @@ namespace Hippo.Core.Domain
                 .WithMany(a => a.Accounts)
                 .HasForeignKey(a => a.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Group>()
+                .HasOne(a => a.Cluster)
+                .WithMany(a => a.Groups)
+                .HasForeignKey(a => a.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);                
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.Cluster)
+                .WithMany()
+                .HasForeignKey(p => p.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);                 
         }
     }
 }

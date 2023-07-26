@@ -130,8 +130,14 @@ namespace Hippo.Web
                 options.AddPolicy(AccessCodes.SystemAccess, policy => policy.Requirements.Add(
                     new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.SystemAccess))));
 
-                options.AddPolicy(AccessCodes.AdminAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.AdminAccess))));
+                options.AddPolicy(AccessCodes.ClusterAdminAccess, policy => policy.Requirements.Add(
+                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.ClusterAdminAccess))));
+
+                options.AddPolicy(AccessCodes.GroupAdminAccess, policy => policy.Requirements.Add(
+                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.GroupAdminAccess))));
+
+                options.AddPolicy(AccessCodes.GroupAccess, policy => policy.Requirements.Add(
+                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.GroupAccess))));
             });
             services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 

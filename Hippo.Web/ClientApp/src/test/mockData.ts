@@ -8,7 +8,6 @@ const fakeUser: User = {
   iam: "1000037182",
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
-  isAdmin: false,
 };
 
 const fakeAdminUser: User = {
@@ -19,7 +18,6 @@ const fakeAdminUser: User = {
   iam: "1000037182",
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
-  isAdmin: true,
 };
 
 export const fakeAccounts: Account[] = [
@@ -31,7 +29,6 @@ export const fakeAccounts: Account[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    isAdmin: false,
   },
   {
     id: 2,
@@ -41,7 +38,6 @@ export const fakeAccounts: Account[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    isAdmin: false,
   },
 ];
 
@@ -87,7 +83,6 @@ export const fakeAdminUsers: User[] = [
     iam: "1000037199",
     kerberos: "bdob",
     name: "A Fake Admin User",
-    isAdmin: true,
   },
 ];
 

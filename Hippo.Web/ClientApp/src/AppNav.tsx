@@ -35,7 +35,7 @@ export const AppNav = () => {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <nav className="simple-nav">
-              <ShowFor cluster={cluster.name} roles={["Sponsor"]}>
+              <ShowFor roles={["GroupAdmin"]}>
                 <NavLink
                   id="sponsorApprove"
                   to={`/${cluster.name}/approve`}
@@ -57,7 +57,7 @@ export const AppNav = () => {
                   Sponsored Accounts
                 </NavLink>
               </ShowFor>
-              <ShowFor cluster={cluster.name} roles={["Admin"]}>
+              <ShowFor roles={["ClusterAdmin"]}>
                 <NavLink
                   id="adminApprovals"
                   className="nav-item nav-link"

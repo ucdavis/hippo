@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Hippo.Core.Models;
 
 namespace Hippo.Web.Controllers;
 
@@ -41,37 +42,43 @@ public class AccountController : SuperController
         return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Owner.Iam == currentUser.Iam).AsNoTracking().ToArrayAsync());
     }
 
-    [HttpGet]
-    public async Task<ActionResult> Sponsors()
-    {
-        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.CanSponsor).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
-    }
-
     // Return all accounts that are waiting for the current user to approve
     [HttpGet]
+    [Authorize(Roles = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Pending()
     {
         var currentUser = await _userService.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
         //Make this one order by date? Or stay consistent and just by name?
-        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
-    }
-
-    [HttpGet]
-    public async Task<ActionResult> Sponsored()
-    {
-        var currentUser = await _userService.GetCurrentUser();
-
-        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Sponsor.OwnerId == currentUser.Id && a.Status != Account.Statuses.PendingApproval).AsNoTracking().OrderBy(a => a.Name).ToArrayAsync());
+        return Ok(await _dbContext.Accounts
+            .PendingApproval()
+            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .AsNoTracking()
+            .OrderBy(a => a.Name)
+            .ToArrayAsync());
     }
 
     // Approve a given pending account if you are the sponsor
     [HttpPost]
+    [Authorize(Roles = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Approve(int id)
     {
         var currentUser = await _userService.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
 
-        var account = await _dbContext.Accounts.InCluster(Cluster).Include(a => a.Owner).AsSingleQuery()
-            .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
+        var account = await _dbContext.Accounts
+            .PendingApproval()
+            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .Include(a => a.Owner)
+            .AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id);
 
         if (account == null)
         {
@@ -104,6 +111,10 @@ public class AccountController : SuperController
     [HttpPost]
     public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
     {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
         if (String.IsNullOrWhiteSpace(model.Reason))
         {
             return BadRequest("Missing Reject Reason");
@@ -111,8 +122,12 @@ public class AccountController : SuperController
 
         var currentUser = await _userService.GetCurrentUser();
 
-        var account = await _dbContext.Accounts.InCluster(Cluster).Include(a => a.Owner).AsSingleQuery()
-            .SingleOrDefaultAsync(a => a.Id == id && a.Sponsor.OwnerId == currentUser.Id && a.Status == Account.Statuses.PendingApproval);
+        var account = await _dbContext.Accounts
+            .PendingApproval()
+            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .Include(a => a.Owner)
+            .AsSingleQuery()
+            .SingleOrDefaultAsync(a => a.Id == id);
 
         if (account == null)
         {
@@ -142,13 +157,9 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        if(model.SponsorId == 0)
+        if (model.GroupId == 0)
         {
-            return BadRequest("Please select a sponsor from the list.");
-        }
-        if (!(await _dbContext.Accounts.InCluster(Cluster).AnyAsync(a => a.Id == model.SponsorId && a.CanSponsor)))
-        {
-            return BadRequest("Sponsor not found.");
+            return BadRequest("Please select a group from the list.");
         }
         if (string.IsNullOrWhiteSpace(model.SshKey))
         {
@@ -160,20 +171,24 @@ public class AccountController : SuperController
         }
 
         var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
-
         if (cluster == null)
         {
             return BadRequest("Cluster not found");
         }
 
-        var existingAccount = await _dbContext.Accounts
-            .Include(a => a.Owner)
-            .Include(a => a.Cluster)
-            .InCluster(Cluster)
+        var group = await _dbContext.Groups
+            .Include(g => g.Account.Owner)
+            .Include(g => g.Account.Cluster)
             .AsSingleQuery()
-            .SingleOrDefaultAsync(a => a.Id == currentUser.Id && a.Status == Account.Statuses.Active);
+            .SingleOrDefaultAsync(g => g.Id == model.GroupId && g.ClusterId == cluster.Id);
+        if (group == null)
+        {
+            return BadRequest("Group not found");
+        }
 
-        if (existingAccount != null) 
+        var existingAccount = group.Account;
+
+        if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
         {
             existingAccount.SshKey = await _yamlService.Get(currentUser, model);
 
@@ -194,9 +209,7 @@ public class AccountController : SuperController
 
         var account = new Account()
         {
-            CanSponsor = false, 
             Owner = currentUser,
-            SponsorId = model.SponsorId,
             SshKey = await _yamlService.Get(currentUser, model),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
@@ -206,7 +219,8 @@ public class AccountController : SuperController
 
         account = await _historyService.AccountRequested(account);
 
-        await _dbContext.Accounts.AddAsync(account);
+        group.Account = account;
+
         await _dbContext.SaveChangesAsync();
 
         var success = await _notificationService.AccountRequested(account);

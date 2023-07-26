@@ -9,37 +9,32 @@ namespace Hippo.Core.Domain
 {
     public class User
     {
-        public User()
-        {
-            IsAdmin = false;
-        }
-
         [Key]
         public int Id { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [MaxLength(50)]
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [MaxLength(50)]
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
         [Required]
-        [StringLength(300)]
+        [MaxLength(300)]
         [EmailAddress]
         public string Email { get; set; }
 
-        [StringLength(10)]
+        [MaxLength(10)]
         public string Iam { get; set; }
 
-        [StringLength(20)]
+        [MaxLength(20)]
         public string Kerberos { get; set; }
 
-        [StringLength(20)] //It probably isn't this long....
-        public string MothraId { get;set;}
+        [MaxLength(20)] //It probably isn't this long....
+        public string MothraId { get; set; }
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
@@ -47,18 +42,25 @@ namespace Hippo.Core.Domain
         [Display(Name = "Name")]
         public string Name => FirstName + " " + LastName;
 
-        public bool IsAdmin { get; set; } //Potentially use this for a super admin?
+        [JsonIgnore]
+        public List<Permission> Permissions { get; set; }
+
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
-            modelBuilder.Entity<User>().HasIndex(a => a.Email); 
-            modelBuilder.Entity<User>().HasIndex(a => a.IsAdmin);
+            modelBuilder.Entity<User>().HasIndex(a => a.Email);
 
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Owner)
                 .WithMany(a => a.Accounts)
                 .HasForeignKey(a => a.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Permissions)
+                .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

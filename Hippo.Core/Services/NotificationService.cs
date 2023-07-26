@@ -27,41 +27,44 @@ namespace Hippo.Core.Services
         private readonly AppDbContext _dbContext;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
+        private readonly IUserService _userService;
 
-        public NotificationService(AppDbContext dbContext, IEmailService emailService, IOptions<EmailSettings> emailSettings)
+        public NotificationService(AppDbContext dbContext, IEmailService emailService, IOptions<EmailSettings> emailSettings, IUserService userService)
         {
             _dbContext = dbContext;
             _emailService = emailService;
             _emailSettings = emailSettings.Value;
+            _userService = userService;
         }
 
-        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null)
+        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideDecidedBy = null, string reason = null)
         {
 
             try
             {
                 account = await GetCompleteAccount(account);
-                var sponser = String.Empty;
-                if (!string.IsNullOrWhiteSpace(overrideSponsor))
+                var decidedBy = String.Empty;
+                if (!string.IsNullOrWhiteSpace(overrideDecidedBy))
                 {
-                    sponser = overrideSponsor;
+                    decidedBy = overrideDecidedBy;
                 }
                 else
                 {
-                    sponser = !String.IsNullOrWhiteSpace(account.Sponsor.Name) ? account.Sponsor.Name : account.Sponsor.Owner.Name;
+                    decidedBy = (await _userService.GetCurrentUser()).Name;
                 }
-                
+
                 var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}"; //TODO: Only have button if approved?
                 var emailTo = account.Owner.Email;
 
                 var model = new DecisionModel()
                 {
-                    SponsorName = sponser,
+                    GroupName = account.Groups[0].DisplayName, // should be safe to assume only one group for a new account
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
+                    AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
                     ClusterName = account.Cluster.Description,
@@ -87,15 +90,15 @@ namespace Hippo.Core.Services
 
         public async Task<bool> AccountRequested(Account account)
         {
-            try 
-            { 
+            try
+            {
                 account = await GetCompleteAccount(account);
                 var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}/approve";
-                var emailTo = account.Sponsor.Owner.Email; 
+                var emails = await GetGroupAdminEmails(account);
 
                 var model = new NewRequestModel()
                 {
-                    SponsorName = account.Sponsor.Owner.Name,
+                    GroupName = account.Groups[0].DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
@@ -104,13 +107,13 @@ namespace Hippo.Core.Services
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
 
-                await _emailService.SendEmail(new[] { emailTo }, null, emailBody, "A new account request is ready for your approval");
+                await _emailService.SendEmail(emails, null, emailBody, "A new account request is ready for your approval");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error("Error emailing Account Request", ex) ;
+                Log.Error("Error emailing Account Request", ex);
                 return false;
             }
         }
@@ -123,11 +126,11 @@ namespace Hippo.Core.Services
 
 
                 //var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
-                var emailTo = account.Sponsor.Owner.Email;
+                var emails = await GetGroupAdminEmails(account);
 
                 var model = new DecisionModel()
                 {
-                    SponsorName = account.Sponsor.Owner.Name,
+                    GroupName = account.Groups[0].DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -143,7 +146,7 @@ namespace Hippo.Core.Services
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission.cshtml", model);
 
-                await _emailService.SendEmail(new[] { emailTo },ccEmails: new[] {adminUser.Email}, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
+                await _emailService.SendEmail(emails, ccEmails: new[] { adminUser.Email }, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
 
                 return true;
             }
@@ -156,11 +159,29 @@ namespace Hippo.Core.Services
 
         private async Task<Account> GetCompleteAccount(Account account)
         {
-            if(account.Owner == null || account.Sponsor == null || account.Sponsor.Owner == null || account.Cluster == null)
+            if (account.Owner == null || (account.Groups?.Count ?? 0) == 0 || account.Cluster == null)
             {
-                return await _dbContext.Accounts.AsNoTracking().AsSingleQuery().Include(a => a.Cluster).Include(a => a.Owner).Include(a => a.Sponsor).ThenInclude(a => a.Owner).SingleAsync(a => a.Id == account.Id);
+                return await _dbContext.Accounts
+                    .AsNoTracking()
+                    .AsSingleQuery()
+                    .Include(a => a.Cluster)
+                    .Include(a => a.Owner)
+                    .Include(a => a.Groups)
+                    .SingleAsync(a => a.Id == account.Id);
             }
             return account;
+        }
+
+        private async Task<string[]> GetGroupAdminEmails(Account account)
+        {
+            var groupAdminEmails = await _dbContext.Users
+                .Where(u => u.Permissions.Any(p =>
+                    p.GroupId == account.Groups[0].Id
+                    && p.Role.Name == Role.Codes.GroupAdmin
+                    && p.ClusterId == account.ClusterId))
+                .Select(u => u.Email)
+                .ToArrayAsync();
+            return groupAdminEmails;
         }
     }
 }

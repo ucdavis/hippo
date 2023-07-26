@@ -13,7 +13,7 @@ export const RequestForm = () => {
 
   const [sponsors, setSponsors] = useState<Account[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({
-    sponsorId: 0,
+    groupId: 0,
     sshKey: "",
   });
 
@@ -90,10 +90,10 @@ export const RequestForm = () => {
               if (selected.length > 0) {
                 setRequest((r) => ({
                   ...r,
-                  sponsorId: Object.values(selected[0])[0],
+                  groupId: Object.values(selected[0])[0],
                 }));
               } else {
-                setRequest((r) => ({ ...r, sponsorId: 0 }));
+                setRequest((r) => ({ ...r, groupId: 0 }));
               }
             }}
             options={sponsors.map(({ id, name }) => ({ id, name }))}

@@ -8,13 +8,13 @@ import { useRouteMatch } from "react-router-dom";
 interface Props {
   children: any;
   roles: RoleName[];
-  cluster?: string;
+  group?: string;
   condition?: boolean | (() => boolean);
 }
 
 // Determines if the user has access to the route based on roles and cluster
 export const ShowFor = (props: Props) => {
-  const { children, roles } = props;
+  const { children, roles, group } = props;
   const [context] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = match?.params.cluster;
@@ -25,25 +25,55 @@ export const ShowFor = (props: Props) => {
     ? props.condition()
     : true;
 
-  if (conditionSatisfied && context.user.detail.isAdmin) {
+  if (!conditionSatisfied) {
+    return null;
+  }
+
+  // system admins can access anything
+  if (context.user.permissions.some((p) => p.role === "System")) {
     return <>{children}</>;
   }
 
-  // not admin, need to check roles within the cluster
-  const clusterAccount = context.accounts.find((a) => a.cluster === cluster);
+  // if no non-system roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "System")) {
+    return null;
+  }
 
-  if (clusterAccount) {
-    if (conditionSatisfied && roles.includes("Sponsor")) {
-      if (clusterAccount.canSponsor) {
-        return <>{children}</>;
-      }
-    }
+  // remaining roles require cluster to be set
+  if (!Boolean(cluster)) {
+    return null;
+  }
 
-    if (conditionSatisfied && roles.includes("Admin")) {
-      if (clusterAccount.isAdmin) {
-        return <>{children}</>;
-      }
+  // cluster admins can access anything in their cluster
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && p.role === "ClusterAdmin"
+    )
+  ) {
+    return <>{children}</>;
+  }
+
+  // if no non-cluster-admin roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "ClusterAdmin")) {
+    return null;
+  }
+
+  if (Boolean(group)) {
+    // check if user has a group-specific role
+    if (
+      context.user.permissions.some(
+        (p) =>
+          p.cluster === cluster && p.group === group && roles.includes(p.role)
+      )
+    ) {
+      return <>{children}</>;
     }
+    // } else {
+    //   // no group specified, so just check if user has any cluster-specific role
+    //   // (this mirrors what VerifyAccessRoleHandler does, but not sure if it's valid in this context)
+    //   if (context.user.permissions.some(p => p.cluster === cluster && roles.includes(p.role))) {
+    //     return <>{children}</>;
+    //   }
   }
 
   return null;

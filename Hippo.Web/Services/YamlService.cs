@@ -25,22 +25,20 @@ namespace Hippo.Web.Services
 
         public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel)
         {
-            var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.Id == accountCreateModel.SponsorId);
+            var groupName = await _dbContext.Groups.Where(g => g.Id == accountCreateModel.GroupId).Select(g => g.Name).SingleOrDefaultAsync();
+            if (string.IsNullOrWhiteSpace(groupName))
+            {
+                throw new KeyNotFoundException($"Group with id {accountCreateModel.GroupId} not found");
+            }
 
             var yaml =  new Serializer();
             
             return yaml.Serialize(
                 new
                 {
-                    sponsor = new
+                    group = new
                     {
-                        accountname = sponsorAccount.Name,
-                        name = sponsorAccount.Owner.Name,
-                        email = sponsorAccount.Owner.Email,
-                        kerb = sponsorAccount.Owner.Kerberos,
-                        iam = sponsorAccount.Owner.Iam,
-                        mothra = sponsorAccount.Owner.MothraId,
-                        cluster = sponsorAccount.Cluster.Name
+                        name = groupName
                     },
                     account = new
                     {
