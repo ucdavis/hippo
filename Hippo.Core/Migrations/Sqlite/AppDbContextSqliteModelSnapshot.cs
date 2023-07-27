@@ -23,9 +23,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("CanSponsor")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ClusterId")
                         .HasColumnType("INTEGER");
 
@@ -35,17 +32,11 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("OwnerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SponsorId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SshKey")
@@ -61,19 +52,13 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CanSponsor");
-
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("CreatedOn");
 
-                    b.HasIndex("IsAdmin");
-
                     b.HasIndex("Name");
 
                     b.HasIndex("OwnerId");
-
-                    b.HasIndex("SponsorId");
 
                     b.HasIndex("UpdatedOn");
 
@@ -129,6 +114,10 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Domain")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -137,10 +126,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Domain")
-                        .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SshKeyId")
@@ -160,6 +145,37 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("Name");
 
                     b.ToTable("Clusters");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ClusterId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -201,6 +217,56 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("Histories");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -220,9 +286,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("Iam")
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Kerberos")
                         .HasMaxLength(20)
@@ -244,8 +307,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("Iam")
                         .IsUnique();
 
-                    b.HasIndex("IsAdmin");
-
                     b.ToTable("Users");
                 });
 
@@ -263,15 +324,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Hippo.Core.Domain.Account", "Sponsor")
-                        .WithMany()
-                        .HasForeignKey("SponsorId");
-
                     b.Navigation("Cluster");
 
                     b.Navigation("Owner");
-
-                    b.Navigation("Sponsor");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.AccountHistory", b =>
@@ -289,6 +344,24 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Account");
 
                     b.Navigation("Actor");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany("Groups")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany("Groups")
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Cluster");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -317,19 +390,63 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Cluster");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Permission", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.Group", "Group")
+                        .WithMany("Permissions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.User", "User")
+                        .WithMany("Permissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
+                    b.Navigation("Groups");
+
                     b.Navigation("Histories");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("Groups");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
+                {
+                    b.Navigation("Permissions");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }
