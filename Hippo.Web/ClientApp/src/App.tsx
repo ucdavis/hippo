@@ -53,27 +53,27 @@ const App = () => {
             />
             <Route path="/:cluster/create" component={RequestForm} />
             <ConditionalRoute
-              roles={["Sponsor"]}
+              roles={["GroupAdmin"]}
               path="/:cluster/approve"
               component={ApproveAccounts}
             />
             <ConditionalRoute
-              roles={["Sponsor"]}
+              roles={["GroupAdmin"]}
               path="/:cluster/sponsored"
               component={SponsoredAccounts}
             />
             <ConditionalRoute
-              roles={["Admin"]}
+              roles={["ClusterAdmin"]}
               path="/:cluster/admin/users"
               component={AdminUsers}
             />
             <ConditionalRoute
-              roles={["Admin"]}
+              roles={["ClusterAdmin"]}
               path="/:cluster/admin/sponsors"
               component={Sponsors}
             />
             <ConditionalRoute
-              roles={["Admin"]}
+              roles={["ClusterAdmin"]}
               path="/:cluster/admin/accountApprovals"
               component={AdminApproveAccounts}
             />

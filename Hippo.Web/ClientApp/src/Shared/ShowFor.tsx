@@ -8,13 +8,12 @@ import { useRouteMatch } from "react-router-dom";
 interface Props {
   children: any;
   roles: RoleName[];
-  group?: string;
   condition?: boolean | (() => boolean);
 }
 
 // Determines if the user has access to the route based on roles and cluster
 export const ShowFor = (props: Props) => {
-  const { children, roles, group } = props;
+  const { children, roles } = props;
   const [context] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = match?.params.cluster;
@@ -58,22 +57,13 @@ export const ShowFor = (props: Props) => {
     return null;
   }
 
-  if (Boolean(group)) {
-    // check if user has a group-specific role
-    if (
-      context.user.permissions.some(
-        (p) =>
-          p.cluster === cluster && p.group === group && roles.includes(p.role)
-      )
-    ) {
-      return <>{children}</>;
-    }
-    // } else {
-    //   // no group specified, so just check if user has any cluster-specific role
-    //   // (this mirrors what VerifyAccessRoleHandler does, but not sure if it's valid in this context)
-    //   if (context.user.permissions.some(p => p.cluster === cluster && roles.includes(p.role))) {
-    //     return <>{children}</>;
-    //   }
+  // check if user has any cluster-specific role
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && roles.includes(p.role)
+    )
+  ) {
+    return <>{children}</>;
   }
 
   return null;
