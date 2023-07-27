@@ -176,17 +176,14 @@ public class AccountController : SuperController
             return BadRequest("Cluster not found");
         }
 
-        var group = await _dbContext.Groups
-            .Include(g => g.Account.Owner)
-            .Include(g => g.Account.Cluster)
+        var existingAccount = await _dbContext.Accounts
+            .Include(a => a.Owner)
+            .Include(a => a.Cluster)
             .AsSingleQuery()
-            .SingleOrDefaultAsync(g => g.Id == model.GroupId && g.ClusterId == cluster.Id);
-        if (group == null)
-        {
-            return BadRequest("Group not found");
-        }
-
-        var existingAccount = group.Account;
+            .SingleOrDefaultAsync(a => 
+                a.OwnerId == currentUser.Id
+                && a.GroupId == model.GroupId 
+                && a.ClusterId == cluster.Id);
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
         {
@@ -215,12 +212,12 @@ public class AccountController : SuperController
             Name = $"{currentUser.Name} ({currentUser.Email})",
             ClusterId = cluster.Id,
             Status = Account.Statuses.PendingApproval,
+            GroupId = model.GroupId
         };
 
         account = await _historyService.AccountRequested(account);
-
-        group.Account = account;
-
+        
+        await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
 
         var success = await _notificationService.AccountRequested(account);

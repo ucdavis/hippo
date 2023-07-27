@@ -94,7 +94,7 @@ namespace Hippo.Core.Services
                 Status = a.Status,
                 Owner = a.Owner.Name,
                 Cluster = a.Cluster.Name,
-                Groups = a.Groups.Select(g => g.Name).ToList(),
+                Group = a.Group.Name,
             }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }

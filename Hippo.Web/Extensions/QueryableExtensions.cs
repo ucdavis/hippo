@@ -39,10 +39,10 @@ namespace Hippo.Web.Extensions
                     && p.Role.Name == Role.Codes.ClusterAdmin)
                 ||
                 // group admin can access accounts for groups they are in
-                a.Groups.Any(g => g.Permissions.Any(p =>
+                a.Group.Permissions.Any(p =>
                     p.User.Iam == iamId
                     && p.Cluster.Name == cluster
-                    && p.Role.Name == Role.Codes.GroupAdmin))
+                    && p.Role.Name == Role.Codes.GroupAdmin)
             );
         }
     }

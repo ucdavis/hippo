@@ -58,7 +58,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    GroupName = account.Groups[0].DisplayName, // should be safe to assume only one group for a new account
+                    GroupName = account.Group.DisplayName, // should be safe to assume only one group for a new account
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -98,7 +98,7 @@ namespace Hippo.Core.Services
 
                 var model = new NewRequestModel()
                 {
-                    GroupName = account.Groups[0].DisplayName,
+                    GroupName = account.Group.DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
@@ -130,7 +130,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    GroupName = account.Groups[0].DisplayName,
+                    GroupName = account.Group.DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -159,14 +159,14 @@ namespace Hippo.Core.Services
 
         private async Task<Account> GetCompleteAccount(Account account)
         {
-            if (account.Owner == null || (account.Groups?.Count ?? 0) == 0 || account.Cluster == null)
+            if (account.Owner == null || account.Group == null || account.Cluster == null)
             {
                 return await _dbContext.Accounts
                     .AsNoTracking()
                     .AsSingleQuery()
                     .Include(a => a.Cluster)
                     .Include(a => a.Owner)
-                    .Include(a => a.Groups)
+                    .Include(a => a.Group)
                     .SingleAsync(a => a.Id == account.Id);
             }
             return account;
@@ -176,7 +176,7 @@ namespace Hippo.Core.Services
         {
             var groupAdminEmails = await _dbContext.Users
                 .Where(u => u.Permissions.Any(p =>
-                    p.GroupId == account.Groups[0].Id
+                    p.GroupId == account.Group.Id
                     && p.Role.Name == Role.Codes.GroupAdmin
                     && p.ClusterId == account.ClusterId))
                 .Select(u => u.Email)

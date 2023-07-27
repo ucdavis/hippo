@@ -10,6 +10,6 @@ namespace Hippo.Core.Models
         public bool CanSponsor { get; set; }
         public string Owner { get; set; }
         public string Cluster { get; set; }
-        public List<string> Groups { get; set; }
+        public string Group { get; set; }
     }
 }
