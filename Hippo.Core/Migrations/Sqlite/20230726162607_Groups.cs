@@ -9,6 +9,12 @@ namespace Hippo.Core.Migrations.Sqlite
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<int>(
+                name: "GroupId",
+                table: "Accounts",
+                type: "INTEGER",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "Groups",
                 columns: table => new
@@ -17,18 +23,11 @@ namespace Hippo.Core.Migrations.Sqlite
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
                     DisplayName = table.Column<string>(type: "TEXT", maxLength: 250, nullable: true),
-                    ClusterId = table.Column<int>(type: "INTEGER", nullable: false),
-                    AccountId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ClusterId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Groups", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Groups_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Groups_Clusters_ClusterId",
                         column: x => x.ClusterId,
@@ -91,9 +90,9 @@ namespace Hippo.Core.Migrations.Sqlite
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Groups_AccountId",
-                table: "Groups",
-                column: "AccountId");
+                name: "IX_Accounts_GroupId",
+                table: "Accounts",
+                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Groups_ClusterId_Name",
@@ -126,6 +125,14 @@ namespace Hippo.Core.Migrations.Sqlite
                 table: "Roles",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Accounts_Groups_GroupId",
+                table: "Accounts",
+                column: "GroupId",
+                principalTable: "Groups",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
 
 
             // Create some user permissions based on existing data before we drop those columns
@@ -169,10 +176,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
 
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Accounts_Accounts_SponsorId",
-                table: "Accounts");
-
             migrationBuilder.DropIndex(
                 name: "IX_Users_IsAdmin",
                 table: "Users");
@@ -185,10 +188,6 @@ namespace Hippo.Core.Migrations.Sqlite
                 name: "IX_Accounts_IsAdmin",
                 table: "Accounts");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Accounts_SponsorId",
-                table: "Accounts");
-
             migrationBuilder.DropColumn(
                 name: "IsAdmin",
                 table: "Users");
@@ -199,10 +198,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
             migrationBuilder.DropColumn(
                 name: "IsAdmin",
-                table: "Accounts");
-
-            migrationBuilder.DropColumn(
-                name: "SponsorId",
                 table: "Accounts");
         }
 
@@ -229,12 +224,6 @@ namespace Hippo.Core.Migrations.Sqlite
                 nullable: false,
                 defaultValue: false);
 
-            migrationBuilder.AddColumn<int>(
-                name: "SponsorId",
-                table: "Accounts",
-                type: "INTEGER",
-                nullable: true);
-
             migrationBuilder.CreateIndex(
                 name: "IX_Users_IsAdmin",
                 table: "Users",
@@ -249,18 +238,6 @@ namespace Hippo.Core.Migrations.Sqlite
                 name: "IX_Accounts_IsAdmin",
                 table: "Accounts",
                 column: "IsAdmin");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Accounts_SponsorId",
-                table: "Accounts",
-                column: "SponsorId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Accounts_Accounts_SponsorId",
-                table: "Accounts",
-                column: "SponsorId",
-                principalTable: "Accounts",
-                principalColumn: "Id");
 
 
             // Restore what we can, like IsAdmin and CanSponsor based on permissions
@@ -290,6 +267,10 @@ namespace Hippo.Core.Migrations.Sqlite
             ");
 
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_Accounts_Groups_GroupId",
+                table: "Accounts");
+
             migrationBuilder.DropTable(
                 name: "Permissions");
 
@@ -298,6 +279,14 @@ namespace Hippo.Core.Migrations.Sqlite
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Accounts_GroupId",
+                table: "Accounts");
+
+            migrationBuilder.DropColumn(
+                name: "GroupId",
+                table: "Accounts");
         }
     }
 }

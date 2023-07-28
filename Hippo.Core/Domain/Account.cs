@@ -45,11 +45,14 @@ namespace Hippo.Core.Domain
         [Required]
         public User Owner { get; set; }
 
+        public int? SponsorId { get; set; }
+        public Account Sponsor { get; set; }
+
         public int ClusterId { get;set;}
         [Required]
         public Cluster Cluster { get; set; }
 
-        public int GroupId { get; set; }
+        public int? GroupId { get; set; }
         public Group Group { get; set; }
 
 
@@ -63,8 +66,12 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
+            modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
             modelBuilder.Entity<Account>().HasIndex(g => g.GroupId);
+
+            //self referencing foreign key
+            modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
 
             modelBuilder.Entity<AccountHistory>()
                 .HasOne(a => a.Account)

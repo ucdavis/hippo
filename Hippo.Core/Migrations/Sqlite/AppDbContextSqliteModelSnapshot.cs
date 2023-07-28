@@ -29,6 +29,9 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
@@ -37,6 +40,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<int>("OwnerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SponsorId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SshKey")
@@ -56,9 +62,13 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("CreatedOn");
 
+                    b.HasIndex("GroupId");
+
                     b.HasIndex("Name");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("SponsorId");
 
                     b.HasIndex("UpdatedOn");
 
@@ -153,9 +163,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ClusterId")
                         .HasColumnType("INTEGER");
 
@@ -169,8 +176,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
 
                     b.HasIndex("ClusterId", "Name")
                         .IsUnique();
@@ -318,15 +323,28 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Hippo.Core.Domain.Group", "Group")
+                        .WithMany("Accounts")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Hippo.Core.Domain.Account", "Sponsor")
+                        .WithMany()
+                        .HasForeignKey("SponsorId");
+
                     b.Navigation("Cluster");
 
+                    b.Navigation("Group");
+
                     b.Navigation("Owner");
+
+                    b.Navigation("Sponsor");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.AccountHistory", b =>
@@ -348,18 +366,11 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
                 {
-                    b.HasOne("Hippo.Core.Domain.Account", "Account")
-                        .WithMany("Groups")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany("Groups")
                         .HasForeignKey("ClusterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Account");
 
                     b.Navigation("Cluster");
                 });
@@ -425,8 +436,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
-                    b.Navigation("Groups");
-
                     b.Navigation("Histories");
                 });
 
@@ -439,6 +448,8 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
                 {
+                    b.Navigation("Accounts");
+
                     b.Navigation("Permissions");
                 });
 
