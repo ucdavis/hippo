@@ -17,7 +17,7 @@ namespace Hippo.Core.Migrations.Sqlite
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.19");
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
@@ -266,6 +266,23 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("PuppetGroups");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
+                {
+                    b.Property<string>("GroupName")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserKerberos")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("GroupName", "UserKerberos");
+
+                    b.HasIndex("UserKerberos");
+
+                    b.ToTable("PuppetGroupsPuppetUsers");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.PuppetUser", b =>
                 {
                     b.Property<string>("Kerberos")
@@ -469,6 +486,25 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Group");
 
                     b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.PuppetGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.PuppetUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserKerberos")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
 
                     b.Navigation("User");
                 });

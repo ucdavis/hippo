@@ -12,6 +12,6 @@ namespace Hippo.Core.Domain
         [Key]
         [MaxLength(32)]
         public string Name { get; set; }
-        public List<PuppetUser> Users { get; } = new();
+        public List<PuppetUser> Users { get; set; } = new();
     }
 }

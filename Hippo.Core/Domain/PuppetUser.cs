@@ -13,6 +13,6 @@ namespace Hippo.Core.Domain
         [MaxLength(20)]
         public string Kerberos { get; set; }
 
-        public List<PuppetGroup> Groups { get; } = new();
+        public List<PuppetGroup> Groups { get; set; } = new();
     }
 }
