@@ -16,17 +16,12 @@ namespace Hippo.Jobs.PuppetSync
 {
     class Program : JobBase
     {
-        private static ILogger _log = null!;
-
         static void Main(string[] args)
         {
-            Configure();
+            Configure(jobName: typeof(Program).Assembly.GetName().Name, jobId: Guid.NewGuid());
             var assembyName = typeof(Program).Assembly.GetName();
-            _log = Log.Logger
-                .ForContext("jobname", assembyName.Name)
-                .ForContext("jobid", Guid.NewGuid());
 
-            _log.Information("Running {job} build {build}", assembyName.Name, assembyName.Version);
+            Log.Information("Running {job} build {build}", assembyName.Name, assembyName.Version);
 
             // setup di
             var provider = ConfigureServices();
@@ -83,7 +78,7 @@ namespace Hippo.Jobs.PuppetSync
 
         private static async Task SyncPuppetAccounts(IAccountSyncService syncService)
         {
-            _log.Information("Syncing Puppet accounts");
+            Log.Information("Syncing Puppet accounts");
 
             await syncService.SyncAccounts();
         }

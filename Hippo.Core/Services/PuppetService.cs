@@ -1,4 +1,5 @@
 
+using Hippo.Core.Domain;
 using Hippo.Core.Models;
 using Hippo.Core.Models.Settings;
 using Microsoft.Extensions.Options;
@@ -9,7 +10,7 @@ namespace Hippo.Core.Services
 {
     public interface IPuppetService
     {
-        Task<PuppetDetails> GetPuppetDetails(string domain);
+        Task<IEnumerable<PuppetGroup>> GetPuppetGroups(string domain);
     }
     
     public class PuppetService : IPuppetService
@@ -24,10 +25,10 @@ namespace Hippo.Core.Services
             _gitHubClient.Credentials = new Credentials(_settings.AuthToken);
         }
 
-
-        public async Task<PuppetDetails> GetPuppetDetails(string domain)
+        public async Task<IEnumerable<PuppetGroup>> GetPuppetGroups(string domain)
         {
-            var details = new PuppetDetails();
+            var groups = new Dictionary<string, PuppetGroup>();
+
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
             // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
@@ -46,7 +47,7 @@ namespace Hippo.Core.Services
                 var groupNode = (YamlMappingNode)rootNode.Children[groupKey];
                 foreach (var kvp in groupNode)
                 {
-                    details.Groups.Add(kvp.Key.ToString());
+                    groups.TryAdd(kvp.Key.ToString(), new PuppetGroup { Name = kvp.Key.ToString() });
                 }
             }
 
@@ -60,17 +61,20 @@ namespace Hippo.Core.Services
                     var user = new PuppetUser { Kerberos = kvp.Key.ToString() };
                     if (kvp.Value is YamlMappingNode userNode && userNode.Children.ContainsKey(userGroupsKey))
                     {
-                        var groups = (YamlSequenceNode)userNode.Children[userGroupsKey];
-                        foreach (var groupNode in groups)
+                        var userGroups = (YamlSequenceNode)userNode.Children[userGroupsKey];
+                        foreach (var groupNode in userGroups)
                         {
-                            user.Groups.Add(groupNode.ToString());
+                            if (groups.TryGetValue(groupNode.ToString(), out var group))
+                            {
+                                user.Groups.Add(group);
+                                group.Users.Add(user);
+                            }
                         }
                     }
-                    details.Users.Add(user);
                 }
             }
 
-            return details;
+            return groups.Values;
         }
     }
 }

@@ -37,9 +37,12 @@ namespace Hippo.Core.Services
         {
             Log.Information("Syncing accounts for cluster {Cluster}", cluster.Name);
 
-            var details = await _puppetService.GetPuppetDetails(cluster.Domain);
+            var puppetGroups = await _puppetService.GetPuppetGroups(cluster.Domain);
 
-            Log.Information("Found {Users} users and {Clusters} groups for cluster {Cluster}", details.Users.Count, details.Groups.Count, cluster.Name);
+            Log.Information("Found {Users} users and {Clusters} groups for cluster {Cluster}",
+                puppetGroups.SelectMany(g => g.Users).Distinct().Count(),
+                puppetGroups.Count(),
+                cluster.Name);
         }
     }
 }
