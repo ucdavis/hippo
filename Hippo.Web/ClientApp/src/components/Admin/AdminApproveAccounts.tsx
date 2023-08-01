@@ -34,7 +34,7 @@ export const AdminApproveAccounts = () => {
       method: "POST",
     });
 
-    setNotification(req, "Approving", "Account Approved");
+    setNotification(req, "Approving", "Account Approved. Please allow 1 - 2 business days for changes to take place.");
 
     var response = await req;
 

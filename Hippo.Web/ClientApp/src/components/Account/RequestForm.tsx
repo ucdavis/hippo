@@ -43,7 +43,7 @@ export const RequestForm = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Request Created", async (r) => {
+    setNotification(req, "Saving", "Request Created. Please allow 1 - 2 business days for changes to take place.", async (r) => {
       if (r.status === 400) {
         const errorText = await response.text(); //Bad Request Text
         return errorText;
