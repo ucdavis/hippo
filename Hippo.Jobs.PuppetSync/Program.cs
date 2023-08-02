@@ -49,6 +49,7 @@ namespace Hippo.Jobs.PuppetSync
                         });
 #if DEBUG
                     o.EnableSensitiveDataLogging();
+                    o.LogTo(message => System.Diagnostics.Debug.WriteLine(message));
 #endif
                 });
             }
@@ -64,13 +65,16 @@ namespace Hippo.Jobs.PuppetSync
 
 #if DEBUG
                     o.EnableSensitiveDataLogging();
+                    o.LogTo(message => System.Diagnostics.Debug.WriteLine(message));
 #endif
                 });
             }
 
             services.Configure<PuppetSettings>(Configuration.GetSection("Puppet"));
+            services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.AddSingleton<IPuppetService, PuppetService>();
             services.AddSingleton<IAccountSyncService, AccountSyncService>();
+            services.AddSingleton<IIdentityService, IdentityService>();
 
 
             return services.BuildServiceProvider();

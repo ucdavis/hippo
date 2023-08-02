@@ -28,7 +28,7 @@ namespace Hippo.Core.Domain
             public const string System = "System";
             public const string ClusterAdmin = "ClusterAdmin";
             public const string GroupAdmin = "GroupAdmin";
-            public const string Group = "GroupMember";
+            public const string GroupMember = "GroupMember";
         }
     }
 }

@@ -143,7 +143,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     ('{Role.Codes.System}'),
                     ('{Role.Codes.ClusterAdmin}'),
                     ('{Role.Codes.GroupAdmin}'),
-                    ('{Role.Codes.Group}')
+                    ('{Role.Codes.GroupMember}')
                 ");
 
             // User.IsAdmin -> Role.System
