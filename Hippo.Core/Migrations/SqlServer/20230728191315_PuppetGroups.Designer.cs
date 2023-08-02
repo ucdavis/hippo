@@ -272,17 +272,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("Hippo.Core.Domain.PuppetGroup", b =>
-                {
-                    b.Property<string>("Name")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.HasKey("Name");
-
-                    b.ToTable("PuppetGroups");
-                });
-
             modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
                 {
                     b.Property<string>("GroupName")
@@ -298,17 +287,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("UserKerberos");
 
                     b.ToTable("PuppetGroupsPuppetUsers");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.PuppetUser", b =>
-                {
-                    b.Property<string>("Kerberos")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Kerberos");
-
-                    b.ToTable("PuppetUsers");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Role", b =>
@@ -510,40 +488,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
-                {
-                    b.HasOne("Hippo.Core.Domain.PuppetGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Hippo.Core.Domain.PuppetUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserKerberos")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PuppetGroupPuppetUser", b =>
-                {
-                    b.HasOne("Hippo.Core.Domain.PuppetGroup", null)
-                        .WithMany()
-                        .HasForeignKey("GroupsName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Hippo.Core.Domain.PuppetUser", null)
-                        .WithMany()
-                        .HasForeignKey("UsersKerberos")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
