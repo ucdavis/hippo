@@ -44,29 +44,29 @@ namespace Hippo.Core.Services
         {
             Log.Information("Syncing accounts for cluster {Cluster}", cluster.Name);
 
-            // // Get groups and their users from puppet for given domain
-            // var puppetGroups = (await _puppetService.GetPuppetGroups(cluster.Domain)).ToArray();
-            // var puppetUsers = puppetGroups.SelectMany(g => g.Users).Distinct().ToArray();
-            // var puppetGroupsUsers = puppetGroups.SelectMany(g => g.Users.Select(u =>
-            //     new PuppetGroupPuppetUser
-            //     {
-            //         UserKerberos = u.Kerberos,
-            //         GroupName = g.Name
-            //     })).ToArray();
+            // Get groups and their users from puppet for given domain
+            var puppetGroups = (await _puppetService.GetPuppetGroups(cluster.Domain)).ToArray();
+            var puppetUsers = puppetGroups.SelectMany(g => g.Users).Distinct().ToArray();
+            var puppetGroupsUsers = puppetGroups.SelectMany(g => g.Users.Select(u =>
+                new PuppetGroupPuppetUser
+                {
+                    UserKerberos = u.Kerberos,
+                    GroupName = g.Name
+                })).ToArray();
 
-            // // refresh temp data in db
-            // await _dbContext.TruncateAsync<PuppetGroupPuppetUser>();
-            // // Can't truncate the following two because of foreign key constraints
-            // await _dbContext.PuppetGroups.BatchDeleteAsync();
-            // await _dbContext.PuppetUsers.BatchDeleteAsync();
-            // await _dbContext.BulkInsertAsync(puppetGroups);
-            // await _dbContext.BulkInsertAsync(puppetUsers);
-            // await _dbContext.BulkInsertAsync(puppetGroupsUsers);
+            // refresh temp data in db
+            await _dbContext.TruncateAsync<PuppetGroupPuppetUser>();
+            // Can't truncate the following two because of foreign key constraints
+            await _dbContext.PuppetGroups.BatchDeleteAsync();
+            await _dbContext.PuppetUsers.BatchDeleteAsync();
+            await _dbContext.BulkInsertAsync(puppetGroups);
+            await _dbContext.BulkInsertAsync(puppetUsers);
+            await _dbContext.BulkInsertAsync(puppetGroupsUsers);
 
-            // Log.Information("Found {Users} users and {Clusters} groups for cluster {Cluster}",
-            //     puppetUsers.Length,
-            //     puppetGroups.Length,
-            //     cluster.Name);
+            Log.Information("Found {Users} users and {Clusters} groups for cluster {Cluster}",
+                puppetUsers.Length,
+                puppetGroups.Length,
+                cluster.Name);
 
             await MakeSponsorsGroupAdmins(cluster);
             await AddNewUsers(cluster);
