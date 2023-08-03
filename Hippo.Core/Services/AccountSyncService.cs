@@ -44,6 +44,15 @@ namespace Hippo.Core.Services
         {
             Log.Information("Syncing accounts for cluster {Cluster}", cluster.Name);
 
+            await RefreshPuppetData(cluster);
+            await MakeSponsorsGroupAdmins(cluster);
+            await AddNewUsers(cluster);
+            await AddNewGroupMemberships(cluster);
+            await RemoveOldGroupMemberships(cluster);
+        }
+
+        private async Task RefreshPuppetData(Cluster cluster)
+        {
             // Get groups and their users from puppet for given domain
             var puppetGroupsUsers = (await _puppetService.GetPuppetGroupsUsers(cluster.Domain)).ToArray();
 
@@ -55,11 +64,6 @@ namespace Hippo.Core.Services
                 puppetGroupsUsers.Select(x => x.UserKerberos).Distinct().Count(),
                 puppetGroupsUsers.Select(x => x.GroupName).Distinct().Count(),
                 cluster.Name);
-
-            await MakeSponsorsGroupAdmins(cluster);
-            await AddNewUsers(cluster);
-            await AddNewGroupMemberships(cluster);
-            await RemoveOldGroupMemberships(cluster);
         }
 
         private async Task RemoveOldGroupMemberships(Cluster cluster)
