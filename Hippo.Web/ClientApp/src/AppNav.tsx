@@ -59,17 +59,6 @@ export const AppNav = () => {
               </ShowFor>
               <ShowFor roles={["ClusterAdmin"]}>
                 <NavLink
-                  id="adminApprovals"
-                  className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/accountApprovals`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Override Approvals
-                </NavLink>
-
-                <NavLink
                   id="AdminIndex"
                   className="nav-item nav-link"
                   to={`/${cluster.name}/admin/users`}

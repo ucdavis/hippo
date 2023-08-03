@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { Account, IRouteParams } from "../../types";
+import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 
@@ -9,7 +9,7 @@ export const AdminUsers = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
-  const [accounts, setAccounts] = useState<Account[]>();
+  const [accounts, setAccounts] = useState<AccountModel[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
   const [request, setRequest] = useState({
     id: "",
@@ -37,7 +37,7 @@ export const AdminUsers = () => {
     fetchAdminAccounts();
   }, [cluster]);
 
-  const handleRemove = async (account: Account) => {
+  const handleRemove = async (account: AccountModel) => {
     const [confirmed] = await getConfirmation();
     if (!confirmed) {
       return;

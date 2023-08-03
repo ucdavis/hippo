@@ -1,5 +1,11 @@
 import React from "react";
-import { Account, AppContextShape, Cluster, User, Permission } from "../types";
+import {
+  AccountModel,
+  AppContextShape,
+  Cluster,
+  User,
+  Permission,
+} from "../types";
 
 const AppContext = React.createContext<
   [AppContextShape, React.Dispatch<React.SetStateAction<AppContextShape>>]
@@ -10,7 +16,7 @@ const AppContext = React.createContext<
       detail: {} as User,
       permissions: [] as Permission[],
     },
-    accounts: [] as Account[],
+    accounts: [] as AccountModel[],
     clusters: [] as Cluster[],
   },
   () => {},

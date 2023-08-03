@@ -10,15 +10,14 @@ export interface User {
 
 export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
-export interface Account {
+export interface AccountModel {
   id: number;
   name: string;
   status: string;
-  canSponsor: boolean;
   createdOn: string;
   cluster: string;
   owner?: User;
-  sponsor?: Account;
+  group?: string;
   updatedOn: string;
 }
 
@@ -48,7 +47,7 @@ export interface AppContextShape {
     detail: User;
     permissions: Permission[];
   };
-  accounts: Account[];
+  accounts: AccountModel[];
   clusters: Cluster[];
 }
 

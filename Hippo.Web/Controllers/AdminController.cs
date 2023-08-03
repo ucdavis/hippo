@@ -328,59 +328,7 @@
 //         }
 //     }
 
-//     // Return all accounts that are waiting for any sponsor to approve for cluster
-//     [HttpGet]
-//     public async Task<ActionResult> Pending()
-//     {
-//         return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Status == Account.Statuses.PendingApproval).Include(a => a.Sponsor).ThenInclude(a => a.Owner).AsNoTracking().OrderBy(a => a.Name).ToListAsync());
-//     }
-
 //     // Approve a given pending account 
-//     [HttpPost]
-//     public async Task<ActionResult> Approve(int id)
-//     {
-//         var currentUser = await _userService.GetCurrentUser();
-
-//         var account = await _dbContext.Accounts.Include(a => a.Owner).Include(a => a.Cluster).InCluster(Cluster).AsSingleQuery()
-//             .SingleOrDefaultAsync(a => a.Id == id && a.Status == Account.Statuses.PendingApproval);
-
-//         if (account == null)
-//         {
-//             return NotFound();
-//         }
-
-//         var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
-
-//         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.yaml"; //Leading .
-//         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.yaml";
-
-//         await _sshService.PlaceFile(account.SshKey, tempFileName, connectionInfo);
-//         await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
-
-//         account.Status = Account.Statuses.Active;
-
-
-//         var success = await _notificationService.AccountDecision(account, true, "Admin Override");
-//         if (!success)
-//         {
-//             Log.Error("Error creating Account Decision email");
-//         }
-
-//         success = await _notificationService.AdminOverrideDecision(account, true, currentUser); //Notify sponsor
-//         if (!success)
-//         {
-//             Log.Error("Error creating Admin Override Decision email");
-//         }
-
-//         await _historyService.AccountApproved(account);
-
-//         await _historyService.AddHistory("Account override approve", $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name}", account);
-
-
-//         await _dbContext.SaveChangesAsync();
-
-//         return Ok();
-//     }
 
 //     [HttpPost]
 //     public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)

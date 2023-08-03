@@ -1,4 +1,4 @@
-import { AppContextShape, User, Account, Cluster } from "../types";
+import { AppContextShape, User, AccountModel, Cluster } from "../types";
 
 const fakeUser: User = {
   id: 1,
@@ -20,24 +20,24 @@ const fakeAdminUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
-export const fakeAccounts: Account[] = [
+export const fakeAccounts: AccountModel[] = [
   {
     id: 1,
     name: "Account 1",
     status: "Active",
-    canSponsor: true,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
+    group: "group1",
   },
   {
     id: 2,
     name: "Account 2",
     status: "Active",
-    canSponsor: true,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
+    group: "group2",
   },
 ];
 
@@ -57,6 +57,13 @@ export const fakeAppContext: AppContextShape = {
     detail: {
       ...fakeUser,
     },
+    permissions: [
+      {
+        role: "GroupMember",
+        group: "group1",
+        cluster: "caesfarm",
+      },
+    ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
@@ -68,6 +75,13 @@ export const fakeAdminAppContext: AppContextShape = {
     detail: {
       ...fakeAdminUser,
     },
+    permissions: [
+      {
+        role: "GroupAdmin",
+        group: "group1",
+        cluster: "caesfarm",
+      },
+    ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
@@ -92,6 +106,7 @@ export const fakeAppContextNoAccount: AppContextShape = {
     detail: {
       ...fakeUser,
     },
+    permissions: [],
   },
   accounts: [],
   clusters: [fakeCluster],

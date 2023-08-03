@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { Account, CreateSponsorPostModel, IRouteParams } from "../../types";
+import {
+  AccountModel,
+  CreateSponsorPostModel,
+  IRouteParams,
+} from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { TransferSponsor } from "./TransferSponsor";
@@ -10,7 +14,7 @@ export const Sponsors = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
   const [notification, setNotification] = usePromiseNotification();
-  const [accounts, setAccounts] = useState<Account[]>();
+  const [accounts, setAccounts] = useState<AccountModel[]>();
   const [adminRemoving, setAdminRemoving] = useState<number>();
   const [request, setRequest] = useState<CreateSponsorPostModel>({
     lookup: "",
@@ -42,7 +46,7 @@ export const Sponsors = () => {
     fetchSponsors();
   }, [cluster]);
 
-  const handleRemove = async (account: Account) => {
+  const handleRemove = async (account: AccountModel) => {
     const [confirmed] = await getConfirmation();
     if (!confirmed) {
       return;
@@ -69,11 +73,19 @@ export const Sponsors = () => {
     //todo deal with error
   };
 
-  const handleTransfer = async (oldAccount: Account, newAccount: Account) => {
+  const handleTransfer = async (
+    oldAccount: AccountModel,
+    newAccount: AccountModel
+  ) => {
     // filter out old account and push new account at the front
     setAccounts((accts) =>
       accts
-        ? [newAccount, ...accts.filter((a) => a.id !== oldAccount.id && a.id !== newAccount.id)]
+        ? [
+            newAccount,
+            ...accts.filter(
+              (a) => a.id !== oldAccount.id && a.id !== newAccount.id
+            ),
+          ]
         : [newAccount]
     );
   };

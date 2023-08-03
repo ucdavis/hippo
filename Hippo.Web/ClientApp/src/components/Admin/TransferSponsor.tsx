@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { Account } from "../../types";
+import { AccountModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
 interface Props {
-  account: Account;
-  transferSponsor: (oldAccount: Account, newAccount: Account) => void;
+  account: AccountModel;
+  transferSponsor: (oldAccount: AccountModel, newAccount: AccountModel) => void;
   transferUrl: string;
   disabled?: boolean;
 }
@@ -31,9 +31,7 @@ export const TransferSponsor = (props: Props) => {
             Anyone sponsored by this sponsor will be transferred to the new
             sponsor and all account history will be retained.
           </p>
-          <p>
-            Please enter new sponsor's information below.
-          </p>
+          <p>Please enter new sponsor's information below.</p>
           <div className="form-group">
             <label htmlFor="lookup">Email or Kerberos</label>
             <input
@@ -102,7 +100,7 @@ export const TransferSponsor = (props: Props) => {
     const response = await request;
 
     if (response.ok) {
-      const newAccount: Account = await response.json();
+      const newAccount: AccountModel = await response.json();
       props.transferSponsor(props.account, newAccount);
     }
   };

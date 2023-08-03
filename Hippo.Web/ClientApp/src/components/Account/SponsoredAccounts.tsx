@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Account, IRouteParams } from "../../types";
+import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 
 export const SponsoredAccounts = () => {
-  const [accounts, setAccounts] = useState<Account[]>();
+  const [accounts, setAccounts] = useState<AccountModel[]>();
 
   const { cluster } = useParams<IRouteParams>();
 
   useEffect(() => {
     const fetchAccounts = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/account/sponsored`);
+      const response = await authenticatedFetch(
+        `/api/${cluster}/account/sponsored`
+      );
 
       if (response.ok) {
         setAccounts(await response.json());

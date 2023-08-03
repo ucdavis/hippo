@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { Account, IRouteParams, RequestPostModel } from "../../types";
+import { AccountModel, IRouteParams, RequestPostModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -11,7 +11,7 @@ export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
   const [notification, setNotification] = usePromiseNotification();
 
-  const [sponsors, setSponsors] = useState<Account[]>([]);
+  const [sponsors, setSponsors] = useState<AccountModel[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({
     groupId: 0,
     sshKey: "",
@@ -55,14 +55,11 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const newAccount = await response.json();
+      const newAccount = (await response.json()) as AccountModel;
 
       setContext((ctx) => ({
         ...ctx,
-        accounts: [
-          ...ctx.accounts,
-          { ...newAccount, cluster: newAccount.cluster.name },
-        ],
+        accounts: [...ctx.accounts, { ...newAccount }],
       }));
       history.replace(`/${cluster}/pendingapproval`);
     }

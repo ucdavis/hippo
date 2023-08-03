@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Routing.Constraints;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -12,7 +11,6 @@ using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
 using Hippo.Web.Services;
 using System.Security.Claims;
-using Hippo.Core.Utilities;
 using Serilog;
 using Hippo.Web.Middleware;
 using Hippo.Core.Models;
@@ -20,6 +18,7 @@ using Hippo.Web.Handlers;
 using Microsoft.AspNetCore.Authorization;
 using MvcReact;
 using Microsoft.Extensions.Options;
+using Hippo.Web.Extensions;
 
 namespace Hippo.Web
 {
@@ -127,17 +126,10 @@ namespace Hippo.Web
 
             services.AddAuthorization(options =>
             { 
-                options.AddPolicy(AccessCodes.SystemAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.SystemAccess))));
-
-                options.AddPolicy(AccessCodes.ClusterAdminAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.ClusterAdminAccess))));
-
-                options.AddPolicy(AccessCodes.GroupAdminAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.GroupAdminAccess))));
-
-                options.AddPolicy(AccessCodes.GroupAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.GroupAccess))));
+                options.AddAccessPolicy(AccessCodes.SystemAccess);
+                options.AddAccessPolicy(AccessCodes.ClusterAdminAccess);
+                options.AddAccessPolicy(AccessCodes.GroupAdminAccess);
+                options.AddAccessPolicy(AccessCodes.GroupAccess);
             });
             services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 

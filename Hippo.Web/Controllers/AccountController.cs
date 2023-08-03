@@ -39,12 +39,16 @@ public class AccountController : SuperController
     {
         var currentUser = await _userService.GetCurrentUser();
 
-        return Ok(await _dbContext.Accounts.InCluster(Cluster).Where(a => a.Owner.Iam == currentUser.Iam).AsNoTracking().ToArrayAsync());
+        return Ok(await _dbContext.Accounts
+            .InCluster(Cluster)
+            .Where(a => a.Owner.Iam == currentUser.Iam)
+            .Select(AccountModel.Projection)
+            .ToArrayAsync());
     }
 
     // Return all accounts that are waiting for the current user to approve
     [HttpGet]
-    [Authorize(Roles = AccessCodes.GroupAdminAccess)]
+    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Pending()
     {
         var currentUser = await _userService.GetCurrentUser();
@@ -57,14 +61,14 @@ public class AccountController : SuperController
         return Ok(await _dbContext.Accounts
             .PendingApproval()
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .AsNoTracking()
             .OrderBy(a => a.Name)
+            .Select(AccountModel.Projection)
             .ToArrayAsync());
     }
 
     // Approve a given pending account if you are the sponsor
     [HttpPost]
-    [Authorize(Roles = AccessCodes.GroupAdminAccess)]
+    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Approve(int id)
     {
         var currentUser = await _userService.GetCurrentUser();
@@ -179,6 +183,7 @@ public class AccountController : SuperController
         var existingAccount = await _dbContext.Accounts
             .Include(a => a.Owner)
             .Include(a => a.Cluster)
+            .Include(a => a.Group)
             .AsSingleQuery()
             .SingleOrDefaultAsync(a => 
                 a.OwnerId == currentUser.Id
@@ -201,7 +206,7 @@ public class AccountController : SuperController
             await _sshService.PlaceFile(existingAccount.SshKey, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
-            return Ok(existingAccount);
+            return Ok(new AccountModel(existingAccount));
         }
 
         var account = new Account()
@@ -226,6 +231,11 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Request email");
         }
 
-        return Ok(account);
+        var accountModel = await _dbContext.Accounts
+            .Where(a => a.Id == account.Id)
+            .Select(AccountModel.Projection)
+            .SingleAsync();
+
+        return Ok(accountModel);
     }
 }

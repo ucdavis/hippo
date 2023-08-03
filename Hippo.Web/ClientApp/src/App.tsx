@@ -14,7 +14,6 @@ import { ApproveAccounts } from "./components/Account/ApproveAccounts";
 import { SponsoredAccounts } from "./components/Account/SponsoredAccounts";
 import { AdminUsers } from "./components/Admin/AdminUsers";
 import { Sponsors } from "./components/Admin/Sponsors";
-import { AdminApproveAccounts } from "./components/Admin/AdminApproveAccounts";
 import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
@@ -71,11 +70,6 @@ const App = () => {
               roles={["ClusterAdmin"]}
               path="/:cluster/admin/sponsors"
               component={Sponsors}
-            />
-            <ConditionalRoute
-              roles={["ClusterAdmin"]}
-              path="/:cluster/admin/accountApprovals"
-              component={AdminApproveAccounts}
             />
             <ConditionalRoute
               roles={["System"]}
