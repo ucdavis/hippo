@@ -116,7 +116,6 @@ export const RequestForm = () => {
             className="form-control"
             id="sharedKey"
             placeholder="Paste your public SSH key here"
-            height="100"
             required
             onChange={(e) =>
               setRequest((r) => ({ ...r, sshKey: e.target.value }))
