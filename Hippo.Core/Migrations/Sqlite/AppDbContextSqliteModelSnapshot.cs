@@ -23,6 +23,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AccountYaml")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ClusterId")
                         .HasColumnType("INTEGER");
 
@@ -44,9 +47,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<int?>("SponsorId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("SshKey")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .IsRequired()

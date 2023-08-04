@@ -30,6 +30,9 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("AccountYaml")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
 
@@ -51,9 +54,6 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<int?>("SponsorId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SshKey")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()

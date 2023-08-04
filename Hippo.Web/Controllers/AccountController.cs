@@ -94,7 +94,7 @@ public class AccountController : SuperController
         var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.yaml"; //Leading .
         var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.yaml";
 
-        await _sshService.PlaceFile(account.SshKey, tempFileName, connectionInfo);
+        await _sshService.PlaceFile(account.AccountYaml, tempFileName, connectionInfo);
         await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
         account.Status = Account.Statuses.Active;
@@ -192,7 +192,7 @@ public class AccountController : SuperController
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
         {
-            existingAccount.SshKey = await _yamlService.Get(currentUser, model);
+            existingAccount.AccountYaml = await _yamlService.Get(currentUser, model);
 
             await _historyService.AccountApproved(existingAccount);
             await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
@@ -203,7 +203,7 @@ public class AccountController : SuperController
             var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.yaml"; //Leading .
             var fileName = $"/var/lib/remote-api/{existingAccount.Owner.Kerberos}.yaml";
 
-            await _sshService.PlaceFile(existingAccount.SshKey, tempFileName, connectionInfo);
+            await _sshService.PlaceFile(existingAccount.AccountYaml, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
             return Ok(new AccountModel(existingAccount));
@@ -212,7 +212,7 @@ public class AccountController : SuperController
         var account = new Account()
         {
             Owner = currentUser,
-            SshKey = await _yamlService.Get(currentUser, model),
+            AccountYaml = await _yamlService.Get(currentUser, model),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             ClusterId = cluster.Id,

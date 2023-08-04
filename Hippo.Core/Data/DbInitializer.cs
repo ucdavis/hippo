@@ -110,7 +110,7 @@ namespace Hippo.Core.Data
                     Owner          = ScottUser,
                     IsActive       = true,
                     Name           = "Scott's Account",
-                    SshKey         = sampleSsh,
+                    AccountYaml         = sampleSsh,
                     Status         = Account.Statuses.Active,
                     Cluster        = cluster,
                 };
@@ -121,7 +121,7 @@ namespace Hippo.Core.Data
                     Owner = OmenAdmin,
                     IsActive = true,
                     Name = OmenAdmin.Name,
-                    SshKey = null,
+                    AccountYaml = null,
                     Status = Account.Statuses.Active,
                     Cluster = cluster,
                 };
@@ -132,7 +132,7 @@ namespace Hippo.Core.Data
                     Owner          = SlupskyUser,
                     IsActive       = true,
                     Name           = "Slupsky",
-                    SshKey         = sampleSsh,
+                    AccountYaml         = sampleSsh,
                     Status         = Account.Statuses.Active,
                     Cluster        = cluster,
                 };
@@ -143,7 +143,7 @@ namespace Hippo.Core.Data
                     Owner          = JasonUser,
                     Name           = "Jason's Account",
                     IsActive       = true,
-                    SshKey         = sampleSsh,
+                    AccountYaml         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
@@ -154,7 +154,7 @@ namespace Hippo.Core.Data
                     Owner          = JamesUser,
                     Name           = "James' Account",
                     IsActive       = true,
-                    SshKey         = sampleSsh,
+                    AccountYaml         = sampleSsh,
                     Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
