@@ -31,6 +31,9 @@ namespace Hippo.Core.Services
 
         public async Task SyncAccounts()
         {
+            // clear temp data in db
+            await _dbContext.TruncateAsync<PuppetGroupPuppetUser>();
+
             foreach (var cluster in await _dbContext.Clusters
                 .Where(c => !string.IsNullOrEmpty(c.Domain))
                 .AsNoTracking()
@@ -54,10 +57,9 @@ namespace Hippo.Core.Services
         private async Task RefreshPuppetData(Cluster cluster)
         {
             // Get groups and their users from puppet for given domain
-            var puppetGroupsUsers = (await _puppetService.GetPuppetGroupsUsers(cluster.Domain)).ToArray();
+            var puppetGroupsUsers = (await _puppetService.GetPuppetGroupsUsers(cluster.Name, cluster.Domain)).ToArray();
 
             // refresh temp data in db
-            await _dbContext.TruncateAsync<PuppetGroupPuppetUser>();
             await _dbContext.BulkInsertAsync(puppetGroupsUsers);
 
             Log.Information("Found {Users} users and {Groups} groups for cluster {Cluster}",
@@ -75,7 +77,7 @@ namespace Hippo.Core.Services
                 .AsNoTracking()
                 .Where(p => p.ClusterId == cluster.Id && p.RoleId == groupMemberRoleId)
                 // identify GroupMember perms that are no longer represented in puppet data (Left Join is via GroupJoin/SelectMany)
-                .GroupJoin(_dbContext.PuppetGroupsPuppetUsers,
+                .GroupJoin(_dbContext.PuppetGroupsPuppetUsers.Where(pgpu => pgpu.ClusterName == cluster.Name),
                     permission => new { kerb = permission.User.Kerberos, GroupName = permission.Group.Name },
                     pgpu => new { kerb = pgpu.UserKerberos, pgpu.GroupName },
                     (permission, pgpus) => new { permission, pgpus })
@@ -116,7 +118,7 @@ namespace Hippo.Core.Services
             // check for new group memberships
             var addPerms = await _dbContext.PuppetGroupsPuppetUsers
                 // only sync users that are members of an existing group
-                .Where(pgpu => _dbContext.Groups.Any(group => group.Name == pgpu.GroupName && group.ClusterId == cluster.Id))
+                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(group => group.Name == pgpu.GroupName && group.ClusterId == cluster.Id))
                 .Join(_dbContext.Users, pgpu => pgpu.UserKerberos, user => user.Kerberos, (pgpu, user) => new { pgpu, user })
                 .Join(_dbContext.Groups, x => x.pgpu.GroupName, group => group.Name, (x, group) => new { x.pgpu, x.user, group })
                 // identify perms that are not yet in the db (Left Join is via GroupJoin/SelectMany)
@@ -141,7 +143,7 @@ namespace Hippo.Core.Services
             // check if any users need to be added
             var addUsers = await _dbContext.PuppetGroupsPuppetUsers
                 // only sync users that are members of an existing group
-                .Where(pgpu => _dbContext.Groups.Any(g => g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
+                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(g => g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
                 // identify users that are not yet in the db (Left Join is via GroupJoin/SelectMany)
                 .GroupJoin(_dbContext.Users, pgpu => pgpu.UserKerberos, u => u.Kerberos, (pgpu, users) => new { pgpu, users })
                 .SelectMany(x => x.users.DefaultIfEmpty(), (x, u) => new { x.pgpu, u })
@@ -186,7 +188,7 @@ namespace Hippo.Core.Services
             // get all users that are sponsering other users in this cluster
             var usersThatShouldBeGroupAdmins = _dbContext.Accounts
                 .Where(sponsor => sponsor.Cluster.Name == cluster.Name && _dbContext.Accounts.Any(a2 => a2.SponsorId == sponsor.Id))
-                .Join(_dbContext.PuppetGroupsPuppetUsers, 
+                .Join(_dbContext.PuppetGroupsPuppetUsers.Where(pgpu => pgpu.ClusterName == cluster.Name), 
                     sponsor => sponsor.Owner.Kerberos, 
                     pgpu => pgpu.UserKerberos, 
                     (sponsor, pgpu) => new { sponsor, pgpu })

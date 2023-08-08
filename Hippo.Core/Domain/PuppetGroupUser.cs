@@ -9,6 +9,8 @@ namespace Hippo.Core.Domain
 {
     public class PuppetGroupPuppetUser
     {
+        [MaxLength(20)]
+        public string ClusterName { get; set; }
         [MaxLength(32)]
         public string GroupName { get; set; }
         [MaxLength(20)]
@@ -17,7 +19,9 @@ namespace Hippo.Core.Domain
         internal static void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<PuppetGroupPuppetUser>()
-                .HasKey(gu => new { gu.GroupName, gu.UserKerberos });
+                .HasKey(gu => new { gu.ClusterName, gu.GroupName, gu.UserKerberos });
+            builder.Entity<PuppetGroupPuppetUser>()
+                .HasIndex(gu => gu.GroupName);
             builder.Entity<PuppetGroupPuppetUser>()
                 .HasIndex(gu => gu.UserKerberos);
         }

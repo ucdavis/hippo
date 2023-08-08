@@ -10,9 +10,9 @@ namespace Hippo.Core.Services
 {
     public interface IPuppetService
     {
-        Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string domain);
+        Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string clusterName, string domain);
     }
-    
+
     public class PuppetService : IPuppetService
     {
         private readonly PuppetSettings _settings;
@@ -25,7 +25,7 @@ namespace Hippo.Core.Services
             _gitHubClient.Credentials = new Credentials(_settings.AuthToken);
         }
 
-        public async Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string domain)
+        public async Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string clusterName, string domain)
         {
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
@@ -53,7 +53,7 @@ namespace Hippo.Core.Services
                         var userGroups = (YamlSequenceNode)userNode.Children[userGroupsKey];
                         foreach (var groupNode in userGroups)
                         {
-                            results.Add(new PuppetGroupPuppetUser { GroupName = groupNode.ToString(), UserKerberos = kerberos });
+                            results.Add(new PuppetGroupPuppetUser { ClusterName = clusterName, GroupName = groupNode.ToString(), UserKerberos = kerberos });
                         }
                     }
                 }

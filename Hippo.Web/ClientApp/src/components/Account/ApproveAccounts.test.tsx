@@ -59,7 +59,7 @@ it("shows pending approvals count", async () => {
     );
   });
   expect(container.textContent).toContain(
-    "There are 2 account(s) awaiting your approval"
+    "There are 2 account(s) awaiting approval"
   );
 });
 
@@ -163,7 +163,7 @@ it("calls approve and filters list when approve is clicked", async () => {
     );
   });
   expect(container.textContent).toContain(
-    "There are 2 account(s) awaiting your approval"
+    "There are 2 account(s) awaiting approval"
   );
   //console.log(container.innerHTML);
   const approveButton = container.querySelector(
@@ -175,7 +175,7 @@ it("calls approve and filters list when approve is clicked", async () => {
   });
   //console.log(container.innerHTML);
   expect(container.textContent).toContain(
-    "There are 1 account(s) awaiting your approval"
+    "There are 1 account(s) awaiting approval"
   );
 
   expect(global.fetch).toHaveBeenCalledTimes(2);

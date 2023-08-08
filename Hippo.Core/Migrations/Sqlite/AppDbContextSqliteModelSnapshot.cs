@@ -255,6 +255,10 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
                 {
+                    b.Property<string>("ClusterName")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("GroupName")
                         .HasMaxLength(32)
                         .HasColumnType("TEXT");
@@ -263,7 +267,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("GroupName", "UserKerberos");
+                    b.HasKey("ClusterName", "GroupName", "UserKerberos");
+
+                    b.HasIndex("GroupName");
 
                     b.HasIndex("UserKerberos");
 

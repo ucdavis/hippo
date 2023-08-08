@@ -272,6 +272,10 @@ namespace Hippo.Core.Migrations.SqlServer
 
             modelBuilder.Entity("Hippo.Core.Domain.PuppetGroupPuppetUser", b =>
                 {
+                    b.Property<string>("ClusterName")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("GroupName")
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
@@ -280,7 +284,9 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("GroupName", "UserKerberos");
+                    b.HasKey("ClusterName", "GroupName", "UserKerberos");
+
+                    b.HasIndex("GroupName");
 
                     b.HasIndex("UserKerberos");
 
