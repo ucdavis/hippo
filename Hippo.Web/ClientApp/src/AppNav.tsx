@@ -47,14 +47,14 @@ export const AppNav = () => {
                   Pending Approvals
                 </NavLink>
                 <NavLink
-                  id="sponsored"
-                  to={`/${cluster.name}/sponsored`}
+                  id="activeAccounts"
+                  to={`/${cluster.name}/activeaccounts`}
                   className="nav-item nav-link"
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Sponsored Accounts
+                  Active Accounts
                 </NavLink>
               </ShowFor>
               <ShowFor roles={["ClusterAdmin"]}>

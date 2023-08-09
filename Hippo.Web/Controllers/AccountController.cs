@@ -66,6 +66,24 @@ public class AccountController : SuperController
             .ToArrayAsync());
     }
 
+    [HttpGet]
+    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
+    public async Task<ActionResult> Active()
+    {
+        var currentUser = await _userService.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
+        return Ok(await _dbContext.Accounts
+            .Where(a => a.Status == Account.Statuses.Active)
+            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .OrderBy(a => a.Group.Name).ThenBy(a => a.Name)
+            .Select(AccountModel.Projection)
+            .ToArrayAsync());                
+    }
+
     // Approve a given pending account if you are the sponsor
     [HttpPost]
     [Authorize(Policy = AccessCodes.GroupAdminAccess)]

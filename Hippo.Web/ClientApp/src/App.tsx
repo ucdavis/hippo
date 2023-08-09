@@ -11,7 +11,7 @@ import { AccountInfo } from "./components/Account/AccountInfo";
 import { RequestForm } from "./components/Account/RequestForm";
 import { PendingApproval } from "./components/Account/PendingApproval";
 import { ApproveAccounts } from "./components/Account/ApproveAccounts";
-import { SponsoredAccounts } from "./components/Account/SponsoredAccounts";
+import { ActiveAccounts } from "./components/Account/ActiveAccounts";
 import { AdminUsers } from "./components/Admin/AdminUsers";
 import { Sponsors } from "./components/Admin/Sponsors";
 import { ConditionalRoute } from "./ConditionalRoute";
@@ -58,8 +58,8 @@ const App = () => {
             />
             <ConditionalRoute
               roles={["GroupAdmin"]}
-              path="/:cluster/sponsored"
-              component={SponsoredAccounts}
+              path="/:cluster/activeaccounts"
+              component={ActiveAccounts}
             />
             <ConditionalRoute
               roles={["ClusterAdmin"]}

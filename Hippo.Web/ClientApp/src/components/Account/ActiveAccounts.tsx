@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 
-export const SponsoredAccounts = () => {
+export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
 
   const { cluster } = useParams<IRouteParams>();
@@ -11,7 +11,7 @@ export const SponsoredAccounts = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/account/sponsored`
+        `/api/${cluster}/account/active`
       );
 
       if (response.ok) {
@@ -29,24 +29,30 @@ export const SponsoredAccounts = () => {
       </div>
     );
   } else {
+    const groupCount = new Set(
+      accounts.map((a) => a.group).filter((g) => g !== null)
+    ).size;
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>You have sponsored {accounts.length} account(s) </p>
+          <p>
+            You have {accounts.length} active account(s) in {groupCount}{" "}
+            group(s)
+          </p>
           <table className="table">
             <thead>
               <tr>
+                <th>Group</th>
                 <th>Name</th>
                 <th>Approved On</th>
-                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id}>
+                  <td>{account.group}</td>
                   <td>{account.name}</td>
                   <td>{new Date(account.updatedOn).toLocaleDateString()}</td>
-                  <td>{account.status}</td>
                 </tr>
               ))}
             </tbody>
