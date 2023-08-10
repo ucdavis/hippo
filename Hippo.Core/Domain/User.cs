@@ -37,13 +37,13 @@ namespace Hippo.Core.Domain
         public string MothraId { get; set; }
 
         [JsonIgnore]
-        public List<Account> Accounts { get; set; }
+        public List<Account> Accounts { get; set; } = new();
 
         [Display(Name = "Name")]
         public string Name => FirstName + " " + LastName;
 
         [JsonIgnore]
-        public List<Permission> Permissions { get; set; }
+        public List<Permission> Permissions { get; set; } = new();
 
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)

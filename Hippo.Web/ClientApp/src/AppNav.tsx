@@ -66,7 +66,7 @@ export const AppNav = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  Manage Admins
+                  Cluster Admins
                 </NavLink>
 
                 <NavLink

@@ -213,7 +213,7 @@ public class AccountController : SuperController
             existingAccount.AccountYaml = await _yamlService.Get(currentUser, model);
 
             await _historyService.AccountApproved(existingAccount);
-            await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
+            await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount.ClusterId, existingAccount.Id);
 
             await _dbContext.SaveChangesAsync();
 

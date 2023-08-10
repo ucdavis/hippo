@@ -16,7 +16,7 @@ namespace Hippo.Core.Services
         Task<Account> AccountApproved(Account account);
         Task<Account> AccountRejected(Account account, string note = null);
 
-        Task AddHistory(string action, string details, Account account, bool adminAction = true);
+        Task AddHistory(string action, string details, int clusterId, int? accountId = null, bool adminAction = true);
     }
 
     public class HistoryService : IHistoryService
@@ -63,16 +63,16 @@ namespace Hippo.Core.Services
             return AddAccountHistory(account, Actions.Rejected, note);
         }
 
-        public async Task AddHistory(string action, string details, Account account, bool adminAction = true)
+        public async Task AddHistory(string action, string details, int clusterId, int? accountId = null, bool adminAction = true)
         {
             var currentUser = await _userService.GetCurrentUser();
 
             var history = new History { Action = action,
                 Details = details,
                 AdminAction = adminAction,
-                Account = account,
+                AccountId = accountId,
                 ActedBy = currentUser,
-                ClusterId = account.ClusterId,
+                ClusterId = clusterId,
             };
 
             await _dbContext.Histories.AddAsync(history);
