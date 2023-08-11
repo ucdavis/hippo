@@ -61,7 +61,7 @@ export const AppNav = () => {
                 <NavLink
                   id="AdminIndex"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/users`}
+                  to={`/${cluster.name}/admin/clusteradmins`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
@@ -72,12 +72,12 @@ export const AppNav = () => {
                 <NavLink
                   id="adminSponsors"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/sponsors`}
+                  to={`/${cluster.name}/admin/groupadmins`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Manage Sponsors
+                  Group Admins
                 </NavLink>
               </ShowFor>
             </nav>

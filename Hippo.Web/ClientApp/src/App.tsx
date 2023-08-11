@@ -12,8 +12,8 @@ import { RequestForm } from "./components/Account/RequestForm";
 import { PendingApproval } from "./components/Account/PendingApproval";
 import { ApproveAccounts } from "./components/Account/ApproveAccounts";
 import { ActiveAccounts } from "./components/Account/ActiveAccounts";
-import { AdminUsers } from "./components/Admin/AdminUsers";
-import { Sponsors } from "./components/Admin/Sponsors";
+import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
+import { GroupAdmins } from "./components/Admin/GroupAdmins";
 import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
@@ -63,13 +63,13 @@ const App = () => {
             />
             <ConditionalRoute
               roles={["ClusterAdmin"]}
-              path="/:cluster/admin/users"
-              component={AdminUsers}
+              path="/:cluster/admin/clusteradmins"
+              component={ClusterAdmins}
             />
             <ConditionalRoute
               roles={["ClusterAdmin"]}
-              path="/:cluster/admin/sponsors"
-              component={Sponsors}
+              path="/:cluster/admin/groupadmins"
+              component={GroupAdmins}
             />
             <ConditionalRoute
               roles={["System"]}

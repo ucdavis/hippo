@@ -10,6 +10,12 @@ export interface User {
 
 export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
+export interface GroupAdminModel {
+  permissionId: number;
+  group: string;
+  user: User;
+}
+
 export interface AccountModel {
   id: number;
   name: string;
@@ -36,9 +42,9 @@ export interface RequestPostModel {
   sshKey: string;
 }
 
-export interface CreateSponsorPostModel {
+export interface AddGroupAdminModel {
   lookup: string;
-  name: string;
+  group: string;
 }
 
 export interface AppContextShape {

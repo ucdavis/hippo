@@ -5,7 +5,7 @@ import { User, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 
-export const AdminUsers = () => {
+export const ClusterAdmins = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
