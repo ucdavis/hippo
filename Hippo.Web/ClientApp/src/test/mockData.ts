@@ -69,7 +69,7 @@ export const fakeAppContext: AppContextShape = {
   clusters: [fakeCluster],
 };
 
-export const fakeAdminAppContext: AppContextShape = {
+export const fakeGroupAdminAppContext: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",
   user: {
     detail: {

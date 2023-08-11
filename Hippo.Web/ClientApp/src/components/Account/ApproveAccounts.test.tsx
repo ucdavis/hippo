@@ -2,7 +2,7 @@ import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { MemoryRouter, Route } from "react-router-dom";
 
-import { fakeAccounts, fakeAppContext } from "../../test/mockData";
+import { fakeAccounts, fakeGroupAdminAppContext } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
 import { act, Simulate } from "react-dom/test-utils";
@@ -27,7 +27,7 @@ beforeEach(() => {
     ok: true,
   });
 
-  (global as any).Hippo = fakeAppContext;
+  (global as any).Hippo = fakeGroupAdminAppContext;
   container = document.createElement("div");
   document.body.appendChild(container);
 
@@ -124,7 +124,7 @@ it("table header has expected text", async () => {
     );
   });
   expect(container.querySelector("tr")?.textContent).toBe(
-    "NameSubmittedAction"
+    "GroupNameSubmittedAction"
   );
 });
 
