@@ -16,6 +16,12 @@ export interface GroupAdminModel {
   user: User;
 }
 
+export interface GroupModel {
+  id: number;
+  name: string;
+  displayName: string;
+}
+
 export interface AccountModel {
   id: number;
   name: string;

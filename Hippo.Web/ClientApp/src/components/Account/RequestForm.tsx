@@ -2,7 +2,12 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useHistory, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AccountModel, IRouteParams, RequestPostModel } from "../../types";
+import {
+  GroupModel,
+  AccountModel,
+  IRouteParams,
+  RequestPostModel,
+} from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -11,7 +16,7 @@ export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
   const [notification, setNotification] = usePromiseNotification();
 
-  const [sponsors, setSponsors] = useState<AccountModel[]>([]);
+  const [groups, setGroups] = useState<GroupModel[]>([]);
   const [request, setRequest] = useState<RequestPostModel>({
     groupId: 0,
     sshKey: "",
@@ -20,21 +25,21 @@ export const RequestForm = () => {
   const history = useHistory();
   const { cluster } = useParams<IRouteParams>();
 
-  // load up possible sponsors
+  // load up possible groups
   useEffect(() => {
-    const fetchSponsors = async () => {
+    const fetchGroups = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/account/sponsors`
+        `/api/${cluster}/account/groups`
       );
 
-      const sponsorResult = await response.json();
+      const groupsResult = await response.json();
 
       if (response.ok) {
-        setSponsors(sponsorResult);
+        setGroups(groupsResult);
       }
     };
 
-    fetchSponsors();
+    fetchGroups();
   }, [cluster]);
 
   const handleSubmit = async () => {
@@ -80,9 +85,9 @@ export const RequestForm = () => {
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
           <Typeahead
-            id="sponsorLookup"
+            id="groupLookup"
             labelKey="name"
-            placeholder="Select a sponsor"
+            placeholder="Select a group"
             onChange={(selected) => {
               if (selected.length > 0) {
                 setRequest((r) => ({
@@ -93,15 +98,20 @@ export const RequestForm = () => {
                 setRequest((r) => ({ ...r, groupId: 0 }));
               }
             }}
-            options={sponsors.map(({ id, name }) => ({ id, name }))}
+            options={groups.map(({ id, displayName }) => ({
+              id,
+              name: displayName,
+            }))}
           />
           <p className="form-helper">
-            Your sponsor is probably your PI or your Department. You can filter
-            this list by typing in it.
+            Your group is probably named after your PI or your Department. You
+            can filter this list by typing in it.
             <br />
-            If you don't see your sponsor, you may contact HPC help to request
-            they be added.{" "}
-            <a href="mailto: hpc-help@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
+            If you don't see your group, you may contact HPC help to request it
+            be added.{" "}
+            <a
+              href={`mailto: hpc-help@ucdavis.edu?subject=Please add a group to the ${cluster} cluster&body=Group Name:  %0D%0API or Dept Email: `}
+            >
               Click here to contact HPC Help
             </a>
           </p>

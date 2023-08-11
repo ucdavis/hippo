@@ -46,6 +46,21 @@ public class AccountController : SuperController
             .ToArrayAsync());
     }
 
+    [HttpGet]
+    public async Task<ActionResult> Groups()
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("You must supply a cluster name.");
+        }
+
+        return Ok(await _dbContext.Groups
+            .AsNoTracking()
+            .Where(g => g.Cluster.Name == Cluster)
+            .OrderBy(g => g.DisplayName)
+            .ToArrayAsync());
+    }
+
     // Return all accounts that are waiting for the current user to approve
     [HttpGet]
     [Authorize(Policy = AccessCodes.GroupAdminAccess)]
@@ -81,7 +96,7 @@ public class AccountController : SuperController
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             .OrderBy(a => a.Group.Name).ThenBy(a => a.Name)
             .Select(AccountModel.Projection)
-            .ToArrayAsync());                
+            .ToArrayAsync());
     }
 
     // Approve a given pending account if you are the sponsor
@@ -203,9 +218,9 @@ public class AccountController : SuperController
             .Include(a => a.Cluster)
             .Include(a => a.Group)
             .AsSingleQuery()
-            .SingleOrDefaultAsync(a => 
+            .SingleOrDefaultAsync(a =>
                 a.OwnerId == currentUser.Id
-                && a.GroupId == model.GroupId 
+                && a.GroupId == model.GroupId
                 && a.ClusterId == cluster.Id);
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
@@ -239,7 +254,7 @@ public class AccountController : SuperController
         };
 
         account = await _historyService.AccountRequested(account);
-        
+
         await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
 
