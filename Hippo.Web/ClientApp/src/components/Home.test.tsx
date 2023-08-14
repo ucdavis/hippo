@@ -6,6 +6,7 @@ import {
   fakeAccounts,
   fakeGroupAdminAppContext,
   fakeAppContextNoAccount,
+  fakeGroups,
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
 import { act } from "react-dom/test-utils";
@@ -20,6 +21,16 @@ afterEach(() => {
 
 describe("Basic render", () => {
   beforeEach(() => {
+    const groupsResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeGroups),
+    });
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        [`/api/${fakeAccounts[0].cluster}/account/groups`]: groupsResponse,
+      })
+    );
     (global as any).Hippo = fakeGroupAdminAppContext;
   });
 
@@ -36,7 +47,7 @@ describe("Basic render", () => {
   });
 });
 
-describe("Home Redirect when Sponsor", () => {
+describe("Home Redirect when GroupAdmin", () => {
   beforeEach(() => {
     (global as any).Hippo = fakeGroupAdminAppContext;
   });
@@ -82,17 +93,17 @@ describe("Home Redirect when Sponsor", () => {
 
 describe("Home Redirect no account", () => {
   beforeEach(() => {
-    const sponsorsResponse = Promise.resolve({
+    const groupsResponse = Promise.resolve({
       status: 200,
       ok: true,
-      json: () => Promise.resolve(fakeAccounts),
+      json: () => Promise.resolve(fakeGroups),
     });
 
     (global as any).Hippo = fakeAppContextNoAccount;
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/account/sponsors`]: sponsorsResponse,
+        [`/api/${fakeAccounts[0].cluster}/account/groups`]: groupsResponse,
       })
     );
   });

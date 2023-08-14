@@ -1,4 +1,10 @@
-import { AppContextShape, User, AccountModel, Cluster } from "../types";
+import {
+  AppContextShape,
+  User,
+  AccountModel,
+  GroupModel,
+  Cluster,
+} from "../types";
 
 const fakeUser: User = {
   id: 1,
@@ -19,6 +25,19 @@ const fakeAdminUser: User = {
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
 };
+
+export const fakeGroups: GroupModel[] = [
+  {
+    id: 1,
+    name: "group1",
+    displayName: "Group 1",
+  },
+  {
+    id: 2,
+    name: "group2",
+    displayName: "Group 2",
+  },
+];
 
 export const fakeAccounts: AccountModel[] = [
   {
