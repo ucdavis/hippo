@@ -171,8 +171,7 @@ public class AccountController : SuperController
             .Include(a => a.Cluster)
             .InCluster(Cluster)
             .AsSingleQuery()
-            .FirstOrDefaultAsync(a => a.OwnerId == currentUser.Id
-                                      && a.Status == Account.Statuses.Active);
+            .FirstOrDefaultAsync(a => a.OwnerId == currentUser.Id && a.Status != Account.Statuses.Rejected);
 
         if (existingAccount != null) 
         {
