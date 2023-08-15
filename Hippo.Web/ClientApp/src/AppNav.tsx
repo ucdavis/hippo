@@ -35,7 +35,7 @@ export const AppNav = () => {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <nav className="simple-nav">
-              <ShowFor cluster={cluster.name} roles={["Sponsor"]}>
+              <ShowFor roles={["GroupAdmin"]}>
                 <NavLink
                   id="sponsorApprove"
                   to={`/${cluster.name}/approve`}
@@ -47,48 +47,37 @@ export const AppNav = () => {
                   Pending Approvals
                 </NavLink>
                 <NavLink
-                  id="sponsored"
-                  to={`/${cluster.name}/sponsored`}
+                  id="activeAccounts"
+                  to={`/${cluster.name}/activeaccounts`}
                   className="nav-item nav-link"
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Sponsored Accounts
+                  Active Accounts
                 </NavLink>
               </ShowFor>
-              <ShowFor cluster={cluster.name} roles={["Admin"]}>
-                <NavLink
-                  id="adminApprovals"
-                  className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/accountApprovals`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Override Approvals
-                </NavLink>
-
+              <ShowFor roles={["ClusterAdmin"]}>
                 <NavLink
                   id="AdminIndex"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/users`}
+                  to={`/${cluster.name}/admin/clusteradmins`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Manage Admins
+                  Cluster Admins
                 </NavLink>
 
                 <NavLink
                   id="adminSponsors"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/sponsors`}
+                  to={`/${cluster.name}/admin/groupadmins`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Manage Sponsors
+                  Group Admins
                 </NavLink>
               </ShowFor>
             </nav>

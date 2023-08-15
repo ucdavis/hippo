@@ -16,8 +16,6 @@ namespace Hippo.Core.Domain
             IsActive = true;
             Status = Statuses.PendingApproval;
             Histories = new List<AccountHistory>();
-            CanSponsor = false;
-            IsAdmin = false;
         }
 
         [Key]
@@ -25,9 +23,6 @@ namespace Hippo.Core.Domain
 
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
-
-        public bool CanSponsor { get; set; }
-        public bool IsAdmin { get; set; }
 
         /// <summary>
         /// Sponsor must resolve to a user (or at least an email?) 
@@ -39,7 +34,7 @@ namespace Hippo.Core.Domain
         public string Name { get; set; }
         public bool IsActive { get;set;}
 
-        public string SshKey { get; set; }
+        public string AccountYaml { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -57,8 +52,13 @@ namespace Hippo.Core.Domain
         [Required]
         public Cluster Cluster { get; set; }
 
+        public int? GroupId { get; set; }
+        public Group Group { get; set; }
+
+
         [JsonIgnore]
         public List<AccountHistory> Histories { get; set; }
+
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,17 +68,16 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
-            modelBuilder.Entity<Account>().HasIndex(a => a.CanSponsor);
-            modelBuilder.Entity<Account>().HasIndex(a => a.IsAdmin);
+            modelBuilder.Entity<Account>().HasIndex(g => g.GroupId);
+
+            //self referencing foreign key
+            modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
 
             modelBuilder.Entity<AccountHistory>()
                 .HasOne(a => a.Account)
                 .WithMany(a => a.Histories)
                 .HasForeignKey(a => a.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            //self referencing foreign key
-            modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
         }
 
         public class Statuses

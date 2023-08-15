@@ -183,7 +183,7 @@ namespace Hippo.Web.Controllers
             return Content(sb.ToString());
         }
 
-        [Authorize(Policy = AccessCodes.AdminAccess)]
+        [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
         public IActionResult TestAuth()
         {
             return Content("Success");

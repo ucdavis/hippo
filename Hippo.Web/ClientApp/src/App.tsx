@@ -11,10 +11,9 @@ import { AccountInfo } from "./components/Account/AccountInfo";
 import { RequestForm } from "./components/Account/RequestForm";
 import { PendingApproval } from "./components/Account/PendingApproval";
 import { ApproveAccounts } from "./components/Account/ApproveAccounts";
-import { SponsoredAccounts } from "./components/Account/SponsoredAccounts";
-import { AdminUsers } from "./components/Admin/AdminUsers";
-import { Sponsors } from "./components/Admin/Sponsors";
-import { AdminApproveAccounts } from "./components/Admin/AdminApproveAccounts";
+import { ActiveAccounts } from "./components/Account/ActiveAccounts";
+import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
+import { GroupAdmins } from "./components/Admin/GroupAdmins";
 import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
@@ -53,29 +52,24 @@ const App = () => {
             />
             <Route path="/:cluster/create" component={RequestForm} />
             <ConditionalRoute
-              roles={["Sponsor"]}
+              roles={["GroupAdmin"]}
               path="/:cluster/approve"
               component={ApproveAccounts}
             />
             <ConditionalRoute
-              roles={["Sponsor"]}
-              path="/:cluster/sponsored"
-              component={SponsoredAccounts}
+              roles={["GroupAdmin"]}
+              path="/:cluster/activeaccounts"
+              component={ActiveAccounts}
             />
             <ConditionalRoute
-              roles={["Admin"]}
-              path="/:cluster/admin/users"
-              component={AdminUsers}
+              roles={["ClusterAdmin"]}
+              path="/:cluster/admin/clusteradmins"
+              component={ClusterAdmins}
             />
             <ConditionalRoute
-              roles={["Admin"]}
-              path="/:cluster/admin/sponsors"
-              component={Sponsors}
-            />
-            <ConditionalRoute
-              roles={["Admin"]}
-              path="/:cluster/admin/accountApprovals"
-              component={AdminApproveAccounts}
+              roles={["ClusterAdmin"]}
+              path="/:cluster/admin/groupadmins"
+              component={GroupAdmins}
             />
             <ConditionalRoute
               roles={["System"]}

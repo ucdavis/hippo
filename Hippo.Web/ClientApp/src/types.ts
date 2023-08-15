@@ -6,22 +6,31 @@ export interface User {
   iam: string;
   kerberos: string;
   name: string;
-  isAdmin: boolean;
 }
 
-export type RoleName = "Admin" | "Sponsor" | "System";
+export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
-export interface Account {
+export interface GroupAdminModel {
+  permissionId: number;
+  group: string;
+  user: User;
+}
+
+export interface GroupModel {
+  id: number;
+  name: string;
+  displayName: string;
+}
+
+export interface AccountModel {
   id: number;
   name: string;
   status: string;
-  canSponsor: boolean;
   createdOn: string;
   cluster: string;
   owner?: User;
-  sponsor?: Account;
+  group?: string;
   updatedOn: string;
-  isAdmin: boolean;
 }
 
 export interface Cluster {
@@ -35,22 +44,29 @@ export interface Cluster {
 }
 
 export interface RequestPostModel {
-  sponsorId: number;
+  groupId: number;
   sshKey: string;
 }
 
-export interface CreateSponsorPostModel {
+export interface AddGroupAdminModel {
   lookup: string;
-  name: string;
+  group: string;
 }
 
 export interface AppContextShape {
   antiForgeryToken: string;
   user: {
     detail: User;
+    permissions: Permission[];
   };
-  accounts: Account[];
+  accounts: AccountModel[];
   clusters: Cluster[];
+}
+
+export interface Permission {
+  role: RoleName;
+  cluster?: string;
+  group?: string;
 }
 
 export interface PromiseStatus {

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
-import { Account } from "../types";
+import { AccountModel } from "../types";
 import { authenticatedFetch } from "../util/api";
 import { usePromiseNotification } from "../util/Notifications";
 import { useConfirmationDialog } from "./ConfirmationDialog";
 import { notEmptyOrFalsey } from "../util/ValueChecks";
 
 interface Props {
-  account: Account;
-  removeAccount: (account: Account) => void;
+  account: AccountModel;
+  removeAccount: (account: AccountModel) => void;
   updateUrl: string;
   disabled?: boolean;
 }

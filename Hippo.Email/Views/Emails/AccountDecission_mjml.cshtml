@@ -75,10 +75,12 @@
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
         "@Model?.RequestDate"))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
-        "@Model?.SponsorName"))
+        "@Model?.AdminName"))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
         "@Model?.DecisionDate"))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
         "@Model?.ClusterName"))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
+        "@Model?.GroupName"))
     </mj-column>
 </mj-section>

@@ -1,4 +1,5 @@
 
+using Hippo.Core.Domain;
 using Hippo.Core.Models;
 using Hippo.Core.Models.Settings;
 using Microsoft.Extensions.Options;
@@ -9,9 +10,9 @@ namespace Hippo.Core.Services
 {
     public interface IPuppetService
     {
-        Task<PuppetDetails> GetPuppetDetails(string domain);
+        Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string clusterName, string domain);
     }
-    
+
     public class PuppetService : IPuppetService
     {
         private readonly PuppetSettings _settings;
@@ -24,10 +25,8 @@ namespace Hippo.Core.Services
             _gitHubClient.Credentials = new Credentials(_settings.AuthToken);
         }
 
-
-        public async Task<PuppetDetails> GetPuppetDetails(string domain)
+        public async Task<IEnumerable<PuppetGroupPuppetUser>> GetPuppetGroupsUsers(string clusterName, string domain)
         {
-            var details = new PuppetDetails();
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
             // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
@@ -40,16 +39,7 @@ namespace Hippo.Core.Services
             yamlStream.Load(reader);
             var rootNode = (YamlMappingNode)yamlStream.Documents[0].RootNode;
 
-            var groupKey = new YamlScalarNode("group");
-            if (rootNode.Children.ContainsKey(groupKey))
-            {
-                var groupNode = (YamlMappingNode)rootNode.Children[groupKey];
-                foreach (var kvp in groupNode)
-                {
-                    details.Groups.Add(kvp.Key.ToString());
-                }
-            }
-
+            var results = new List<PuppetGroupPuppetUser>();
             var userKey = new YamlScalarNode("user");
             if (rootNode.Children.ContainsKey(userKey))
             {
@@ -57,20 +47,19 @@ namespace Hippo.Core.Services
                 var users = (YamlMappingNode)rootNode.Children[userKey];
                 foreach (var kvp in users)
                 {
-                    var user = new PuppetUser { Kerberos = kvp.Key.ToString() };
+                    var kerberos = kvp.Key.ToString();
                     if (kvp.Value is YamlMappingNode userNode && userNode.Children.ContainsKey(userGroupsKey))
                     {
-                        var groups = (YamlSequenceNode)userNode.Children[userGroupsKey];
-                        foreach (var groupNode in groups)
+                        var userGroups = (YamlSequenceNode)userNode.Children[userGroupsKey];
+                        foreach (var groupNode in userGroups)
                         {
-                            user.Groups.Add(groupNode.ToString());
+                            results.Add(new PuppetGroupPuppetUser { ClusterName = clusterName, GroupName = groupNode.ToString(), UserKerberos = kerberos });
                         }
                     }
-                    details.Users.Add(user);
                 }
             }
 
-            return details;
+            return results;
         }
     }
 }

@@ -2,7 +2,7 @@ import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { MemoryRouter, Route } from "react-router-dom";
 
-import { fakeAccounts, fakeAppContext } from "../../test/mockData";
+import { fakeAccounts, fakeGroupAdminAppContext } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
 import { act, Simulate } from "react-dom/test-utils";
@@ -27,7 +27,7 @@ beforeEach(() => {
     ok: true,
   });
 
-  (global as any).Hippo = fakeAppContext;
+  (global as any).Hippo = fakeGroupAdminAppContext;
   container = document.createElement("div");
   document.body.appendChild(container);
 
@@ -59,7 +59,7 @@ it("shows pending approvals count", async () => {
     );
   });
   expect(container.textContent).toContain(
-    "There are 2 account(s) awaiting your approval"
+    "There are 2 account(s) awaiting approval"
   );
 });
 
@@ -124,7 +124,7 @@ it("table header has expected text", async () => {
     );
   });
   expect(container.querySelector("tr")?.textContent).toBe(
-    "NameSubmittedAction"
+    "GroupNameSubmittedAction"
   );
 });
 
@@ -163,7 +163,7 @@ it("calls approve and filters list when approve is clicked", async () => {
     );
   });
   expect(container.textContent).toContain(
-    "There are 2 account(s) awaiting your approval"
+    "There are 2 account(s) awaiting approval"
   );
   //console.log(container.innerHTML);
   const approveButton = container.querySelector(
@@ -175,7 +175,7 @@ it("calls approve and filters list when approve is clicked", async () => {
   });
   //console.log(container.innerHTML);
   expect(container.textContent).toContain(
-    "There are 1 account(s) awaiting your approval"
+    "There are 1 account(s) awaiting approval"
   );
 
   expect(global.fetch).toHaveBeenCalledTimes(2);

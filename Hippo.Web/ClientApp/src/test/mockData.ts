@@ -1,4 +1,10 @@
-import { AppContextShape, User, Account, Cluster } from "../types";
+import {
+  AppContextShape,
+  User,
+  AccountModel,
+  GroupModel,
+  Cluster,
+} from "../types";
 
 const fakeUser: User = {
   id: 1,
@@ -8,7 +14,6 @@ const fakeUser: User = {
   iam: "1000037182",
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
-  isAdmin: false,
 };
 
 const fakeAdminUser: User = {
@@ -19,29 +24,39 @@ const fakeAdminUser: User = {
   iam: "1000037182",
   kerberos: "bdobalina",
   name: "Mr Mr Mr Bob Dobalina",
-  isAdmin: true,
 };
 
-export const fakeAccounts: Account[] = [
+export const fakeGroups: GroupModel[] = [
+  {
+    id: 1,
+    name: "group1",
+    displayName: "Group 1",
+  },
+  {
+    id: 2,
+    name: "group2",
+    displayName: "Group 2",
+  },
+];
+
+export const fakeAccounts: AccountModel[] = [
   {
     id: 1,
     name: "Account 1",
     status: "Active",
-    canSponsor: true,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    isAdmin: false,
+    group: "group1",
   },
   {
     id: 2,
     name: "Account 2",
     status: "Active",
-    canSponsor: true,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    isAdmin: false,
+    group: "group2",
   },
 ];
 
@@ -61,17 +76,31 @@ export const fakeAppContext: AppContextShape = {
     detail: {
       ...fakeUser,
     },
+    permissions: [
+      {
+        role: "GroupMember",
+        group: "group1",
+        cluster: "caesfarm",
+      },
+    ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
 };
 
-export const fakeAdminAppContext: AppContextShape = {
+export const fakeGroupAdminAppContext: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",
   user: {
     detail: {
       ...fakeAdminUser,
     },
+    permissions: [
+      {
+        role: "GroupAdmin",
+        group: "group1",
+        cluster: "caesfarm",
+      },
+    ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
@@ -87,7 +116,6 @@ export const fakeAdminUsers: User[] = [
     iam: "1000037199",
     kerberos: "bdob",
     name: "A Fake Admin User",
-    isAdmin: true,
   },
 ];
 
@@ -97,6 +125,7 @@ export const fakeAppContextNoAccount: AppContextShape = {
     detail: {
       ...fakeUser,
     },
+    permissions: [],
   },
   accounts: [],
   clusters: [fakeCluster],

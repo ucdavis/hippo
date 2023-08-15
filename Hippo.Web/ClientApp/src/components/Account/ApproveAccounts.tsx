@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Account, IRouteParams } from "../../types";
+import { AccountModel, IRouteParams } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -9,7 +9,7 @@ export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
-  const [accounts, setAccounts] = useState<Account[]>();
+  const [accounts, setAccounts] = useState<AccountModel[]>();
   const [accountApproving, setAccountApproving] = useState<number>();
   const [notification, setNotification] = usePromiseNotification();
 
@@ -17,7 +17,9 @@ export const ApproveAccounts = () => {
 
   useEffect(() => {
     const fetchAccounts = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/account/pending`);
+      const response = await authenticatedFetch(
+        `/api/${cluster}/account/pending`
+      );
 
       if (response.ok) {
         setAccounts(await response.json());
@@ -27,12 +29,15 @@ export const ApproveAccounts = () => {
     fetchAccounts();
   }, [cluster]);
 
-  const handleApprove = async (account: Account) => {
+  const handleApprove = async (account: AccountModel) => {
     setAccountApproving(account.id);
 
-    const req = authenticatedFetch(`/api/${cluster}/account/approve/${account.id}`, {
-      method: "POST",
-    });
+    const req = authenticatedFetch(
+      `/api/${cluster}/account/approve/${account.id}`,
+      {
+        method: "POST",
+      }
+    );
 
     setNotification(req, "Approving", "Account Approved");
 
@@ -45,7 +50,7 @@ export const ApproveAccounts = () => {
     }
   };
 
-  const handleReject = async (account: Account) => {
+  const handleReject = async (account: AccountModel) => {
     // remove the account from the list
     setAccounts(accounts?.filter((a) => a.id !== account.id));
   };
@@ -60,10 +65,11 @@ export const ApproveAccounts = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>There are {accounts.length} account(s) awaiting your approval</p>
+          <p>There are {accounts.length} account(s) awaiting approval</p>
           <table className="table">
             <thead>
               <tr>
+                <th>Group</th>
                 <th>Name</th>
                 <th>Submitted</th>
                 <th>Action</th>
@@ -72,6 +78,7 @@ export const ApproveAccounts = () => {
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id}>
+                  <td>{account.group}</td>
                   <td>{account.name}</td>
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>
@@ -83,7 +90,8 @@ export const ApproveAccounts = () => {
                       {accountApproving === account.id
                         ? "Approving..."
                         : "Approve"}
-                    </button>{" | "}
+                    </button>
+                    {" | "}
                     {accountApproving !== account.id && (
                       <RejectRequest
                         account={account}

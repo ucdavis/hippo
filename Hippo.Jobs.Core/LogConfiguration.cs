@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -16,7 +17,7 @@ namespace Hippo.Jobs.Core
 
         private static IConfigurationRoot _configuration = null!;
 
-        public static void Setup(IConfigurationRoot configuration)
+        public static void Setup(IConfigurationRoot configuration, string? jobName, Guid? jobId)
         {
             if (_loggingSetup) return;
 
@@ -24,7 +25,10 @@ namespace Hippo.Jobs.Core
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
             // create global logger with standard configuration
-            Log.Logger = GetConfiguration().CreateLogger();
+            Log.Logger = GetConfiguration()
+                .CreateLogger()
+                .ForContext("jobname", jobName ?? Assembly.GetEntryAssembly()?.GetName().Name)
+                .ForContext("jobid", jobId ?? Guid.NewGuid());
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => Log.Fatal(e.ExceptionObject as Exception, e.ExceptionObject.ToString());
 

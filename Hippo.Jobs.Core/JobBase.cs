@@ -10,7 +10,7 @@ namespace Hippo.Jobs.Core
     {
         public static IConfigurationRoot Configuration { get; set; } = null!;
 
-        protected static void Configure()
+        protected static void Configure(string? jobName, Guid? jobId)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -26,7 +26,7 @@ namespace Hippo.Jobs.Core
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
 
-            LogConfiguration.Setup(Configuration); 
+            LogConfiguration.Setup(Configuration, jobName, jobId); 
         }
     }
 }
