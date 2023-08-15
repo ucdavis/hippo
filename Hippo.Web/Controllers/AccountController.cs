@@ -141,6 +141,7 @@ public class AccountController : SuperController
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
+        model.SshKey = model.SshKey.Trim();
 
         if(model.SponsorId == 0)
         {
