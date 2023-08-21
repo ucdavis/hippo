@@ -9,7 +9,7 @@ namespace Hippo.Web.Services
 {
     public interface IYamlService
     {
-        Task<string> Get(User currentUser, AccountCreateModel accountCreateModel);
+        Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster);
     }
 
     public class YamlService : IYamlService
@@ -23,7 +23,7 @@ namespace Hippo.Web.Services
 
         
 
-        public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel)
+        public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster)
         {
             var sponsorAccount = await _dbContext.Accounts.Include(a => a.Owner).SingleAsync(a => a.Id == accountCreateModel.SponsorId);
 
@@ -40,7 +40,6 @@ namespace Hippo.Web.Services
                         kerb = sponsorAccount.Owner.Kerberos,
                         iam = sponsorAccount.Owner.Iam,
                         mothra = sponsorAccount.Owner.MothraId,
-                        cluster = sponsorAccount.Cluster.Name
                     },
                     account = new
                     {
@@ -50,6 +49,10 @@ namespace Hippo.Web.Services
                         iam = currentUser.Iam,
                         mothra = currentUser.MothraId,
                         key = accountCreateModel.SshKey
+                    },
+                    meta = new
+                    {
+                        cluster = cluster.Name,
                     }
                 }
             );

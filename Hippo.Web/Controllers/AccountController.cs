@@ -176,7 +176,7 @@ public class AccountController : SuperController
 
         if (existingAccount != null) 
         {
-            existingAccount.SshKey = await _yamlService.Get(currentUser, model);
+            existingAccount.SshKey = await _yamlService.Get(currentUser, model, cluster);
 
             await _historyService.AccountApproved(existingAccount);
             await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount);
@@ -198,7 +198,7 @@ public class AccountController : SuperController
             CanSponsor = false, 
             Owner = currentUser,
             SponsorId = model.SponsorId,
-            SshKey = await _yamlService.Get(currentUser, model),
+            SshKey = await _yamlService.Get(currentUser, model, cluster),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             ClusterId = cluster.Id,
