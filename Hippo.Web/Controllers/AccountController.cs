@@ -16,11 +16,11 @@ namespace Hippo.Web.Controllers;
 [Authorize]
 public class AccountController : SuperController
 {
-    private AppDbContext _dbContext;
-    private IUserService _userService;
-    private ISshService _sshService;
-    private INotificationService _notificationService;
-    private IHistoryService _historyService;
+    private readonly AppDbContext _dbContext;
+    private readonly IUserService _userService;
+    private readonly ISshService _sshService;
+    private readonly INotificationService _notificationService;
+    private readonly IHistoryService _historyService;
     private readonly IYamlService _yamlService;
 
     public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, IYamlService yamlService)
@@ -35,29 +35,18 @@ public class AccountController : SuperController
 
     // Return account info for the currently logged in user
     [HttpGet]
-    public async Task<ActionResult> Get(string cluster)
+    public async Task<ActionResult> Get()
     {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
         var currentUser = await _userService.GetCurrentUser();
 
         return Ok(await _dbContext.Accounts
             .InCluster(Cluster)
             .Where(a => a.Owner.Iam == currentUser.Iam)
             .Select(AccountModel.Projection)
-            .ToArrayAsync());
-    }
-
-    [HttpGet]
-    public async Task<ActionResult> Groups()
-    {
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("You must supply a cluster name.");
-        }
-
-        return Ok(await _dbContext.Groups
-            .AsNoTracking()
-            .Where(g => g.Cluster.Name == Cluster)
-            .OrderBy(g => g.DisplayName)
             .ToArrayAsync());
     }
 

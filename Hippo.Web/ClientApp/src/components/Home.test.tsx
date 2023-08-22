@@ -28,7 +28,7 @@ describe("Basic render", () => {
     });
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/account/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       })
     );
     (global as any).Hippo = fakeGroupAdminAppContext;
@@ -103,7 +103,7 @@ describe("Home Redirect no account", () => {
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/account/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       })
     );
   });
