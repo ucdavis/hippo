@@ -25,6 +25,15 @@ export const AccountInfo = () => {
           </a>
           .
         </p>
+        <a
+          href={`https://hippo.ucdavis.edu/${match?.params.cluster}/create`}
+          className="btn btn-primary"
+          style={{
+            marginTop: "5%"
+          }}
+        >
+          Update my ssh key
+        </a>
       </div>
     </div>
   );
