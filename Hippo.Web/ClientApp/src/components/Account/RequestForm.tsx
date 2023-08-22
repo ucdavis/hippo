@@ -114,6 +114,7 @@ export const RequestForm = () => {
           <textarea
             className="form-control"
             id="sharedKey"
+            placeholder="Paste your public SSH key here"
             required
             onChange={(e) =>
               setRequest((r) => ({ ...r, sshKey: e.target.value }))
