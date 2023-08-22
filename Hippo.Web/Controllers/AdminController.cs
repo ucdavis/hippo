@@ -131,7 +131,7 @@ public class AdminController : SuperController
         // get all users with group admin permissions
         return Ok(await _dbContext.Permissions
             .AsNoTracking()
-            .Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.GroupAdmin)
+            .Where(p => p.Group.IsActive && p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.GroupAdmin)
             .OrderBy(p => p.Group.Name).ThenBy(p => p.User.LastName).ThenBy(p => p.User.FirstName)
             .Select(p => new GroupAdminModel { PermissionId = p.Id, Group = p.Group.Name, User = p.User })
             .ToArrayAsync());
