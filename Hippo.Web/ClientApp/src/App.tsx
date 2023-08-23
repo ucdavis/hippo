@@ -19,6 +19,7 @@ import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
 import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
+import { Groups } from "./components/Admin/Groups";
 
 declare var Hippo: AppContextShape;
 
@@ -60,6 +61,11 @@ const App = () => {
               roles={["GroupAdmin"]}
               path="/:cluster/activeaccounts"
               component={ActiveAccounts}
+            />
+            <ConditionalRoute
+              roles={["ClusterAdmin"]}
+              path="/:cluster/admin/groups"
+              component={Groups}
             />
             <ConditionalRoute
               roles={["ClusterAdmin"]}

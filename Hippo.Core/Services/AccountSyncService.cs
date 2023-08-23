@@ -118,7 +118,7 @@ namespace Hippo.Core.Services
             // check for new group memberships
             var addPerms = await _dbContext.PuppetGroupsPuppetUsers
                 // only sync users that are members of an existing group
-                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(group => group.Name == pgpu.GroupName && group.ClusterId == cluster.Id))
+                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(group => group.IsActive && group.Name == pgpu.GroupName && group.ClusterId == cluster.Id))
                 .Join(_dbContext.Users, pgpu => pgpu.UserKerberos, user => user.Kerberos, (pgpu, user) => new { pgpu, user })
                 .Join(_dbContext.Groups, x => x.pgpu.GroupName, group => group.Name, (x, group) => new { x.pgpu, x.user, group })
                 // identify perms that are not yet in the db (Left Join is via GroupJoin/SelectMany)
@@ -143,7 +143,7 @@ namespace Hippo.Core.Services
             // check if any users need to be added
             var addUsers = await _dbContext.PuppetGroupsPuppetUsers
                 // only sync users that are members of an existing group
-                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(g => g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
+                .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(g => g.IsActive && g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
                 // identify users that are not yet in the db (Left Join is via GroupJoin/SelectMany)
                 .GroupJoin(_dbContext.Users, pgpu => pgpu.UserKerberos, u => u.Kerberos, (pgpu, users) => new { pgpu, users })
                 .SelectMany(x => x.users.DefaultIfEmpty(), (x, u) => new { x.pgpu, u })
@@ -196,7 +196,7 @@ namespace Hippo.Core.Services
 
             // check if any groups need to be created
             var missingGroups = await usersThatShouldBeGroupAdmins
-                .Where(u => !_dbContext.Groups.Any(g => g.Name == u.GroupName))
+                .Where(u => !_dbContext.Groups.Any(g => g.IsActive && g.Name == u.GroupName && g.ClusterId == cluster.Id))
                 .Select(u => u.GroupName)
                 .Distinct()
                 .Select(groupName => new Group { Name = groupName, DisplayName = groupName, ClusterId = cluster.Id })
@@ -209,7 +209,10 @@ namespace Hippo.Core.Services
 
             // check if any users need to be added to groups
             var missingPerms = await usersThatShouldBeGroupAdmins
-                .Join(_dbContext.Groups, u => u.GroupName, g => g.Name, (user, grp) => new { user, grp })
+                .Join(_dbContext.Groups.Where(g => g.IsActive), 
+                    u => new { u.GroupName, cluster.Id }, 
+                    g => new { GroupName = g.Name, Id = g.ClusterId }, 
+                    (user, grp) => new { user, grp })
                 .GroupJoin(_dbContext.Permissions, 
                     x => new { x.user.UserId, GroupId = (int?)x.grp.Id, RoleId = groupMemberRoleId, ClusterId = (int?)cluster.Id }, 
                     perm => new { perm.UserId, perm.GroupId, perm.RoleId, perm.ClusterId }, 
