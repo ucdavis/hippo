@@ -253,7 +253,9 @@ export const Groups = () => {
           </div>
           <br />
           <button
-            disabled={notification.pending}
+            disabled={
+              notification.pending || !request.name || !request.displayName
+            }
             className="btn btn-primary"
             onClick={handleCreate}
           >
