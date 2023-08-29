@@ -34,7 +34,7 @@ export const ApproveAccounts = () => {
       method: "POST",
     });
 
-    setNotification(req, "Approving", "Account Approved. Please allow 1 - 2 business days for changes to take place.");
+    setNotification(req, "Approving", "Account Approved. Please allow 2 to 3 hours for changes to take place.");
 
     const response = await req;
     if (response.ok) {
