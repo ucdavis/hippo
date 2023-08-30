@@ -21,7 +21,7 @@ namespace Hippo.Web.Services
             _dbContext = dbContext;
         }
 
-        
+
 
         public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel)
         {
@@ -31,15 +31,12 @@ namespace Hippo.Web.Services
                 throw new KeyNotFoundException($"Group with id {accountCreateModel.GroupId} not found");
             }
 
-            var yaml =  new Serializer();
-            
+            var yaml = new Serializer();
+
             return yaml.Serialize(
                 new
                 {
-                    group = new
-                    {
-                        name = groupName
-                    },
+                    groups = new[] { groupName },
                     account = new
                     {
                         name = currentUser.Name,

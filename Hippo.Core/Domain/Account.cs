@@ -52,13 +52,12 @@ namespace Hippo.Core.Domain
         [Required]
         public Cluster Cluster { get; set; }
 
-        public int? GroupId { get; set; }
-        public Group Group { get; set; }
-
 
         [JsonIgnore]
         public List<AccountHistory> Histories { get; set; }
 
+        [JsonIgnore]
+        public List<GroupAccount> GroupAccounts { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,7 +67,6 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
             modelBuilder.Entity<Account>().HasIndex(a => a.SponsorId);
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
-            modelBuilder.Entity<Account>().HasIndex(g => g.GroupId);
 
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
@@ -78,6 +76,12 @@ namespace Hippo.Core.Domain
                 .WithMany(a => a.Histories)
                 .HasForeignKey(a => a.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GroupAccount>()
+                .HasOne(ga => ga.Account)
+                .WithMany(a => a.GroupAccounts)
+                .HasForeignKey(ga => ga.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);                
         }
 
         public class Statuses

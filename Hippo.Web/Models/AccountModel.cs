@@ -11,7 +11,7 @@ namespace Hippo.Web.Models
         public DateTime CreatedOn { get; set; }
         public string Cluster { get; set; } = "";
         public User? Owner { get; set; }
-        public string Group { get; set; } = "";
+        public List<string> Groups { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
 
         public AccountModel()
@@ -27,7 +27,7 @@ namespace Hippo.Web.Models
             CreatedOn = account.CreatedOn;
             Cluster = account.Cluster.Name;
             Owner = account.Owner;
-            Group = account.Group.Name;
+            Groups = account.GroupAccounts.Select(ga => ga.Group.Name).OrderBy(x => x).ToList();
             UpdatedOn = account.UpdatedOn;
         }
 
@@ -43,7 +43,7 @@ namespace Hippo.Web.Models
                     CreatedOn = a.CreatedOn,
                     Cluster = a.Cluster.Name,
                     Owner = a.Owner,
-                    Group = a.Group.Name,
+                    Groups = a.GroupAccounts.Select(ga => ga.Group.Name).OrderBy(x => x).ToList(),
                     UpdatedOn = a.UpdatedOn
                 };
             }

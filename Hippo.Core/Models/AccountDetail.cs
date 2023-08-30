@@ -9,6 +9,6 @@ namespace Hippo.Core.Models
         public string Status { get; set; }
         public string Owner { get; set; }
         public string Cluster { get; set; }
-        public string Group { get; set; }
+        public List<string> Groups { get; set; } = new();
     }
 }

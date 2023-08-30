@@ -61,11 +61,13 @@ public class AccountController : SuperController
             return BadRequest("Cluster is required");
         }
 
-        //Make this one order by date? Or stay consistent and just by name?
         return Ok(await _dbContext.Accounts
+            .AsNoTracking()
             .PendingApproval()
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .OrderBy(a => a.Name)
+            // the projection is sorting groups by name, so we'll sort by the first group name
+            .OrderBy(a => a.GroupAccounts.OrderBy(ga => ga.Group.Name).First().Group.Name)
+                .ThenBy(a => a.Name)
             .Select(AccountModel.Projection)
             .ToArrayAsync());
     }
@@ -81,9 +83,12 @@ public class AccountController : SuperController
         }
 
         return Ok(await _dbContext.Accounts
+            .AsNoTracking()
             .Where(a => a.Status == Account.Statuses.Active)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .OrderBy(a => a.Group.Name).ThenBy(a => a.Name)
+            // the projection is sorting groups by name, so we'll sort by the first group name
+            .OrderBy(a => a.GroupAccounts.OrderBy(ga => ga.Group.Name).First().Group.Name)
+                .ThenBy(a => a.Name)
             .Select(AccountModel.Projection)
             .ToArrayAsync());
     }
@@ -205,11 +210,10 @@ public class AccountController : SuperController
         var existingAccount = await _dbContext.Accounts
             .Include(a => a.Owner)
             .Include(a => a.Cluster)
-            .Include(a => a.Group)
-            .AsSingleQuery()
+            .Include(a => a.GroupAccounts)
+                .ThenInclude(ga => ga.Group)
             .SingleOrDefaultAsync(a =>
                 a.OwnerId == currentUser.Id
-                && a.GroupId == model.GroupId
                 && a.ClusterId == cluster.Id);
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
@@ -239,12 +243,12 @@ public class AccountController : SuperController
             Name = $"{currentUser.Name} ({currentUser.Email})",
             ClusterId = cluster.Id,
             Status = Account.Statuses.PendingApproval,
-            GroupId = model.GroupId
         };
 
         account = await _historyService.AccountRequested(account);
 
         await _dbContext.Accounts.AddAsync(account);
+        await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
         await _dbContext.SaveChangesAsync();
 
         var success = await _notificationService.AccountRequested(account);

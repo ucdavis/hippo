@@ -144,7 +144,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     ('{Role.Codes.System}'),
                     ('{Role.Codes.ClusterAdmin}'),
                     ('{Role.Codes.GroupAdmin}'),
-                    ('{Role.Codes.GroupMember}')
                 ");
 
             // User.IsAdmin -> Role.System
