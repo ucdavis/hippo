@@ -142,7 +142,7 @@ public class AccountController : SuperController
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
-        model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+", "");
+        model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+([\w!#$%&'*+\-/=?\^_`{|}~]+(\.[\w!#$%&'*+\-/=?\^_`{|}~]+)*@((([\-\w]+\.?)+[a-zA-Z]{2,4})|(([0-9]{1,3}\.){3}[0-9]{1,3})))?", "");
 
         if(model.SponsorId == 0)
         {
