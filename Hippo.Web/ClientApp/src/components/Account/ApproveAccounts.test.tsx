@@ -124,7 +124,7 @@ it("table header has expected text", async () => {
     );
   });
   expect(container.querySelector("tr")?.textContent).toBe(
-    "GroupNameSubmittedAction"
+    "GroupsNameSubmittedAction"
   );
 });
 
