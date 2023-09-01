@@ -16,7 +16,7 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         public string DisplayName { get; set; } = "";
 
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
         [Required]
         public int ClusterId { get; set; }

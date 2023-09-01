@@ -28,6 +28,8 @@ namespace Hippo.Core.Services
 
         public async Task SyncAccounts()
         {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            
             // clear temp data in db
             await _dbContext.TruncateAsync<PuppetGroupPuppetUser>();
 
@@ -38,6 +40,8 @@ namespace Hippo.Core.Services
             {
                 await SyncAccounts(cluster);
             }
+
+            await transaction.CommitAsync();
         }
 
         private async Task SyncAccounts(Cluster cluster)
@@ -45,10 +49,12 @@ namespace Hippo.Core.Services
             Log.Information("Syncing accounts for cluster {Cluster}", cluster.Name);
 
             await RefreshPuppetData(cluster);
-            await MakeSponsorsGroupAdmins(cluster);
             await AddNewUsers(cluster);
+            await AddNewGroups(cluster);
+            await RemoveOldGroups(cluster);
             await AddNewGroupAccounts(cluster);
             await RemoveOldGroupAccounts(cluster);
+            await MakeSponsorsGroupAdmins(cluster);
         }
 
         private async Task RefreshPuppetData(Cluster cluster)
@@ -65,20 +71,92 @@ namespace Hippo.Core.Services
                 cluster.Name);
         }
 
+        private async Task AddNewGroups(Cluster cluster)
+        {
+            // check if any groups need to be created
+            var missingGroups = await _dbContext.PuppetGroupsPuppetUsers
+                .Where(pgpu => pgpu.ClusterName == cluster.Name)
+                // identify missing groups
+                .Where(pgpu => !_dbContext.Groups.IgnoreQueryFilters().Any(g => g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
+                .Select(pgpu => pgpu.GroupName)
+                .Distinct()
+                .Select(groupName => new Group { Name = groupName, DisplayName = groupName, ClusterId = cluster.Id })
+                .ToArrayAsync();
+            if (missingGroups.Any())
+            {
+                Log.Information("Adding {Count} missing groups for cluster {Cluster}", missingGroups.Count(), cluster.Name);
+                await _dbContext.BulkInsertAsync(missingGroups);
+            }
+
+            // check if any groups need to be reactivated
+            var reactivateGroups = await _dbContext.Groups
+                .AsNoTracking()
+                .IgnoreQueryFilters()
+                .Where(g => g.ClusterId == cluster.Id && !g.IsActive)
+                .Where(g => _dbContext.PuppetGroupsPuppetUsers.Any(pgpu => pgpu.ClusterName == cluster.Name && pgpu.GroupName == g.Name))
+                .ToArrayAsync();
+
+            if (reactivateGroups.Any())
+            {
+                Log.Information("Re-enabling {Count} groups for cluster {Cluster}", reactivateGroups.Length, cluster.Name);
+                foreach (var group in reactivateGroups)
+                {
+                    group.IsActive = true;
+                }
+                await _dbContext.BulkUpdateAsync(reactivateGroups);
+            }
+        }
+
+        private async Task RemoveOldGroups(Cluster cluster)
+        {
+            // check for groups that no longer exist
+            var deactivateGroups = await _dbContext.Groups
+                .AsNoTracking()
+                .Where(g => g.ClusterId == cluster.Id)
+                .Where(g => !_dbContext.PuppetGroupsPuppetUsers.Any(pgpu => pgpu.ClusterName == cluster.Name && pgpu.GroupName == g.Name))
+                .ToArrayAsync();
+
+            if (deactivateGroups.Any())
+            {
+                Log.Information("Removing {Count} groups for cluster {Cluster}", deactivateGroups.Length, cluster.Name);
+                foreach (var group in deactivateGroups)
+                {
+                    group.IsActive = false;
+                }
+                await _dbContext.BulkUpdateAsync(deactivateGroups);
+
+                // deactivate accounts that have no remaining active groups
+                var inspectAccounts = await _dbContext.Accounts
+                    .AsNoTracking()
+                    .Include(a => a.GroupAccounts)
+                    .Where(a => a.ClusterId == cluster.Id
+                        && deactivateGroups.Select(g => g.Id).Contains(a.GroupAccounts.Select(ga => ga.GroupId).FirstOrDefault()))
+                    .ToArrayAsync();
+
+                var deactivateAccounts = new List<Account>();
+
+                foreach (var account in inspectAccounts.Where(a => a.GroupAccounts.Any()))
+                {
+                    account.IsActive = false;
+                    deactivateAccounts.Add(account);
+                }
+
+                if (deactivateAccounts.Any())
+                {
+                    Log.Information("Disabling {Count} accounts for cluster {Cluster}", deactivateAccounts.Count, cluster.Name);
+                    await _dbContext.BulkUpdateAsync(deactivateAccounts);
+                }
+            }
+        }
+
         private async Task RemoveOldGroupAccounts(Cluster cluster)
         {
             // check for group memberships that no longer exist
             var removeGroupsAccounts = await _dbContext.GroupsAccounts
                 .AsNoTracking()
                 .Where(ga => ga.Group.ClusterId == cluster.Id)
-                // identify GroupAccount records that are no longer represented in puppet data (Left Join is via GroupJoin/SelectMany)
-                .GroupJoin(_dbContext.PuppetGroupsPuppetUsers.Where(pgpu => pgpu.ClusterName == cluster.Name),
-                    ga => new { kerb = ga.Account.Owner.Kerberos, GroupName = ga.Group.Name },
-                    pgpu => new { kerb = pgpu.UserKerberos, pgpu.GroupName },
-                    (ga, pgpus) => new { ga, pgpus })
-                .SelectMany(x => x.pgpus.DefaultIfEmpty(), (x, pgpu) => new { x.ga, pgpu })
-                .Where(x => x.pgpu == null)
-                .Select(x => x.ga)
+                // identify GroupAccount records that are no longer represented in puppet data
+                .Where(ga => !_dbContext.PuppetGroupsPuppetUsers.Any(pgpu => pgpu.ClusterName == cluster.Name && pgpu.UserKerberos == ga.Account.Owner.Kerberos && pgpu.GroupName == ga.Group.Name))
                 .ToArrayAsync();
 
             if (removeGroupsAccounts.Any())
@@ -95,19 +173,19 @@ namespace Hippo.Core.Services
                     .ToArrayAsync();
 
                 var inactivateAccounts = new List<Account>();
-                
+
                 foreach (var account in inspectAccounts.Where(a => a.GroupAccounts.Any()))
                 {
                     account.IsActive = false;
                     inactivateAccounts.Add(account);
                 }
-                
+
                 if (inactivateAccounts.Any())
                 {
                     Log.Information("Disabling {Count} accounts for cluster {Cluster}", inactivateAccounts.Count, cluster.Name);
                     await _dbContext.BulkUpdateAsync(inactivateAccounts);
                 }
-                
+
             }
         }
 
@@ -119,19 +197,15 @@ namespace Hippo.Core.Services
                 .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(group => group.IsActive && group.Name == pgpu.GroupName && group.ClusterId == cluster.Id))
                 .Join(_dbContext.Accounts, pgpu => pgpu.UserKerberos, account => account.Owner.Kerberos, (pgpu, account) => new { pgpu, account })
                 .Join(_dbContext.Groups, x => x.pgpu.GroupName, group => group.Name, (x, group) => new { x.pgpu, x.account, group })
-                // identify missing GroupAccounts (Left Join is via GroupJoin/SelectMany)
-                .GroupJoin(_dbContext.GroupsAccounts,
-                    x => new { AccountId = x.account.Id, GroupId = x.group.Id },
-                    ga => new { ga.AccountId, ga.GroupId },
-                    (x, groupAccounts) => new { x.pgpu, x.account, g = x.group, groupAccounts })
-                .SelectMany(x => x.groupAccounts.DefaultIfEmpty(), (x, groupAccount) => new { x.pgpu, x.account, x.g, groupAccount })
-                .Where(x => x.groupAccount == null)
-                .Select(x => new GroupAccount { GroupId = x.g.Id, AccountId = x.account.Id })
+                // identify missing GroupAccounts
+                .Where(x => !_dbContext.GroupsAccounts.Any(ga => ga.AccountId == x.account.Id && ga.GroupId == x.group.Id))
+                .Select(x => new GroupAccount { GroupId = x.group.Id, AccountId = x.account.Id })
                 .ToArrayAsync();
+
 
             if (addGroupsAccounts.Any())
             {
-                Log.Information("Adding {Count} new GroupMembership permissions for cluster {Cluster}", addGroupsAccounts.Length, cluster.Name);
+                Log.Information("Adding {Count} new GroupAccounts for cluster {Cluster}", addGroupsAccounts.Length, cluster.Name);
                 await _dbContext.BulkInsertAsync(addGroupsAccounts);
             }
         }
@@ -142,11 +216,9 @@ namespace Hippo.Core.Services
             var addUsers = await _dbContext.PuppetGroupsPuppetUsers
                 // only sync users that are members of an existing group
                 .Where(pgpu => pgpu.ClusterName == cluster.Name && _dbContext.Groups.Any(g => g.IsActive && g.Name == pgpu.GroupName && g.ClusterId == cluster.Id))
-                // identify users that are not yet in the db (Left Join is via GroupJoin/SelectMany)
-                .GroupJoin(_dbContext.Users, pgpu => pgpu.UserKerberos, u => u.Kerberos, (pgpu, users) => new { pgpu, users })
-                .SelectMany(x => x.users.DefaultIfEmpty(), (x, u) => new { x.pgpu, u })
-                .Where(x => x.u == null)
-                .Select(x => x.pgpu.UserKerberos)
+                // identify missing users
+                .Where(pgpu => !_dbContext.Users.Any(u => u.Kerberos == pgpu.UserKerberos))
+                .Select(pgpu => pgpu.UserKerberos)
                 .Distinct()
                 .ToArrayAsync();
 
@@ -172,11 +244,11 @@ namespace Hippo.Core.Services
 
             if (newUsers.Any())
             {
-                Log.Information("Adding {Count} new users for cluster {Cluster}", newUsers.Count(), cluster.Name);
-                await _dbContext.BulkInsertAsync(newUsers);
+                Log.Information("Adding {Count} new users and accounts for cluster {Cluster}", newUsers.Count(), cluster.Name);
+                await _dbContext.BulkInsertAsync(newUsers, new BulkConfig { SetOutputIdentity = true });
 
                 // create accounts for these new users
-                var newAccounts = newUsers.Select(u => new Account { OwnerId = u.Id, ClusterId = cluster.Id, Status = Account.Statuses.Active }).ToArray();
+                var newAccounts = newUsers.Select(u => new Account { OwnerId = u.Id, ClusterId = cluster.Id, Status = Account.Statuses.Active, Name = $"{u.FirstName} {u.LastName} ({u.Email})" }).ToArray();
                 await _dbContext.BulkInsertAsync(newAccounts);
 
                 // link new accounts to their groups
@@ -197,9 +269,9 @@ namespace Hippo.Core.Services
             // get all users that are sponsering other users in this cluster
             var usersThatShouldBeGroupAdmins = _dbContext.Accounts
                 .Where(sponsor => sponsor.Cluster.Name == cluster.Name && _dbContext.Accounts.Any(a2 => a2.SponsorId == sponsor.Id))
-                .Join(_dbContext.PuppetGroupsPuppetUsers.Where(pgpu => pgpu.ClusterName == cluster.Name), 
-                    sponsor => sponsor.Owner.Kerberos, 
-                    pgpu => pgpu.UserKerberos, 
+                .Join(_dbContext.PuppetGroupsPuppetUsers.Where(pgpu => pgpu.ClusterName == cluster.Name),
+                    sponsor => sponsor.Owner.Kerberos,
+                    pgpu => pgpu.UserKerberos,
                     (sponsor, pgpu) => new { sponsor, pgpu })
                 .Select(x => new { UserId = x.sponsor.Owner.Id, x.pgpu.GroupName });
 
@@ -217,18 +289,14 @@ namespace Hippo.Core.Services
             }
 
             // check if any users need to be added to groups
-            var groupAdminRoleId = (await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.GroupAdmin)).Id;         
+            var groupAdminRoleId = (await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.GroupAdmin)).Id;
             var missingPerms = await usersThatShouldBeGroupAdmins
-                .Join(_dbContext.Groups.Where(g => g.IsActive), 
-                    u => new { u.GroupName, cluster.Id }, 
-                    g => new { GroupName = g.Name, Id = g.ClusterId }, 
+                .Join(_dbContext.Groups.Where(g => g.IsActive),
+                    u => new { u.GroupName, cluster.Id },
+                    g => new { GroupName = g.Name, Id = g.ClusterId },
                     (user, grp) => new { user, grp })
-                .GroupJoin(_dbContext.Permissions, 
-                    x => new { x.user.UserId, GroupId = (int?)x.grp.Id, RoleId = groupAdminRoleId, ClusterId = (int?)cluster.Id }, 
-                    perm => new { perm.UserId, perm.GroupId, perm.RoleId, perm.ClusterId }, 
-                    (x, perms) => new { x.user, x.grp, perms })
-                .SelectMany(x => x.perms.DefaultIfEmpty(), (x, perm) => new { x.user, x.grp, perm })
-                .Where(x => x.perm == null)
+                // identify missing permissions
+                .Where(x => !_dbContext.Permissions.Any(perm => perm.UserId == x.user.UserId && perm.GroupId == x.grp.Id && perm.RoleId == groupAdminRoleId && perm.ClusterId == cluster.Id))
                 .Select(x => new Permission { ClusterId = cluster.Id, GroupId = x.grp.Id, RoleId = groupAdminRoleId, UserId = x.user.UserId })
                 .ToArrayAsync();
 

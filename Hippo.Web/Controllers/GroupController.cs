@@ -129,48 +129,4 @@ public class GroupController : SuperController
         await _dbContext.SaveChangesAsync();
         return Ok(existingGroup);
     }
-
-    [HttpPost]
-    public async Task<IActionResult> Delete(int Id)
-    {
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("You must supply a cluster name.");
-        }
-
-        var group = await _dbContext.Groups
-            .AsSplitQuery()
-            .Include(g => g.Permissions)
-            .Include(g => g.GroupAccounts)
-            .Where(g => g.Cluster.Name == Cluster)
-            .SingleOrDefaultAsync(g => g.Id == Id);
-        if (group == null)
-        {
-            return BadRequest($"Group does not exist.");
-        }
-
-
-        group.IsActive = false;
-
-        await _dbContext.SaveChangesAsync();
-
-        // deactivate associated accounts that have no other active groups
-        var deactivateAccounts = await _dbContext.Accounts
-            .AsNoTracking()
-            .Where(a =>
-                group.GroupAccounts.Select(ga => ga.AccountId).Contains(a.Id)
-                && !a.GroupAccounts.Any(ga => ga.Group.IsActive))
-            .ToArrayAsync();
-
-        if (deactivateAccounts.Any())
-        {
-            foreach (var account in deactivateAccounts)
-            {
-                account.IsActive = false;
-            }
-            await _dbContext.BulkUpdateAsync(deactivateAccounts);
-        }
-
-        return Ok();
-    }
 }
