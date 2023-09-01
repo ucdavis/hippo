@@ -11,7 +11,6 @@ export const Groups = () => {
   // allow user to approve or reject each account
   const [notification, setNotification] = usePromiseNotification();
   const [groups, setGroups] = useState<GroupModel[]>();
-  const [removing, setRemoving] = useState<number>();
   const [editing, setEditing] = useState<number>();
   const [editGroupDisplayName, setEditGroupDisplayName] = useState<string>("");
   const [request, setRequest] = useState<GroupModel>({
@@ -24,15 +23,6 @@ export const Groups = () => {
   >([]);
   const [untrackedGroups, setUntrackedGroups] = useState<string[]>([]);
   const { cluster } = useParams<IRouteParams>();
-
-  const [getRemoveConfirmation] = useConfirmationDialog<string>(
-    {
-      title: "Remove Group",
-      message:
-        "Are you sure you want to remove this group? All associated accounts will be deactivated.",
-    },
-    []
-  );
 
   const [getEditConfirmation] = useConfirmationDialog<string>(
     {
@@ -92,30 +82,6 @@ export const Groups = () => {
 
     fetchUntrackedGroups();
   }, [cluster]);
-
-  const handleRemove = async (group: GroupModel) => {
-    const [confirmed] = await getRemoveConfirmation();
-    if (!confirmed) {
-      return;
-    }
-
-    setRemoving(group.id);
-
-    const req = authenticatedFetch(`/api/${cluster}/group/delete/${group.id}`, {
-      method: "POST",
-    });
-
-    setNotification(req, "Removing", "Group Removed");
-
-    const response = await req;
-    if (response.ok) {
-      setRemoving(undefined);
-
-      // remove the user from the list
-      setGroups(groups?.filter((g) => g.id !== group.id));
-    }
-    //todo deal with error
-  };
 
   const handleCreate = async () => {
     const req = authenticatedFetch(`/api/${cluster}/group/create`, {
@@ -278,14 +244,6 @@ export const Groups = () => {
                   <td>{g.name}</td>
                   <td>{g.displayName}</td>
                   <td>
-                    <button
-                      disabled={notification.pending}
-                      onClick={() => handleRemove(g)}
-                      className="btn btn-danger"
-                    >
-                      {removing === g.id ? "Removing..." : "Remove"}
-                    </button>
-                    |
                     <button
                       disabled={notification.pending}
                       onClick={() => handleEdit(g)}
