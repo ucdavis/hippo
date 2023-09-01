@@ -69,7 +69,7 @@ export const ApproveAccounts = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Group</th>
+                <th>Groups</th>
                 <th>Name</th>
                 <th>Submitted</th>
                 <th>Action</th>
@@ -78,7 +78,7 @@ export const ApproveAccounts = () => {
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id}>
-                  <td>{account.group}</td>
+                  <td>{account.groups.join(", ")}</td>
                   <td>{account.name}</td>
                   <td>{new Date(account.createdOn).toLocaleDateString()}</td>
                   <td>

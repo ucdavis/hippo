@@ -39,9 +39,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -68,8 +65,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("CreatedOn");
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("Name");
 
@@ -197,6 +192,30 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsUnique();
 
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.GroupAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("GroupId", "AccountId")
+                        .IsUnique();
+
+                    b.ToTable("GroupsAccounts");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -371,11 +390,6 @@ namespace Hippo.Core.Migrations.SqlServer
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Hippo.Core.Domain.Group", "Group")
-                        .WithMany("Accounts")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
@@ -387,8 +401,6 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasForeignKey("SponsorId");
 
                     b.Navigation("Cluster");
-
-                    b.Navigation("Group");
 
                     b.Navigation("Owner");
 
@@ -421,6 +433,25 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsRequired();
 
                     b.Navigation("Cluster");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.GroupAccount", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany("GroupAccounts")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Group", "Group")
+                        .WithMany("GroupAccounts")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -484,6 +515,8 @@ namespace Hippo.Core.Migrations.SqlServer
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
+                    b.Navigation("GroupAccounts");
+
                     b.Navigation("Histories");
                 });
 
@@ -496,7 +529,7 @@ namespace Hippo.Core.Migrations.SqlServer
 
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
                 {
-                    b.Navigation("Accounts");
+                    b.Navigation("GroupAccounts");
 
                     b.Navigation("Permissions");
                 });

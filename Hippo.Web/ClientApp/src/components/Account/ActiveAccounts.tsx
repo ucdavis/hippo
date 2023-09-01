@@ -30,7 +30,7 @@ export const ActiveAccounts = () => {
     );
   } else {
     const groupCount = new Set(
-      accounts.map((a) => a.group).filter((g) => g !== null)
+      accounts.map((a) => a.groups).filter((g) => g !== null)
     ).size;
     return (
       <div className="row justify-content-center">
@@ -42,7 +42,7 @@ export const ActiveAccounts = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Group</th>
+                <th>Groups</th>
                 <th>Name</th>
                 <th>Approved On</th>
               </tr>
@@ -50,7 +50,7 @@ export const ActiveAccounts = () => {
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id}>
-                  <td>{account.group}</td>
+                  <td>{account.groups.join(", ")}</td>
                   <td>{account.name}</td>
                   <td>{new Date(account.updatedOn).toLocaleDateString()}</td>
                 </tr>

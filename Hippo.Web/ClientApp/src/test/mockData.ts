@@ -47,7 +47,7 @@ export const fakeAccounts: AccountModel[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    group: "group1",
+    groups: ["group1"],
   },
   {
     id: 2,
@@ -56,7 +56,7 @@ export const fakeAccounts: AccountModel[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    group: "group2",
+    groups: ["group2"],
   },
 ];
 

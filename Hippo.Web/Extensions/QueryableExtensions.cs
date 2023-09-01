@@ -42,7 +42,7 @@ namespace Hippo.Web.Extensions
                                     || (
                                         // group admin can access accounts with the permission's given group
                                         p.Role.Name == Role.Codes.GroupAdmin
-                                        && p.GroupId == a.GroupId
+                                        && a.GroupAccounts.Any(ga => ga.GroupId == p.GroupId)
                                     )
                                 )
                             )

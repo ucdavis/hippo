@@ -129,7 +129,6 @@ namespace Hippo.Web
                 options.AddAccessPolicy(AccessCodes.SystemAccess);
                 options.AddAccessPolicy(AccessCodes.ClusterAdminAccess);
                 options.AddAccessPolicy(AccessCodes.GroupAdminAccess);
-                options.AddAccessPolicy(AccessCodes.GroupAccess);
             });
             services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 

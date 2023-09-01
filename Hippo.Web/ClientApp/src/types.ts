@@ -29,7 +29,7 @@ export interface AccountModel {
   createdOn: string;
   cluster: string;
   owner?: User;
-  group?: string;
+  groups: string[];
   updatedOn: string;
 }
 

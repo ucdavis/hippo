@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Hippo.Core.Models;
+using EFCore.BulkExtensions;
 
 namespace Hippo.Web.Controllers;
 
@@ -119,7 +120,7 @@ public class GroupController : SuperController
         var existingGroup = await _dbContext.Groups
             .Where(g => g.IsActive && g.Cluster.Name == Cluster)
             .SingleOrDefaultAsync(g => g.Id == group.Id);
-        if(existingGroup == null)
+        if (existingGroup == null)
         {
             return BadRequest($"Group does not exist.");
         }
@@ -140,7 +141,7 @@ public class GroupController : SuperController
         var group = await _dbContext.Groups
             .AsSplitQuery()
             .Include(g => g.Permissions)
-            .Include(g => g.Accounts)
+            .Include(g => g.GroupAccounts)
             .Where(g => g.Cluster.Name == Cluster)
             .SingleOrDefaultAsync(g => g.Id == Id);
         if (group == null)
@@ -148,14 +149,28 @@ public class GroupController : SuperController
             return BadRequest($"Group does not exist.");
         }
 
-        // disable group and associated accounts
-        foreach (var account in group.Accounts)
-        {
-            account.IsActive = false;
-        }
+
         group.IsActive = false;
 
         await _dbContext.SaveChangesAsync();
+
+        // deactivate associated accounts that have no other active groups
+        var deactivateAccounts = await _dbContext.Accounts
+            .AsNoTracking()
+            .Where(a =>
+                group.GroupAccounts.Select(ga => ga.AccountId).Contains(a.Id)
+                && !a.GroupAccounts.Any(ga => ga.Group.IsActive))
+            .ToArrayAsync();
+
+        if (deactivateAccounts.Any())
+        {
+            foreach (var account in deactivateAccounts)
+            {
+                account.IsActive = false;
+            }
+            await _dbContext.BulkUpdateAsync(deactivateAccounts);
+        }
+
         return Ok();
     }
 }

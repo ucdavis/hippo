@@ -26,7 +26,7 @@ namespace Hippo.Core.Domain
         public List<Permission> Permissions { get; set; } = new();
 
         [JsonIgnore]
-        public List<Account> Accounts { get; set; } = new();
+        public List<GroupAccount> GroupAccounts { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,10 +39,10 @@ namespace Hippo.Core.Domain
                 .HasForeignKey(p => p.GroupId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Account>()
-                .HasOne(a => a.Group)
-                .WithMany(g => g.Accounts)
-                .HasForeignKey(a => a.GroupId)
+            modelBuilder.Entity<GroupAccount>()
+                .HasOne(ga => ga.Group)
+                .WithMany(g => g.GroupAccounts)
+                .HasForeignKey(ga => ga.GroupId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

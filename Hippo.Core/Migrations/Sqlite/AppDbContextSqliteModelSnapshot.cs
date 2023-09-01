@@ -32,9 +32,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
@@ -61,8 +58,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("CreatedOn");
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("Name");
 
@@ -184,6 +179,28 @@ namespace Hippo.Core.Migrations.Sqlite
                         .IsUnique();
 
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.GroupAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("GroupId", "AccountId")
+                        .IsUnique();
+
+                    b.ToTable("GroupsAccounts");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -349,11 +366,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Hippo.Core.Domain.Group", "Group")
-                        .WithMany("Accounts")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Hippo.Core.Domain.User", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
@@ -365,8 +377,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasForeignKey("SponsorId");
 
                     b.Navigation("Cluster");
-
-                    b.Navigation("Group");
 
                     b.Navigation("Owner");
 
@@ -399,6 +409,25 @@ namespace Hippo.Core.Migrations.Sqlite
                         .IsRequired();
 
                     b.Navigation("Cluster");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.GroupAccount", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany("GroupAccounts")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Group", "Group")
+                        .WithMany("GroupAccounts")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.History", b =>
@@ -462,6 +491,8 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
+                    b.Navigation("GroupAccounts");
+
                     b.Navigation("Histories");
                 });
 
@@ -474,7 +505,7 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
                 {
-                    b.Navigation("Accounts");
+                    b.Navigation("GroupAccounts");
 
                     b.Navigation("Permissions");
                 });
