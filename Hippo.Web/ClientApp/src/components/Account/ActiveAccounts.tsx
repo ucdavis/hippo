@@ -30,7 +30,10 @@ export const ActiveAccounts = () => {
     );
   } else {
     const groupCount = new Set(
-      accounts.map((a) => a.groups).filter((g) => g !== null)
+      accounts
+        .map((a) => a.groups)
+        .flat()
+        .filter((g) => g !== null)
     ).size;
     return (
       <div className="row justify-content-center">
