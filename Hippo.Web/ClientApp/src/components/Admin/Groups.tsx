@@ -4,7 +4,6 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { Typeahead } from "react-bootstrap-typeahead";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -13,15 +12,6 @@ export const Groups = () => {
   const [groups, setGroups] = useState<GroupModel[]>();
   const [editing, setEditing] = useState<number>();
   const [editGroupDisplayName, setEditGroupDisplayName] = useState<string>("");
-  const [request, setRequest] = useState<GroupModel>({
-    id: 0,
-    name: "",
-    displayName: "",
-  });
-  const [untrackedGroupSelection, setUntrackedGroupSelection] = useState<
-    string[]
-  >([]);
-  const [untrackedGroups, setUntrackedGroups] = useState<string[]>([]);
   const { cluster } = useParams<IRouteParams>();
 
   const [getEditConfirmation] = useConfirmationDialog<string>(
@@ -66,67 +56,6 @@ export const Groups = () => {
 
     fetchGroups();
   }, [cluster]);
-
-  useEffect(() => {
-    const fetchUntrackedGroups = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/group/untrackedgroups`
-      );
-
-      if (response.ok) {
-        setUntrackedGroups(await response.json());
-      } else {
-        alert("Error fetching untracked groups");
-      }
-    };
-
-    fetchUntrackedGroups();
-  }, [cluster]);
-
-  const handleCreate = async () => {
-    const req = authenticatedFetch(`/api/${cluster}/group/create`, {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
-
-    setNotification(
-      req,
-      "Saving",
-      (r) => "Group added",
-      async (r) => {
-        if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
-        } else {
-          return "An error happened, please try again.";
-        }
-      }
-    );
-
-    const response = await req;
-
-    if (response.ok) {
-      const newGroup = (await response.json()) as GroupModel;
-      let updatedGroups = [] as GroupModel[];
-      //check if the newGroup is already in the list
-      if (groups?.find((g) => g.id === newGroup.id)) {
-        //if it is, update the group
-        updatedGroups = groups
-          ? groups.map((g) => (g.id === newGroup.id ? newGroup : g))
-          : [newGroup];
-      } else {
-        //if it is not, add it to the list and sort it
-        updatedGroups = groups ? [...groups, newGroup] : [newGroup];
-      }
-      //sort the list
-      setGroups(
-        updatedGroups.sort((a, b) =>
-          (a.displayName ?? "").localeCompare(b.displayName ?? "")
-        )
-      );
-      setRequest((r) => ({ ...r, lookup: "", group: "" }));
-    }
-  };
 
   const handleEdit = async (group: GroupModel) => {
     setEditGroupDisplayName(group.displayName);
@@ -188,47 +117,6 @@ export const Groups = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <div className="form-group">
-            <label className="form-label">Display Name</label>
-
-            <input
-              className="form-control"
-              id="displayNameLookup"
-              placeholder="Group name or description here"
-              value={request.displayName}
-              onChange={(e) =>
-                setRequest((r) => ({ ...r, displayName: e.target.value }))
-              }
-            ></input>
-          </div>
-          <br />
-          <div className="form-group">
-            <label className="form-label">Group</label>
-            <Typeahead
-              id="groupTypeahead"
-              options={untrackedGroups}
-              selected={untrackedGroupSelection}
-              placeholder="Select a group"
-              onChange={(selected) => {
-                setUntrackedGroupSelection(selected.map((s) => s as string));
-                if (selected.length > 0)
-                  setRequest((r) => ({ ...r, name: selected[0] as string }));
-                else setRequest((r) => ({ ...r, name: "" }));
-              }}
-            />
-          </div>
-          <br />
-          <button
-            disabled={
-              notification.pending || !request.name || !request.displayName
-            }
-            className="btn btn-primary"
-            onClick={handleCreate}
-          >
-            Add Group
-          </button>
-          <hr />
-
           <p>There are {groups.length} groups</p>
           <table className="table">
             <thead>
