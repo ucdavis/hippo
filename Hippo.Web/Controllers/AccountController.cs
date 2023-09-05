@@ -8,6 +8,7 @@ using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
 
@@ -187,6 +188,7 @@ public class AccountController : SuperController
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
+        model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+(([\w\.\-]+)@([\w\-]+\.?)+)?", "");
 
         if (model.GroupId == 0)
         {
@@ -214,11 +216,12 @@ public class AccountController : SuperController
                 .ThenInclude(ga => ga.Group)
             .SingleOrDefaultAsync(a =>
                 a.OwnerId == currentUser.Id
-                && a.ClusterId == cluster.Id);
+                && a.ClusterId == cluster.Id
+                && a.Status != Account.Statuses.Rejected);
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
         {
-            existingAccount.AccountYaml = await _yamlService.Get(currentUser, model);
+            existingAccount.AccountYaml = await _yamlService.Get(currentUser, model, cluster);
 
             await _historyService.AccountApproved(existingAccount);
             await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount.ClusterId, existingAccount.Id);
@@ -238,7 +241,7 @@ public class AccountController : SuperController
         var account = new Account()
         {
             Owner = currentUser,
-            AccountYaml = await _yamlService.Get(currentUser, model),
+            AccountYaml = await _yamlService.Get(currentUser, model, cluster),
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             ClusterId = cluster.Id,

@@ -9,7 +9,7 @@ namespace Hippo.Web.Services
 {
     public interface IYamlService
     {
-        Task<string> Get(User currentUser, AccountCreateModel accountCreateModel);
+        Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster);
     }
 
     public class YamlService : IYamlService
@@ -23,7 +23,7 @@ namespace Hippo.Web.Services
 
 
 
-        public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel)
+        public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster)
         {
             var groupName = await _dbContext.Groups.Where(g => g.Id == accountCreateModel.GroupId).Select(g => g.Name).SingleOrDefaultAsync();
             if (string.IsNullOrWhiteSpace(groupName))
@@ -45,6 +45,10 @@ namespace Hippo.Web.Services
                         iam = currentUser.Iam,
                         mothra = currentUser.MothraId,
                         key = accountCreateModel.SshKey
+                    },
+                    meta = new
+                    {
+                        cluster = cluster.Name,
                     }
                 }
             );

@@ -46,7 +46,7 @@ export const RequestForm = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Request Created", async (r) => {
+    setNotification(req, "Saving", "Request Created. Please wait for your sponsor to approve your request.", async (r) => {
       if (r.status === 400) {
         const errorText = await response.text(); //Bad Request Text
         return errorText;
@@ -119,6 +119,7 @@ export const RequestForm = () => {
           <textarea
             className="form-control"
             id="sharedKey"
+            placeholder="Paste your public SSH key here"
             required
             onChange={(e) =>
               setRequest((r) => ({ ...r, sshKey: e.target.value }))

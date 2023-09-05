@@ -77,7 +77,10 @@ export const usePromiseNotification = (): [
         try {
           toastLoadingId = toast.loading(loadingMessage);
           const result = await fetchWithFailOnNotOk(promise);
-          toast.success(await getMessage(successMessageOrHandler, result));
+          const toastOptions = {
+            duration: 30000
+          };
+          toast.success(await getMessage(successMessageOrHandler, result), toastOptions);
           if (getIsMounted()) {
             setSuccess(true);
             setPending(false);
