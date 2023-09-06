@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
+import DataTable from "../../Shared/DataTableBase";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
@@ -42,24 +43,24 @@ export const ActiveAccounts = () => {
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)
           </p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Groups</th>
-                <th>Name</th>
-                <th>Approved On</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account) => (
-                <tr key={account.id}>
-                  <td>{account.groups.join(", ")}</td>
-                  <td>{account.name}</td>
-                  <td>{new Date(account.updatedOn).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            keyField="id"
+            data={accounts}
+            responsive
+            columns={[
+              {
+                name: "Groups",
+                selector: (row) => row.groups.join(", "),
+                sortable: true,
+              },
+              { name: "Name", selector: (row) => row.name, sortable: true },
+              {
+                name: "Approved On",
+                selector: (row) => new Date(row.updatedOn).toLocaleDateString(),
+                sortable: true,
+              },
+            ]}
+          />
         </div>
       </div>
     );
