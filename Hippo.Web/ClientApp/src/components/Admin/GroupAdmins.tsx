@@ -5,6 +5,7 @@ import { AddGroupAdminModel, GroupAdminModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { DataTable } from "../../Shared/DataTable";
 
 export const GroupAdmins = () => {
   // get all accounts that need approval and list them
@@ -190,22 +191,31 @@ export const GroupAdmins = () => {
           <hr />
 
           <p>There are {groupAdmins.length} group admins</p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groupAdmins.map((ga) => (
-                <tr key={ga.permissionId}>
-                  <td>{ga.group}</td>
-                  <td>{ga.user.name}</td>
-                  <td>{ga.user.email}</td>
-                  <td>
+          <DataTable
+            keyField="id"
+            data={groupAdmins}
+            responsive
+            columns={[
+              {
+                name: <th>Group</th>,
+                selector: (ga) => ga.group,
+                sortable: true,
+              },
+              {
+                name: <th>User</th>,
+                selector: (ga) => ga.user.name,
+                sortable: true,
+              },
+              {
+                name: <th>Email</th>,
+                selector: (ga) => ga.user.email,
+                sortable: true,
+              },
+              {
+                name: <th>Action</th>,
+                sortable: false,
+                cell: (ga) => (
+                  <>
                     <button
                       disabled={notification.pending}
                       onClick={() => handleRemove(ga)}
@@ -215,11 +225,11 @@ export const GroupAdmins = () => {
                         ? "Removing..."
                         : "Remove"}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
     );

@@ -4,6 +4,7 @@ import { ClusterModel, Cluster } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import { DataTable } from "../../Shared/DataTable";
 
 const defaultCluster: Cluster = {
   id: 0,
@@ -297,27 +298,55 @@ export const Clusters = () => {
             </div>
           </div>
           <div className="col-md-8">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>SSH URL</th>
-                  <th>SSH Name</th>
-                  <th>SSH Key ID</th>
-                  <th>Domain</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clusterModels.map((m) => (
-                  <tr key={m.cluster.id}>
-                    <td>{m.cluster.name}</td>
-                    <td>{m.cluster.description}</td>
-                    <td>{m.cluster.sshUrl}</td>
-                    <td>{m.cluster.sshName}</td>
-                    <td>{m.cluster.sshKeyId}</td>
-                    <td>{m.cluster.domain}</td>
-                    <td>
+            <DataTable
+              keyField="id"
+              data={clusterModels}
+              responsive
+              columns={[
+                {
+                  name: <th>Name</th>,
+                  selector: (m) => m.cluster.name,
+                  sortable: true,
+                  wrap: true,
+                  maxWidth: "100px",
+                },
+                {
+                  name: <th>Description</th>,
+                  selector: (m) => m.cluster.description,
+                  sortable: true,
+                  wrap: true,
+                  maxWidth: "100px",
+                },
+                {
+                  name: <th>SSH URL</th>,
+                  selector: (m) => m.cluster.sshUrl,
+                  sortable: true,
+                  wrap: true,
+                },
+                {
+                  name: <th>SSH Name</th>,
+                  selector: (m) => m.cluster.sshName,
+                  sortable: true,
+                  wrap: true,
+                  maxWidth: "100px",
+                },
+                {
+                  name: <th>SSH Key ID</th>,
+                  selector: (m) => m.cluster.sshKeyId,
+                  sortable: true,
+                  wrap: true,
+                },
+                {
+                  name: <th>Domain</th>,
+                  selector: (m) => m.cluster.domain,
+                  sortable: true,
+                  wrap: true,
+                },
+                {
+                  name: <th>Action</th>,
+                  sortable: false,
+                  cell: (m) => (
+                    <>
                       <button
                         disabled={notification.pending}
                         onClick={() => handleEdit(m.cluster.id)}
@@ -333,11 +362,11 @@ export const Clusters = () => {
                       >
                         Remove
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </>
+                  ),
+                },
+              ]}
+            />
           </div>
         </div>
       </>

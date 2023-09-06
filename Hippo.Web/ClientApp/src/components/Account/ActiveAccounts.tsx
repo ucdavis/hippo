@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import DataTable from "../../Shared/DataTableBase";
+import { DataTable } from "../../Shared/DataTable";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();

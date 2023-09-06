@@ -4,6 +4,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { User, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
+import { DataTable } from "../../Shared/DataTable";
 
 export const ClusterAdmins = () => {
   // get all accounts that need approval and list them
@@ -132,20 +133,26 @@ export const ClusterAdmins = () => {
           <hr />
 
           <p>There are {users.length} users with admin access</p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>
+          <DataTable
+            keyField="id"
+            data={users}
+            responsive
+            columns={[
+              {
+                name: <th>Name</th>,
+                selector: (user) => user.name,
+                sortable: true,
+              },
+              {
+                name: <th>Email</th>,
+                selector: (user) => user.email,
+                sortable: true,
+              },
+              {
+                name: <th>Action</th>,
+                sortable: false,
+                cell: (user) => (
+                  <>
                     <button
                       disabled={notification.pending}
                       onClick={() => handleRemove(user)}
@@ -153,11 +160,11 @@ export const ClusterAdmins = () => {
                     >
                       {adminRemoving === user.id ? "Removing..." : "Remove"}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
     );

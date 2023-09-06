@@ -4,7 +4,7 @@ import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
-import DataTable from "../../Shared/DataTableBase";
+import { DataTable } from "../../Shared/DataTable";
 
 export const ApproveAccounts = () => {
   // get all accounts that need approval and list them

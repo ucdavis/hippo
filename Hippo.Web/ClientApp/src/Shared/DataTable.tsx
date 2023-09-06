@@ -30,7 +30,7 @@ const Filter = ({ filterText, onFilter, onClear }: FilterProps) => (
   </Form>
 );
 
-function DataTable<T>(props: TableProps<T>): JSX.Element {
+export function DataTable<T>(props: TableProps<T>): JSX.Element {
   const [filterText, setFilterText] = React.useState("");
   const [resetPaginationToggle, setResetPaginationToggle] =
     React.useState(false);
@@ -74,5 +74,3 @@ function DataTable<T>(props: TableProps<T>): JSX.Element {
     />
   );
 }
-
-export default DataTable;

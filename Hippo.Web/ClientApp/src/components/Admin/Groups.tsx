@@ -4,6 +4,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
+import { DataTable } from "../../Shared/DataTable";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -118,32 +119,38 @@ export const Groups = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <p>There are {groups.length} groups</p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Display Name</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groups.map((g) => (
-                <tr key={g.id}>
-                  <td>{g.name}</td>
-                  <td>{g.displayName}</td>
-                  <td>
+          <DataTable
+            keyField="id"
+            data={groups}
+            responsive
+            columns={[
+              {
+                name: <th>Group</th>,
+                selector: (group) => group.name,
+                sortable: true,
+              },
+              {
+                name: <th>Display Name</th>,
+                selector: (group) => group.displayName,
+                sortable: true,
+              },
+              {
+                name: <th>Action</th>,
+                sortable: false,
+                cell: (group) => (
+                  <>
                     <button
                       disabled={notification.pending}
-                      onClick={() => handleEdit(g)}
+                      onClick={() => handleEdit(group)}
                       className="btn btn-primary"
                     >
-                      {editing === g.id ? "Updating..." : "Edit"}
+                      {editing === group.id ? "Updating..." : "Edit"}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
     );
