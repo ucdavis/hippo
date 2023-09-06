@@ -49,13 +49,17 @@ export const ActiveAccounts = () => {
             responsive
             columns={[
               {
-                name: "Groups",
+                name: <th>Groups</th>,
                 selector: (row) => row.groups.join(", "),
                 sortable: true,
               },
-              { name: "Name", selector: (row) => row.name, sortable: true },
               {
-                name: "Approved On",
+                name: <th>Name</th>,
+                selector: (row) => row.name,
+                sortable: true,
+              },
+              {
+                name: <th>Approved On</th>,
                 selector: (row) => new Date(row.updatedOn).toLocaleDateString(),
                 sortable: true,
               },

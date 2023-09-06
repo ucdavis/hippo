@@ -70,6 +70,7 @@ function DataTable<T>(props: TableProps<T>): JSX.Element {
       dense
       data={filteredData}
       paginationRowsPerPageOptions={[10, 25, 50, 100]}
+      className="table"
     />
   );
 }
