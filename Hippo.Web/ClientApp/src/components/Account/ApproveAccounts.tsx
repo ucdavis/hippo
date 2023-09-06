@@ -4,6 +4,7 @@ import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
+import DataTable from "../../Shared/DataTableBase";
 
 export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -39,7 +40,11 @@ export const ApproveAccounts = () => {
       }
     );
 
-    setNotification(req, "Approving", "Account Approved. Please allow 2 to 3 hours for changes to take place.");
+    setNotification(
+      req,
+      "Approving",
+      "Account Approved. Please allow 2 to 3 hours for changes to take place."
+    );
 
     const response = await req;
     if (response.ok) {
@@ -66,22 +71,32 @@ export const ApproveAccounts = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <p>There are {accounts.length} account(s) awaiting approval</p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Groups</th>
-                <th>Name</th>
-                <th>Submitted</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account) => (
-                <tr key={account.id}>
-                  <td>{account.groups.join(", ")}</td>
-                  <td>{account.name}</td>
-                  <td>{new Date(account.createdOn).toLocaleDateString()}</td>
-                  <td>
+          <DataTable
+            keyField="id"
+            data={accounts}
+            responsive
+            columns={[
+              {
+                name: <th>Groups</th>,
+                selector: (account) => account.groups.join(", "),
+                sortable: true,
+              },
+              {
+                name: <th>Name</th>,
+                selector: (account) => account.name,
+                sortable: true,
+              },
+              {
+                name: <th>Submitted</th>,
+                selector: (account) =>
+                  new Date(account.updatedOn).toLocaleDateString(),
+                sortable: true,
+              },
+              {
+                name: <th>Action</th>,
+                sortable: false,
+                cell: (account) => (
+                  <>
                     <button
                       disabled={notification.pending}
                       onClick={() => handleApprove(account)}
@@ -100,11 +115,11 @@ export const ApproveAccounts = () => {
                         disabled={notification.pending}
                       ></RejectRequest>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
     );
