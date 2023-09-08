@@ -125,17 +125,17 @@ export const Groups = () => {
             responsive
             columns={[
               {
-                name: <th>Group</th>,
+                name: <b>Group</b>,
                 selector: (group) => group.name,
                 sortable: true,
               },
               {
-                name: <th>Display Name</th>,
+                name: <b>Display Name</b>,
                 selector: (group) => group.displayName,
                 sortable: true,
               },
               {
-                name: <th>Action</th>,
+                name: <b>Action</b>,
                 sortable: false,
                 cell: (group) => (
                   <>

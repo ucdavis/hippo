@@ -139,17 +139,17 @@ export const ClusterAdmins = () => {
             responsive
             columns={[
               {
-                name: <th>Name</th>,
+                name: <b>Name</b>,
                 selector: (user) => user.name,
                 sortable: true,
               },
               {
-                name: <th>Email</th>,
+                name: <b>Email</b>,
                 selector: (user) => user.email,
                 sortable: true,
               },
               {
-                name: <th>Action</th>,
+                name: <b>Action</b>,
                 sortable: false,
                 cell: (user) => (
                   <>

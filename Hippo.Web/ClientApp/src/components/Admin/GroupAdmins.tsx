@@ -197,22 +197,22 @@ export const GroupAdmins = () => {
             responsive
             columns={[
               {
-                name: <th>Group</th>,
+                name: <b>Group</b>,
                 selector: (ga) => ga.group,
                 sortable: true,
               },
               {
-                name: <th>User</th>,
+                name: <b>User</b>,
                 selector: (ga) => ga.user.name,
                 sortable: true,
               },
               {
-                name: <th>Email</th>,
+                name: <b>Email</b>,
                 selector: (ga) => ga.user.email,
                 sortable: true,
               },
               {
-                name: <th>Action</th>,
+                name: <b>Action</b>,
                 sortable: false,
                 cell: (ga) => (
                   <>

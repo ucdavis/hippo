@@ -77,23 +77,23 @@ export const ApproveAccounts = () => {
             responsive
             columns={[
               {
-                name: <th>Groups</th>,
+                name: <b>Groups</b>,
                 selector: (account) => account.groups.join(", "),
                 sortable: true,
               },
               {
-                name: <th>Name</th>,
+                name: <b>Name</b>,
                 selector: (account) => account.name,
                 sortable: true,
               },
               {
-                name: <th>Submitted</th>,
+                name: <b>Submitted</b>,
                 selector: (account) =>
                   new Date(account.updatedOn).toLocaleDateString(),
                 sortable: true,
               },
               {
-                name: <th>Action</th>,
+                name: <b>Action</b>,
                 sortable: false,
                 cell: (account) => (
                   <>

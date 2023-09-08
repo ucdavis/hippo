@@ -304,46 +304,46 @@ export const Clusters = () => {
               responsive
               columns={[
                 {
-                  name: <th>Name</th>,
+                  name: <b>Name</b>,
                   selector: (m) => m.cluster.name,
                   sortable: true,
                   wrap: true,
                   maxWidth: "100px",
                 },
                 {
-                  name: <th>Description</th>,
+                  name: <b>Description</b>,
                   selector: (m) => m.cluster.description,
                   sortable: true,
                   wrap: true,
                   maxWidth: "100px",
                 },
                 {
-                  name: <th>SSH URL</th>,
+                  name: <b>SSH URL</b>,
                   selector: (m) => m.cluster.sshUrl,
                   sortable: true,
                   wrap: true,
                 },
                 {
-                  name: <th>SSH Name</th>,
+                  name: <b>SSH Name</b>,
                   selector: (m) => m.cluster.sshName,
                   sortable: true,
                   wrap: true,
                   maxWidth: "100px",
                 },
                 {
-                  name: <th>SSH Key ID</th>,
+                  name: <b>SSH Key ID</b>,
                   selector: (m) => m.cluster.sshKeyId,
                   sortable: true,
                   wrap: true,
                 },
                 {
-                  name: <th>Domain</th>,
+                  name: <b>Domain</b>,
                   selector: (m) => m.cluster.domain,
                   sortable: true,
                   wrap: true,
                 },
                 {
-                  name: <th>Action</th>,
+                  name: <b>Action</b>,
                   sortable: false,
                   cell: (m) => (
                     <>
