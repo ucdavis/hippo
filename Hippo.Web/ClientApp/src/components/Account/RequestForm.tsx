@@ -46,14 +46,19 @@ export const RequestForm = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Request Created. Please wait for your sponsor to approve your request.", async (r) => {
-      if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
-      } else {
-        return "An error happened, please try again.";
+    setNotification(
+      req,
+      "Saving",
+      "Request Created. Please wait for your sponsor to approve your request.",
+      async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
       }
-    });
+    );
 
     const response = await req;
 

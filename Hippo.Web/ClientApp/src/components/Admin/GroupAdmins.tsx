@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { AddGroupAdminModel, GroupAdminModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 export const GroupAdmins = () => {
   // get all accounts that need approval and list them
@@ -58,34 +60,39 @@ export const GroupAdmins = () => {
     fetchGroups();
   }, [cluster]);
 
-  const handleRemove = async (groupUser: GroupAdminModel) => {
-    const [confirmed] = await getConfirmation();
-    if (!confirmed) {
-      return;
-    }
-
-    setAdminRemoving(groupUser.permissionId);
-
-    const req = authenticatedFetch(
-      `/api/${cluster}/admin/RemoveGroupAdmin/${groupUser.permissionId}`,
-      {
-        method: "POST",
+  const handleRemove = useCallback(
+    async (groupUser: GroupAdminModel) => {
+      const [confirmed] = await getConfirmation();
+      if (!confirmed) {
+        return;
       }
-    );
 
-    setNotification(req, "Removing", "Group Admin Removed");
+      setAdminRemoving(groupUser.permissionId);
 
-    const response = await req;
-    if (response.ok) {
-      setAdminRemoving(undefined);
-
-      // remove the user from the list
-      setGroupAdmins(
-        groupAdmins?.filter((ga) => ga.permissionId !== groupUser.permissionId)
+      const req = authenticatedFetch(
+        `/api/${cluster}/admin/RemoveGroupAdmin/${groupUser.permissionId}`,
+        {
+          method: "POST",
+        }
       );
-    }
-    //todo deal with error
-  };
+
+      setNotification(req, "Removing", "Group Admin Removed");
+
+      const response = await req;
+      if (response.ok) {
+        setAdminRemoving(undefined);
+
+        // remove the user from the list
+        setGroupAdmins(
+          groupAdmins?.filter(
+            (ga) => ga.permissionId !== groupUser.permissionId
+          )
+        );
+      }
+      //todo deal with error
+    },
+    [cluster, getConfirmation, groupAdmins, setNotification]
+  );
 
   const handleSubmit = async () => {
     const req = authenticatedFetch(`/api/${cluster}/admin/AddGroupAdmin`, {
@@ -140,6 +147,46 @@ export const GroupAdmins = () => {
     }
   };
 
+  const columns: Column<GroupAdminModel>[] = useMemo(
+    () => [
+      {
+        Header: "Group",
+        accessor: (ga) => ga.group,
+        sortable: true,
+      },
+      {
+        Header: "User",
+        accessor: (ga) => ga.user.name,
+        sortable: true,
+      },
+      {
+        Header: "Email",
+        accessor: (ga) => ga.user.email,
+        sortable: true,
+      },
+      {
+        Header: "Action",
+        sortable: false,
+        Cell: (props) => (
+          <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleRemove(props.row.original)}
+              className="btn btn-danger"
+            >
+              {adminRemoving === props.row.original.permissionId
+                ? "Removing..."
+                : "Remove"}
+            </button>
+          </>
+        ),
+      },
+    ],
+    [adminRemoving, handleRemove, notification.pending]
+  );
+
+  const groupAdminsData = useMemo(() => groupAdmins ?? [], [groupAdmins]);
+
   if (groupAdmins === undefined) {
     return (
       <div className="row justify-content-center">
@@ -190,36 +237,13 @@ export const GroupAdmins = () => {
           <hr />
 
           <p>There are {groupAdmins.length} group admins</p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groupAdmins.map((ga) => (
-                <tr key={ga.permissionId}>
-                  <td>{ga.group}</td>
-                  <td>{ga.user.name}</td>
-                  <td>{ga.user.email}</td>
-                  <td>
-                    <button
-                      disabled={notification.pending}
-                      onClick={() => handleRemove(ga)}
-                      className="btn btn-danger"
-                    >
-                      {adminRemoving === ga.permissionId
-                        ? "Removing..."
-                        : "Remove"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ReactTable
+            columns={columns}
+            data={groupAdminsData}
+            initialState={{
+              sortBy: [{ id: "lastName" }, { id: "firstName" }],
+            }}
+          />
         </div>
       </div>
     );

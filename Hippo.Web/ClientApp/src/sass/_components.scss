@@ -29,7 +29,7 @@
   .table & {
     font-size: 0.9rem;
     color: $primary-color !important;
-    background-color: #fff;
+    background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
     padding: 1% 2%;
     &:hover {
@@ -105,7 +105,7 @@
   .table & {
     font-size: 0.9rem;
     color: $merlot !important;
-    background-color: #fff;
+    background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
     padding: 1% 2%;
     &:hover {

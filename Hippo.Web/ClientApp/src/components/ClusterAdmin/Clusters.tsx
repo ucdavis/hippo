@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { ClusterModel, Cluster } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 const defaultCluster: Cluster = {
   id: 0,
@@ -181,25 +183,28 @@ export const Clusters = () => {
     fetchClusters();
   }, []);
 
-  const handleRemove = async (id: number) => {
-    const [confirmed] = await getRemoveConfirmation();
-    if (!confirmed) {
-      return;
-    }
+  const handleRemove = useCallback(
+    async (id: number) => {
+      const [confirmed] = await getRemoveConfirmation();
+      if (!confirmed) {
+        return;
+      }
 
-    const req = authenticatedFetch(`/api/clusteradmin/delete/${id}`, {
-      method: "POST",
-    });
+      const req = authenticatedFetch(`/api/clusteradmin/delete/${id}`, {
+        method: "POST",
+      });
 
-    setNotification(req, "Removing", "Cluster Removed");
+      setNotification(req, "Removing", "Cluster Removed");
 
-    const response = await req;
-    if (response.ok) {
-      // remove the cluster from the list
-      setClusters(clusterModels.filter((m) => m.cluster.id !== id));
-    }
-    //todo deal with error
-  };
+      const response = await req;
+      if (response.ok) {
+        // remove the cluster from the list
+        setClusters(clusterModels.filter((m) => m.cluster.id !== id));
+      }
+      //todo deal with error
+    },
+    [clusterModels, getRemoveConfirmation, setNotification]
+  );
 
   const handleCreate = async () => {
     setEditClusterModel({ cluster: { ...defaultCluster }, sshKey: "" });
@@ -237,47 +242,120 @@ export const Clusters = () => {
     }
   };
 
-  const handleEdit = async (id: number) => {
-    const editClusterModel = clusterModels.filter(
-      (m) => m.cluster.id === id
-    )[0];
-    setEditClusterModel({
-      cluster: { ...editClusterModel.cluster },
-      sshKey: editClusterModel.sshKey,
-    });
-    setEditConfirmationTitle("Edit Cluster");
-    const [confirmed, newModel] = await getEditConfirmation();
+  const handleEdit = useCallback(
+    async (id: number) => {
+      const editClusterModel = clusterModels.filter(
+        (m) => m.cluster.id === id
+      )[0];
+      setEditClusterModel({
+        cluster: { ...editClusterModel.cluster },
+        sshKey: editClusterModel.sshKey,
+      });
+      setEditConfirmationTitle("Edit Cluster");
+      const [confirmed, newModel] = await getEditConfirmation();
 
-    if (!confirmed) {
-      return;
-    }
-
-    const req = authenticatedFetch(`/api/clusteradmin/update`, {
-      method: "POST",
-      body: JSON.stringify(newModel),
-    });
-
-    setNotification(req, "Saving", "Cluster Updated", async (r) => {
-      if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
-      } else {
-        return "An error happened, please try again.";
+      if (!confirmed) {
+        return;
       }
-    });
 
-    const response = await req;
+      const req = authenticatedFetch(`/api/clusteradmin/update`, {
+        method: "POST",
+        body: JSON.stringify(newModel),
+      });
 
-    if (response.ok) {
-      const newCluster = await response.json();
-      setClusters(
-        clusterModels
-          .map((m) => (m.cluster.id === id ? newCluster : m))
-          .sort((a, b) => a.cluster.name.localeCompare(b.cluster.name))
-      );
-      setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
-    }
-  };
+      setNotification(req, "Saving", "Cluster Updated", async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await req;
+
+      if (response.ok) {
+        const newCluster = await response.json();
+        setClusters(
+          clusterModels
+            .map((m) => (m.cluster.id === id ? newCluster : m))
+            .sort((a, b) => a.cluster.name.localeCompare(b.cluster.name))
+        );
+        setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
+      }
+    },
+    [clusterModels, getEditConfirmation, setNotification]
+  );
+
+  const columns: Column<ClusterModel>[] = useMemo(
+    () => [
+      {
+        Header: "Name",
+        accessor: (m) => m.cluster.name,
+        sortable: true,
+        wrap: true,
+        width: "100px",
+      },
+      {
+        Header: "Description",
+        accessor: (m) => m.cluster.description,
+        sortable: true,
+        wrap: true,
+        width: "100px",
+      },
+      {
+        Header: "SSH URL",
+        accessor: (m) => m.cluster.sshUrl,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        Header: "SSH Name",
+        accessor: (m) => m.cluster.sshName,
+        sortable: true,
+        wrap: true,
+        width: "100px",
+      },
+      {
+        Header: "SSH Key ID",
+        accessor: (m) => m.cluster.sshKeyId,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        Header: "Domain",
+        accessor: (m) => m.cluster.domain,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        Header: "Action",
+        sortable: false,
+        Cell: (m) => (
+          <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleEdit(m.cluster.id)}
+              className="btn btn-primary"
+            >
+              Edit
+            </button>
+            {" | "}
+            <button
+              disabled={notification.pending}
+              onClick={() => handleRemove(m.cluster.id)}
+              className="btn btn-danger"
+            >
+              Remove
+            </button>
+          </>
+        ),
+      },
+    ],
+    [handleEdit, handleRemove, notification.pending]
+  );
+
+  const clusterModelsData = useMemo(() => clusterModels ?? [], [clusterModels]);
 
   if (notification.pending) {
     return (
@@ -297,47 +375,13 @@ export const Clusters = () => {
             </div>
           </div>
           <div className="col-md-8">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>SSH URL</th>
-                  <th>SSH Name</th>
-                  <th>SSH Key ID</th>
-                  <th>Domain</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clusterModels.map((m) => (
-                  <tr key={m.cluster.id}>
-                    <td>{m.cluster.name}</td>
-                    <td>{m.cluster.description}</td>
-                    <td>{m.cluster.sshUrl}</td>
-                    <td>{m.cluster.sshName}</td>
-                    <td>{m.cluster.sshKeyId}</td>
-                    <td>{m.cluster.domain}</td>
-                    <td>
-                      <button
-                        disabled={notification.pending}
-                        onClick={() => handleEdit(m.cluster.id)}
-                        className="btn btn-primary"
-                      >
-                        Edit
-                      </button>
-                      {" | "}
-                      <button
-                        disabled={notification.pending}
-                        onClick={() => handleRemove(m.cluster.id)}
-                        className="btn btn-danger"
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ReactTable
+              columns={columns}
+              data={clusterModelsData}
+              initialState={{
+                sortBy: [{ id: "name" }],
+              }}
+            />
           </div>
         </div>
       </>
