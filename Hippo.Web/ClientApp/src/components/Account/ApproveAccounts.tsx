@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { AccountModel, IRouteParams } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
-import { DataTable } from "../../Shared/DataTable";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 export const ApproveAccounts = () => {
   // get all accounts that need approval and list them
@@ -30,35 +31,96 @@ export const ApproveAccounts = () => {
     fetchAccounts();
   }, [cluster]);
 
-  const handleApprove = async (account: AccountModel) => {
-    setAccountApproving(account.id);
+  const handleApprove = useCallback(
+    async (account: AccountModel) => {
+      setAccountApproving(account.id);
 
-    const req = authenticatedFetch(
-      `/api/${cluster}/account/approve/${account.id}`,
-      {
-        method: "POST",
+      const req = authenticatedFetch(
+        `/api/${cluster}/account/approve/${account.id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      setNotification(
+        req,
+        "Approving",
+        "Account Approved. Please allow 2 to 3 hours for changes to take place."
+      );
+
+      const response = await req;
+      if (response.ok) {
+        setAccountApproving(undefined);
+
+        // remove the account from the list
+        setAccounts(accounts?.filter((a) => a.id !== account.id));
       }
-    );
+    },
+    [accounts, cluster, setNotification]
+  );
 
-    setNotification(
-      req,
-      "Approving",
-      "Account Approved. Please allow 2 to 3 hours for changes to take place."
-    );
-
-    const response = await req;
-    if (response.ok) {
-      setAccountApproving(undefined);
-
+  const handleReject = useCallback(
+    async (account: AccountModel) => {
       // remove the account from the list
       setAccounts(accounts?.filter((a) => a.id !== account.id));
-    }
-  };
+    },
+    [accounts]
+  );
 
-  const handleReject = async (account: AccountModel) => {
-    // remove the account from the list
-    setAccounts(accounts?.filter((a) => a.id !== account.id));
-  };
+  const columns: Column<AccountModel>[] = useMemo(
+    () => [
+      {
+        Header: "Groups",
+        accessor: (account) => account.groups.join(", "),
+        sortable: true,
+      },
+      {
+        Header: "Name",
+        accessor: (account) => account.name,
+        sortable: true,
+      },
+      {
+        Header: "Submitted",
+        accessor: (account) => new Date(account.updatedOn).toLocaleDateString(),
+        sortable: true,
+      },
+      {
+        Header: "Action",
+        sortable: false,
+        Cell: (props) => (
+          <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleApprove(props.row.original)}
+              className="btn btn-primary"
+            >
+              {accountApproving === props.row.original.id
+                ? "Approving..."
+                : "Approve"}
+            </button>
+            {" | "}
+            {accountApproving !== props.row.original.id && (
+              <RejectRequest
+                account={props.row.original}
+                removeAccount={() => handleReject(props.row.original)}
+                updateUrl={`/api/${cluster}/Account/Reject/`}
+                disabled={notification.pending}
+              ></RejectRequest>
+            )}
+          </>
+        ),
+      },
+    ],
+    [
+      accountApproving,
+      cluster,
+      notification.pending,
+      handleApprove,
+      handleReject,
+    ]
+  );
+
+  const accountsData = useMemo(() => accounts ?? [], [accounts]);
 
   if (accounts === undefined) {
     return (
@@ -71,54 +133,12 @@ export const ApproveAccounts = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <p>There are {accounts.length} account(s) awaiting approval</p>
-          <DataTable
-            keyField="id"
-            data={accounts}
-            responsive
-            columns={[
-              {
-                name: <b>Groups</b>,
-                selector: (account) => account.groups.join(", "),
-                sortable: true,
-              },
-              {
-                name: <b>Name</b>,
-                selector: (account) => account.name,
-                sortable: true,
-              },
-              {
-                name: <b>Submitted</b>,
-                selector: (account) =>
-                  new Date(account.updatedOn).toLocaleDateString(),
-                sortable: true,
-              },
-              {
-                name: <b>Action</b>,
-                sortable: false,
-                cell: (account) => (
-                  <>
-                    <button
-                      disabled={notification.pending}
-                      onClick={() => handleApprove(account)}
-                      className="btn btn-primary"
-                    >
-                      {accountApproving === account.id
-                        ? "Approving..."
-                        : "Approve"}
-                    </button>
-                    {" | "}
-                    {accountApproving !== account.id && (
-                      <RejectRequest
-                        account={account}
-                        removeAccount={() => handleReject(account)}
-                        updateUrl={`/api/${cluster}/Account/Reject/`}
-                        disabled={notification.pending}
-                      ></RejectRequest>
-                    )}
-                  </>
-                ),
-              },
-            ]}
+          <ReactTable
+            columns={columns}
+            data={accountsData}
+            initialState={{
+              sortBy: [{ id: "name" }],
+            }}
           />
         </div>
       </div>

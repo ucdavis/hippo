@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { DataTable } from "../../Shared/DataTable";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -58,55 +59,88 @@ export const Groups = () => {
     fetchGroups();
   }, [cluster]);
 
-  const handleEdit = async (group: GroupModel) => {
-    setEditGroupDisplayName(group.displayName);
-    setEditing(group.id);
-    const [confirmed, displayName] = await getEditConfirmation();
-    if (!confirmed) {
+  const handleEdit = useCallback(
+    async (group: GroupModel) => {
+      setEditGroupDisplayName(group.displayName);
+      setEditing(group.id);
+      const [confirmed, displayName] = await getEditConfirmation();
+      if (!confirmed) {
+        setEditing(undefined);
+        return;
+      }
+
+      const req = authenticatedFetch(`/api/${cluster}/group/update`, {
+        method: "POST",
+        body: JSON.stringify({ ...group, displayName }),
+      });
+
+      setNotification(req, "Saving", "Group Updated", async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await req;
+
+      if (response.ok) {
+        const updatedGroup = (await response.json()) as GroupModel;
+        let updatedGroups = [] as GroupModel[];
+        //check if the updatedGroup is already in the list
+        if (groups?.find((g) => g.id === updatedGroup.id)) {
+          //if it is, update the group
+          updatedGroups = groups
+            ? groups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
+            : [updatedGroup];
+        } else {
+          //if it is not, add it to the list and sort it
+          updatedGroups = groups ? [...groups, updatedGroup] : [updatedGroup];
+        }
+        //sort the list
+        setGroups(
+          updatedGroups.sort((a, b) =>
+            (a.displayName ?? "").localeCompare(b.displayName ?? "")
+          )
+        );
+        setEditGroupDisplayName("");
+      }
+
       setEditing(undefined);
-      return;
-    }
+    },
+    [cluster, getEditConfirmation, groups, setNotification]
+  );
 
-    const req = authenticatedFetch(`/api/${cluster}/group/update`, {
-      method: "POST",
-      body: JSON.stringify({ ...group, displayName }),
-    });
+  const columns: Column<GroupModel>[] = useMemo(
+    () => [
+      {
+        Header: "Group",
+        accessor: (group) => group.name,
+      },
+      {
+        Header: "Display Name",
+        accessor: (group) => group.displayName,
+      },
+      {
+        Header: "Action",
+        Cell: (props) => (
+          <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleEdit(props.row.original)}
+              className="btn btn-primary"
+            >
+              {editing === props.row.original.id ? "Updating..." : "Edit"}
+            </button>
+          </>
+        ),
+      },
+    ],
+    [editing, handleEdit, notification.pending]
+  );
 
-    setNotification(req, "Saving", "Group Updated", async (r) => {
-      if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
-      } else {
-        return "An error happened, please try again.";
-      }
-    });
-
-    const response = await req;
-
-    if (response.ok) {
-      const updatedGroup = (await response.json()) as GroupModel;
-      let updatedGroups = [] as GroupModel[];
-      //check if the updatedGroup is already in the list
-      if (groups?.find((g) => g.id === updatedGroup.id)) {
-        //if it is, update the group
-        updatedGroups = groups
-          ? groups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
-          : [updatedGroup];
-      } else {
-        //if it is not, add it to the list and sort it
-        updatedGroups = groups ? [...groups, updatedGroup] : [updatedGroup];
-      }
-      //sort the list
-      setGroups(
-        updatedGroups.sort((a, b) =>
-          (a.displayName ?? "").localeCompare(b.displayName ?? "")
-        )
-      );
-      setEditGroupDisplayName("");
-    }
-
-    setEditing(undefined);
-  };
+  const groupsData = useMemo(() => groups ?? [], [groups]);
 
   if (groups === undefined) {
     return (
@@ -119,37 +153,12 @@ export const Groups = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <p>There are {groups.length} groups</p>
-          <DataTable
-            keyField="id"
-            data={groups}
-            responsive
-            columns={[
-              {
-                name: <b>Group</b>,
-                selector: (group) => group.name,
-                sortable: true,
-              },
-              {
-                name: <b>Display Name</b>,
-                selector: (group) => group.displayName,
-                sortable: true,
-              },
-              {
-                name: <b>Action</b>,
-                sortable: false,
-                cell: (group) => (
-                  <>
-                    <button
-                      disabled={notification.pending}
-                      onClick={() => handleEdit(group)}
-                      className="btn btn-primary"
-                    >
-                      {editing === group.id ? "Updating..." : "Edit"}
-                    </button>
-                  </>
-                ),
-              },
-            ]}
+          <ReactTable
+            columns={columns}
+            data={groupsData}
+            initialState={{
+              sortBy: [{ id: "name" }],
+            }}
           />
         </div>
       </div>

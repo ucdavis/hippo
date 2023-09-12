@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { User, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { DataTable } from "../../Shared/DataTable";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 export const ClusterAdmins = () => {
   // get all accounts that need approval and list them
@@ -40,38 +41,41 @@ export const ClusterAdmins = () => {
     fetchClusterAdmins();
   }, [cluster]);
 
-  const handleRemove = async (user: User) => {
-    const [confirmed] = await getConfirmation();
-    if (!confirmed) {
-      return;
-    }
-
-    setAdminRemoving(user.id);
-
-    const req = authenticatedFetch(
-      `/api/${cluster}/admin/RemoveClusterAdmin/${user.id}`,
-      {
-        method: "POST",
+  const handleRemove = useCallback(
+    async (user: User) => {
+      const [confirmed] = await getConfirmation();
+      if (!confirmed) {
+        return;
       }
-    );
 
-    setNotification(req, "Removing", "Admin Removed", async (r) => {
-      if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
-      } else {
-        return "An error happened, please try again.";
+      setAdminRemoving(user.id);
+
+      const req = authenticatedFetch(
+        `/api/${cluster}/admin/RemoveClusterAdmin/${user.id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      setNotification(req, "Removing", "Admin Removed", async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await req;
+
+      if (response.ok) {
+        // remove the user from the list
+        setUsers(users?.filter((a) => a.id !== user.id));
       }
-    });
-
-    const response = await req;
-
-    if (response.ok) {
-      // remove the user from the list
-      setUsers(users?.filter((a) => a.id !== user.id));
-    }
-    setAdminRemoving(undefined);
-  };
+      setAdminRemoving(undefined);
+    },
+    [cluster, getConfirmation, setNotification, users]
+  );
 
   const handleSubmit = async () => {
     const req = authenticatedFetch(
@@ -98,6 +102,41 @@ export const ClusterAdmins = () => {
       setRequest((r) => ({ ...r, id: "" }));
     }
   };
+
+  const columns: Column<User>[] = useMemo(
+    () => [
+      {
+        Header: "Name",
+        accessor: (user) => user.name,
+        sortable: true,
+      },
+      {
+        Header: "Email",
+        accessor: (user) => user.email,
+        sortable: true,
+      },
+      {
+        Header: "Action",
+        sortable: false,
+        Cell: (props) => (
+          <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleRemove(props.row.original)}
+              className="btn btn-danger"
+            >
+              {adminRemoving === props.row.original.id
+                ? "Removing..."
+                : "Remove"}
+            </button>
+          </>
+        ),
+      },
+    ],
+    [adminRemoving, handleRemove, notification.pending]
+  );
+
+  const usersData = useMemo(() => users ?? [], [users]);
 
   if (users === undefined) {
     return (
@@ -133,37 +172,12 @@ export const ClusterAdmins = () => {
           <hr />
 
           <p>There are {users.length} users with admin access</p>
-          <DataTable
-            keyField="id"
-            data={users}
-            responsive
-            columns={[
-              {
-                name: <b>Name</b>,
-                selector: (user) => user.name,
-                sortable: true,
-              },
-              {
-                name: <b>Email</b>,
-                selector: (user) => user.email,
-                sortable: true,
-              },
-              {
-                name: <b>Action</b>,
-                sortable: false,
-                cell: (user) => (
-                  <>
-                    <button
-                      disabled={notification.pending}
-                      onClick={() => handleRemove(user)}
-                      className="btn btn-danger"
-                    >
-                      {adminRemoving === user.id ? "Removing..." : "Remove"}
-                    </button>
-                  </>
-                ),
-              },
-            ]}
+          <ReactTable
+            columns={columns}
+            data={usersData}
+            initialState={{
+              sortBy: [{ id: "lastName" }, { id: "firstName" }],
+            }}
           />
         </div>
       </div>

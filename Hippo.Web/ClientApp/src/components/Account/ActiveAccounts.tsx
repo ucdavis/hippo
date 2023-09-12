@@ -1,13 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { DataTable } from "../../Shared/DataTable";
+import { ReactTable } from "../../Shared/ReactTable";
+import { Column } from "react-table";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
 
   const { cluster } = useParams<IRouteParams>();
+
+  const columns: Column<AccountModel>[] = useMemo(
+    () => [
+      {
+        Header: "Groups",
+        accessor: (row) => row.groups.join(", "),
+        sortable: true,
+      },
+      {
+        Header: "Name",
+        accessor: (row) => row.name,
+        sortable: true,
+      },
+      {
+        Header: "Approved On",
+        accessor: (row) => new Date(row.updatedOn).toLocaleDateString(),
+        sortable: true,
+      },
+    ],
+    []
+  );
+
+  const accountsData = useMemo(() => accounts ?? [], [accounts]);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -43,27 +67,12 @@ export const ActiveAccounts = () => {
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)
           </p>
-          <DataTable
-            keyField="id"
-            data={accounts}
-            responsive
-            columns={[
-              {
-                name: <b>Groups</b>,
-                selector: (row) => row.groups.join(", "),
-                sortable: true,
-              },
-              {
-                name: <b>Name</b>,
-                selector: (row) => row.name,
-                sortable: true,
-              },
-              {
-                name: <b>Approved On</b>,
-                selector: (row) => new Date(row.updatedOn).toLocaleDateString(),
-                sortable: true,
-              },
-            ]}
+          <ReactTable
+            columns={columns}
+            data={accountsData}
+            initialState={{
+              sortBy: [{ id: "name" }],
+            }}
           />
         </div>
       </div>
