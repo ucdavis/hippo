@@ -144,7 +144,7 @@ public class AccountController : SuperController
         var currentUser = await _userService.GetCurrentUser();
         model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+(([\w\.\-]+)@([\w\-]+\.?)+)?", "");
 
-        if(model.SponsorId == 0)
+        if (model.SponsorId == 0)
         {
             return BadRequest("Please select a sponsor from the list.");
         }
@@ -175,8 +175,13 @@ public class AccountController : SuperController
             .AsSingleQuery()
             .FirstOrDefaultAsync(a => a.OwnerId == currentUser.Id && a.Status != Account.Statuses.Rejected);
 
-        if (existingAccount != null) 
+        if (existingAccount != null)
         {
+            if (existingAccount.Status != Account.Statuses.Active)
+            {
+                return BadRequest("Only Active accounts can be updated.");
+            }
+
             existingAccount.SshKey = await _yamlService.Get(currentUser, model, cluster);
 
             await _historyService.AccountApproved(existingAccount);
@@ -193,30 +198,32 @@ public class AccountController : SuperController
 
             return Ok(existingAccount);
         }
-
-        var account = new Account()
+        else
         {
-            CanSponsor = false, 
-            Owner = currentUser,
-            SponsorId = model.SponsorId,
-            SshKey = await _yamlService.Get(currentUser, model, cluster),
-            IsActive = true,
-            Name = $"{currentUser.Name} ({currentUser.Email})",
-            ClusterId = cluster.Id,
-            Status = Account.Statuses.PendingApproval,
-        };
+            var account = new Account()
+            {
+                CanSponsor = false,
+                Owner = currentUser,
+                SponsorId = model.SponsorId,
+                SshKey = await _yamlService.Get(currentUser, model, cluster),
+                IsActive = true,
+                Name = $"{currentUser.Name} ({currentUser.Email})",
+                ClusterId = cluster.Id,
+                Status = Account.Statuses.PendingApproval,
+            };
 
-        account = await _historyService.AccountRequested(account);
+            account = await _historyService.AccountRequested(account);
 
-        await _dbContext.Accounts.AddAsync(account);
-        await _dbContext.SaveChangesAsync();
+            await _dbContext.Accounts.AddAsync(account);
+            await _dbContext.SaveChangesAsync();
 
-        var success = await _notificationService.AccountRequested(account);
-        if (!success)
-        {
-            Log.Error("Error creating Account Request email");
+            var success = await _notificationService.AccountRequested(account);
+            if (!success)
+            {
+                Log.Error("Error creating Account Request email");
+            }
+
+            return Ok(account);
         }
-
-        return Ok(account);
     }
 }
