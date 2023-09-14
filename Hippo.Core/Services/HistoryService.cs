@@ -21,35 +21,31 @@ namespace Hippo.Core.Services
     public class HistoryService : IHistoryService
     {
         private AppDbContext _dbContext { get; }
-        private Lazy<Task<int>> _currentClusterId { get; }
-        private Lazy<Task<User>> _currentUser { get; }
+
+        private IHttpContextAccessor _httpContextAccessor { get; }
+        private IUserService _userService { get; }
 
         public HistoryService(IUserService userService, AppDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
-            _currentClusterId = new Lazy<Task<int>>(async () =>
-            {
-                var cluster = httpContextAccessor.HttpContext.GetRouteValue("cluster") as string;
-                if (string.IsNullOrWhiteSpace(cluster))
-                {
-                    return 0;
-                }
-
-                return await _dbContext.Clusters.AsNoTracking().Where(c => c.Name == cluster).Select(c => c.Id).SingleOrDefaultAsync();
-            });
-            _currentUser = new Lazy<Task<User>>(async () => await userService.GetCurrentUser());
+            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         public async Task AddHistory(History history)
         {
             if (history.ActedBy == null)
             {
-                history.ActedBy = await _currentUser.Value;
+                history.ActedBy = await _userService.GetCurrentUser();
             }
 
             if (history.ClusterId == 0)
             {
-                history.ClusterId = await _currentClusterId.Value;
+                var cluster = _httpContextAccessor.HttpContext.GetRouteValue("cluster") as string;
+                if (!string.IsNullOrWhiteSpace(cluster))
+                {
+                    history.ClusterId = await _dbContext.Clusters.AsNoTracking().Where(c => c.Name == cluster).Select(c => c.Id).SingleOrDefaultAsync();
+                }
             }
 
             await _dbContext.Histories.AddAsync(history);
