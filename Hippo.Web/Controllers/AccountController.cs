@@ -231,7 +231,7 @@ public class AccountController : SuperController
                 && a.ClusterId == cluster.Id
                 && a.Status != Account.Statuses.Rejected);
 
-        if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
+        if (existingAccount != null)
         {
             if (existingAccount.Status != Account.Statuses.Active)
             {
