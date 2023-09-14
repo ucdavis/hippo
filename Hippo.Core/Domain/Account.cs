@@ -71,12 +71,6 @@ namespace Hippo.Core.Domain
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
 
-            modelBuilder.Entity<History>()
-                .HasOne(a => a.Account)
-                .WithMany(a => a.Histories)
-                .HasForeignKey(a => a.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<GroupAccount>()
                 .HasOne(ga => ga.Account)
                 .WithMany(a => a.GroupAccounts)

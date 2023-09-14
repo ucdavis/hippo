@@ -40,9 +40,9 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<History>().HasOne(a => a.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<History>().HasOne(a => a.Account).WithMany().HasForeignKey(a => a.AccountId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<History>().HasOne(a => a.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.Account).WithMany(a => a.Histories).HasForeignKey(a => a.AccountId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
         }
 
         public class Actions
