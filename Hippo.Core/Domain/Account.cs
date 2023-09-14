@@ -15,7 +15,7 @@ namespace Hippo.Core.Domain
             UpdatedOn = DateTime.UtcNow;
             IsActive = true;
             Status = Statuses.PendingApproval;
-            Histories = new List<AccountHistory>();
+            Histories = new List<History>();
         }
 
         [Key]
@@ -54,7 +54,7 @@ namespace Hippo.Core.Domain
 
 
         [JsonIgnore]
-        public List<AccountHistory> Histories { get; set; }
+        public List<History> Histories { get; set; }
 
         [JsonIgnore]
         public List<GroupAccount> GroupAccounts { get; set; } = new();
@@ -71,7 +71,7 @@ namespace Hippo.Core.Domain
             //self referencing foreign key
             modelBuilder.Entity<Account>().HasOne(a => a.Sponsor).WithMany().HasForeignKey(a => a.SponsorId);
 
-            modelBuilder.Entity<AccountHistory>()
+            modelBuilder.Entity<History>()
                 .HasOne(a => a.Account)
                 .WithMany(a => a.Histories)
                 .HasForeignKey(a => a.AccountId)

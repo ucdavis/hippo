@@ -19,6 +19,7 @@ namespace Hippo.Core.Services
         Task<User> GetUser(Claim[] userClaims);
         Task<User> GetCurrentUser();
         Task<string> GetCurrentUserJsonAsync();
+        Task<IEnumerable<Permission>> GetCurrentPermissionsAsync();
         Task<string> GetCurrentPermissionsJsonAsync();
         string GetCurrentUserId();
         Task<string> GetCurrentAccountsJsonAsync();
@@ -62,6 +63,24 @@ namespace Hippo.Core.Services
         {
             var user = await GetCurrentUser();
             return JsonSerializer.Serialize(user, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        public async Task<IEnumerable<Permission>> GetCurrentPermissionsAsync()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                Log.Warning("No HttpContext found. Unable to retrieve User permissions.");
+                return new Permission[] {};
+            }
+
+            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;    
+            var permissions = await _dbContext.Permissions
+                .Include(p => p.Cluster)
+                .Include(p => p.Group)
+                .Include(p => p.Role)
+                .Where(p => p.User.Iam == iamId)
+                .ToArrayAsync();
+            return permissions;
         }
 
         public async Task<string> GetCurrentPermissionsJsonAsync()

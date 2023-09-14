@@ -29,7 +29,6 @@ namespace Hippo.Core.Data
         }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Account> Accounts { get; set; }
-        public virtual DbSet<AccountHistory> AccountHistories { get; set; }
         public virtual DbSet<History> Histories { get; set; }
         public virtual DbSet<Cluster> Clusters { get; set; }
         public virtual DbSet<Group> Groups { get; set; }

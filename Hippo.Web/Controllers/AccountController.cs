@@ -133,7 +133,13 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.AccountApproved(account);
+        // safe to assume admin override if no GroupAdmin permission is found
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isAdminOverride = permissions.Any(p => p.Cluster.Name == Cluster
+            && p.Role.Name == Role.Codes.GroupAdmin
+            && account.GroupAccounts.Any(ga => ga.GroupId == p.GroupId));
+
+        await _historyService.AccountApproved(account, isAdminOverride);
 
         await _dbContext.SaveChangesAsync();
 
@@ -175,7 +181,13 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Decision email");
         }
 
-        await _historyService.AccountRejected(account, model.Reason);
+        // safe to assume admin override if no GroupAdmin permission is found
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isAdminOverride = permissions.Any(p => p.Cluster.Name == Cluster
+            && p.Role.Name == Role.Codes.GroupAdmin
+            && account.GroupAccounts.Any(ga => ga.GroupId == p.GroupId));
+            
+        await _historyService.AccountRejected(account, isAdminOverride, model.Reason);
 
 
         await _dbContext.SaveChangesAsync();
@@ -221,12 +233,12 @@ public class AccountController : SuperController
 
         if (existingAccount != null && existingAccount.Status == Account.Statuses.Active)
         {
+            if (existingAccount.Status != Account.Statuses.Active)
+            {
+                return BadRequest("Only Active accounts can be updated.");
+            }
+
             existingAccount.AccountYaml = await _yamlService.Get(currentUser, model, cluster);
-
-            await _historyService.AccountApproved(existingAccount);
-            await _historyService.AddHistory("Existing account override approve", $"Kerb: {existingAccount.Owner.Kerberos} IAM: {existingAccount.Owner.Iam} Email: {existingAccount.Owner.Email} Name: {existingAccount.Owner.Name}", existingAccount.ClusterId, existingAccount.Id);
-
-            await _dbContext.SaveChangesAsync();
 
             var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
             var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.yaml"; //Leading .
@@ -235,36 +247,43 @@ public class AccountController : SuperController
             await _sshService.PlaceFile(existingAccount.AccountYaml, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
+            await _historyService.AccountUpdated(existingAccount);
+
+            await _dbContext.SaveChangesAsync();
+
             return Ok(new AccountModel(existingAccount));
         }
-
-        var account = new Account()
+        else
         {
-            Owner = currentUser,
-            AccountYaml = await _yamlService.Get(currentUser, model, cluster),
-            IsActive = true,
-            Name = $"{currentUser.Name} ({currentUser.Email})",
-            ClusterId = cluster.Id,
-            Status = Account.Statuses.PendingApproval,
-        };
 
-        account = await _historyService.AccountRequested(account);
+            var account = new Account()
+            {
+                Owner = currentUser,
+                AccountYaml = await _yamlService.Get(currentUser, model, cluster),
+                IsActive = true,
+                Name = $"{currentUser.Name} ({currentUser.Email})",
+                ClusterId = cluster.Id,
+                Status = Account.Statuses.PendingApproval,
+            };
 
-        await _dbContext.Accounts.AddAsync(account);
-        await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
-        await _dbContext.SaveChangesAsync();
+            account = await _historyService.AccountRequested(account);
 
-        var success = await _notificationService.AccountRequested(account);
-        if (!success)
-        {
-            Log.Error("Error creating Account Request email");
+            await _dbContext.Accounts.AddAsync(account);
+            await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
+            await _dbContext.SaveChangesAsync();
+
+            var success = await _notificationService.AccountRequested(account);
+            if (!success)
+            {
+                Log.Error("Error creating Account Request email");
+            }
+
+            var accountModel = await _dbContext.Accounts
+                .Where(a => a.Id == account.Id)
+                .Select(AccountModel.Projection)
+                .SingleAsync();
+
+            return Ok(accountModel);
         }
-
-        var accountModel = await _dbContext.Accounts
-            .Where(a => a.Id == account.Id)
-            .Select(AccountModel.Projection)
-            .SingleAsync();
-
-        return Ok(accountModel);
     }
 }
