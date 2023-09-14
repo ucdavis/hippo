@@ -247,7 +247,10 @@ public class AccountController : SuperController
             await _sshService.PlaceFile(existingAccount.AccountYaml, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
 
-            await _historyService.AccountUpdated(existingAccount);
+            // safe to assume admin override if current user is not the owner
+            var isAdminOverride = existingAccount.OwnerId != currentUser.Id;
+
+            await _historyService.AccountUpdated(existingAccount, isAdminOverride);
 
             await _dbContext.SaveChangesAsync();
 

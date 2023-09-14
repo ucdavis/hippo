@@ -76,7 +76,8 @@ namespace Hippo.Core.Services
             {
                 Action = $"{perm.Role.Name} {action}",
                 Details = $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}{(perm.Group != null ? $" Group: " : perm.Group.Name)}",
-                ClusterId = perm.ClusterId ?? 0
+                ClusterId = perm.ClusterId ?? 0,
+                AdminAction = true
             };
         }
 
@@ -90,11 +91,12 @@ namespace Hippo.Core.Services
         public static async Task<Account> AccountApproved(this IHistoryService historyService, Account account, bool isAdminOverride)
         {
             var history = CreateHistory(account, isAdminOverride ? Actions.AdminApproved : Actions.Approved);
+            history.AdminAction = isAdminOverride;
             await historyService.AddHistory(history);
             return account;
         }
 
-        public static async Task<Account> AccountUpdated(this IHistoryService historyService, Account account)
+        public static async Task<Account> AccountUpdated(this IHistoryService historyService, Account account, bool isAdminOverride)
         {
             var history = CreateHistory(account, Actions.Updated);
             await historyService.AddHistory(history);
@@ -104,6 +106,7 @@ namespace Hippo.Core.Services
         public static async Task<Account> AccountRejected(this IHistoryService historyService, Account account, bool isAdminOverride, string note = "")
         {
             var history = CreateHistory(account, isAdminOverride ? Actions.AdminRejected :  Actions.Rejected, note);
+            history.AdminAction = isAdminOverride;
             await historyService.AddHistory(history);
             return account;
         }
