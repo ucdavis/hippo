@@ -53,6 +53,7 @@ namespace Hippo.Core.Domain
             public const string Rejected = "Rejected";
             public const string AdminApproved = "Admin Approved";
             public const string AdminRejected = "Admin Rejected";
+            public const string AdminUpdated = "Admin Updated";
             public const string Other = "Other";
 
             public static List<string> TypeList = new List<string>

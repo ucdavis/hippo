@@ -93,35 +93,29 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> RemoveClusterAdmin(int id)
     {
-        var user = await _dbContext.Users
-            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
-                .ThenInclude(p => p.Role)
-            .Where(u => u.Id == id)
+        var permission = await _dbContext.Permissions
+            .Include(p => p.Role)
+            .Include(p => p.User)
+            .Where(p =>
+                p.Id == id
+                && p.Cluster.Name == Cluster
+                && p.Role.Name == Role.Codes.ClusterAdmin)
             .SingleOrDefaultAsync();
 
-        if (user == null)
+        if (permission == null)
         {
-            return NotFound();
+            return BadRequest("Permission not found");
         }
 
-        if (user.Id == (await _userService.GetCurrentUser()).Id)
+        if (permission.UserId == (await _userService.GetCurrentUser()).Id)
         {
             return BadRequest("Can't remove yourself");
         }
 
-        // remove cluster admin permission
-        var adminPermission = user.Permissions.SingleOrDefault();
-
-        if (adminPermission == null)
-        {
-            return BadRequest("User is not a cluster admin");
-        }
-
-        user.Permissions.Clear();
-
-        await _historyService.RoleRemoved(user, adminPermission);
-
+        await _historyService.RoleRemoved(permission.User, permission);
+        _dbContext.Permissions.Remove(permission);
         await _dbContext.SaveChangesAsync();
+
         return Ok();
     }
 
@@ -204,6 +198,7 @@ public class AdminController : SuperController
             permission = new Permission{
                 UserId = user.Id,
                 GroupId = group.Id,
+                Group = group,
                 Role = await _dbContext.Roles.Where(r => r.Name == Role.Codes.GroupAdmin).SingleAsync(),
                 ClusterId = clusterId
             };
@@ -224,15 +219,16 @@ public class AdminController : SuperController
         var permission = await _dbContext.Permissions
             .Include(p => p.Role)
             .Include(p => p.User)
+            .Include(p => p.Group)
             .Where(p =>
-            p.Id == id
-            && p.Cluster.Name == Cluster
-            && p.Role.Name == Role.Codes.GroupAdmin)
+                p.Id == id
+                && p.Cluster.Name == Cluster
+                && p.Role.Name == Role.Codes.GroupAdmin)
             .SingleOrDefaultAsync();
 
         if (permission == null)
         {
-            return NotFound("Permission not found");
+            return BadRequest("Permission not found");
         }
 
         await _historyService.RoleRemoved(permission.User, permission);

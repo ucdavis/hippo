@@ -35,7 +35,7 @@ namespace Hippo.Core.Services
                     return 0;
                 }
 
-                return await _dbContext.Clusters.Where(c => c.Name == cluster).Select(c => c.Id).SingleOrDefaultAsync();
+                return await _dbContext.Clusters.AsNoTracking().Where(c => c.Name == cluster).Select(c => c.Id).SingleOrDefaultAsync();
             });
             _currentUser = new Lazy<Task<User>>(async () => await userService.GetCurrentUser());
         }
@@ -75,7 +75,7 @@ namespace Hippo.Core.Services
             return new History
             {
                 Action = $"{perm.Role.Name} {action}",
-                Details = $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}{(perm.Group != null ? $" Group: " : perm.Group.Name)}",
+                Details = $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}{(perm.Group != null ? $" Group: {perm.Group.Name}" : "")}",
                 ClusterId = perm.ClusterId ?? 0,
                 AdminAction = true
             };
@@ -98,7 +98,7 @@ namespace Hippo.Core.Services
 
         public static async Task<Account> AccountUpdated(this IHistoryService historyService, Account account, bool isAdminOverride)
         {
-            var history = CreateHistory(account, Actions.Updated);
+            var history = CreateHistory(account, isAdminOverride ? Actions.AdminUpdated : Actions.Updated);
             await historyService.AddHistory(history);
             return account;
         }
