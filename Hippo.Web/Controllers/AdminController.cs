@@ -76,14 +76,15 @@ public class AdminController : SuperController
 
         if (!user.Permissions.Any())
         {
-            user.Permissions.Add(new Permission
+            var perm = new Permission
             {
                 Cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster),
-                Role = await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.ClusterAdmin)
-            });
+                Role = await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.ClusterAdmin),
+            };
+            user.Permissions.Add(perm);
+            await _historyService.RoleAdded(user, perm);
         }
 
-        await _historyService.AddHistory("ClusterAdmin role added", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}", cluster.Id);
 
         await _dbContext.SaveChangesAsync();
         return Ok(user);
@@ -92,34 +93,29 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> RemoveClusterAdmin(int id)
     {
-        var user = await _dbContext.Users
-            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
-            .Where(u => u.Id == id)
+        var permission = await _dbContext.Permissions
+            .Include(p => p.Role)
+            .Include(p => p.User)
+            .Where(p =>
+                p.Id == id
+                && p.Cluster.Name == Cluster
+                && p.Role.Name == Role.Codes.ClusterAdmin)
             .SingleOrDefaultAsync();
 
-        if (user == null)
+        if (permission == null)
         {
-            return NotFound();
+            return BadRequest("Permission not found");
         }
 
-        if (user.Id == (await _userService.GetCurrentUser()).Id)
+        if (permission.UserId == (await _userService.GetCurrentUser()).Id)
         {
             return BadRequest("Can't remove yourself");
         }
 
-        // remove cluster admin permission
-        var adminPermission = user.Permissions.SingleOrDefault();
-
-        if (adminPermission == null)
-        {
-            return BadRequest("User is not a cluster admin");
-        }
-
-        user.Permissions.Clear();
-
-        await _historyService.AddHistory("ClusterAdmin role removed", $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}", adminPermission.ClusterId ?? 0);
-
+        await _historyService.RoleRemoved(permission.User, permission);
+        _dbContext.Permissions.Remove(permission);
         await _dbContext.SaveChangesAsync();
+
         return Ok();
     }
 
@@ -202,11 +198,12 @@ public class AdminController : SuperController
             permission = new Permission{
                 UserId = user.Id,
                 GroupId = group.Id,
-                RoleId = await _dbContext.Roles.Where(r => r.Name == Role.Codes.GroupAdmin).Select(r => r.Id).SingleAsync(),
+                Group = group,
+                Role = await _dbContext.Roles.Where(r => r.Name == Role.Codes.GroupAdmin).SingleAsync(),
                 ClusterId = clusterId
             };
             user.Permissions.Add(permission);
-            await _historyService.AddHistory("GroupAdmin role added", $"user: {user.Name} kerberos: {user.Kerberos}, iam: {user.Iam}", clusterId);
+            await _historyService.RoleAdded(user, permission);
             await _dbContext.SaveChangesAsync();
             return Ok(new GroupAdminModel { PermissionId = permission.Id, Group = group.Name, User = user });
         } 
@@ -219,17 +216,22 @@ public class AdminController : SuperController
     [HttpPost]
     public async Task<IActionResult> RemoveGroupAdmin(int id)
     {
-        var permission = await _dbContext.Permissions.Where(p =>
-            p.Id == id
-            && p.Cluster.Name == Cluster
-            && p.Role.Name == Role.Codes.GroupAdmin)
+        var permission = await _dbContext.Permissions
+            .Include(p => p.Role)
+            .Include(p => p.User)
+            .Include(p => p.Group)
+            .Where(p =>
+                p.Id == id
+                && p.Cluster.Name == Cluster
+                && p.Role.Name == Role.Codes.GroupAdmin)
             .SingleOrDefaultAsync();
 
         if (permission == null)
         {
-            return NotFound("Permission not found");
+            return BadRequest("Permission not found");
         }
 
+        await _historyService.RoleRemoved(permission.User, permission);
         _dbContext.Permissions.Remove(permission);
         await _dbContext.SaveChangesAsync();
 
