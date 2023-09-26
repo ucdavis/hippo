@@ -14,7 +14,7 @@ using EFCore.BulkExtensions;
 
 namespace Hippo.Web.Controllers;
 
-[Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+[Authorize]
 public class GroupController : SuperController
 {
     private readonly AppDbContext _dbContext;
@@ -63,6 +63,7 @@ public class GroupController : SuperController
         return Ok(groups);
     }
 
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Group group)
     {
@@ -104,6 +105,7 @@ public class GroupController : SuperController
         return Ok(group);
     }
 
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     [HttpPost]
     public async Task<IActionResult> Update([FromBody] Group group)
     {
