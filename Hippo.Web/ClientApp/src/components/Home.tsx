@@ -48,12 +48,6 @@ export const ClusterHome = () => {
     return <Redirect to={`/${cluster}/create`} />;
   } else {
     // one account, show page depending on status
-    return (
-      <Redirect
-        to={`/${
-          accountInCluster.cluster
-        }/${accountInCluster.status.toLocaleLowerCase()}`}
-      />
-    );
+    return <Redirect to={`/${accountInCluster.cluster}/myaccount`} />;
   }
 };

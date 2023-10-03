@@ -28,7 +28,9 @@ export const RequestForm = () => {
   // load up possible groups
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
+      const response = await authenticatedFetch(
+        `/api/${cluster}/group/groupnames`
+      );
 
       const groupsResult = await response.json();
 

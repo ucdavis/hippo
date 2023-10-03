@@ -11,6 +11,9 @@ import {
 import { responseMap } from "../test/testHelpers";
 import { act } from "react-dom/test-utils";
 
+const testCluster = fakeAccounts[0].cluster;
+const myAccountUrl = `/${testCluster}/myaccount`;
+
 afterEach(() => {
   // cleanup on exiting
   // clear any mocks living on fetch
@@ -28,7 +31,7 @@ describe("Basic render", () => {
     });
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groupnames`]: groupsResponse,
       })
     );
     (global as any).Hippo = fakeGroupAdminAppContext;
@@ -49,7 +52,19 @@ describe("Basic render", () => {
 
 describe("Home Redirect when GroupAdmin", () => {
   beforeEach(() => {
+    const groupsResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeGroups),
+    });
+
     (global as any).Hippo = fakeGroupAdminAppContext;
+
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+      })
+    );
   });
 
   it("renders without crashing", async () => {
@@ -68,13 +83,15 @@ describe("Home Redirect when GroupAdmin", () => {
     const div = document.createElement("div");
     await act(async () => {
       ReactDOM.render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[myAccountUrl]}>
           <App />
         </MemoryRouter>,
         div
       );
     });
-    expect(div.textContent).toContain("Welcome Bob you have an account");
+    expect(div.textContent).toContain(
+      "Welcome Bob. Your account is registered with the following group(s):"
+    );
   });
 
   it("Shows pending approvals button", async () => {
@@ -103,7 +120,7 @@ describe("Home Redirect no account", () => {
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groupnames`]: groupsResponse,
       })
     );
   });

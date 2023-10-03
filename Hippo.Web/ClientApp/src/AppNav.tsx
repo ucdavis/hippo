@@ -6,9 +6,12 @@ import { ShowFor } from "./Shared/ShowFor";
 import { IRouteParams } from "./types";
 
 export const AppNav = () => {
-  const [{ clusters }] = useContext(AppContext);
+  const [{ clusters, accounts }] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = clusters.find((c) => c.name === match?.params.cluster);
+
+  const accountInCluster =
+    cluster && accounts.some((a) => a.cluster === cluster.name);
 
   return (
     <div>
@@ -35,6 +38,18 @@ export const AppNav = () => {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <nav className="simple-nav">
+              {accountInCluster && (
+                <NavLink
+                  id="myAccount"
+                  to={`/${cluster.name}/myaccount`}
+                  className="nav-item nav-link"
+                  activeStyle={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  My Account
+                </NavLink>
+              )}
               <ShowFor roles={["GroupAdmin"]}>
                 <NavLink
                   id="sponsorApprove"

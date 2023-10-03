@@ -7,14 +7,14 @@
 } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import { useModal } from "react-modal-hook";
-import { isFunction } from "../util/TypeChecks";
+import { isBoolean, isFunction } from "../util/TypeChecks";
 
 interface Props<T> {
   title: ReactNode;
   message:
     | ReactNode
     | ((setReturnValue: Dispatch<SetStateAction<T | undefined>>) => ReactNode);
-  canConfirm?: boolean;
+  canConfirm?: boolean | ((returnValue: T) => boolean);
 }
 
 export const useConfirmationDialog = <T extends any = undefined>(
@@ -54,7 +54,11 @@ export const useConfirmationDialog = <T extends any = undefined>(
               hideModal();
             }}
             disabled={
-              props.canConfirm === undefined ? false : !props.canConfirm
+              props.canConfirm === undefined
+                ? false
+                : isBoolean(props.canConfirm)
+                ? !props.canConfirm
+                : !props.canConfirm(returnValue)
             }
           >
             Confirm

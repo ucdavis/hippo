@@ -16,10 +16,17 @@ export interface GroupAdminModel {
   user: User;
 }
 
+export interface GroupUserModel {
+  kerberos: string;
+  name: string;
+  email: string;
+}
+
 export interface GroupModel {
   id: number;
   name: string;
   displayName: string;
+  admins: GroupUserModel[];
 }
 
 export interface AccountModel {
@@ -29,7 +36,7 @@ export interface AccountModel {
   createdOn: string;
   cluster: string;
   owner?: User;
-  groups: string[];
+  groups: GroupModel[];
   updatedOn: string;
 }
 

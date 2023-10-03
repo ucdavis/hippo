@@ -70,10 +70,10 @@ namespace Hippo.Core.Services
             if (_httpContextAccessor.HttpContext == null)
             {
                 Log.Warning("No HttpContext found. Unable to retrieve User permissions.");
-                return new Permission[] {};
+                return new Permission[] { };
             }
 
-            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;    
+            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;
             var permissions = await _dbContext.Permissions
                 .Include(p => p.Cluster)
                 .Include(p => p.Group)
@@ -91,10 +91,11 @@ namespace Hippo.Core.Services
                 return null;
             }
 
-            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;    
+            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;
             var permissions = await _dbContext.Permissions
                 .Where(p => p.User.Iam == iamId)
-                .Select(p => new PermissionModel {
+                .Select(p => new PermissionModel
+                {
                     Role = p.Role.Name,
                     Cluster = p.Cluster.Name,
                     Group = p.Group.Name
@@ -107,13 +108,27 @@ namespace Hippo.Core.Services
         {
             string iamId = GetCurrentUserId();
 
-            var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail {
+            var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail
+            {
                 Id = a.Id,
                 Name = a.Name,
                 Status = a.Status,
                 Owner = a.Owner.Name,
                 Cluster = a.Cluster.Name,
-                Groups = a.GroupAccounts.Select(ga => ga.Group.Name).ToList(),
+                Groups = a.GroupAccounts.Select(ga => new GroupModel 
+                { 
+                    Id = ga.GroupId, 
+                    DisplayName = ga.Group.DisplayName, 
+                    Name = ga.Group.Name,
+                    Admins = ga.Group.Permissions
+                        .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
+                        .Select(p => new GroupUserModel 
+                        { 
+                            Kerberos = p.User.Kerberos,
+                            Name = p.User.Name,
+                            Email = p.User.Email
+                        }).ToList(),
+                }).ToList(),
             }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
@@ -159,7 +174,8 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<string> GetAvailableClustersJsonAsync() {
+        public async Task<string> GetAvailableClustersJsonAsync()
+        {
             var clusters = await _dbContext.Clusters.ToArrayAsync();
             return JsonSerializer.Serialize(clusters, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }

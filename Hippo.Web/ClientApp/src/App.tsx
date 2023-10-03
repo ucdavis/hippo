@@ -46,7 +46,7 @@ const App = () => {
             <Route exact path="/" component={Home} />
             <Route path="/clusters" component={Clusters} />
             <Route exact path="/:cluster" component={ClusterHome} />
-            <Route path="/:cluster/active" component={AccountInfo} />
+            <Route path="/:cluster/myaccount" component={AccountInfo} />
             <Route
               path="/:cluster/pendingapproval"
               component={PendingApproval}
