@@ -99,7 +99,7 @@ export const AccountInfo = () => {
         <br />
         <p>
           <button
-            disabled={notification.pending}
+            disabled={notification.pending || groups.length === 0}
             onClick={() => handleRequestAccess()}
             className="btn btn-primary"
           >

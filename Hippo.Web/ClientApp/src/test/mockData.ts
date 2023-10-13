@@ -4,6 +4,7 @@ import {
   AccountModel,
   GroupModel,
   Cluster,
+  RequestModel,
 } from "../types";
 
 const fakeUser: User = {
@@ -59,6 +60,23 @@ export const fakeAccounts: AccountModel[] = [
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
     groups: [fakeGroups[1]],
+  },
+];
+
+export const fakeRequests: RequestModel[] = [
+  {
+    id: 1,
+    requesterEmail: fakeUser.email,
+    requesterName: fakeUser.name,
+    action: "CreateAccount",
+    groupModel: fakeGroups[0],
+  },
+  {
+    id: 2,
+    requesterEmail: fakeUser.email,
+    requesterName: fakeUser.name,
+    action: "AddAccountToGroup",
+    groupModel: fakeGroups[1],
   },
 ];
 

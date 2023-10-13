@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
-import { AccountModel } from "../types";
+import { RequestModel } from "../types";
 import { authenticatedFetch } from "../util/api";
 import { usePromiseNotification } from "../util/Notifications";
 import { useConfirmationDialog } from "./ConfirmationDialog";
 import { notEmptyOrFalsey } from "../util/ValueChecks";
 
 interface Props {
-  account: AccountModel;
-  removeAccount: (account: AccountModel) => void;
+  request: RequestModel;
+  removeAccount: (request: RequestModel) => void;
   updateUrl: string;
   disabled?: boolean;
 }
@@ -52,7 +52,7 @@ export const RejectRequest = (props: Props) => {
     }
 
     const request = authenticatedFetch(
-      `${props.updateUrl}${props.account.id}`,
+      `${props.updateUrl}${props.request.id}`,
       {
         method: "POST",
         body: JSON.stringify({ reason }),
@@ -71,7 +71,7 @@ export const RejectRequest = (props: Props) => {
     const response = await request;
 
     if (response.ok) {
-      props.removeAccount(props.account);
+      props.removeAccount(props.request);
     }
   };
   return (

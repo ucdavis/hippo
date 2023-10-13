@@ -19,11 +19,7 @@ export const Home = () => {
     }
   } else if (accounts.length === 1) {
     // one account, show page depending on status
-    return (
-      <Redirect
-        to={`/${accounts[0].cluster}/${accounts[0].status.toLocaleLowerCase()}`}
-      />
-    );
+    return <Redirect to={`/${accounts[0].cluster}/myaccount`} />;
   } else {
     return <Redirect to="/clusters" />;
   }

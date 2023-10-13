@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
+using AccountRequest = Hippo.Core.Domain.Request;
 
 namespace Hippo.Web.Controllers;
 
@@ -94,106 +95,6 @@ public class AccountController : SuperController
             .ToArrayAsync());
     }
 
-    // Approve a given pending account if you are the sponsor
-    [HttpPost]
-    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
-    public async Task<ActionResult> Approve(int id)
-    {
-        var currentUser = await _userService.GetCurrentUser();
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("Cluster is required");
-        }
-
-        var account = await _dbContext.Accounts
-            .PendingApproval()
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .Include(a => a.Owner)
-            .AsSingleQuery()
-            .SingleOrDefaultAsync(a => a.Id == id);
-
-        if (account == null)
-        {
-            return NotFound();
-        }
-
-        var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
-
-        var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.yaml"; //Leading .
-        var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.yaml";
-
-        await _sshService.PlaceFile(account.AccountYaml, tempFileName, connectionInfo);
-        await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
-
-        account.Status = Account.Statuses.Active;
-
-        var success = await _notificationService.AccountDecision(account, true);
-        if (!success)
-        {
-            Log.Error("Error creating Account Decision email");
-        }
-
-        // safe to assume admin override if no GroupAdmin permission is found
-        var permissions = await _userService.GetCurrentPermissionsAsync();
-        var isAdminOverride = permissions.Any(p => p.Cluster.Name == Cluster
-            && p.Role.Name == Role.Codes.GroupAdmin
-            && account.GroupAccounts.Any(ga => ga.GroupId == p.GroupId));
-
-        await _historyService.AccountApproved(account, isAdminOverride);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
-    }
-
-    [HttpPost]
-    public async Task<ActionResult> Reject(int id, [FromBody] RequestRejectionModel model)
-    {
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("Cluster is required");
-        }
-        if (String.IsNullOrWhiteSpace(model.Reason))
-        {
-            return BadRequest("Missing Reject Reason");
-        }
-
-        var currentUser = await _userService.GetCurrentUser();
-
-        var account = await _dbContext.Accounts
-            .PendingApproval()
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .Include(a => a.Owner)
-            .AsSingleQuery()
-            .SingleOrDefaultAsync(a => a.Id == id);
-
-        if (account == null)
-        {
-            return NotFound();
-        }
-
-        account.Status = Account.Statuses.Rejected;
-        account.IsActive = false;
-
-        var success = await _notificationService.AccountDecision(account, false, reason: model.Reason);
-        if (!success)
-        {
-            Log.Error("Error creating Account Decision email");
-        }
-
-        // safe to assume admin override if no GroupAdmin permission is found
-        var permissions = await _userService.GetCurrentPermissionsAsync();
-        var isAdminOverride = permissions.Any(p => p.Cluster.Name == Cluster
-            && p.Role.Name == Role.Codes.GroupAdmin
-            && account.GroupAccounts.Any(ga => ga.GroupId == p.GroupId));
-            
-        await _historyService.AccountRejected(account, isAdminOverride, model.Reason);
-
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
-    }
 
 
     [HttpPost]
@@ -265,7 +166,7 @@ public class AccountController : SuperController
                 AccountYaml = await _yamlService.Get(currentUser, model, cluster),
                 IsActive = true,
                 Name = $"{currentUser.Name} ({currentUser.Email})",
-                ClusterId = cluster.Id,
+                Cluster = cluster,
                 Status = Account.Statuses.PendingApproval,
             };
 
@@ -273,9 +174,19 @@ public class AccountController : SuperController
 
             await _dbContext.Accounts.AddAsync(account);
             await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
+            var request = new AccountRequest
+            {
+                Account = account,
+                Requester = currentUser,
+                Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).SingleAsync(),
+                Action = AccountRequest.ActionValues.CreateAccount,
+                Status = AccountRequest.StatusValues.PendingApproval,
+                Cluster = cluster,
+            };
+            await _dbContext.Requests.AddAsync(request);
             await _dbContext.SaveChangesAsync();
 
-            var success = await _notificationService.AccountRequested(account);
+            var success = await _notificationService.AccountRequest(request);
             if (!success)
             {
                 Log.Error("Error creating Account Request email");

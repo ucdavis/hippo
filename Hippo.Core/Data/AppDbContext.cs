@@ -36,6 +36,7 @@ namespace Hippo.Core.Data
         public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<PuppetGroupPuppetUser> PuppetGroupsPuppetUsers { get; set; }
         public virtual DbSet<GroupAccount> GroupsAccounts { get; set; }
+        public virtual DbSet<Request> Requests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -49,6 +50,7 @@ namespace Hippo.Core.Data
             Permission.OnModelCreating(builder);
             Hippo.Core.Domain.PuppetGroupPuppetUser.OnModelCreating(builder);
             GroupAccount.OnModelCreating(builder);
+            Request.OnModelCreating(builder);
         }
     }
  }

@@ -57,27 +57,6 @@ namespace Hippo.Web.Controllers
             return Content(results);
         }
 
-        public async Task<IActionResult> TestAccountRequest()
-        {
-            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 2);
-            if (await _notificationService.AccountRequested(account))
-            {
-                return Content("Email Sent");
-            }
-            return Content("Houston we have a problem");
-        }
-
-        public async Task<IActionResult> TestAccountDecision()
-        {
-            var account = await _dbContext.Accounts.SingleAsync(a => a.Id == 4);
-            if (await _notificationService.AccountDecision(account, true))
-            {
-                await _notificationService.AccountDecision(account, false, reason: "Fake reject Reason here.");
-                return Content("Emails Sent");
-            }
-            return Content("Houston we have a problem");
-        }
-
         public async Task<IActionResult> TestSsh()
         {
             if (Cluster == null)

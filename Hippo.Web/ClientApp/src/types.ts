@@ -29,6 +29,14 @@ export interface GroupModel {
   admins: GroupUserModel[];
 }
 
+export interface RequestModel {
+  id: number;
+  requesterEmail: string;
+  requesterName: string;
+  action: "CreateAccount" | "AddAccountToGroup";
+  groupModel: GroupModel;
+}
+
 export interface AccountModel {
   id: number;
   name: string;

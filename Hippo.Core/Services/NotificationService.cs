@@ -17,9 +17,9 @@ namespace Hippo.Core.Services
 {
     public interface INotificationService
     {
-        Task<bool> AccountRequested(Account account);
-        Task<bool> AccountDecision(Account account, bool isApproved, string overrideSponsor = null, string reason = null);
-        Task<bool> AdminOverrideDecision(Account account, bool isApproved, User adminUser, string reason = null);
+        Task<bool> AccountRequest(Request request);
+        Task<bool> AccountDecision(Request request, bool isApproved, string overrideSponsor = null, string reason = null);
+        Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
     }
 
     public class NotificationService : INotificationService
@@ -37,12 +37,12 @@ namespace Hippo.Core.Services
             _userService = userService;
         }
 
-        public async Task<bool> AccountDecision(Account account, bool isApproved, string overrideDecidedBy = null, string reason = null)
+        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string reason = null)
         {
 
             try
             {
-                account = await GetCompleteAccount(account);
+                var account = request.Account;
                 var decidedBy = String.Empty;
                 if (!string.IsNullOrWhiteSpace(overrideDecidedBy))
                 {
@@ -58,7 +58,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    GroupName = account.GroupAccounts[0].Group.DisplayName, // should be safe to assume only one group for a new account
+                    GroupName = request.Group.DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -88,17 +88,17 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<bool> AccountRequested(Account account)
+        public async Task<bool> AccountRequest(Request request)
         {
             try
             {
-                account = await GetCompleteAccount(account);
+                var account = request.Account;
                 var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}/approve";
                 var emails = await GetGroupAdminEmails(account);
 
                 var model = new NewRequestModel()
                 {
-                    GroupName = account.GroupAccounts[0].Group.DisplayName,
+                    GroupName = request.Group.DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
@@ -118,19 +118,17 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<bool> AdminOverrideDecision(Account account, bool isApproved, User adminUser, string reason = null)
+        public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null)
         {
             try
             {
-                account = await GetCompleteAccount(account);
-
-
+                var account = request.Account;
                 //var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
                 var emails = await GetGroupAdminEmails(account);
 
                 var model = new DecisionModel()
                 {
-                    GroupName = account.GroupAccounts[0].Group.DisplayName,
+                    GroupName = request.Group.DisplayName,
                     RequesterName = account.Owner.Name,
                     RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -155,21 +153,6 @@ namespace Hippo.Core.Services
                 Log.Error("Error emailing Account Request", ex);
                 return false;
             }
-        }
-
-        private async Task<Account> GetCompleteAccount(Account account)
-        {
-            if (account.Owner == null || !account.GroupAccounts.Any() || account.Cluster == null)
-            {
-                return await _dbContext.Accounts
-                    .AsNoTracking()
-                    .Include(a => a.Cluster)
-                    .Include(a => a.Owner)
-                    .Include(a => a.GroupAccounts)
-                        .ThenInclude(ga => ga.Group)
-                    .SingleAsync(a => a.Id == account.Id);
-            }
-            return account;
         }
 
         private async Task<string[]> GetGroupAdminEmails(Account account)
