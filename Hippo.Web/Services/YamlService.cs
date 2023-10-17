@@ -9,7 +9,7 @@ namespace Hippo.Web.Services
 {
     public interface IYamlService
     {
-        Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster);
+        string Get(Request request);
     }
 
     public class YamlService : IYamlService
@@ -23,12 +23,26 @@ namespace Hippo.Web.Services
 
 
 
-        public async Task<string> Get(User currentUser, AccountCreateModel accountCreateModel, Cluster cluster)
+        public string Get(Request request)
         {
-            var groupName = await _dbContext.Groups.Where(g => g.Id == accountCreateModel.GroupId).Select(g => g.Name).SingleOrDefaultAsync();
-            if (string.IsNullOrWhiteSpace(groupName))
+            if (request.Group == null)
             {
-                throw new KeyNotFoundException($"Group with id {accountCreateModel.GroupId} not found");
+                throw new InvalidOperationException($"Group is required");
+            }
+
+            if (request.Account == null)
+            {
+                throw new InvalidOperationException($"Account is required");
+            }
+
+            if (request.Account.Owner == null)
+            {
+                throw new InvalidOperationException($"Account Owner is required");
+            }
+
+            if (request.Account.Cluster == null)
+            {
+                throw new InvalidOperationException($"Cluster is required");
             }
 
             var yaml = new Serializer();
@@ -36,19 +50,19 @@ namespace Hippo.Web.Services
             return yaml.Serialize(
                 new
                 {
-                    groups = new[] { groupName },
+                    groups = new[] { request.Group.Name },
                     account = new
                     {
-                        name = currentUser.Name,
-                        email = currentUser.Email,
-                        kerb = currentUser.Kerberos,
-                        iam = currentUser.Iam,
-                        mothra = currentUser.MothraId,
-                        key = accountCreateModel.SshKey
+                        name = request.Account.Owner.Name,
+                        email = request.Account.Owner.Email,
+                        kerb = request.Account.Owner.Kerberos,
+                        iam = request.Account.Owner.Iam,
+                        mothra = request.Account.Owner.MothraId,
+                        key = request.Account.AccountYaml
                     },
                     meta = new
                     {
-                        cluster = cluster.Name,
+                        cluster = request.Account.Cluster.Name,
                     }
                 }
             );

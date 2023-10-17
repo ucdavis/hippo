@@ -23,16 +23,14 @@ public class AccountController : SuperController
     private readonly ISshService _sshService;
     private readonly INotificationService _notificationService;
     private readonly IHistoryService _historyService;
-    private readonly IYamlService _yamlService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, IYamlService yamlService)
+    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _sshService = sshService;
         _notificationService = notificationService;
         _historyService = historyService;
-        _yamlService = yamlService;
     }
 
     // Return account info for the currently logged in user
@@ -139,7 +137,7 @@ public class AccountController : SuperController
                 return BadRequest("Only Active accounts can be updated.");
             }
 
-            existingAccount.AccountYaml = await _yamlService.Get(currentUser, model, cluster);
+            existingAccount.AccountYaml = model.SshKey;
 
             var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
             var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.yaml"; //Leading .
@@ -163,7 +161,7 @@ public class AccountController : SuperController
             var account = new Account()
             {
                 Owner = currentUser,
-                AccountYaml = await _yamlService.Get(currentUser, model, cluster),
+                AccountYaml = model.SshKey,
                 IsActive = true,
                 Name = $"{currentUser.Name} ({currentUser.Email})",
                 Cluster = cluster,
@@ -179,8 +177,8 @@ public class AccountController : SuperController
                 Account = account,
                 Requester = currentUser,
                 Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).SingleAsync(),
-                Action = AccountRequest.ActionValues.CreateAccount,
-                Status = AccountRequest.StatusValues.PendingApproval,
+                Action = AccountRequest.Actions.CreateAccount,
+                Status = AccountRequest.Statuses.PendingApproval,
                 Cluster = cluster,
             };
             await _dbContext.Requests.AddAsync(request);

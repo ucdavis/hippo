@@ -48,7 +48,7 @@ public class RequestController : SuperController
 
         var requests = await _dbContext.Requests
             .AsNoTracking()
-            .Where(r => r.Status == AccountRequest.StatusValues.PendingApproval)
+            .Where(r => r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(a => a.Group.Name)
@@ -72,7 +72,8 @@ public class RequestController : SuperController
 
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
-            .Where(r => r.Id == id && r.Status == AccountRequest.StatusValues.PendingApproval)
+            .AsSplitQuery()
+            .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             .Include(r => r.Account.Owner)
             .Include(r => r.Account.Cluster)
@@ -84,6 +85,18 @@ public class RequestController : SuperController
             return NotFound();
         }
 
+        var result = request.Action switch
+        {
+            AccountRequest.Actions.CreateAccount => await ApproveCreateAccount(request),
+            AccountRequest.Actions.AddAccountToGroup => await ApproveAddAccountToGroup(request),
+            _ => BadRequest("Invalid action")
+        };
+
+        return result;
+    }
+
+    private async Task<ActionResult> ApproveCreateAccount(AccountRequest request)
+    {
         var permissions = await _userService.GetCurrentPermissionsAsync();
         var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
         var isGroupAdmin = permissions.IsGroupAdmin(Cluster, request.GroupId);
@@ -93,22 +106,22 @@ public class RequestController : SuperController
             return Forbid();
         }
 
-        var account = request.Account;
-
-        if (account == null)
+        if (request.Account == null)
         {
             return BadRequest("No account associated with this request");
         }
 
-        var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+        if (request.Group == null)
+        {
+            return BadRequest("No group associated with this request");
+        }        
 
-        var tempFileName = $"/var/lib/remote-api/.{account.Owner.Kerberos}.yaml"; //Leading .
-        var fileName = $"/var/lib/remote-api/{account.Owner.Kerberos}.yaml";
+        await SendYaml(request);
 
-        await _sshService.PlaceFile(account.AccountYaml, tempFileName, connectionInfo);
-        await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
+        request.Account.Status = Account.Statuses.Active;
+        // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
+        request.Status = AccountRequest.Statuses.Completed;
 
-        account.Status = Account.Statuses.Active;
 
         var success = await _notificationService.AccountDecision(request, true);
         if (!success)
@@ -117,11 +130,64 @@ public class RequestController : SuperController
         }
 
         // safe to assume admin override if no GroupAdmin permission is found
-        await _historyService.AccountApproved(account, !isGroupAdmin);
+        await _historyService.AccountApproved(request.Account, !isGroupAdmin);
 
         await _dbContext.SaveChangesAsync();
 
         return Ok();
+    }
+
+    private async Task<ActionResult> ApproveAddAccountToGroup(AccountRequest request)
+    {
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+        var isGroupAdmin = permissions.IsGroupAdmin(Cluster, request.GroupId);
+
+        if (!isClusterOrSystemAdmin && !isGroupAdmin)
+        {
+            return Forbid();
+        }
+
+        if (request.Account == null)
+        {
+            return BadRequest("No account associated with this request");
+        }
+
+        if (request.Group == null)
+        {
+            return BadRequest("No group associated with this request");
+        }
+
+        await SendYaml(request);
+
+        request.Account.Status = Account.Statuses.Active;
+        // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
+        request.Status = AccountRequest.Statuses.Completed;
+
+        var success = await _notificationService.AccountDecision(request, true);
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        // safe to assume admin override if no GroupAdmin permission is found
+        await _historyService.AccountApproved(request.Account, !isGroupAdmin);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    private async Task SendYaml(AccountRequest request)
+    {
+        var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
+
+        var tempFileName = $"/var/lib/remote-api/.{request.Account.Owner.Kerberos}.yaml"; //Leading .
+        var fileName = $"/var/lib/remote-api/{request.Account.Owner.Kerberos}.yaml";
+        var yaml = _yamlService.Get(request);
+
+        await _sshService.PlaceFile(yaml, tempFileName, connectionInfo);
+        await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
     }
 
     [HttpPost]
@@ -141,7 +207,7 @@ public class RequestController : SuperController
 
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
-            .Where(r => r.Id == id && r.Status == AccountRequest.StatusValues.PendingApproval)
+            .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             .Include(r => r.Account.Owner)
             .Include(r => r.Account.Cluster)
@@ -171,6 +237,7 @@ public class RequestController : SuperController
 
         account.Status = Account.Statuses.Rejected;
         account.IsActive = false;
+        request.Status = AccountRequest.Statuses.Rejected;
 
         var success = await _notificationService.AccountDecision(request, false, reason: model.Reason);
         if (!success)

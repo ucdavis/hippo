@@ -97,8 +97,8 @@ namespace Hippo.Core.Migrations.Sqlite
             // create requests for existing account records
             migrationBuilder.Sql($@"
                 INSERT INTO Requests (Action, RequesterId, ActorId, GroupId, AccountId, ClusterId, Status, Details)
-                SELECT '{Request.ActionValues.CreateAccount}', OwnerId, NULL, ga.GroupId, a.Id, ClusterId, 
-                    IIF(a.Status = 'Active', '{Request.StatusValues.Completed}', a.Status),
+                SELECT '{Request.Actions.CreateAccount}', OwnerId, NULL, ga.GroupId, a.Id, ClusterId, 
+                    IIF(a.Status = 'Active', '{Request.Statuses.Completed}', a.Status),
                     'Request created by migration for existing account. Actor details can be found in history table.'
                 FROM Accounts a JOIN GroupsAccounts ga on ga.AccountId = a.Id
             ");

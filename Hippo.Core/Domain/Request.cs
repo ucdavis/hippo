@@ -62,13 +62,13 @@ namespace Hippo.Core.Domain
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        public static class ActionValues
+        public static class Actions
         {
             public const string CreateAccount = "CreateAccount";
             public const string AddAccountToGroup = "AddAccountToGroup";
         }
 
-        public static class StatusValues
+        public static class Statuses
         {
             public const string PendingApproval = "PendingApproval";
             public const string Rejected = "Rejected";
