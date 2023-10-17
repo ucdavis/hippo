@@ -23,9 +23,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AccountYaml")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("ClusterId")
                         .HasColumnType("INTEGER");
 
@@ -44,6 +41,9 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<int?>("SponsorId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("SshKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -262,6 +262,59 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("PuppetGroupsPuppetUsers");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ActorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequesterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("ClusterId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Requests");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -322,59 +375,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Request", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ActorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ClusterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RequesterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("Action");
-
-                    b.HasIndex("ActorId");
-
-                    b.HasIndex("ClusterId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("RequesterId");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("Requests");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
@@ -491,7 +491,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Request", b =>
+            modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
                 {
                     b.HasOne("Hippo.Core.Domain.Account", "Account")
                         .WithMany()

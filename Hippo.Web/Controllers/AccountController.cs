@@ -143,7 +143,7 @@ public class AccountController : SuperController
         var account = new Account()
         {
             Owner = currentUser,
-            AccountYaml = model.SshKey,
+            SshKey = model.SshKey,
             IsActive = true,
             Name = $"{currentUser.Name} ({currentUser.Email})",
             Cluster = cluster,
@@ -208,7 +208,7 @@ public class AccountController : SuperController
             return BadRequest("Only Active accounts can be updated.");
         }
 
-        existingAccount.AccountYaml = model.SshKey;
+        existingAccount.SshKey = model.SshKey;
 
         if (!await _accountUpdateService.UpdateAccount(existingAccount))
         {

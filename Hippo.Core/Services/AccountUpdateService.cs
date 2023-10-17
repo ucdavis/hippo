@@ -71,7 +71,7 @@ namespace Hippo.Core.Services
                         kerb = account.Owner.Kerberos,
                         iam = account.Owner.Iam,
                         mothra = account.Owner.MothraId,
-                        key = account.AccountYaml
+                        key = account.SshKey
                     },
                     meta = new
                     {
