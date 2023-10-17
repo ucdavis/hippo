@@ -3,7 +3,6 @@ using Hippo.Core.Domain;
 using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
-using Hippo.Web.Services;
 using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +19,18 @@ public class AccountController : SuperController
 {
     private readonly AppDbContext _dbContext;
     private readonly IUserService _userService;
-    private readonly ISshService _sshService;
     private readonly INotificationService _notificationService;
     private readonly IHistoryService _historyService;
+    private readonly IAccountUpdateService _accountUpdateService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
+    public AccountController(AppDbContext dbContext, IUserService userService, INotificationService notificationService, 
+        IHistoryService historyService, IAccountUpdateService accountUpdateService)
     {
         _dbContext = dbContext;
         _userService = userService;
-        _sshService = sshService;
         _notificationService = notificationService;
         _historyService = historyService;
+        _accountUpdateService = accountUpdateService;
     }
 
     // Return account info for the currently logged in user
@@ -76,11 +76,11 @@ public class AccountController : SuperController
     [Authorize(Policy = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Active()
     {
-        var currentUser = await _userService.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("Cluster is required");
         }
+        var currentUser = await _userService.GetCurrentUser();
 
         return Ok(await _dbContext.Accounts
             .AsNoTracking()
@@ -98,7 +98,12 @@ public class AccountController : SuperController
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
         var currentUser = await _userService.GetCurrentUser();
+
         model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+(([\w\.\-]+)@([\w\-]+\.?)+)?", "");
 
         if (model.GroupId == 0)
@@ -132,70 +137,92 @@ public class AccountController : SuperController
 
         if (existingAccount != null)
         {
-            if (existingAccount.Status != Account.Statuses.Active)
-            {
-                return BadRequest("Only Active accounts can be updated.");
-            }
-
-            existingAccount.AccountYaml = model.SshKey;
-
-            var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
-            var tempFileName = $"/var/lib/remote-api/.{existingAccount.Owner.Kerberos}.yaml"; //Leading .
-            var fileName = $"/var/lib/remote-api/{existingAccount.Owner.Kerberos}.yaml";
-
-            await _sshService.PlaceFile(existingAccount.AccountYaml, tempFileName, connectionInfo);
-            await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
-
-            // safe to assume admin override if current user is not the owner
-            var isAdminOverride = existingAccount.OwnerId != currentUser.Id;
-
-            await _historyService.AccountUpdated(existingAccount, isAdminOverride);
-
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(new AccountModel(existingAccount));
+            return BadRequest("You already have an account for this cluster");
         }
-        else
+
+        var account = new Account()
         {
+            Owner = currentUser,
+            AccountYaml = model.SshKey,
+            IsActive = true,
+            Name = $"{currentUser.Name} ({currentUser.Email})",
+            Cluster = cluster,
+            Status = Account.Statuses.PendingApproval,
+        };
 
-            var account = new Account()
-            {
-                Owner = currentUser,
-                AccountYaml = model.SshKey,
-                IsActive = true,
-                Name = $"{currentUser.Name} ({currentUser.Email})",
-                Cluster = cluster,
-                Status = Account.Statuses.PendingApproval,
-            };
+        account = await _historyService.AccountRequested(account);
 
-            account = await _historyService.AccountRequested(account);
+        await _dbContext.Accounts.AddAsync(account);
+        await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
+        var request = new AccountRequest
+        {
+            Account = account,
+            Requester = currentUser,
+            Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).SingleAsync(),
+            Action = AccountRequest.Actions.CreateAccount,
+            Status = AccountRequest.Statuses.PendingApproval,
+            Cluster = cluster,
+        };
+        await _dbContext.Requests.AddAsync(request);
+        await _dbContext.SaveChangesAsync();
 
-            await _dbContext.Accounts.AddAsync(account);
-            await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
-            var request = new AccountRequest
-            {
-                Account = account,
-                Requester = currentUser,
-                Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).SingleAsync(),
-                Action = AccountRequest.Actions.CreateAccount,
-                Status = AccountRequest.Statuses.PendingApproval,
-                Cluster = cluster,
-            };
-            await _dbContext.Requests.AddAsync(request);
-            await _dbContext.SaveChangesAsync();
-
-            var success = await _notificationService.AccountRequest(request);
-            if (!success)
-            {
-                Log.Error("Error creating Account Request email");
-            }
-
-            var accountModel = await _dbContext.Accounts
-                .Where(a => a.Id == account.Id)
-                .Select(AccountModel.Projection)
-                .SingleAsync();
-
-            return Ok(accountModel);
+        var success = await _notificationService.AccountRequest(request);
+        if (!success)
+        {
+            Log.Error("Error creating Account Request email");
         }
+
+        var accountModel = await _dbContext.Accounts
+            .Where(a => a.Id == account.Id)
+            .Select(AccountModel.Projection)
+            .SingleAsync();
+
+        return Ok(accountModel);
+
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> UpdateSsh(AccountSshKeyModel model)
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
+        var currentUser = await _userService.GetCurrentUser();
+        var existingAccount = await _dbContext.Accounts
+            .Include(a => a.Owner)
+            .Include(a => a.Cluster)
+            .SingleOrDefaultAsync(a =>
+                a.Id == model.AccountId
+                && a.OwnerId == currentUser.Id
+                && a.Cluster.Name == Cluster);
+
+        if (existingAccount == null)
+        {
+            return NotFound();
+        }
+
+        if (existingAccount.Status != Account.Statuses.Active)
+        {
+            return BadRequest("Only Active accounts can be updated.");
+        }
+
+        existingAccount.AccountYaml = model.SshKey;
+
+        if (!await _accountUpdateService.UpdateAccount(existingAccount))
+        {
+            // It could be that ssh is down
+            return BadRequest("Error updating account. Please try again later.");
+        }
+
+        // safe to assume admin override if current user is not the owner
+        var isAdminOverride = existingAccount.OwnerId != currentUser.Id;
+
+        await _historyService.AccountUpdated(existingAccount, isAdminOverride);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new AccountModel(existingAccount));
     }
 }

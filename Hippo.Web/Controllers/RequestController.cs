@@ -3,7 +3,6 @@ using Hippo.Core.Domain;
 using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
-using Hippo.Web.Services;
 using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +19,18 @@ public class RequestController : SuperController
 {
     private readonly AppDbContext _dbContext;
     private readonly IUserService _userService;
-    private readonly ISshService _sshService;
     private readonly INotificationService _notificationService;
     private readonly IHistoryService _historyService;
-    private readonly IYamlService _yamlService;
+    private readonly IAccountUpdateService _accountUpdateService;
 
-    public RequestController(AppDbContext dbContext, IUserService userService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, IYamlService yamlService)
+    public RequestController(AppDbContext dbContext, IUserService userService, INotificationService notificationService, 
+        IHistoryService historyService, IAccountUpdateService accountUpdateService)
     {
         _dbContext = dbContext;
         _userService = userService;
-        _sshService = sshService;
         _notificationService = notificationService;
         _historyService = historyService;
-        _yamlService = yamlService;
+        _accountUpdateService = accountUpdateService;
     }
 
     // Return all requests that are waiting for the current user to approve
@@ -116,7 +114,11 @@ public class RequestController : SuperController
             return BadRequest("No group associated with this request");
         }        
 
-        await SendYaml(request);
+        if (!await _accountUpdateService.UpdateAccount(request.Account, request.Group))
+        {
+            // It could be that ssh is down
+            return BadRequest("Error updating account. Please try again later.");
+        }
 
         request.Account.Status = Account.Statuses.Active;
         // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
@@ -158,7 +160,11 @@ public class RequestController : SuperController
             return BadRequest("No group associated with this request");
         }
 
-        await SendYaml(request);
+        if (!await _accountUpdateService.UpdateAccount(request.Account, request.Group))
+        {
+            // It could be that ssh is down
+            return BadRequest("Error updating account. Please try again later.");
+        }
 
         request.Account.Status = Account.Statuses.Active;
         // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
@@ -176,18 +182,6 @@ public class RequestController : SuperController
         await _dbContext.SaveChangesAsync();
 
         return Ok();
-    }
-
-    private async Task SendYaml(AccountRequest request)
-    {
-        var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(Cluster);
-
-        var tempFileName = $"/var/lib/remote-api/.{request.Account.Owner.Kerberos}.yaml"; //Leading .
-        var fileName = $"/var/lib/remote-api/{request.Account.Owner.Kerberos}.yaml";
-        var yaml = _yamlService.Get(request);
-
-        await _sshService.PlaceFile(yaml, tempFileName, connectionInfo);
-        await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
     }
 
     [HttpPost]
