@@ -31,7 +31,7 @@ describe("Basic render", () => {
     });
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/group/groupnames`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       })
     );
     (global as any).Hippo = fakeGroupAdminAppContext;
