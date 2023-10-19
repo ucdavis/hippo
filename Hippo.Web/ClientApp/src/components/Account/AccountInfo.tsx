@@ -143,46 +143,56 @@ export const AccountInfo = () => {
   }, [account?.id, cluster, getSshKeyConfirmation, setNotification]);
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-8 text-center">
-        <p>
-          Welcome {context.user.detail.firstName}. Your account is registered
-          with the following group(s):
-        </p>
-        <CardColumns>
-          {currentGroups.map((g, i) => (
-            <GroupInfo group={g} key={i} />
-          ))}
-        </CardColumns>
-        <br />
-        <p>
-          <button
-            disabled={notification.pending || groups.length === 0}
-            onClick={() => handleRequestAccess()}
-            className="btn btn-primary"
-          >
-            Request Access to Another Group
-          </button>
-          <button
-            disabled={notification.pending || groups.length === 0}
-            onClick={() => handleUpdateSshKey()}
-            className="btn btn-primary"
-          >
-            Update SSH Key
-          </button>
-        </p>
-        <p>
-          Documentation about this cluster can be found{" "}
-          <a
-            href="https://wiki.cse.ucdavis.edu/support/systems/farm"
-            target={"_blank"}
-            rel="noreferrer"
-          >
-            at the UC Davis Farm Wiki
-          </a>
-          .
-        </p>
+    <>
+      <div className="row justify-content-center">
+        <div className="col-md-8 text-center">
+          <p>
+            Welcome {context.user.detail.firstName}. Your account is registered
+            with the following group(s):
+          </p>
+        </div>
       </div>
-    </div>
+      <div className="row justify-content-center">
+        <div className="col-md-4 text-center">
+          <CardColumns>
+            {currentGroups.map((g, i) => (
+              <GroupInfo group={g} key={i} />
+            ))}
+          </CardColumns>
+          <br />
+        </div>
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-md-8 text-center">
+          <div>
+            <button
+              disabled={notification.pending || groups.length === 0}
+              onClick={() => handleRequestAccess()}
+              className="btn btn-primary"
+            >
+              Request Access to Another Group
+            </button>{" "}
+            <button
+              disabled={notification.pending || groups.length === 0}
+              onClick={() => handleUpdateSshKey()}
+              className="btn btn-primary"
+            >
+              Update SSH Key
+            </button>
+          </div>
+          <p>
+            Documentation about this cluster can be found{" "}
+            <a
+              href="https://wiki.cse.ucdavis.edu/support/systems/farm"
+              target={"_blank"}
+              rel="noreferrer"
+            >
+              at the UC Davis Farm Wiki
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+    </>
   );
 };
