@@ -12,7 +12,7 @@ export const GroupInfo = ({ group }: GroupInfoProps) => {
         {group.displayName}{" "}
         {group.name !== group.displayName && `(${group.name})`}
       </CardTitle>
-      {group.admins.length > 0 && (
+      {group.admins?.length > 0 && (
         <>
           <CardSubtitle>Group Sponsors/Admins:</CardSubtitle>
           <CardText>

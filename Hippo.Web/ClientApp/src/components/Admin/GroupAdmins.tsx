@@ -1,12 +1,17 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { AddGroupAdminModel, GroupAdminModel, IRouteParams } from "../../types";
+import {
+  AddGroupAdminModel,
+  GroupAdminModel,
+  GroupModel,
+  IRouteParams,
+} from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { Typeahead } from "react-bootstrap-typeahead";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
+import { GroupLookup } from "../Group/GroupLookup";
 
 export const GroupAdmins = () => {
   // get all accounts that need approval and list them
@@ -18,8 +23,7 @@ export const GroupAdmins = () => {
     lookup: "",
     group: "",
   });
-  const [groups, setGroups] = useState<string[]>([]);
-  const [groupSelection, setGroupSelection] = useState<string[]>([]);
+  const [groups, setGroups] = useState<GroupModel[]>([]);
   const { cluster } = useParams<IRouteParams>();
 
   const [getConfirmation] = useConfirmationDialog<string>(
@@ -48,7 +52,7 @@ export const GroupAdmins = () => {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/admin/groups`);
+      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
 
       if (response.ok) {
         setGroups(await response.json());
@@ -213,17 +217,11 @@ export const GroupAdmins = () => {
           <br />
           <div className="form-group">
             <label className="form-label">Group</label>
-            <Typeahead
-              id="groupTypeahead"
+            <GroupLookup
+              setSelection={(group) =>
+                setRequest((r) => ({ ...r, group: group.name }))
+              }
               options={groups}
-              selected={groupSelection}
-              placeholder="Select a group"
-              onChange={(selected) => {
-                setGroupSelection(selected.map((s) => s as string));
-                if (selected.length > 0)
-                  setRequest((r) => ({ ...r, group: selected[0] as string }));
-                else setRequest((r) => ({ ...r, group: "" }));
-              }}
             />
           </div>
           <br />
