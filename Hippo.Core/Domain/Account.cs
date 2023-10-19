@@ -34,7 +34,7 @@ namespace Hippo.Core.Domain
         public string Name { get; set; }
         public bool IsActive { get;set;}
 
-        public string AccountYaml { get; set; }
+        public string SshKey { get; set; }
 
         [Required]
         [MaxLength(50)]

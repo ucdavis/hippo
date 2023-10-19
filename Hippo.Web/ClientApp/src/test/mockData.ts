@@ -4,6 +4,7 @@ import {
   AccountModel,
   GroupModel,
   Cluster,
+  RequestModel,
 } from "../types";
 
 const fakeUser: User = {
@@ -31,11 +32,13 @@ export const fakeGroups: GroupModel[] = [
     id: 1,
     name: "group1",
     displayName: "Group 1",
+    admins: [],
   },
   {
     id: 2,
     name: "group2",
     displayName: "Group 2",
+    admins: [],
   },
 ];
 
@@ -47,7 +50,7 @@ export const fakeAccounts: AccountModel[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    groups: ["group1"],
+    groups: [fakeGroups[0]],
   },
   {
     id: 2,
@@ -56,7 +59,24 @@ export const fakeAccounts: AccountModel[] = [
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    groups: ["group2"],
+    groups: [fakeGroups[1]],
+  },
+];
+
+export const fakeRequests: RequestModel[] = [
+  {
+    id: 1,
+    requesterEmail: fakeUser.email,
+    requesterName: fakeUser.name,
+    action: "CreateAccount",
+    groupModel: fakeGroups[0],
+  },
+  {
+    id: 2,
+    requesterEmail: fakeUser.email,
+    requesterName: fakeUser.name,
+    action: "AddAccountToGroup",
+    groupModel: fakeGroups[1],
   },
 ];
 

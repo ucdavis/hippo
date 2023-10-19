@@ -9,8 +9,8 @@ import {
   RequestPostModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { Typeahead } from "react-bootstrap-typeahead";
 import { usePromiseNotification } from "../../util/Notifications";
+import { GroupLookup } from "../Group/GroupLookup";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
@@ -28,7 +28,9 @@ export const RequestForm = () => {
   // load up possible groups
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
+      const response = await authenticatedFetch(
+        `/api/${cluster}/group/groupnames`
+      );
 
       const groupsResult = await response.json();
 
@@ -87,24 +89,11 @@ export const RequestForm = () => {
         <hr />
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
-          <Typeahead
-            id="groupLookup"
-            labelKey="name"
-            placeholder="Select a group"
-            onChange={(selected) => {
-              if (selected.length > 0) {
-                setRequest((r) => ({
-                  ...r,
-                  groupId: Object.values(selected[0])[0],
-                }));
-              } else {
-                setRequest((r) => ({ ...r, groupId: 0 }));
-              }
-            }}
-            options={groups.map(({ id, displayName }) => ({
-              id,
-              name: displayName,
-            }))}
+          <GroupLookup
+            setSelection={(group) =>
+              setRequest((r) => ({ ...r, groupId: group.id }))
+            }
+            options={groups}
           />
           <p className="form-helper">
             Your group is probably named after your PI or your Department. You

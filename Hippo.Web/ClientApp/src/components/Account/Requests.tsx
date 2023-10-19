@@ -1,42 +1,45 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { AccountModel, IRouteParams } from "../../types";
+import { RequestModel, IRouteParams } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
+import { GroupInfo } from "../Group/GroupInfo";
+import { UncontrolledTooltip } from "reactstrap";
+import { SplitCamelCase } from "../../util/StringHelpers";
 
-export const ApproveAccounts = () => {
+export const Requests = () => {
   // get all accounts that need approval and list them
-  // allow user to approve or reject each account
+  // allow user to approve or reject each request
 
-  const [accounts, setAccounts] = useState<AccountModel[]>();
-  const [accountApproving, setAccountApproving] = useState<number>();
+  const [requests, setRequests] = useState<RequestModel[]>();
+  const [requestApproving, setRequestApproving] = useState<number>();
   const [notification, setNotification] = usePromiseNotification();
 
   const { cluster } = useParams<IRouteParams>();
 
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchRequests = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/account/pending`
+        `/api/${cluster}/request/pending`
       );
 
       if (response.ok) {
-        setAccounts(await response.json());
+        setRequests(await response.json());
       }
     };
 
-    fetchAccounts();
+    fetchRequests();
   }, [cluster]);
 
   const handleApprove = useCallback(
-    async (account: AccountModel) => {
-      setAccountApproving(account.id);
+    async (request: RequestModel) => {
+      setRequestApproving(request.id);
 
       const req = authenticatedFetch(
-        `/api/${cluster}/account/approve/${account.id}`,
+        `/api/${cluster}/request/approve/${request.id}`,
         {
           method: "POST",
         }
@@ -45,43 +48,60 @@ export const ApproveAccounts = () => {
       setNotification(
         req,
         "Approving",
-        "Account Approved. Please allow 2 to 3 hours for changes to take place."
+        "Request Approved. Please allow 2 to 3 hours for changes to take place."
       );
 
       const response = await req;
       if (response.ok) {
-        setAccountApproving(undefined);
+        setRequestApproving(undefined);
 
-        // remove the account from the list
-        setAccounts(accounts?.filter((a) => a.id !== account.id));
+        // remove the request from the list
+        setRequests(requests?.filter((a) => a.id !== request.id));
       }
     },
-    [accounts, cluster, setNotification]
+    [requests, cluster, setNotification]
   );
 
   const handleReject = useCallback(
-    async (account: AccountModel) => {
-      // remove the account from the list
-      setAccounts(accounts?.filter((a) => a.id !== account.id));
+    async (request: RequestModel) => {
+      // remove the request from the list
+      setRequests(requests?.filter((a) => a.id !== request.id));
     },
-    [accounts]
+    [requests]
   );
 
-  const columns: Column<AccountModel>[] = useMemo(
+  const columns: Column<RequestModel>[] = useMemo(
     () => [
       {
-        Header: "Groups",
-        accessor: (account) => account.groups.join(", "),
+        Header: "Request",
+        accessor: (request) => SplitCamelCase(request.action),
         sortable: true,
       },
       {
         Header: "Name",
-        accessor: (account) => account.name,
+        accessor: (request) => request.requesterName,
         sortable: true,
       },
       {
-        Header: "Submitted",
-        accessor: (account) => new Date(account.updatedOn).toLocaleDateString(),
+        Header: "Email",
+        accessor: (request) => request.requesterEmail,
+        sortable: true,
+      },
+      {
+        Header: "Group",
+        accessor: (request) => (
+          <div>
+            <div id={`groupName_${request.id}`}>
+              {request.groupModel.displayName}
+            </div>
+            <UncontrolledTooltip
+              placement="left"
+              target={`groupName_${request.id}`}
+            >
+              <GroupInfo group={request.groupModel} />
+            </UncontrolledTooltip>
+          </div>
+        ),
         sortable: true,
       },
       {
@@ -90,20 +110,21 @@ export const ApproveAccounts = () => {
         Cell: (props) => (
           <>
             <button
+              id="approveButton"
               disabled={notification.pending}
               onClick={() => handleApprove(props.row.original)}
               className="btn btn-primary"
             >
-              {accountApproving === props.row.original.id
+              {requestApproving === props.row.original.id
                 ? "Approving..."
                 : "Approve"}
             </button>
             {" | "}
-            {accountApproving !== props.row.original.id && (
+            {requestApproving !== props.row.original.id && (
               <RejectRequest
-                account={props.row.original}
+                request={props.row.original}
                 removeAccount={() => handleReject(props.row.original)}
-                updateUrl={`/api/${cluster}/Account/Reject/`}
+                updateUrl={`/api/${cluster}/request/reject/`}
                 disabled={notification.pending}
               ></RejectRequest>
             )}
@@ -112,7 +133,7 @@ export const ApproveAccounts = () => {
       },
     ],
     [
-      accountApproving,
+      requestApproving,
       cluster,
       notification.pending,
       handleApprove,
@@ -120,9 +141,9 @@ export const ApproveAccounts = () => {
     ]
   );
 
-  const accountsData = useMemo(() => accounts ?? [], [accounts]);
+  const accountsData = useMemo(() => requests ?? [], [requests]);
 
-  if (accounts === undefined) {
+  if (requests === undefined) {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">Loading...</div>
@@ -132,7 +153,7 @@ export const ApproveAccounts = () => {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>There are {accounts.length} account(s) awaiting approval</p>
+          <p>There are {requests.length} request(s) awaiting approval</p>
           <ReactTable
             columns={columns}
             data={accountsData}

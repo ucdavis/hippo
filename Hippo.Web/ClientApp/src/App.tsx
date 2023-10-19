@@ -10,7 +10,7 @@ import { ClusterHome, Home } from "./components/Home";
 import { AccountInfo } from "./components/Account/AccountInfo";
 import { RequestForm } from "./components/Account/RequestForm";
 import { PendingApproval } from "./components/Account/PendingApproval";
-import { ApproveAccounts } from "./components/Account/ApproveAccounts";
+import { Requests } from "./components/Account/Requests";
 import { ActiveAccounts } from "./components/Account/ActiveAccounts";
 import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
 import { GroupAdmins } from "./components/Admin/GroupAdmins";
@@ -46,7 +46,7 @@ const App = () => {
             <Route exact path="/" component={Home} />
             <Route path="/clusters" component={Clusters} />
             <Route exact path="/:cluster" component={ClusterHome} />
-            <Route path="/:cluster/active" component={AccountInfo} />
+            <Route path="/:cluster/myaccount" component={AccountInfo} />
             <Route
               path="/:cluster/pendingapproval"
               component={PendingApproval}
@@ -55,7 +55,7 @@ const App = () => {
             <ConditionalRoute
               roles={["GroupAdmin"]}
               path="/:cluster/approve"
-              component={ApproveAccounts}
+              component={Requests}
             />
             <ConditionalRoute
               roles={["GroupAdmin"]}

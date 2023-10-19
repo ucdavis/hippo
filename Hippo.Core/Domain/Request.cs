@@ -1,0 +1,79 @@
+using System.ComponentModel.DataAnnotations;
+using Hippo.Core.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hippo.Core.Domain
+{
+    public class Request
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string Action { get; set; } = "";
+        [Required]
+        public User Requester { get; set; }
+        [Required]
+        public int RequesterId { get; set; }
+        public User Actor { get; set; }
+        public int? ActorId { get; set; }
+        public Group Group { get; set; }
+        public int? GroupId { get; set; }
+        public Account Account { get; set; }
+        public int? AccountId { get; set; }
+        [Required]
+        public Cluster Cluster { get; set; }
+        [Required]
+        public int ClusterId { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; } = "";
+        public string Details { get; set; } = "";
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Request>().HasIndex(r => r.Action);
+            modelBuilder.Entity<Request>().HasIndex(r => r.Status);
+            modelBuilder.Entity<Request>().HasIndex(r => r.GroupId);
+            modelBuilder.Entity<Request>().HasIndex(r => r.AccountId);
+            modelBuilder.Entity<Request>().HasIndex(r => r.RequesterId);
+            modelBuilder.Entity<Request>().HasIndex(r => r.ActorId);
+            modelBuilder.Entity<Request>().HasIndex(r => r.ClusterId);
+
+            modelBuilder.Entity<Request>().HasOne(r => r.Requester)
+                .WithMany()
+                .HasForeignKey(r => r.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Request>().HasOne(r => r.Actor)
+                .WithMany()
+                .HasForeignKey(r => r.ActorId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Request>().HasOne(r => r.Group)
+                .WithMany()
+                .HasForeignKey(r => r.GroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Request>().HasOne(r => r.Account)
+                .WithMany()
+                .HasForeignKey(r => r.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Request>().HasOne(r => r.Cluster)
+                .WithMany()
+                .HasForeignKey(r => r.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public static class Actions
+        {
+            public const string CreateAccount = "CreateAccount";
+            public const string AddAccountToGroup = "AddAccountToGroup";
+        }
+
+        public static class Statuses
+        {
+            public const string PendingApproval = "PendingApproval";
+            public const string Rejected = "Rejected";
+            public const string Processing = "Processing";
+            public const string Completed = "Completed";
+        }
+    }
+}

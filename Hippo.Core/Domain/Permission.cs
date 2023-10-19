@@ -13,7 +13,7 @@ namespace Hippo.Core.Domain
 
         [Required]
         public int UserId { get; set; }
-        
+
         /// <summary>
         /// Optional for cross-cluster roles (currently only the "System" role)
         /// </summary>
@@ -31,7 +31,7 @@ namespace Hippo.Core.Domain
         public Cluster Cluster { get; set; }
 
         public Group Group { get; set; }
-        
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Permission>().HasIndex(a => a.RoleId);
@@ -39,5 +39,27 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Permission>().HasIndex(a => a.ClusterId);
             modelBuilder.Entity<Permission>().HasIndex(a => a.GroupId);
         }
-    }    
+    }
+
+    public static class PermissionExtensions
+    {
+        public static bool IsClusterOrSystemAdmin(this IEnumerable<Permission> permissions, string cluster)
+        {
+            return permissions.Any(p =>
+                p.Role.Name == Role.Codes.System
+                || (p.Role.Name == Role.Codes.ClusterAdmin && p.Cluster?.Name == cluster));
+        }
+
+        public static bool IsGroupAdmin(this IEnumerable<Permission> permissions, string cluster, int? groupId)
+        {
+            if (groupId == null)
+            {
+                return false;
+            }
+            return permissions.Any(p =>
+                p.Role.Name == Role.Codes.GroupAdmin
+                && p.Cluster?.Name == cluster
+                && p.GroupId == groupId);
+        }
+    }
 }

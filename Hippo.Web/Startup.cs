@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Hippo.Web.Services;
 using System.Security.Claims;
 using Serilog;
 using Hippo.Web.Middleware;
@@ -181,7 +180,7 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IYamlService, YamlService>();
+            services.AddScoped<IAccountUpdateService, AccountUpdateService>();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddHttpContextAccessor();
         }

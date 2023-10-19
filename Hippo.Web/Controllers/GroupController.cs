@@ -3,7 +3,6 @@ using Hippo.Core.Domain;
 using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
-using Hippo.Web.Services;
 using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +32,24 @@ public class GroupController : SuperController
             return BadRequest("You must supply a cluster name.");
         }
 
+        var groups = await _dbContext.Groups
+            .AsNoTracking()
+            .Where(g => g.Cluster.Name == Cluster)
+            .OrderBy(g => g.DisplayName)
+            .Select(GroupModel.Projection)
+            .ToArrayAsync();
+
+        return Ok(groups);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> GroupNames()
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("You must supply a cluster name.");
+        }
+
         return Ok(await _dbContext.Groups
             .AsNoTracking()
             .Where(g => g.Cluster.Name == Cluster)
@@ -41,7 +58,7 @@ public class GroupController : SuperController
     }
 
     [HttpGet]
-    public async Task<IActionResult> UntrackedGroups()
+    public async Task<IActionResult> UntrackedGroupNames()
     {
         if (string.IsNullOrWhiteSpace(Cluster))
         {

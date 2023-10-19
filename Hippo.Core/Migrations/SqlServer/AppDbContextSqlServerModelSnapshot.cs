@@ -30,9 +30,6 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AccountYaml")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
 
@@ -51,6 +48,9 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<int?>("SponsorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SshKey")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -279,6 +279,61 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.ToTable("PuppetGroupsPuppetUsers");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ActorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RequesterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("ClusterId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Requests");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -458,6 +513,46 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.User", "Actor")
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.User", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Actor");
+
+                    b.Navigation("Cluster");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Requester");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>

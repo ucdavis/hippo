@@ -1,7 +1,6 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
-using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;

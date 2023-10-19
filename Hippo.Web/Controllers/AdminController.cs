@@ -4,7 +4,6 @@ using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
-using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
