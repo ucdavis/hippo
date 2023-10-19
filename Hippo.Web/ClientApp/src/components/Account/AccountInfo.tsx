@@ -8,17 +8,15 @@ import { CardColumns } from "reactstrap";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
 import { authenticatedFetch } from "../../util/api";
+import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [context] = useContext(AppContext);
   const { cluster } = useParams<IRouteParams>();
+  const account = context.accounts.find((a) => a.cluster === cluster);
 
-  const currentGroups = useMemo(
-    () =>
-      context.accounts.filter((a) => a.cluster === cluster)[0]?.groups ?? [],
-    [context.accounts, cluster]
-  );
+  const currentGroups = useMemo(() => account?.groups ?? [], [account]);
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
@@ -61,6 +59,41 @@ export const AccountInfo = () => {
     [groups]
   );
 
+  const [getSshKeyConfirmation] = useConfirmationDialog<string>(
+    {
+      title: "Update your SSH Key",
+      message: (setReturn) => {
+        return (
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="form-group">
+                <label className="form-label">
+                  What is your Public SSH key
+                </label>
+                <textarea
+                  className="form-control"
+                  id="sharedKey"
+                  placeholder="Paste your public SSH key here"
+                  required
+                  onChange={(e) => setReturn(e.target.value)}
+                ></textarea>
+                <p className="form-helper">
+                  Paste all of the text from your public SSH file here. Example:
+                  <br></br>
+                  <code>
+                    ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
+                  </code>
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      },
+      canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
+    },
+    []
+  );
+
   const handleRequestAccess = useCallback(async () => {
     const [confirmed, group] = await getGroupConfirmation();
     if (confirmed) {
@@ -84,6 +117,31 @@ export const AccountInfo = () => {
     }
   }, [cluster, getGroupConfirmation, setNotification]);
 
+  const handleUpdateSshKey = useCallback(async () => {
+    const [confirmed, sshKey] = await getSshKeyConfirmation();
+
+    if (confirmed) {
+      const request = authenticatedFetch(`/api/${cluster}/account/updatessh`, {
+        method: "POST",
+        body: JSON.stringify({
+          accountId: account?.id,
+          sshKey: sshKey,
+        }),
+      });
+
+      setNotification(request, "Request sent", async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await request;
+    }
+  }, [account?.id, cluster, getSshKeyConfirmation, setNotification]);
+
   return (
     <div className="row justify-content-center">
       <div className="col-md-8 text-center">
@@ -103,7 +161,14 @@ export const AccountInfo = () => {
             onClick={() => handleRequestAccess()}
             className="btn btn-primary"
           >
-            Request Access to Additional Groups
+            Request Access to Another Group
+          </button>
+          <button
+            disabled={notification.pending || groups.length === 0}
+            onClick={() => handleUpdateSshKey()}
+            className="btn btn-primary"
+          >
+            Update SSH Key
           </button>
         </p>
         <p>

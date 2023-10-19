@@ -23,7 +23,7 @@ public class AccountController : SuperController
     private readonly IHistoryService _historyService;
     private readonly IAccountUpdateService _accountUpdateService;
 
-    public AccountController(AppDbContext dbContext, IUserService userService, INotificationService notificationService, 
+    public AccountController(AppDbContext dbContext, IUserService userService, INotificationService notificationService,
         IHistoryService historyService, IAccountUpdateService accountUpdateService)
     {
         _dbContext = dbContext;
@@ -182,7 +182,7 @@ public class AccountController : SuperController
     }
 
     [HttpPost]
-    public async Task<ActionResult> UpdateSsh(AccountSshKeyModel model)
+    public async Task<ActionResult> UpdateSsh([FromBody] AccountSshKeyModel model)
     {
         if (string.IsNullOrWhiteSpace(Cluster))
         {
