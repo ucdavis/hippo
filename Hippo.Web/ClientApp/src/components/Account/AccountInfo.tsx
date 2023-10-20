@@ -145,37 +145,31 @@ export const AccountInfo = () => {
   return (
     <>
       <div className="row justify-content-center">
-        <div className="col-md-8 text-center">
+        <div className="col-md-8">
           <p>
             Welcome {context.user.detail.firstName}. Your account is registered
             with the following group(s):
           </p>
-        </div>
-      </div>
-      <div className="row justify-content-center">
-        <div className="col-md-4 text-center">
+
           <CardColumns>
             {currentGroups.map((g, i) => (
               <GroupInfo group={g} key={i} />
             ))}
           </CardColumns>
           <br />
-        </div>
-      </div>
-      <div className="row justify-content-center">
-        <div className="col-md-8 text-center">
+
           <div>
             <button
               disabled={notification.pending || groups.length === 0}
               onClick={() => handleRequestAccess()}
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
             >
               Request Access to Another Group
             </button>{" "}
             <button
               disabled={notification.pending || groups.length === 0}
               onClick={() => handleUpdateSshKey()}
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
             >
               Update SSH Key
             </button>

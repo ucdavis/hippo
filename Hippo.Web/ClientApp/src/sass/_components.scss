@@ -217,3 +217,13 @@ hr {
   color: $primary-font;
   box-shadow: 0 0 0 0.1rem transparentize($primary-color, 0.75);
 }
+.card-columns {
+  .card {
+    padding: 12px;
+  }
+}
+.group-card-admin {
+  padding-left: 16px;
+  border-left: 2px solid $primary-color;
+  margin: 2% 0;
+}
