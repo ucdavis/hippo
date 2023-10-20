@@ -7,11 +7,13 @@ export interface GroupInfoProps {
 
 export const GroupInfo = ({ group }: GroupInfoProps) => {
   return (
-    <Card key={group.id}>
-      <CardTitle>
-        {group.displayName}{" "}
-        {group.name !== group.displayName && `(${group.name})`}
-      </CardTitle>
+    <div className="group-card-admin" key={group.id}>
+      <p className="mb-0">
+        <b>
+          {group.displayName}{" "}
+          {group.name !== group.displayName && `(${group.name})`}
+        </b>
+      </p>
       {group.admins?.length > 0 && (
         <>
           <CardSubtitle>Group Sponsors/Admins:</CardSubtitle>
@@ -24,6 +26,6 @@ export const GroupInfo = ({ group }: GroupInfoProps) => {
           </CardText>
         </>
       )}
-    </Card>
+    </div>
   );
 };
