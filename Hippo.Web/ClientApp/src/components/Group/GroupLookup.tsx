@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Typeahead } from "react-bootstrap-typeahead";
+import { Typeahead, Menu, MenuItem } from "react-bootstrap-typeahead";
 import { GroupModel } from "../../types";
 import { GroupInfo } from "./GroupInfo";
 
@@ -35,8 +35,14 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
         setGroupSelection(selected as GroupModel[]);
         setSelection(selected[0] as GroupModel);
       }}
-      renderMenuItemChildren={(option, props, index) => (
-        <GroupInfo group={option as GroupModel} key={index} />
+      renderMenu={(results, menuProps) => (
+        <Menu {...menuProps}>
+          {results.map((result, index) => (
+            <MenuItem option={result} position={index}>
+              <GroupInfo group={result as GroupModel} key={index} />
+            </MenuItem>
+          ))}
+        </Menu>
       )}
     />
   );
