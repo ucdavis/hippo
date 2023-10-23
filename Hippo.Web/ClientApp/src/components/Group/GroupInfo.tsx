@@ -7,12 +7,10 @@ export interface GroupInfoProps {
 
 export const GroupInfo = ({ group }: GroupInfoProps) => {
   return (
-    <div className="group-card-admin" key={group.id}>
-      <p className="mb-0">
-        <b>
-          {group.displayName}{" "}
-          {group.name !== group.displayName && `(${group.name})`}
-        </b>
+    <div className="group-info-baseline" key={group.id}>
+      <p className="group-info-header">
+        {group.displayName}{" "}
+        {group.name !== group.displayName && `(${group.name})`}
       </p>
       {group.admins?.length > 0 && (
         <>

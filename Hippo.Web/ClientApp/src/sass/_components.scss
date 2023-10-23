@@ -223,7 +223,20 @@ hr {
   }
 }
 .group-card-admin {
-  padding-left: 16px;
   border-left: 2px solid $primary-color;
+}
+
+.group-info-baseline {
   margin: 2% 0;
+  padding-left: 16px;
+  text-align: left;
+  .card-subtitle {
+    color: $primary-font;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .group-info-header {
+    font-weight: bold;
+    margin-bottom: 0;
+  }
 }

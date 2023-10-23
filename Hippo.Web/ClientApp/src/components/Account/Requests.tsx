@@ -96,6 +96,7 @@ export const Requests = () => {
             </div>
             <UncontrolledTooltip
               placement="left"
+              style={{ backgroundColor: "rgb(233, 226, 237)" }}
               target={`groupName_${request.id}`}
             >
               <GroupInfo group={request.groupModel} />

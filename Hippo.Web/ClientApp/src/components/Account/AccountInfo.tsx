@@ -153,7 +153,9 @@ export const AccountInfo = () => {
 
           <CardColumns>
             {currentGroups.map((g, i) => (
-              <GroupInfo group={g} key={i} />
+              <div className="group-card-admin">
+                <GroupInfo group={g} key={i} />
+              </div>
             ))}
           </CardColumns>
           <br />
