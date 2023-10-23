@@ -9,6 +9,8 @@ import { Column } from "react-table";
 import { GroupInfo } from "../Group/GroupInfo";
 import { UncontrolledTooltip } from "reactstrap";
 import { SplitCamelCase } from "../../util/StringHelpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMessage } from "@fortawesome/free-solid-svg-icons";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -93,6 +95,7 @@ export const Requests = () => {
           <div>
             <div id={`groupName_${request.id}`}>
               {request.groupModel.displayName}
+              <FontAwesomeIcon size="xs" icon={faMessage} />
             </div>
             <UncontrolledTooltip
               placement="left"
