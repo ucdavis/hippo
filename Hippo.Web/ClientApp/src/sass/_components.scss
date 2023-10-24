@@ -243,3 +243,6 @@ hr {
 .tooltip-inner {
   max-width: 100% !important;
 }
+.dotted-underline {
+  border-bottom: 1px dotted $primary-color;
+}

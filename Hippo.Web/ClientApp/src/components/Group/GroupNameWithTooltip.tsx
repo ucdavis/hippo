@@ -1,6 +1,4 @@
 import { GroupModel } from "../../types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import { UncontrolledTooltip } from "reactstrap";
 import { GroupInfo } from "./GroupInfo";
 
@@ -17,10 +15,9 @@ export const GroupNameWithTooltip = ({
 }: Props) => {
   const target = `groupName_${group.id}_${id ?? ""}`;
   return (
-    <span>
+    <span className="dotted-underline">
       <span id={target} style={{ whiteSpace: "nowrap" }}>
         {useDisplayName ? group.displayName : group.name}
-        <FontAwesomeIcon size="xs" icon={faMessage} />
       </span>
       <UncontrolledTooltip
         placement="left"
