@@ -125,10 +125,10 @@ public class AdminController : SuperController
     {
         // get all users with group admin permissions
         return Ok(await _dbContext.Permissions
-            .AsNoTracking()
+            .AsSplitQuery()
             .Where(p => p.Group.IsActive && p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.GroupAdmin)
             .OrderBy(p => p.Group.Name).ThenBy(p => p.User.LastName).ThenBy(p => p.User.FirstName)
-            .Select(p => new GroupAdminModel { PermissionId = p.Id, Group = p.Group.Name, User = p.User })
+            .Select(GroupAdminModel.ProjectFromPermission)
             .ToArrayAsync());
     }
 
@@ -186,15 +186,16 @@ public class AdminController : SuperController
         var permission = await _dbContext.Permissions
             .Include(p => p.Group)
             .Include(p => p.Role)
-            .SingleOrDefaultAsync(p => 
-                p.UserId == user.Id 
-                && p.GroupId == group.Id 
-                && p.Role.Name == Role.Codes.GroupAdmin 
+            .SingleOrDefaultAsync(p =>
+                p.UserId == user.Id
+                && p.GroupId == group.Id
+                && p.Role.Name == Role.Codes.GroupAdmin
                 && p.ClusterId == clusterId);
 
         if (permission == null)
         {
-            permission = new Permission{
+            permission = new Permission
+            {
                 UserId = user.Id,
                 GroupId = group.Id,
                 Group = group,
@@ -204,8 +205,13 @@ public class AdminController : SuperController
             user.Permissions.Add(permission);
             await _historyService.RoleAdded(user, permission);
             await _dbContext.SaveChangesAsync();
-            return Ok(new GroupAdminModel { PermissionId = permission.Id, Group = group.Name, User = user });
-        } 
+            var groupAdminModel = await _dbContext.Permissions
+                .AsSplitQuery()
+                .Where(p => p.Id == permission.Id)
+                .Select(GroupAdminModel.ProjectFromPermission)
+                .SingleAsync();
+            return Ok(groupAdminModel);
+        }
         else
         {
             return BadRequest("User is already a group admin");

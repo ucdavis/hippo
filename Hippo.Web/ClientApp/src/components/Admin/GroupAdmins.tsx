@@ -12,6 +12,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupLookup } from "../Group/GroupLookup";
+import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 
 export const GroupAdmins = () => {
   // get all accounts that need approval and list them
@@ -143,7 +144,7 @@ export const GroupAdmins = () => {
       setGroupAdmins(
         updatedGroupUsers.sort(
           (a, b) =>
-            (a.group ?? "").localeCompare(b.group ?? "") ||
+            (a.group?.name ?? "").localeCompare(b.group?.name ?? "") ||
             a.user.name.localeCompare(b.user.name)
         )
       );
@@ -155,7 +156,12 @@ export const GroupAdmins = () => {
     () => [
       {
         Header: "Group",
-        accessor: (ga) => ga.group,
+        accessor: (ga) => (
+          <GroupNameWithTooltip
+            group={ga.group}
+            id={ga.permissionId.toString()}
+          />
+        ),
         sortable: true,
       },
       {

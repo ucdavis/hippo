@@ -4,6 +4,7 @@ import { AccountModel, IRouteParams } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
+import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
@@ -14,7 +15,20 @@ export const ActiveAccounts = () => {
     () => [
       {
         Header: "Groups",
-        accessor: (row) => row.groups.join(", "),
+        accessor: (row) => (
+          <>
+            {row.groups.map((g, i) => (
+              <>
+                {i > 0 && ", "}
+                <GroupNameWithTooltip
+                  group={g}
+                  id={row.id.toString()}
+                  key={i}
+                />
+              </>
+            ))}
+          </>
+        ),
         sortable: true,
       },
       {

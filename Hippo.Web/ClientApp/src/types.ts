@@ -12,7 +12,7 @@ export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
 export interface GroupAdminModel {
   permissionId: number;
-  group: string;
+  group: GroupModel;
   user: User;
 }
 
