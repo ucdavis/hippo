@@ -6,11 +6,8 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
-import { GroupInfo } from "../Group/GroupInfo";
-import { UncontrolledTooltip } from "reactstrap";
 import { SplitCamelCase } from "../../util/StringHelpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMessage } from "@fortawesome/free-solid-svg-icons";
+import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -92,19 +89,10 @@ export const Requests = () => {
       {
         Header: "Group",
         accessor: (request) => (
-          <div>
-            <div id={`groupName_${request.id}`}>
-              {request.groupModel.displayName}
-              <FontAwesomeIcon size="xs" icon={faMessage} />
-            </div>
-            <UncontrolledTooltip
-              placement="left"
-              style={{ backgroundColor: "rgb(233, 226, 237)" }}
-              target={`groupName_${request.id}`}
-            >
-              <GroupInfo group={request.groupModel} />
-            </UncontrolledTooltip>
-          </div>
+          <GroupNameWithTooltip
+            group={request.groupModel}
+            id={request.id.toString()}
+          />
         ),
         sortable: true,
       },

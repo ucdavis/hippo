@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Hippo.Core.Domain;
+using Hippo.Core.Models;
 
 namespace Hippo.Web.Models
 {
@@ -11,7 +12,7 @@ namespace Hippo.Web.Models
         public DateTime CreatedOn { get; set; }
         public string Cluster { get; set; } = "";
         public User? Owner { get; set; }
-        public List<string> Groups { get; set; } = new();
+        public List<GroupModel> Groups { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
 
         public AccountModel()
@@ -27,7 +28,21 @@ namespace Hippo.Web.Models
             CreatedOn = account.CreatedOn;
             Cluster = account.Cluster.Name;
             Owner = account.Owner;
-            Groups = account.GroupAccounts.Select(ga => ga.Group.Name).OrderBy(x => x).ToList();
+            Groups = account.GroupAccounts.Select(ga => new GroupModel
+            {
+                Id = ga.Group.Id,
+                DisplayName = ga.Group.DisplayName,
+                Name = ga.Group.Name,
+                Admins = ga.Group.Permissions
+                    .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
+                    .Select(p => new GroupUserModel
+                    {
+                        Kerberos = p.User.Kerberos,
+                        Name = p.User.Name,
+                        Email = p.User.Email
+                    }).ToList(),
+            })
+            .OrderBy(x => x).ToList();
             UpdatedOn = account.UpdatedOn;
         }
 
@@ -43,7 +58,20 @@ namespace Hippo.Web.Models
                     CreatedOn = a.CreatedOn,
                     Cluster = a.Cluster.Name,
                     Owner = a.Owner,
-                    Groups = a.GroupAccounts.Select(ga => ga.Group.Name).OrderBy(x => x).ToList(),
+                    Groups = a.GroupAccounts.Select(ga => new GroupModel
+                    {
+                        Id = ga.Group.Id,
+                        DisplayName = ga.Group.DisplayName,
+                        Name = ga.Group.Name,
+                        Admins = ga.Group.Permissions
+                            .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
+                            .Select(p => new GroupUserModel
+                            {
+                                Kerberos = p.User.Kerberos,
+                                Name = p.User.Name,
+                                Email = p.User.Email
+                            }).ToList(),
+                    }).OrderBy(x => x.Name).ToList(),
                     UpdatedOn = a.UpdatedOn
                 };
             }

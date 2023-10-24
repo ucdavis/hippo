@@ -6,6 +6,7 @@ import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
+import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -118,7 +119,9 @@ export const Groups = () => {
     () => [
       {
         Header: "Group",
-        accessor: (group) => group.name,
+        accessor: (group) => (
+          <GroupNameWithTooltip group={group} showDisplayName={false} />
+        ),
       },
       {
         Header: "Display Name",
