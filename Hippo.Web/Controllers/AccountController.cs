@@ -8,7 +8,6 @@ using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using Serilog;
 
 namespace Hippo.Web.Controllers;
@@ -142,7 +141,6 @@ public class AccountController : SuperController
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
         var currentUser = await _userService.GetCurrentUser();
-        model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+(([\w\.\-]+)@([\w\-]+\.?)+)?", "");
 
         if (model.SponsorId == 0)
         {

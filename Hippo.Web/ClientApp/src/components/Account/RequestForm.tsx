@@ -111,7 +111,7 @@ export const RequestForm = () => {
         </div>
         <div className="form-group">
           <label className="form-label">What is your Public SSH key</label>
-          <textarea
+          <input
             className="form-control"
             id="sharedKey"
             placeholder="Paste your public SSH key here"
@@ -119,7 +119,7 @@ export const RequestForm = () => {
             onChange={(e) =>
               setRequest((r) => ({ ...r, sshKey: e.target.value }))
             }
-          ></textarea>
+          ></input>
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:
             <br></br>
