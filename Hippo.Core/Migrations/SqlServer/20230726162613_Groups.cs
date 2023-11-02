@@ -143,7 +143,6 @@ namespace Hippo.Core.Migrations.SqlServer
                 INSERT INTO Roles (Name) VALUES
                     ('{Role.Codes.System}'),
                     ('{Role.Codes.ClusterAdmin}'),
-                    ('{Role.Codes.GroupAdmin}'),
                 ");
 
             // User.IsAdmin -> Role.System
@@ -162,18 +161,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     JOIN Roles r ON r.Name = '{Role.Codes.ClusterAdmin}'
                 WHERE a.IsAdmin = 1
                 ");
-
-            // Account.CanSponsor -> Role.GroupAdmin
-            // Leaving GroupId null isn't valid for GroupAdmin role, but we don't have that information.
-            // We'll have the PuppetSync job fix this up later.
-            migrationBuilder.Sql($@"
-                INSERT INTO Permissions (RoleId, UserId, ClusterId)
-                SELECT DISTINCT r.Id, u.Id, a.ClusterId
-                FROM Accounts a JOIN Users u ON u.Id = a.OwnerId
-                    JOIN Roles r ON r.Name = '{Role.Codes.GroupAdmin}'
-                WHERE a.CanSponsor = 1
-                "); 
-
 
             migrationBuilder.DropIndex(
                 name: "IX_Users_IsAdmin",
@@ -255,16 +242,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     and Permissions.UserId = Accounts.OwnerId
                 WHERE Permissions.RoleId = (SELECT Id FROM Roles WHERE Name = '{Role.Codes.ClusterAdmin}')
                 ");
-
-            migrationBuilder.Sql($@"
-                UPDATE Accounts
-                SET Accounts.CanSponsor = 1
-                FROM Accounts join Permissions
-                    on Permissions.ClusterId = Accounts.ClusterId
-                    and Permissions.UserId = Accounts.OwnerId
-                WHERE Permissions.RoleId = (SELECT Id FROM Roles WHERE Name = '{Role.Codes.GroupAdmin}')
-            ");
-
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Accounts_Groups_GroupId",

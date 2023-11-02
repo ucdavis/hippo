@@ -22,6 +22,25 @@ namespace Hippo.Core.Services
             _dbContext = dbContext;
         }
 
+        public async Task<bool> CreateAccount(Request request)
+        {
+            try
+            {
+                var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(request.Cluster.Name);
+                var tempFileName = $"/var/lib/remote-api/.{request.Requester.Kerberos}.yaml"; //Leading .
+                var fileName = $"/var/lib/remote-api/{request.Requester.Kerberos}.yaml";
+                var yaml = GetYaml(request);
+                await _sshService.PlaceFile(yaml, tempFileName, connectionInfo);
+                await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error creating account");
+                return false;
+            }
+        }
+
         public async Task<bool> UpdateAccount(Account account, Group group = null)
         {
             try
@@ -39,6 +58,46 @@ namespace Hippo.Core.Services
                 Log.Error(e, "Error updating account");
                 return false;
             }
+        }
+
+        private string GetYaml(Request request)
+        {
+            if (request == null)
+            {
+                throw new InvalidOperationException($"Request is required");
+            }
+
+            if (request.Requester == null)
+            {
+                throw new InvalidOperationException($"Requester is required");
+            }
+
+            if (request.Group == null)
+            {
+                throw new InvalidOperationException($"Group is required");
+            }
+
+            var yaml = new Serializer();
+
+            return yaml.Serialize(
+                new
+                {
+                    groups = new[] { request.Group },
+                    account = new
+                    {
+                        name = request.Requester.Name,
+                        email = request.Requester.Email,
+                        kerb = request.Requester.Kerberos,
+                        iam = request.Requester.Iam,
+                        mothra = request.Requester.MothraId,
+                        key = request.SshKey
+                    },
+                    meta = new
+                    {
+                        cluster = request.Cluster.Name,
+                    }
+                }
+            );
         }
 
         private string GetYaml(Account account, Group group = null)

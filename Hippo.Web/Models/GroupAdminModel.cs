@@ -6,33 +6,35 @@ namespace Hippo.Web.Models
 {
     public class GroupAdminModel
     {
-        public int PermissionId { get; set; }
         public GroupModel Group { get; set; } = new();
-        public User User { get; set; } = new();
+        public GroupAccountModel Account { get; set; } = new();
 
-        public static Expression<Func<Permission, GroupAdminModel>> ProjectFromPermission
+        public static Expression<Func<Account, IEnumerable<GroupAdminModel>>> ProjectFromAccount
         {
             get
             {
-                return p => new GroupAdminModel
+                return a => a.AdminOfGroups.Select(g => new GroupAdminModel
                 {
-                    PermissionId = p.Id,
                     Group = new GroupModel
                     {
-                        Id = p.Group.Id,
-                        DisplayName = p.Group.DisplayName,
-                        Name = p.Group.Name,
-                        Admins = p.Group.Permissions
-                        .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
-                        .Select(p => new GroupUserModel
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                        .Select(a => new GroupAccountModel
                         {
-                            Kerberos = p.User.Kerberos,
-                            Name = p.User.Name,
-                            Email = p.User.Email
+                            Kerberos = a.Kerberos,
+                            Name = a.Name,
+                            Email = a.Email
                         }).ToList(),
                     },
-                    User = p.User
-                };
+                    Account = new GroupAccountModel
+                    {
+                        Kerberos = a.Kerberos,
+                        Name = a.Name,
+                        Email = a.Email
+                    }
+                });
             }
         }
     }

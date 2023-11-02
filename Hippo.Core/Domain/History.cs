@@ -29,19 +29,15 @@ namespace Hippo.Core.Domain
 
         public string Details { get; set; } = String.Empty;
 
-        public int? AccountId { get; set; }
-        public Account Account { get; set; }
-
         public int ClusterId { get; set; } //When we have a cluster identifier 
         public Cluster Cluster { get; set; }
 
         [MaxLength(50)]
-        public string AccountStatus { get; set; }
+        public string Status { get; set; }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<History>().HasOne(h => h.Account).WithMany(a => a.Histories).HasForeignKey(a => a.AccountId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
         }
 
@@ -51,10 +47,8 @@ namespace Hippo.Core.Domain
             public const string Approved = "Approved";
             public const string Updated = "Updated";
             public const string Rejected = "Rejected";
-            public const string AdminApproved = "Admin Approved";
-            public const string AdminRejected = "Admin Rejected";
-            public const string AdminUpdated = "Admin Updated";
-            public const string Other = "Other";
+            public const string Completed = "Completed";
+            public const string Processing = "Processing";
 
             public static List<string> TypeList = new List<string>
             {
@@ -62,9 +56,6 @@ namespace Hippo.Core.Domain
                 Approved,
                 Updated,
                 Rejected,
-                AdminApproved,
-                AdminRejected,
-                Other,
             }.ToList();
         }
     }

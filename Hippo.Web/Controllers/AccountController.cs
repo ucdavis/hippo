@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
 using AccountRequest = Hippo.Core.Domain.Request;
+using Hippo.Core.Extensions;
 
 namespace Hippo.Web.Controllers;
 
@@ -50,28 +51,6 @@ public class AccountController : SuperController
             .ToArrayAsync());
     }
 
-    // Return all accounts that are waiting for the current user to approve
-    [HttpGet]
-    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
-    public async Task<ActionResult> Pending()
-    {
-        var currentUser = await _userService.GetCurrentUser();
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("Cluster is required");
-        }
-
-        return Ok(await _dbContext.Accounts
-            .AsNoTracking()
-            .PendingApproval()
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            // the projection is sorting groups by name, so we'll sort by the first group name
-            .OrderBy(a => a.GroupAccounts.OrderBy(ga => ga.Group.Name).First().Group.Name)
-                .ThenBy(a => a.Name)
-            .Select(AccountModel.Projection)
-            .ToArrayAsync());
-    }
-
     [HttpGet]
     [Authorize(Policy = AccessCodes.GroupAdminAccess)]
     public async Task<ActionResult> Active()
@@ -84,10 +63,9 @@ public class AccountController : SuperController
 
         return Ok(await _dbContext.Accounts
             .AsNoTracking()
-            .Where(a => a.Status == Account.Statuses.Active)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             // the projection is sorting groups by name, so we'll sort by the first group name
-            .OrderBy(a => a.GroupAccounts.OrderBy(ga => ga.Group.Name).First().Group.Name)
+            .OrderBy(a => a.MemberOfGroups.OrderBy(g => g.Name).First().Name)
                 .ThenBy(a => a.Name)
             .Select(AccountModel.Projection)
             .ToArrayAsync());
@@ -125,45 +103,25 @@ public class AccountController : SuperController
             return BadRequest("Cluster not found");
         }
 
-        var existingAccount = await _dbContext.Accounts
-            .Include(a => a.Owner)
-            .Include(a => a.Cluster)
-            .Include(a => a.GroupAccounts)
-                .ThenInclude(ga => ga.Group)
-            .SingleOrDefaultAsync(a =>
-                a.OwnerId == currentUser.Id
-                && a.ClusterId == cluster.Id
-                && a.Status != Account.Statuses.Rejected);
+        var hasAccount = await _dbContext.Accounts.AnyAsync(a =>a.OwnerId == currentUser.Id
+                && a.ClusterId == cluster.Id);
 
-        if (existingAccount != null)
+        if (hasAccount)
         {
             return BadRequest("You already have an account for this cluster");
         }
 
-        var account = new Account()
-        {
-            Owner = currentUser,
-            SshKey = model.SshKey,
-            IsActive = true,
-            Name = $"{currentUser.Name} ({currentUser.Email})",
-            Cluster = cluster,
-            Status = Account.Statuses.PendingApproval,
-        };
-
-        account = await _historyService.AccountRequested(account);
-
-        await _dbContext.Accounts.AddAsync(account);
-        await _dbContext.GroupsAccounts.AddAsync(new GroupAccount { GroupId = model.GroupId, AccountId = account.Id });
         var request = new AccountRequest
         {
-            Account = account,
             Requester = currentUser,
-            Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).SingleAsync(),
+            Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).Select(g => g.Name).SingleAsync(),
             Action = AccountRequest.Actions.CreateAccount,
             Status = AccountRequest.Statuses.PendingApproval,
             Cluster = cluster,
         };
         await _dbContext.Requests.AddAsync(request);
+        await _historyService.RequestCreated(request);
+
         await _dbContext.SaveChangesAsync();
 
         var success = await _notificationService.AccountRequest(request);
@@ -172,12 +130,12 @@ public class AccountController : SuperController
             Log.Error("Error creating Account Request email");
         }
 
-        var accountModel = await _dbContext.Accounts
-            .Where(a => a.Id == account.Id)
-            .Select(AccountModel.Projection)
+        var requestModel = await _dbContext.Requests
+            .Where(r => r.Id == request.Id)
+            .SelectRequestModel(_dbContext)
             .SingleAsync();
 
-        return Ok(accountModel);
+        return Ok(requestModel);
 
     }
 
@@ -201,11 +159,6 @@ public class AccountController : SuperController
         if (existingAccount == null)
         {
             return NotFound();
-        }
-
-        if (existingAccount.Status != Account.Statuses.Active)
-        {
-            return BadRequest("Only Active accounts can be updated.");
         }
 
         existingAccount.SshKey = model.SshKey;

@@ -17,10 +17,8 @@ namespace Hippo.Core.Domain
         public int RequesterId { get; set; }
         public User Actor { get; set; }
         public int? ActorId { get; set; }
-        public Group Group { get; set; }
-        public int? GroupId { get; set; }
-        public Account Account { get; set; }
-        public int? AccountId { get; set; }
+        [MaxLength(32)]
+        public string Group { get; set; }
         [Required]
         public Cluster Cluster { get; set; }
         [Required]
@@ -29,13 +27,15 @@ namespace Hippo.Core.Domain
         [MaxLength(50)]
         public string Status { get; set; } = "";
         public string Details { get; set; } = "";
+        public string SshKey { get; set; } = "";
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Request>().HasIndex(r => r.Action);
             modelBuilder.Entity<Request>().HasIndex(r => r.Status);
-            modelBuilder.Entity<Request>().HasIndex(r => r.GroupId);
-            modelBuilder.Entity<Request>().HasIndex(r => r.AccountId);
+            modelBuilder.Entity<Request>().HasIndex(r => r.Group);
             modelBuilder.Entity<Request>().HasIndex(r => r.RequesterId);
             modelBuilder.Entity<Request>().HasIndex(r => r.ActorId);
             modelBuilder.Entity<Request>().HasIndex(r => r.ClusterId);
@@ -47,14 +47,6 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Request>().HasOne(r => r.Actor)
                 .WithMany()
                 .HasForeignKey(r => r.ActorId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Request>().HasOne(r => r.Group)
-                .WithMany()
-                .HasForeignKey(r => r.GroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Request>().HasOne(r => r.Account)
-                .WithMany()
-                .HasForeignKey(r => r.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Request>().HasOne(r => r.Cluster)
                 .WithMany()

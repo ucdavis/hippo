@@ -84,7 +84,7 @@ namespace Hippo.Jobs.PuppetSync
         {
             Log.Information("Syncing Puppet accounts");
 
-            await syncService.SyncAccounts();
+            await syncService.Run();
         }
     }
 }

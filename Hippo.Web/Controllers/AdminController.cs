@@ -124,11 +124,9 @@ public class AdminController : SuperController
     public async Task<IActionResult> GroupAdmins()
     {
         // get all users with group admin permissions
-        return Ok(await _dbContext.Permissions
-            .AsSplitQuery()
-            .Where(p => p.Group.IsActive && p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.GroupAdmin)
-            .OrderBy(p => p.Group.Name).ThenBy(p => p.User.LastName).ThenBy(p => p.User.FirstName)
-            .Select(GroupAdminModel.ProjectFromPermission)
+        return Ok(await _dbContext.Accounts
+            .SelectMany(GroupAdminModel.ProjectFromAccount)
+            .OrderBy(ga => ga.Group.Name).ThenBy(ga => ga.Account.Name)
             .ToArrayAsync());
     }
 
@@ -141,105 +139,5 @@ public class AdminController : SuperController
             .OrderBy(g => g.Name)
             .Select(g => g.Name)
             .ToArrayAsync());
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> AddGroupAdmin([FromBody] AddGroupAdminModel model)
-    {
-        var clusterId = await _dbContext.Clusters.Where(c => c.Name == Cluster).Select(c => c.Id).SingleAsync();
-
-        if (string.IsNullOrWhiteSpace(model.Lookup))
-        {
-            return BadRequest("You must supply either an email or kerb id to lookup.");
-        }
-
-        var userLookup = model.Lookup.Contains("@")
-                    ? await _identityService.GetByEmail(model.Lookup)
-                    : await _identityService.GetByKerberos(model.Lookup);
-
-        if (userLookup == null)
-        {
-            return BadRequest("User Not Found");
-        }
-
-        if (string.IsNullOrWhiteSpace(model.Group))
-        {
-            return BadRequest("You must supply a group.");
-        }
-
-        var group = await _dbContext.Groups
-            .SingleOrDefaultAsync(g => g.Name == model.Group && g.Cluster.Name == Cluster);
-
-        if (group == null)
-        {
-            return BadRequest("Group Not Found");
-        }
-
-
-        var user = await _dbContext.Users.SingleOrDefaultAsync(a => a.Iam == userLookup.Iam);
-        if (user == null)
-        {
-            user = userLookup;
-            await _dbContext.Users.AddAsync(user);
-        }
-
-        var permission = await _dbContext.Permissions
-            .Include(p => p.Group)
-            .Include(p => p.Role)
-            .SingleOrDefaultAsync(p =>
-                p.UserId == user.Id
-                && p.GroupId == group.Id
-                && p.Role.Name == Role.Codes.GroupAdmin
-                && p.ClusterId == clusterId);
-
-        if (permission == null)
-        {
-            permission = new Permission
-            {
-                UserId = user.Id,
-                GroupId = group.Id,
-                Group = group,
-                Role = await _dbContext.Roles.Where(r => r.Name == Role.Codes.GroupAdmin).SingleAsync(),
-                ClusterId = clusterId
-            };
-            user.Permissions.Add(permission);
-            await _historyService.RoleAdded(user, permission);
-            await _dbContext.SaveChangesAsync();
-            var groupAdminModel = await _dbContext.Permissions
-                .AsSplitQuery()
-                .Where(p => p.Id == permission.Id)
-                .Select(GroupAdminModel.ProjectFromPermission)
-                .SingleAsync();
-            return Ok(groupAdminModel);
-        }
-        else
-        {
-            return BadRequest("User is already a group admin");
-        }
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> RemoveGroupAdmin(int id)
-    {
-        var permission = await _dbContext.Permissions
-            .Include(p => p.Role)
-            .Include(p => p.User)
-            .Include(p => p.Group)
-            .Where(p =>
-                p.Id == id
-                && p.Cluster.Name == Cluster
-                && p.Role.Name == Role.Codes.GroupAdmin)
-            .SingleOrDefaultAsync();
-
-        if (permission == null)
-        {
-            return BadRequest("Permission not found");
-        }
-
-        await _historyService.RoleRemoved(permission.User, permission);
-        _dbContext.Permissions.Remove(permission);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
     }
 }

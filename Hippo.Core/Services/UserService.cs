@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Hippo.Core.Models;
 using Serilog;
+using Hippo.Core.Extensions;
 
 namespace Hippo.Core.Services
 {
@@ -21,6 +22,7 @@ namespace Hippo.Core.Services
         Task<string> GetCurrentUserJsonAsync();
         Task<IEnumerable<Permission>> GetCurrentPermissionsAsync();
         Task<string> GetCurrentPermissionsJsonAsync();
+        Task<string> GetCurrentOpenRequestsAsync();
         string GetCurrentUserId();
         Task<string> GetCurrentAccountsJsonAsync();
         Task<string> GetAvailableClustersJsonAsync();
@@ -76,7 +78,6 @@ namespace Hippo.Core.Services
             var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;
             var permissions = await _dbContext.Permissions
                 .Include(p => p.Cluster)
-                .Include(p => p.Group)
                 .Include(p => p.Role)
                 .Where(p => p.User.Iam == iamId)
                 .ToArrayAsync();
@@ -98,7 +99,6 @@ namespace Hippo.Core.Services
                 {
                     Role = p.Role.Name,
                     Cluster = p.Cluster.Name,
-                    Group = p.Group.Name
                 })
                 .ToArrayAsync();
             return JsonSerializer.Serialize(permissions, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -112,25 +112,34 @@ namespace Hippo.Core.Services
             {
                 Id = a.Id,
                 Name = a.Name,
-                Status = a.Status,
                 Owner = a.Owner.Name,
                 Cluster = a.Cluster.Name,
-                Groups = a.GroupAccounts.Select(ga => new GroupModel 
-                { 
-                    Id = ga.GroupId, 
-                    DisplayName = ga.Group.DisplayName, 
-                    Name = ga.Group.Name,
-                    Admins = ga.Group.Permissions
-                        .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
-                        .Select(p => new GroupUserModel 
-                        { 
-                            Kerberos = p.User.Kerberos,
-                            Name = p.User.Name,
-                            Email = p.User.Email
+                Groups = a.MemberOfGroups.Select(g => new GroupModel
+                {
+                    Id = g.Id,
+                    DisplayName = g.DisplayName,
+                    Name = g.Name,
+                    Admins = g.AdminAccounts
+                        .Select(a => new GroupAccountModel
+                        {
+                            Kerberos = a.Kerberos,
+                            Name = a.Name,
+                            Email = a.Email
                         }).ToList(),
                 }).ToList(),
             }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        public async Task<string> GetCurrentOpenRequestsAsync()
+        {
+            string iamId = GetCurrentUserId();
+
+            var requests = await _dbContext.Requests
+                .Where(r => r.Requester.Iam == iamId && r.Status != Request.Statuses.Completed && r.Status != Request.Statuses.Rejected)
+                .SelectRequestModel(_dbContext)
+                .ToListAsync();
+            return JsonSerializer.Serialize(requests, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         // Get any user based on their claims, creating if necessary

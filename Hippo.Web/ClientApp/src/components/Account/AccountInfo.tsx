@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
 import { GroupModel, IRouteParams } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
@@ -141,6 +141,16 @@ export const AccountInfo = () => {
       const response = await request;
     }
   }, [account?.id, cluster, getSshKeyConfirmation, setNotification]);
+
+  if (!account) {
+    const request = context.openRequests.find(
+      (r) => r.cluster === cluster && r.action === "CreateAccount"
+    );
+    if (request) {
+      return <Redirect to={`/${cluster}/pendingapproval`} />;
+    }
+    return <Redirect to={`/${cluster}/create`} />;
+  }
 
   return (
     <>

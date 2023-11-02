@@ -46,7 +46,6 @@ export const fakeAccounts: AccountModel[] = [
   {
     id: 1,
     name: "Account 1",
-    status: "Active",
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
@@ -55,7 +54,6 @@ export const fakeAccounts: AccountModel[] = [
   {
     id: 2,
     name: "Account 2",
-    status: "Active",
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
@@ -70,6 +68,8 @@ export const fakeRequests: RequestModel[] = [
     requesterName: fakeUser.name,
     action: "CreateAccount",
     groupModel: fakeGroups[0],
+    status: "PendingApproval",
+    cluster: "caesfarm",
   },
   {
     id: 2,
@@ -77,6 +77,8 @@ export const fakeRequests: RequestModel[] = [
     requesterName: fakeUser.name,
     action: "AddAccountToGroup",
     groupModel: fakeGroups[1],
+    status: "PendingApproval",
+    cluster: "caesfarm",
   },
 ];
 
@@ -99,13 +101,13 @@ export const fakeAppContext: AppContextShape = {
     permissions: [
       {
         role: "GroupMember",
-        group: "group1",
         cluster: "caesfarm",
       },
     ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
+  openRequests: fakeRequests,
 };
 
 export const fakeGroupAdminAppContext: AppContextShape = {
@@ -117,13 +119,13 @@ export const fakeGroupAdminAppContext: AppContextShape = {
     permissions: [
       {
         role: "GroupAdmin",
-        group: "group1",
         cluster: "caesfarm",
       },
     ],
   },
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
+  openRequests: fakeRequests,
 };
 
 export const fakeAdminUsers: User[] = [
@@ -149,4 +151,5 @@ export const fakeAppContextNoAccount: AppContextShape = {
   },
   accounts: [],
   clusters: [fakeCluster],
+  openRequests: [],
 };
