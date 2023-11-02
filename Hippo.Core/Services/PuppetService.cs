@@ -33,7 +33,7 @@ namespace Hippo.Core.Services
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
             // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
-            var contents = await _gitHubClient.Repository.Content.GetAllContentsByRef(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath, "cheeto-group-sponsors");
+            var contents = await _gitHubClient.Repository.Content.GetAllContentsByRef(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath, _settings.RepositoryBranch);
             var yaml = contents.First().Content;
             using var reader = new StringReader(yaml);
 
