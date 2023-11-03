@@ -2,8 +2,8 @@
 using EFCore.BulkExtensions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 
 namespace Hippo.Core.Services
@@ -86,6 +86,7 @@ namespace Hippo.Core.Services
                 .ToArrayAsync();
 
             // insert/update groups and accounts
+            Log.Information("Inserting/Updating {Count} groups and {Count} accounts for cluster {Cluster}", desiredGroups.Count, desiredAccounts.Length, cluster.Name);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroups, new BulkConfig
             {
                 PropertiesToExcludeOnUpdate = new List<string> { nameof(Group.DisplayName) },
@@ -102,7 +103,7 @@ namespace Hippo.Core.Services
             var mapGroupNameToId = await _dbContext.Groups
                 .Where(g => g.ClusterId == cluster.Id)
                 .ToDictionaryAsync(g => g.Name, g => g.Id);
-            
+
             var mapKerberosToAccountId = await _dbContext.Accounts
                 .Where(a => a.ClusterId == cluster.Id)
                 .ToDictionaryAsync(a => a.Kerberos, a => a.Id);
@@ -122,6 +123,7 @@ namespace Hippo.Core.Services
                 }));
 
             // insert/update group memberships
+            Log.Information("Inserting/Updating {Count} group memberships and {Count} group admin memberships for cluster {Cluster}", desiredGroupAccounts.Count(), desiredGroupAdminAccounts.Count(), cluster.Name);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroupAccounts);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroupAdminAccounts);
 
@@ -138,10 +140,12 @@ namespace Hippo.Core.Services
                 .ToArrayAsync();
 
             // delete group memberships
+            Log.Information("Deleting {Count} group memberships and {Count} group admin memberships for cluster {Cluster}", deleteGroupAccounts.Length, deleteGroupAdminAccounts.Length, cluster.Name);
             await _dbContext.BulkDeleteAsync(deleteGroupAccounts);
             await _dbContext.BulkDeleteAsync(deleteGroupAdminAccounts);
 
             // delete groups and accounts
+            Log.Information("Deleting {Count} groups and {Count} accounts for cluster {Cluster}", deleteGroups.Length, deleteAccounts.Length, cluster.Name);
             await _dbContext.BulkDeleteAsync(deleteGroups, new BulkConfig
             {
                 UpdateByProperties = new List<string> { nameof(Group.ClusterId), nameof(Group.Name) }
@@ -154,6 +158,28 @@ namespace Hippo.Core.Services
             // clear temp table data
             await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
             await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
+
+            // find requests that need to be updated
+            var requests = await _dbContext.Requests
+                .Where(r => r.ClusterId == cluster.Id && r.Status == Request.Statuses.Processing)
+                .LeftJoin(_dbContext.Accounts,
+                    r => new { r.ClusterId, r.Requester.Kerberos },
+                    a => new { a.ClusterId, a.Kerberos })
+                .Where(r => r.Right != null && r.Right.MemberOfGroups.Any(g => g.Name == r.Left.Group))
+                .Select(r => r.Left)
+                .ToArrayAsync();
+
+            if (requests.Any())
+            {
+                Log.Information("Updating {Count} requests to completed for cluster {Cluster}", requests.Length, cluster.Name);
+                var updatedOn = DateTime.UtcNow;
+                foreach (var request in requests)
+                {
+                    request.Status = Request.Statuses.Completed;
+                    request.UpdatedOn = updatedOn;
+                }
+                await _dbContext.Requests.BatchUpdateAsync(requests, new List<string> { nameof(Request.Status), nameof(Request.UpdatedOn) });
+            }
         }
 
     }

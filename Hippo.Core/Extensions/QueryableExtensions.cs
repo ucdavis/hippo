@@ -31,9 +31,12 @@ namespace Hippo.Core.Extensions
                         }).ToList(),
                 }
             });
-                
+
         }
 
+        /// <summary>
+        /// Helper to make left joins a bit more readable
+        /// </summary>
         public static IQueryable<TResult> LeftJoin<TLeft, TRight, TKey, TResult>(
             this IQueryable<TLeft> left,
             IQueryable<TRight> right,
@@ -47,6 +50,18 @@ namespace Hippo.Core.Extensions
                 .Select(resultSelector);
 
             return result;
+        }
+
+        /// <summary>
+        /// Helper to make left joins a bit more readable
+        /// </summary>
+        public static IQueryable<JoinResult<TLeft, TRight>> LeftJoin<TLeft, TRight, TKey>(
+            this IQueryable<TLeft> left,
+            IQueryable<TRight> right,
+            Expression<Func<TLeft, TKey>> outerKeySelector,
+            Expression<Func<TRight, TKey>> innerKeySelector)
+        {
+            return left.LeftJoin(right, outerKeySelector, innerKeySelector, row => row);
         }
 
         public class JoinResult<TLeft, TRight>
