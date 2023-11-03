@@ -175,7 +175,17 @@ namespace Hippo.Core.Services
                 var foundUser = await _identityService.GetByKerberos(newUser.Kerberos);
                 newUser.MothraId = foundUser.MothraId;
 
-                _dbContext.Users.Add(newUser);
+                await _dbContext.Users.AddAsync(newUser);
+
+                // check if any existing accounts need to be associated with this user
+                var existingAccounts = await _dbContext.Accounts.Where(a => a.Kerberos == newUser.Kerberos).ToArrayAsync();
+                if (existingAccounts.Length > 0)
+                {
+                    foreach (var account in existingAccounts)
+                    {
+                        account.Owner = newUser;
+                    }
+                }
 
                 await _dbContext.SaveChangesAsync();
 
