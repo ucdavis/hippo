@@ -18,7 +18,7 @@ namespace Hippo.Web.Extensions
             {
                 // System can access anything
                 AccessCodes.SystemAccess => new[] { Role.Codes.System },
-                AccessCodes.ClusterAdminAccess => new[] { Role.Codes.ClusterAdmin, Role.Codes.GroupAdmin },
+                AccessCodes.ClusterAdminAccess => new[] { Role.Codes.ClusterAdmin },
                 AccessCodes.GroupAdminAccess => new[] { Role.Codes.GroupAdmin },
                 _ => throw new ArgumentException($"{nameof(accessCode)} is not a valid {nameof(AccessCodes)} constant")
             };

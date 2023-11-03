@@ -7,10 +7,10 @@ using Hippo.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
 using AccountRequest = Hippo.Core.Domain.Request;
+using Hippo.Core.Extensions;
 
 namespace Hippo.Web.Controllers;
 
@@ -23,7 +23,7 @@ public class RequestController : SuperController
     private readonly IHistoryService _historyService;
     private readonly IAccountUpdateService _accountUpdateService;
 
-    public RequestController(AppDbContext dbContext, IUserService userService, INotificationService notificationService, 
+    public RequestController(AppDbContext dbContext, IUserService userService, INotificationService notificationService,
         IHistoryService historyService, IAccountUpdateService accountUpdateService)
     {
         _dbContext = dbContext;
@@ -49,9 +49,10 @@ public class RequestController : SuperController
             .Where(r => r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             // the projection is sorting groups by name, so we'll sort by the first group name
-            .OrderBy(a => a.Group.Name)
-                .ThenBy(a => a.Account.Name)
-            .Select(RequestModel.Projection)
+            .OrderBy(r => r.Group)
+                .ThenBy(r => r.Requester.FirstName)
+                    .ThenBy(r => r.Requester.LastName)
+            .SelectRequestModel(_dbContext)
             .ToArrayAsync();
 
         return Ok(requests);
@@ -73,8 +74,8 @@ public class RequestController : SuperController
             .AsSplitQuery()
             .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .Include(r => r.Account.Owner)
-            .Include(r => r.Account.Cluster)
+            .Include(r => r.Requester)
+            .Include(r => r.Cluster)
             .Include(r => r.Group)
             .SingleOrDefaultAsync();
 
@@ -95,34 +96,44 @@ public class RequestController : SuperController
 
     private async Task<ActionResult> ApproveCreateAccount(AccountRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Group))
+        {
+            return BadRequest("No group associated with this request");
+        }
+
+        var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
+        var currentUser = await _userService.GetCurrentUser();
         var permissions = await _userService.GetCurrentPermissionsAsync();
         var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
-        var isGroupAdmin = permissions.IsGroupAdmin(Cluster, request.GroupId);
+        var isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
+            ga.GroupId == group.Id
+            && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
 
         if (!isClusterOrSystemAdmin && !isGroupAdmin)
         {
             return Forbid();
         }
 
-        if (request.Account == null)
+        var account = new Account
         {
-            return BadRequest("No account associated with this request");
-        }
+            Name = request.Requester.Name,
+            Email = request.Requester.Email,
+            Kerberos = request.Requester.Kerberos,
+            Owner = request.Requester,
+            Cluster = request.Cluster,
+            SshKey = request.SshKey,
+            MemberOfGroups = new List<Group> { group },
+        };
 
-        if (request.Group == null)
-        {
-            return BadRequest("No group associated with this request");
-        }        
+        await _dbContext.Accounts.AddAsync(account);
 
-        if (!await _accountUpdateService.UpdateAccount(request.Account, request.Group))
+        if (!await _accountUpdateService.UpdateAccount(account, group))
         {
             // It could be that ssh is down
             return BadRequest("Error updating account. Please try again later.");
         }
 
-        request.Account.Status = Account.Statuses.Active;
-        // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
-        request.Status = AccountRequest.Statuses.Completed;
+        request.Status = AccountRequest.Statuses.Processing;
 
 
         var success = await _notificationService.AccountDecision(request, true);
@@ -132,7 +143,7 @@ public class RequestController : SuperController
         }
 
         // safe to assume admin override if no GroupAdmin permission is found
-        await _historyService.AccountApproved(request.Account, !isGroupAdmin);
+        await _historyService.RequestApproved(request, !isGroupAdmin);
 
         await _dbContext.SaveChangesAsync();
 
@@ -141,34 +152,41 @@ public class RequestController : SuperController
 
     private async Task<ActionResult> ApproveAddAccountToGroup(AccountRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Group))
+        {
+            return BadRequest("No group associated with this request");
+        }
+
+        var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
+        var currentUser = await _userService.GetCurrentUser();
         var permissions = await _userService.GetCurrentPermissionsAsync();
         var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
-        var isGroupAdmin = permissions.IsGroupAdmin(Cluster, request.GroupId);
+        var isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
+            ga.GroupId == group.Id
+            && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
 
         if (!isClusterOrSystemAdmin && !isGroupAdmin)
         {
             return Forbid();
         }
 
-        if (request.Account == null)
+        var account = await _dbContext.Accounts
+            .Where(a => a.ClusterId == request.ClusterId && a.OwnerId == request.RequesterId)
+            .SingleOrDefaultAsync();
+
+        if (account == null)
         {
-            return BadRequest("No account associated with this request");
+            return BadRequest("No account found for this request");
         }
 
-        if (request.Group == null)
-        {
-            return BadRequest("No group associated with this request");
-        }
 
-        if (!await _accountUpdateService.UpdateAccount(request.Account, request.Group))
+        if (!await _accountUpdateService.UpdateAccount(account, group))
         {
             // It could be that ssh is down
             return BadRequest("Error updating account. Please try again later.");
         }
 
-        request.Account.Status = Account.Statuses.Active;
-        // TODO: Should request status be set to Processing, and have the AccountSyncService set it to active when confirmed?
-        request.Status = AccountRequest.Statuses.Completed;
+        request.Status = AccountRequest.Statuses.Processing;
 
         var success = await _notificationService.AccountDecision(request, true);
         if (!success)
@@ -177,7 +195,7 @@ public class RequestController : SuperController
         }
 
         // safe to assume admin override if no GroupAdmin permission is found
-        await _historyService.AccountApproved(request.Account, !isGroupAdmin);
+        await _historyService.RequestApproved(request, !isGroupAdmin);
 
         await _dbContext.SaveChangesAsync();
 
@@ -203,9 +221,8 @@ public class RequestController : SuperController
             .IgnoreQueryFilters()
             .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
-            .Include(r => r.Account.Owner)
-            .Include(r => r.Account.Cluster)
-            .Include(r => r.Group)
+            .Include(r => r.Requester)
+            .Include(r => r.Cluster)
             .SingleOrDefaultAsync();
 
         if (request == null)
@@ -213,25 +230,17 @@ public class RequestController : SuperController
             return NotFound();
         }
 
+        var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
         var permissions = await _userService.GetCurrentPermissionsAsync();
         var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
-        var isGroupAdmin = permissions.IsGroupAdmin(Cluster, request.GroupId);
+        var isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
+            ga.GroupId == group.Id
+            && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
 
         if (!isClusterOrSystemAdmin && !isGroupAdmin)
         {
             return Forbid();
         }
-
-        var account = request.Account;
-
-        if (account == null)
-        {
-            return BadRequest("No account associated with this request");
-        }
-
-        account.Status = Account.Statuses.Rejected;
-        account.IsActive = false;
-        request.Status = AccountRequest.Statuses.Rejected;
 
         var success = await _notificationService.AccountDecision(request, false, reason: model.Reason);
         if (!success)
@@ -240,8 +249,7 @@ public class RequestController : SuperController
         }
 
         // safe to assume admin override if no GroupAdmin permission is found
-        await _historyService.AccountRejected(account, !isGroupAdmin, model.Reason);
-
+        await _historyService.RequestRejected(request, !isGroupAdmin, model.Reason);
 
         await _dbContext.SaveChangesAsync();
 

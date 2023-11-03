@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using static Hippo.Core.Domain.History;
 
@@ -54,15 +55,43 @@ namespace Hippo.Core.Services
 
     public static class HistoryServiceExtensions
     {
-        private static History CreateHistory(Account account, string action, string details = "")
+        private static string Serialize(object obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        private static History CreateHistory(Account account, string action, string note = "")
         {
             return new History
             {
                 Action = action,
-                AccountStatus = account.Status,
-                Account = account,
-                Details = $"Kerb: {account.Owner.Kerberos} IAM: {account.Owner.Iam} Email: {account.Owner.Email} Name: {account.Owner.Name}{Environment.NewLine}{details}",
+                Details = Serialize(new
+                {
+                    Note = note,
+                    account.Owner.Kerberos,
+                    account.Owner.Iam,
+                    account.Owner.Email,
+                    account.Owner.Name
+                }),
                 ClusterId = account.ClusterId
+            };
+        }
+
+        private static History CreateHistory(Request request, string action, string note = "")
+        {
+            return new History
+            {
+                Action = action,
+                Status = request.Status,
+                Details = Serialize(new
+                {
+                    Note = note,
+                    request.Requester.Kerberos,
+                    request.Requester.Iam,
+                    request.Requester.Email,
+                    request.Requester.Name
+                }),
+                ClusterId = request.ClusterId
             };
         }
 
@@ -71,40 +100,51 @@ namespace Hippo.Core.Services
             return new History
             {
                 Action = $"{perm.Role.Name} {action}",
-                Details = $"Kerb: {user.Kerberos} IAM: {user.Iam} Email: {user.Email} Name: {user.Name}{(perm.Group != null ? $" Group: {perm.Group.Name}" : "")}",
+                Details = Serialize(new
+                {
+                    user.Kerberos,
+                    user.Iam,
+                    user.Email,
+                    user.Name,
+                }),
                 ClusterId = perm.ClusterId ?? 0,
                 AdminAction = true
             };
         }
 
-        public static async Task<Account> AccountRequested(this IHistoryService historyService, Account account)
+        public static async Task RequestCreated(this IHistoryService historyService, Request request, string note = "")
         {
-            var history = CreateHistory(account, Actions.Requested);
+            var history = CreateHistory(request, Actions.Requested, note);
             await historyService.AddHistory(history);
-            return account;
         }
 
-        public static async Task<Account> AccountApproved(this IHistoryService historyService, Account account, bool isAdminOverride)
+        public static async Task RequestApproved(this IHistoryService historyService, Request request, bool isAdminOverride, string note = "")
         {
-            var history = CreateHistory(account, isAdminOverride ? Actions.AdminApproved : Actions.Approved);
+            var history = CreateHistory(request, Actions.Approved, note);
+            history.AdminAction = isAdminOverride;
+            await historyService.AddHistory(history);
+        }
+
+        public static async Task<Account> AccountUpdated(this IHistoryService historyService, Account account, bool isAdminOverride, string note = "")
+        {
+            var history = CreateHistory(account, Actions.Updated, note);
             history.AdminAction = isAdminOverride;
             await historyService.AddHistory(history);
             return account;
         }
 
-        public static async Task<Account> AccountUpdated(this IHistoryService historyService, Account account, bool isAdminOverride)
+        public static async Task RequestRejected(this IHistoryService historyService, Request request, bool isAdminOverride, string note = "")
         {
-            var history = CreateHistory(account, isAdminOverride ? Actions.AdminUpdated : Actions.Updated);
-            await historyService.AddHistory(history);
-            return account;
-        }
-
-        public static async Task<Account> AccountRejected(this IHistoryService historyService, Account account, bool isAdminOverride, string note = "")
-        {
-            var history = CreateHistory(account, isAdminOverride ? Actions.AdminRejected :  Actions.Rejected, note);
+            var history = CreateHistory(request, Actions.Rejected, note);
             history.AdminAction = isAdminOverride;
             await historyService.AddHistory(history);
-            return account;
+        }
+
+        public static async Task RequestCompleted(this IHistoryService historyService, Request request, bool isAdminOverride, string note = "")
+        {
+            var history = CreateHistory(request, Actions.Completed, note);
+            history.AdminAction = isAdminOverride;
+            await historyService.AddHistory(history);
         }
 
         public static async Task RoleAdded(this IHistoryService historyService, User user, Permission perm)

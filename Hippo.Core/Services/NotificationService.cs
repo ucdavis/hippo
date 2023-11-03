@@ -42,7 +42,6 @@ namespace Hippo.Core.Services
 
             try
             {
-                var account = request.Account;
                 var decidedBy = String.Empty;
                 if (!string.IsNullOrWhiteSpace(overrideDecidedBy))
                 {
@@ -53,21 +52,24 @@ namespace Hippo.Core.Services
                     decidedBy = (await _userService.GetCurrentUser()).Name;
                 }
 
-                var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}"; //TODO: Only have button if approved?
-                var emailTo = account.Owner.Email;
+                var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}"; //TODO: Only have button if approved?
+                var emailTo = request.Requester.Email;
+
+                var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
 
                 var model = new DecisionModel()
                 {
-                    GroupName = request.Group.DisplayName,
-                    RequesterName = account.Owner.Name,
-                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
+                    RequestedAction = request.Action.SplitCamelCase(),
+                    GroupName = group.DisplayName,
+                    RequesterName = request.Requester.Name,
+                    RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
+                    DecisionDate = request.UpdatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
-                    ClusterName = account.Cluster.Description,
+                    ClusterName = request.Cluster.Description,
                 };
 
                 if (!isApproved)
@@ -92,17 +94,17 @@ namespace Hippo.Core.Services
         {
             try
             {
-                var account = request.Account;
-                var requestUrl = $"{_emailSettings.BaseUrl}/{account.Cluster.Name}/approve";
-                var emails = await GetGroupAdminEmails(account);
+                var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
+                var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}/approve";
+                var emails = await GetGroupAdminEmails(group);
 
                 var model = new NewRequestModel()
                 {
-                    GroupName = request.Group.DisplayName,
-                    RequesterName = account.Owner.Name,
-                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
+                    GroupName = group.DisplayName,
+                    RequesterName = request.Requester.Name,
+                    RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
-                    ClusterName = account.Cluster.Description,
+                    ClusterName = request.Cluster.Description,
                 };
 
                 var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
@@ -122,23 +124,23 @@ namespace Hippo.Core.Services
         {
             try
             {
-                var account = request.Account;
                 //var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
-                var emails = await GetGroupAdminEmails(account);
+                var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
+                var emails = await GetGroupAdminEmails(group);
 
                 var model = new DecisionModel()
                 {
-                    GroupName = request.Group.DisplayName,
-                    RequesterName = account.Owner.Name,
-                    RequestDate = account.CreatedOn.ToPacificTime().Date.Format("d"),
-                    DecisionDate = account.UpdatedOn.ToPacificTime().Date.Format("d"),
+                    GroupName = group.DisplayName,
+                    RequesterName = request.Requester.Name,
+                    RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
+                    DecisionDate = request.UpdatedOn.ToPacificTime().Date.Format("d"),
                     //RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
                     AdminName = adminUser.Name,
                     Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
-                    ClusterName = account.Cluster.Description,
+                    ClusterName = request.Cluster.Description,
                 };
 
 
@@ -155,14 +157,13 @@ namespace Hippo.Core.Services
             }
         }
 
-        private async Task<string[]> GetGroupAdminEmails(Account account)
+        private async Task<string[]> GetGroupAdminEmails(Group group)
         {
-            var groupAdminEmails = await _dbContext.Users
-                .Where(u => u.Permissions.Any(p =>
-                    account.GroupAccounts.Select(ga => (int?)ga.GroupId).Contains(p.GroupId)
-                    && p.Role.Name == Role.Codes.GroupAdmin
-                    && p.ClusterId == account.ClusterId))
-                .Select(u => u.Email)
+            var groupAdminEmails = await _dbContext.Groups
+                .Where(g => g.Id == group.Id)
+                .SelectMany(g => g.AdminAccounts)
+                .Select(a => a.Owner != null ? a.Owner.Email : a.Email)
+                .Where(e => e != null)
                 .ToArrayAsync();
             return groupAdminEmails;
         }

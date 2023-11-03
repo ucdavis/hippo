@@ -5,6 +5,7 @@ import {
   Cluster,
   User,
   Permission,
+  RequestModel,
 } from "../types";
 
 const AppContext = React.createContext<
@@ -18,6 +19,7 @@ const AppContext = React.createContext<
     },
     accounts: [] as AccountModel[],
     clusters: [] as Cluster[],
+    openRequests: [] as RequestModel[],
   },
   () => {},
 ]);

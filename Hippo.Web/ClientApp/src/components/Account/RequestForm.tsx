@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
 import {
   GroupModel,
-  AccountModel,
   IRouteParams,
   RequestPostModel,
+  RequestModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -65,15 +65,24 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const newAccount = (await response.json()) as AccountModel;
+      const request = (await response.json()) as RequestModel;
 
       setContext((ctx) => ({
         ...ctx,
-        accounts: [...ctx.accounts, { ...newAccount }],
+        openRequests: [...ctx.openRequests, { ...request }],
       }));
       history.replace(`/${cluster}/pendingapproval`);
     }
   };
+
+  if (
+    context.openRequests.find(
+      (r) => r.cluster === cluster && r.action === "CreateAccount"
+    )
+  ) {
+    // there's already a request for this cluster, redirect to pending page
+    return <Redirect to={`/${cluster}/pendingapproval`} />;
+  }
 
   return (
     <div className="row justify-content-center">

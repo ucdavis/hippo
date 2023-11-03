@@ -108,10 +108,8 @@ namespace Hippo.Core.Data
                 var scottAccount   = new Account()
                 {
                     Owner          = ScottUser,
-                    IsActive       = true,
                     Name           = "Scott's Account",
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.Active,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
@@ -119,10 +117,8 @@ namespace Hippo.Core.Data
                 var owenAccount = new Account()
                 {
                     Owner = OmenAdmin,
-                    IsActive = true,
                     Name = OmenAdmin.Name,
                     SshKey = null,
-                    Status = Account.Statuses.Active,
                     Cluster = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(owenAccount);
@@ -130,10 +126,8 @@ namespace Hippo.Core.Data
                 var slupskyAccount = new Account()
                 {
                     Owner          = SlupskyUser,
-                    IsActive       = true,
                     Name           = "Slupsky",
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.Active,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(slupskyAccount);
@@ -142,9 +136,7 @@ namespace Hippo.Core.Data
                 {
                     Owner          = JasonUser,
                     Name           = "Jason's Account",
-                    IsActive       = true,
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
@@ -153,9 +145,7 @@ namespace Hippo.Core.Data
                 {
                     Owner          = JamesUser,
                     Name           = "James' Account",
-                    IsActive       = true,
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);

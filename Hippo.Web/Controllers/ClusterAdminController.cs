@@ -102,17 +102,5 @@ namespace Hippo.Web.Controllers
             return Ok(clusterModel);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Id == id);
-            if (cluster == null)
-            {
-                return NotFound();
-            }
-            cluster.IsActive = false;
-            await _dbContext.SaveChangesAsync();
-            return Ok();
-        }
     }
 }

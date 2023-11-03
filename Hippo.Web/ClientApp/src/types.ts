@@ -13,10 +13,10 @@ export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 export interface GroupAdminModel {
   permissionId: number;
   group: GroupModel;
-  user: User;
+  account: GroupAccountModel;
 }
 
-export interface GroupUserModel {
+export interface GroupAccountModel {
   kerberos: string;
   name: string;
   email: string;
@@ -26,7 +26,7 @@ export interface GroupModel {
   id: number;
   name: string;
   displayName: string;
-  admins: GroupUserModel[];
+  admins: GroupAccountModel[];
 }
 
 export interface RequestModel {
@@ -35,12 +35,13 @@ export interface RequestModel {
   requesterName: string;
   action: "CreateAccount" | "AddAccountToGroup";
   groupModel: GroupModel;
+  status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
+  cluster: string;
 }
 
 export interface AccountModel {
   id: number;
   name: string;
-  status: string;
   createdOn: string;
   cluster: string;
   owner?: User;
@@ -76,12 +77,12 @@ export interface AppContextShape {
   };
   accounts: AccountModel[];
   clusters: Cluster[];
+  openRequests: RequestModel[];
 }
 
 export interface Permission {
   role: RoleName;
   cluster?: string;
-  group?: string;
 }
 
 export interface PromiseStatus {

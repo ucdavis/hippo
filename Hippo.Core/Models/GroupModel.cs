@@ -9,7 +9,7 @@ namespace Hippo.Core.Models
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
 
-        public List<GroupUserModel> Admins { get; set; } = new();
+        public List<GroupAccountModel> Admins { get; set; } = new();
 
         public static Expression<Func<Group, GroupModel>> Projection
         {
@@ -20,20 +20,19 @@ namespace Hippo.Core.Models
                     Id = g.Id, 
                     DisplayName = g.DisplayName, 
                     Name = g.Name,
-                    Admins = g.Permissions
-                        .Where(p => p.Role.Name == Role.Codes.GroupAdmin)
-                        .Select(p => new GroupUserModel 
+                    Admins = g.AdminAccounts
+                        .Select(a => new GroupAccountModel 
                         { 
-                            Kerberos = p.User.Kerberos,
-                            Name = p.User.Name,
-                            Email = p.User.Email
+                            Kerberos = a.Kerberos,
+                            Name = a.Name,
+                            Email = a.Email
                         }).ToList(),
                 };
             }
         }
     }
 
-    public class GroupUserModel
+    public class GroupAccountModel
     {
         public string Kerberos { get; set; } = "";
         public string Name { get; set; } = "";

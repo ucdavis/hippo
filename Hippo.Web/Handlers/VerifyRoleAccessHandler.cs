@@ -62,28 +62,25 @@ namespace Hippo.Web.Handlers
             
             if (string.IsNullOrWhiteSpace(groupName))
             {
-                // if no group is provided, just ensure there is at least one permission for the given role
+                // if no group is provided, just ensure the user is an admin for at least one group,
                 // and let group-specific filtering be performed by the controller action
-                if (await _dbContext.Permissions.AnyAsync(p
-                => p.User.Iam == userIamId
-                && requirement.RoleStrings.Contains(p.Role.Name)
-                && p.Cluster.Name == clusterName))
+                if (await _dbContext.GroupAdminAccount.AnyAsync(gaa
+                    => gaa.Account.Owner.Iam == userIamId
+                    && gaa.Group.Cluster.Name == clusterName))
                 {
                     context.Succeed(requirement);
+                    return;
                 }
-                return;
             }
 
-            if (await _dbContext.Permissions.AnyAsync(p
-                => p.User.Iam == userIamId
-                && requirement.RoleStrings.Contains(p.Role.Name)
-                && p.Cluster.Name == clusterName
-                && p.Group.Name == groupName))
+            if (await _dbContext.GroupAdminAccount.AnyAsync(gaa
+                => gaa.Account.Owner.Iam == userIamId
+                && gaa.Group.Name == groupName
+                && gaa.Group.Cluster.Name == clusterName))
             {
                 context.Succeed(requirement);
                 return;
             }
-
         }
     }
 }

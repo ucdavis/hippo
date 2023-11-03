@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Models;
 
 namespace Hippo.Web.Extensions
 {
@@ -15,11 +17,6 @@ namespace Hippo.Web.Extensions
             }
 
             return accounts.Where(a => a.Cluster.Name == cluster);
-        }
-
-        public static IQueryable<Account> PendingApproval(this IQueryable<Account> accounts)
-        {
-            return accounts.Where(a => a.Status == Account.Statuses.PendingApproval);
         }
 
         public static IQueryable<Request> CanAccess(this IQueryable<Request> requests, AppDbContext dbContext, string? cluster, string iamId)
@@ -44,16 +41,16 @@ namespace Hippo.Web.Extensions
                                     // cluster admin can access any request in the cluster
                                     p.Role.Name == Role.Codes.ClusterAdmin
                                     || (
-                                        // group admin can access requests with the permission's given group
-                                        p.Role.Name == Role.Codes.GroupAdmin
-                                        && r.GroupId == p.GroupId
+                                        // group admin can access requests for the given group
+                                        r.Group != null && dbContext.Groups.Any(g =>
+                                            g.Name == r.Group && g.AdminAccounts.Any(a => a.Owner.Iam == iamId)
+                                        )
                                     )
                                 )
                             )
                         )
                     )
                 );
-
         }
 
         public static IQueryable<Account> CanAccess(this IQueryable<Account> accounts, AppDbContext dbContext, string? cluster, string iamId)
@@ -74,9 +71,8 @@ namespace Hippo.Web.Extensions
                                     // cluster admin can access any account in the cluster
                                     p.Role.Name == Role.Codes.ClusterAdmin
                                     || (
-                                        // group admin can access accounts with the permission's given group
-                                        p.Role.Name == Role.Codes.GroupAdmin
-                                        && a.GroupAccounts.Any(ga => ga.GroupId == p.GroupId)
+                                        // group admin can access requests for the given group
+                                        a.AdminOfGroups.Any(g => g.AdminAccounts.Any(a => a.Owner.Iam == iamId))
                                     )
                                 )
                             )
