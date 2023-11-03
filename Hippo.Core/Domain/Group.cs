@@ -25,13 +25,7 @@ namespace Hippo.Core.Domain
         public List<Account> MemberAccounts { get; set; } = new();
 
         [JsonIgnore]
-        public List<GroupMemberAccount> MemberAccountsJunction { get; set; } = new();
-
-        [JsonIgnore]
         public List<Account> AdminAccounts { get; set; } = new();
-
-        [JsonIgnore]
-        public List<GroupAdminAccount> AdminAccountsJunction { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
