@@ -53,6 +53,7 @@ namespace Hippo.Core.Services
                 .ToDictionaryAsync(k => k.Kerberos, v => v.Id);
 
             // setup desired state of groups and accounts
+            var now = DateTime.UtcNow;
             var desiredAccounts = puppetData.Users
                 .Select(u => new Account
                 {
@@ -61,6 +62,8 @@ namespace Hippo.Core.Services
                     Kerberos = u.Kerberos,
                     OwnerId = mapKerbsToUserIds.ContainsKey(u.Kerberos) ? mapKerbsToUserIds[u.Kerberos] : null,
                     ClusterId = cluster.Id,
+                    CreatedOn = now,
+                    UpdatedOn = now,
                 })
                 .ToArray();
             var desiredGroups = puppetData.GroupsWithSponsors
@@ -94,7 +97,7 @@ namespace Hippo.Core.Services
             });
             await _dbContext.BulkInsertOrUpdateAsync(desiredAccounts, new BulkConfig
             {
-                PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey) },
+                PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey), nameof(Account.CreatedOn) },
                 UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) }
             });
 
