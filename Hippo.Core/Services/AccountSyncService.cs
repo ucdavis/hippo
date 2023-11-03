@@ -105,7 +105,7 @@ namespace Hippo.Core.Services
                 .ToDictionaryAsync(g => g.Name, g => g.Id);
 
             var mapKerberosToAccountId = await _dbContext.Accounts
-                .Where(a => a.ClusterId == cluster.Id)
+                .Where(a => a.ClusterId == cluster.Id && a.Kerberos != null)
                 .ToDictionaryAsync(a => a.Kerberos, a => a.Id);
 
             // setup desired state of group memberships
