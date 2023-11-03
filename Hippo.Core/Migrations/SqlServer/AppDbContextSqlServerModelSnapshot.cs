@@ -433,7 +433,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Group", "Group")
-                        .WithMany("AdminAccountsJunction")
+                        .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -452,7 +452,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Group", "Group")
-                        .WithMany("MemberAccountsJunction")
+                        .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -538,13 +538,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Navigation("Accounts");
 
                     b.Navigation("Groups");
-                });
-
-            modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
-                {
-                    b.Navigation("AdminAccountsJunction");
-
-                    b.Navigation("MemberAccountsJunction");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
