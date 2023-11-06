@@ -73,7 +73,7 @@ namespace Hippo.Core.Services
                     AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
                 if (!isApproved)
@@ -108,7 +108,7 @@ namespace Hippo.Core.Services
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
@@ -144,7 +144,7 @@ namespace Hippo.Core.Services
                     Reason = reason,
                     AdminName = adminUser.Name,
                     Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
 
