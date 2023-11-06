@@ -1,4 +1,5 @@
 ﻿using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Hippo.Email.Models;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.EntityFrameworkCore;
+using Mjml.Net;
 using Razor.Templating.Core;
 using System.Text;
 
@@ -19,15 +21,17 @@ namespace Hippo.Web.Controllers
         public INotificationService _notificationService { get; }
         public AppDbContext _dbContext { get; }
         public ISecretsService _secretsService { get; }
+        private readonly IMjmlRenderer _mjmlRenderer;
 
         public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext,
-            ISecretsService secretsService)
+            ISecretsService secretsService, IMjmlRenderer mjmlRenderer)
         {
             _emailService = emailService;
             _sshService = sshService;
             _notificationService = notificationService;
             _dbContext = dbContext;
             _secretsService = secretsService;
+            _mjmlRenderer = mjmlRenderer;
         }
 
         public async Task<IActionResult> TestEmail()
@@ -37,7 +41,7 @@ namespace Hippo.Web.Controllers
             model.SomeText = "This is some replaced text.";
             model.SomeText2 = "Even More replaced text";
 
-            var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/Sample.cshtml", model);
+            var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/Sample_mjml.cshtml", model);
 
 
             //await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", emailBody);
@@ -52,7 +56,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            var results = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
+            var results = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
 
             return Content(results);
         }

@@ -11,15 +11,15 @@
     background-color="#ffffff" padding-bottom="20px" padding-top="20px">
     <mj-column width="100%" vertical-align="top">
         <mj-text padding-top="0px" padding-bottom="0px" font-size="28px" color="#1F1F1F">
-            <p>Hi members of group @@Model?.GroupName</p>
+            <p>Hi members of group @Model?.GroupName</p>
         </mj-text>
         <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
-            New account request for @@Model?.ClusterName
+            New account request for @Model?.ClusterName
         </mj-text>
     </mj-column>
 </mj-section>
 
-@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel("@Model?.ButtonText", "@Model?.RequestUrl"))
+@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel(@Model!.ButtonText, @Model!.RequestUrl))
 
 <mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
     padding-bottom="10px" padding-top="5px">
@@ -33,7 +33,7 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         <mj-text>
-            @@Model?.Instructions
+            @Model?.Instructions
         </mj-text>
     </mj-column>
 </mj-section>
@@ -50,10 +50,10 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
-        "@Model?.RequesterName"))
+        @Model?.RequesterName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
-        "@Model?.RequestDate"))
+        @Model?.RequestDate ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
-        "@Model?.ClusterName"))
+        @Model?.ClusterName ?? ""))
     </mj-column>
 </mj-section>
