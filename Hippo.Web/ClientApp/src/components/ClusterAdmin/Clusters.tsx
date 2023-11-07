@@ -117,10 +117,14 @@ export const Clusters = () => {
               wrap="soft"
               value={editClusterModel.sshKey}
               onChange={(e) => {
+                const value = e.target.value
+                  .trim()
+                  .replaceAll("\r", "")
+                  .replaceAll("\n", "");
                 const model: ClusterModel = {
                   ...editClusterModel,
                   cluster: { ...editClusterModel.cluster },
-                  sshKey: e.target.value,
+                  sshKey: value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);

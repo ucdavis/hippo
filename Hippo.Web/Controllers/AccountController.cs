@@ -82,8 +82,6 @@ public class AccountController : SuperController
         }
         var currentUser = await _userService.GetCurrentUser();
 
-        model.SshKey = Regex.Replace(model.SshKey, @"(?<!ssh-rsa)\s+(([\w\.\-]+)@([\w\-]+\.?)+)?", "");
-
         if (model.GroupId == 0)
         {
             return BadRequest("Please select a group from the list.");
@@ -92,7 +90,7 @@ public class AccountController : SuperController
         {
             return BadRequest("Missing SSH Key");
         }
-        if (!model.SshKey.StartsWith("ssh-") || model.SshKey.Trim().Length < 25)
+        if (!model.SshKey.IsValidSshKey())
         {
             return BadRequest("Invalid SSH key");
         }
@@ -145,6 +143,14 @@ public class AccountController : SuperController
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("Cluster is required");
+        }
+        if (string.IsNullOrWhiteSpace(model.SshKey))
+        {
+            return BadRequest("SSH Key is required");
+        }
+        if (!model.SshKey.IsValidSshKey())
+        {
+            return BadRequest("Invalid SSH key");
         }
 
         var currentUser = await _userService.GetCurrentUser();

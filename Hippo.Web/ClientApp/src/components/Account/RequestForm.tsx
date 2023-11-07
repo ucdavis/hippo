@@ -124,9 +124,14 @@ export const RequestForm = () => {
             id="sharedKey"
             placeholder="Paste your public SSH key here"
             required
-            onChange={(e) =>
-              setRequest((r) => ({ ...r, sshKey: e.target.value }))
-            }
+            onChange={(e) => {
+              const value = e.target.value
+                .trim()
+                .replaceAll("\r", "")
+                .replaceAll("\n", "");
+              e.target.value = value;
+              setRequest((r) => ({ ...r, sshKey: value }));
+            }}
           ></textarea>
           <p className="form-helper">
             Paste all of the text from your public SSH file here. Example:

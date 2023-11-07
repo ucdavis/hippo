@@ -75,7 +75,14 @@ export const AccountInfo = () => {
                   id="sharedKey"
                   placeholder="Paste your public SSH key here"
                   required
-                  onChange={(e) => setReturn(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                      .trim()
+                      .replaceAll("\r", "")
+                      .replaceAll("\n", "");
+                    e.target.value = value;
+                    setReturn(e.target.value);
+                  }}
                 ></textarea>
                 <p className="form-helper">
                   Paste all of the text from your public SSH file here. Example:
