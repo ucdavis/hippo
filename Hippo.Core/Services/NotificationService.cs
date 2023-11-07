@@ -12,6 +12,7 @@ using Serilog;
 using Hippo.Email.Models;
 using Hippo.Core.Extensions;
 using Razor.Templating.Core;
+using Mjml.Net;
 
 namespace Hippo.Core.Services
 {
@@ -28,13 +29,16 @@ namespace Hippo.Core.Services
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
         private readonly IUserService _userService;
+        private readonly IMjmlRenderer _mjmlRenderer;
 
-        public NotificationService(AppDbContext dbContext, IEmailService emailService, IOptions<EmailSettings> emailSettings, IUserService userService)
+        public NotificationService(AppDbContext dbContext, IEmailService emailService, 
+            IOptions<EmailSettings> emailSettings, IUserService userService, IMjmlRenderer mjmlRenderer)
         {
             _dbContext = dbContext;
             _emailService = emailService;
             _emailSettings = emailSettings.Value;
             _userService = userService;
+            _mjmlRenderer = mjmlRenderer;
         }
 
         public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string reason = null)
@@ -69,7 +73,7 @@ namespace Hippo.Core.Services
                     AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
                 if (!isApproved)
@@ -77,7 +81,7 @@ namespace Hippo.Core.Services
                     model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
                 }
 
-                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountDecission.cshtml", model);
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecission_mjml.cshtml", model);
 
                 await _emailService.SendEmail(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
 
@@ -104,10 +108,10 @@ namespace Hippo.Core.Services
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
-                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AccountRequest.cshtml", model);
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
                 await _emailService.SendEmail(emails, null, emailBody, "A new account request is ready for your approval");
 
@@ -140,11 +144,11 @@ namespace Hippo.Core.Services
                     Reason = reason,
                     AdminName = adminUser.Name,
                     Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
-                    ClusterName = request.Cluster.Description,
+                    ClusterName = request.Cluster.Name,
                 };
 
 
-                var emailBody = await RazorTemplateEngine.RenderAsync("/Views/Emails/AdminOverrideDecission.cshtml", model);
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
 
                 await _emailService.SendEmail(emails, ccEmails: new[] { adminUser.Email }, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
 

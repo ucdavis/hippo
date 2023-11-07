@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using MvcReact;
 using Microsoft.Extensions.Options;
 using Hippo.Web.Extensions;
+using Mjml.Net;
 
 namespace Hippo.Web
 {
@@ -183,6 +184,7 @@ namespace Hippo.Web
             services.AddScoped<IAccountUpdateService, AccountUpdateService>();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddHttpContextAccessor();
+            services.AddScoped<IMjmlRenderer, MjmlRenderer>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)

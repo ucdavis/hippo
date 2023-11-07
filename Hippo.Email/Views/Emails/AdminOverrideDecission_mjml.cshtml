@@ -11,10 +11,10 @@
     background-color="#ffffff" padding-bottom="20px" padding-top="20px">
     <mj-column width="100%" vertical-align="top">
         <mj-text padding-top="0px" padding-bottom="0px" font-size="28px" color="#1F1F1F">
-            <p>Hi admin for group @@Model?.GroupName</p>
+            <p>Hi admin for group @Model?.GroupName</p>
         </mj-text>
         <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
-            Admin Override for request for @@Model?.ClusterName account
+            Admin Override for request for @Model?.ClusterName account
         </mj-text>
     </mj-column>
 </mj-section>
@@ -31,7 +31,7 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         <mj-text>
-            @@Model?.Instructions
+            @Model?.Instructions
         </mj-text>
     </mj-column>
 </mj-section>
@@ -45,13 +45,13 @@
 </mj-section>
 <mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
     padding-bottom="20px" padding-top="0px">
-    <mj-column width="90%" vertical-align="top" border-left="4px solid @@Model?.DecisionColor" padding-left="10px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid @Model?.DecisionColor" padding-left="10px">
         <mj-text padding-top="0px" padding-left="0px" padding-bottom="5px">
-            <h1>@@Model?.Decision</h1>
+            <h1>@Model?.Decision</h1>
             @@if(!string.IsNullOrWhiteSpace(Model?.Reason))
             {
             @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Reject Reason",
-            "@Model?.Reason"))
+            @Model!.Reason))
             }
         </mj-text>
     </mj-column>
@@ -69,14 +69,14 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
-        "@Model?.RequesterName"))
+        @Model?.RequesterName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
-        "@Model?.RequestDate"))
+        @Model?.RequestDate ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
-        "@Model?.AdminName"))
+        @Model?.AdminName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
-        "@Model?.DecisionDate"))
+        @Model?.DecisionDate ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
-        "@Model?.ClusterName"))
+        @Model?.ClusterName ?? ""))
     </mj-column>
 </mj-section>
