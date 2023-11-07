@@ -48,9 +48,7 @@ export const Groups = () => {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/group/groupnames`
-      );
+      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
 
       if (response.ok) {
         setGroups(await response.json());
