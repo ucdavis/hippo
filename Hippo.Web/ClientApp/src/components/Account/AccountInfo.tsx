@@ -1,7 +1,12 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Redirect, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { GroupModel, IRouteParams } from "../../types";
+import {
+  AddToGroupModel,
+  GroupModel,
+  IRouteParams,
+  RequestModel,
+} from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -12,7 +17,7 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
-  const [context] = useContext(AppContext);
+  const [context, setContext] = useContext(AppContext);
   const { cluster } = useParams<IRouteParams>();
   const account = context.accounts.find((a) => a.cluster === cluster);
 
@@ -26,7 +31,9 @@ export const AccountInfo = () => {
       if (response.ok) {
         setGroups(
           ((await response.json()) as GroupModel[]).filter(
-            (g) => !currentGroups.some((cg) => cg.id === g.id)
+            (g) =>
+              !currentGroups.some((cg) => cg.id === g.id) &&
+              !context.openRequests.some((r) => r.groupModel.id === g.id)
           )
         );
       } else {
@@ -35,9 +42,9 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [cluster, currentGroups]);
+  }, [cluster, context.openRequests, currentGroups]);
 
-  const [getGroupConfirmation] = useConfirmationDialog<GroupModel>(
+  const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
       title: "Request Access to Group",
       message: (setReturn) => {
@@ -46,9 +53,32 @@ export const AccountInfo = () => {
             <div className="col-md-8">
               <div className="form-group">
                 <GroupLookup
-                  setSelection={(selection) => setReturn(selection)}
+                  setSelection={(selection) =>
+                    setReturn((model) => ({ ...model, groupId: selection?.id }))
+                  }
                   options={groups}
                 />
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Who is your supervising PI?
+                </label>
+                <input
+                  className="form-control"
+                  id="supervisingPI"
+                  placeholder="Supervising PI"
+                  onChange={(e) =>
+                    setReturn((model) => ({
+                      ...model,
+                      supervisingPI: e.target.value,
+                    }))
+                  }
+                ></input>
+                <p className="form-helper">
+                  Some clusters may require additional clarification on who your
+                  supervising PI will be for this group. If you are unsure,
+                  please ask your sponsor.
+                </p>
               </div>
             </div>
           </div>
@@ -102,16 +132,17 @@ export const AccountInfo = () => {
   );
 
   const handleRequestAccess = useCallback(async () => {
-    const [confirmed, group] = await getGroupConfirmation();
+    const [confirmed, addToGroupModel] = await getGroupConfirmation();
     if (confirmed) {
-      const request = fetch(`/api/${cluster}/group/request/${group.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const request = authenticatedFetch(
+        `/api/${cluster}/group/requestaccess/`,
+        {
+          method: "POST",
+          body: JSON.stringify(addToGroupModel),
+        }
+      );
 
-      setNotification(request, "Request sent", async (r) => {
+      setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
           const errorText = await response.text(); //Bad Request Text
           return errorText;
@@ -121,8 +152,16 @@ export const AccountInfo = () => {
       });
 
       const response = await request;
+      if (response.ok) {
+        const newRequest = (await response.json()) as RequestModel;
+        setContext((c) => ({
+          ...c,
+          openRequests: [...c.openRequests, newRequest],
+        }));
+        setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));
+      }
     }
-  }, [cluster, getGroupConfirmation, setNotification]);
+  }, [cluster, getGroupConfirmation, setNotification, setContext]);
 
   const handleUpdateSshKey = useCallback(async () => {
     const [confirmed, sshKey] = await getSshKeyConfirmation();
@@ -136,7 +175,7 @@ export const AccountInfo = () => {
         }),
       });
 
-      setNotification(request, "Request sent", async (r) => {
+      setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
           const errorText = await response.text(); //Bad Request Text
           return errorText;
@@ -175,6 +214,20 @@ export const AccountInfo = () => {
               </div>
             ))}
           </CardColumns>
+
+          {Boolean(context.openRequests.length) && (
+            <>
+              <p>You have pending requests for the following group(s):</p>
+
+              <CardColumns>
+                {context.openRequests.map((r, i) => (
+                  <div className="group-card-admin">
+                    <GroupInfo group={r.groupModel} key={i} />
+                  </div>
+                ))}
+              </CardColumns>
+            </>
+          )}
           <br />
 
           <div>

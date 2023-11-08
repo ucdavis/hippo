@@ -9,29 +9,32 @@ namespace Hippo.Core.Extensions
     {
         public static IQueryable<RequestModel> SelectRequestModel(this IQueryable<Request> requests, AppDbContext dbContext)
         {
-            return requests.LeftJoin(dbContext.Groups, r => r.Group, g => g.Name, r => new RequestModel
-            {
-                Id = r.Left.Id,
-                Action = r.Left.Action,
-                RequesterEmail = r.Left.Requester.Email,
-                RequesterName = $"{r.Left.Requester.LastName}, {r.Left.Requester.FirstName}",
-                Status = r.Left.Status,
-                Cluster = r.Left.Cluster.Name,
-                GroupModel = r.Right == null ? null : new GroupModel
+            return requests.LeftJoin(
+                dbContext.Groups, 
+                r => new { r.ClusterId, r.Group },
+                g => new { g.ClusterId, Group = g.Name },
+                r => new RequestModel
                 {
-                    Id = r.Right.Id,
-                    DisplayName = r.Right.DisplayName,
-                    Name = r.Right.Name,
-                    Admins = r.Right.AdminAccounts
-                        .Select(a => new GroupAccountModel
-                        {
-                            Kerberos = a.Kerberos,
-                            Name = a.Name,
-                            Email = a.Email
-                        }).ToList(),
-                }
-            });
-
+                    Id = r.Left.Id,
+                    Action = r.Left.Action,
+                    RequesterEmail = r.Left.Requester.Email,
+                    RequesterName = $"{r.Left.Requester.LastName}, {r.Left.Requester.FirstName}",
+                    Status = r.Left.Status,
+                    Cluster = r.Left.Cluster.Name,
+                    GroupModel = r.Right == null ? null : new GroupModel
+                    {
+                        Id = r.Right.Id,
+                        DisplayName = r.Right.DisplayName,
+                        Name = r.Right.Name,
+                        Admins = r.Right.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }
+                });
         }
 
         /// <summary>

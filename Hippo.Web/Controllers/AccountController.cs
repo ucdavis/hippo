@@ -116,6 +116,7 @@ public class AccountController : SuperController
             Action = AccountRequest.Actions.CreateAccount,
             Status = AccountRequest.Statuses.PendingApproval,
             Cluster = cluster,
+            SupervisingPI = model.SupervisingPI,
         };
         await _dbContext.Requests.AddAsync(request);
         await _historyService.RequestCreated(request);

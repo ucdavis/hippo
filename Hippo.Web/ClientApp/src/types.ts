@@ -37,6 +37,7 @@ export interface RequestModel {
   groupModel: GroupModel;
   status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
   cluster: string;
+  supervisingPI: string;
 }
 
 export interface AccountModel {
@@ -59,9 +60,15 @@ export interface Cluster {
   domain: string;
 }
 
-export interface RequestPostModel {
+export interface AccountCreateModel {
   groupId: number;
   sshKey: string;
+  supervisingPI: string;
+}
+
+export interface AddToGroupModel {
+  groupId: number;
+  supervisingPI: string;
 }
 
 export interface AddGroupAdminModel {

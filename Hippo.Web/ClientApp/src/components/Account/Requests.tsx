@@ -97,6 +97,11 @@ export const Requests = () => {
         sortable: true,
       },
       {
+        Header: "Supervising PI",
+        accessor: (request) => request.supervisingPI,
+        sortable: true,
+      },
+      {
         Header: "Action",
         sortable: false,
         Cell: (props) => (

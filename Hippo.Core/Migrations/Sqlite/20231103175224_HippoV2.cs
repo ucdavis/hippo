@@ -76,7 +76,8 @@ namespace Hippo.Core.Migrations.Sqlite
                     Details = table.Column<string>(type: "TEXT", nullable: true),
                     SshKey = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedOn = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedOn = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    UpdatedOn = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SupervisingPI = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                 },
                 constraints: table =>
                 {

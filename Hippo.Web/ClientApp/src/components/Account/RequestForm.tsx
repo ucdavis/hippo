@@ -5,7 +5,7 @@ import AppContext from "../../Shared/AppContext";
 import {
   GroupModel,
   IRouteParams,
-  RequestPostModel,
+  AccountCreateModel,
   RequestModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
@@ -17,9 +17,10 @@ export const RequestForm = () => {
   const [notification, setNotification] = usePromiseNotification();
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
-  const [request, setRequest] = useState<RequestPostModel>({
+  const [request, setRequest] = useState<AccountCreateModel>({
     groupId: 0,
     sshKey: "",
+    supervisingPI: "",
   });
 
   const history = useHistory();
@@ -113,6 +114,22 @@ export const RequestForm = () => {
             >
               Click here to contact HPC Help
             </a>
+          </p>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Who is your supervising PI?</label>
+          <input
+            className="form-control"
+            id="supervisingPI"
+            placeholder="Supervising PI"
+            value={request.supervisingPI}
+            onChange={(e) =>
+              setRequest((r) => ({ ...r, supervisingPI: e.target.value }))
+            }
+          ></input>
+          <p className="form-helper">
+            Some clusters may require additional clarification on who your
+            supervising PI will be. If you are unsure, please ask your sponsor.
           </p>
         </div>
         <div className="form-group">
