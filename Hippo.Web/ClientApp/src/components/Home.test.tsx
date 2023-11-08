@@ -120,7 +120,7 @@ describe("Home Redirect no account", () => {
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/group/groupnames`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       })
     );
   });

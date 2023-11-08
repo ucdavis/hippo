@@ -42,21 +42,6 @@ public class GroupController : SuperController
         return Ok(groups);
     }
 
-    [HttpGet]
-    public async Task<ActionResult> GroupNames()
-    {
-        if (string.IsNullOrWhiteSpace(Cluster))
-        {
-            return BadRequest("You must supply a cluster name.");
-        }
-
-        return Ok(await _dbContext.Groups
-            .AsNoTracking()
-            .Where(g => g.Cluster.Name == Cluster)
-            .OrderBy(g => g.DisplayName)
-            .ToArrayAsync());
-    }
-
     [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     [HttpPost]
     public async Task<IActionResult> Update([FromBody] Group group)
