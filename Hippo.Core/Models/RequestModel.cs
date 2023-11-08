@@ -12,6 +12,7 @@ namespace Hippo.Core.Models
         public string RequesterName { get; set; } = "";
         public string Status { get; set; } = "";
         public string Cluster { get; set; } = "";
+        public string SupervisingPI { get; set; } = "";
 
         public GroupModel GroupModel { get; set; } = new();
     }

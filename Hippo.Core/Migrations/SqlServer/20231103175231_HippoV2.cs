@@ -76,7 +76,8 @@ namespace Hippo.Core.Migrations.SqlServer
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SshKey = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SupervisingPI = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                 },
                 constraints: table =>
                 {

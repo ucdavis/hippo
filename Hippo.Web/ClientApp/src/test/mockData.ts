@@ -70,6 +70,7 @@ export const fakeRequests: RequestModel[] = [
     groupModel: fakeGroups[0],
     status: "PendingApproval",
     cluster: "caesfarm",
+    supervisingPI: "Dr. Bob Dobalina",
   },
   {
     id: 2,
@@ -79,6 +80,7 @@ export const fakeRequests: RequestModel[] = [
     groupModel: fakeGroups[1],
     status: "PendingApproval",
     cluster: "caesfarm",
+    supervisingPI: "Dr. Bob Dobalina",
   },
 ];
 

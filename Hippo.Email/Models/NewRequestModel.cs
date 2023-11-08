@@ -16,5 +16,7 @@ namespace Hippo.Email.Models
         public string Instructions { get; set; } = "As a group admin who can sponsor new accounts and group memberships on this cluster, you have received this request. Please click on the View Request button to approve or deny this request.";
         public string RequestUrl { get; set; } = String.Empty;
         public string ButtonText { get; set; } = "View Request";
+        public string SupervisingPI { get; set; } = String.Empty;
+        public string Action { get; set; } = String.Empty;
     }
 }

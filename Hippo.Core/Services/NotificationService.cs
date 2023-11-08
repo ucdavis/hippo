@@ -109,6 +109,8 @@ namespace Hippo.Core.Services
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
                     ClusterName = request.Cluster.Name,
+                    SupervisingPI = request.SupervisingPI,
+                    Action = request.Action.SplitCamelCase(),
                 };
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
@@ -145,6 +147,7 @@ namespace Hippo.Core.Services
                     AdminName = adminUser.Name,
                     Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
                     ClusterName = request.Cluster.Name,
+                    RequestedAction = request.Action.SplitCamelCase(),
                 };
 
 

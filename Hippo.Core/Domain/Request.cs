@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Hippo.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,12 +13,15 @@ namespace Hippo.Core.Domain
         [MaxLength(50)]
         public string Action { get; set; } = "";
         [Required]
+        [JsonIgnore]
         public User Requester { get; set; }
         [Required]
         public int RequesterId { get; set; }
+        [JsonIgnore]
         public User Actor { get; set; }
         public int? ActorId { get; set; }
         [MaxLength(32)]
+        [JsonIgnore]
         public string Group { get; set; }
         [Required]
         public Cluster Cluster { get; set; }
@@ -28,6 +32,8 @@ namespace Hippo.Core.Domain
         public string Status { get; set; } = "";
         public string Details { get; set; } = "";
         public string SshKey { get; set; } = "";
+        [MaxLength(100)]
+        public string SupervisingPI { get; set; } = "";
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
 

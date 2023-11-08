@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Redirect, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { GroupModel, IRouteParams } from "../../types";
+import { AddToGroupModel, GroupModel, IRouteParams } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -37,7 +37,7 @@ export const AccountInfo = () => {
     fetchGroups();
   }, [cluster, currentGroups]);
 
-  const [getGroupConfirmation] = useConfirmationDialog<GroupModel>(
+  const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
       title: "Request Access to Group",
       message: (setReturn) => {
@@ -46,9 +46,32 @@ export const AccountInfo = () => {
             <div className="col-md-8">
               <div className="form-group">
                 <GroupLookup
-                  setSelection={(selection) => setReturn(selection)}
+                  setSelection={(selection) =>
+                    setReturn((model) => ({ ...model, groupId: selection?.id }))
+                  }
                   options={groups}
                 />
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Who is your supervising PI?
+                </label>
+                <input
+                  className="form-control"
+                  id="supervisingPI"
+                  placeholder="Supervising PI"
+                  onChange={(e) =>
+                    setReturn((model) => ({
+                      ...model,
+                      supervisingPI: e.target.value,
+                    }))
+                  }
+                ></input>
+                <p className="form-helper">
+                  Some clusters may require additional clarification on who your
+                  supervising PI will be for this group. If you are unsure,
+                  please ask your sponsor.
+                </p>
               </div>
             </div>
           </div>
@@ -102,16 +125,17 @@ export const AccountInfo = () => {
   );
 
   const handleRequestAccess = useCallback(async () => {
-    const [confirmed, group] = await getGroupConfirmation();
+    const [confirmed, addToGroupModel] = await getGroupConfirmation();
     if (confirmed) {
-      const request = fetch(`/api/${cluster}/group/request/${group.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const request = authenticatedFetch(
+        `/api/${cluster}/group/requestaccess/`,
+        {
+          method: "POST",
+          body: JSON.stringify(addToGroupModel),
+        }
+      );
 
-      setNotification(request, "Request sent", async (r) => {
+      setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
           const errorText = await response.text(); //Bad Request Text
           return errorText;
@@ -136,7 +160,7 @@ export const AccountInfo = () => {
         }),
       });
 
-      setNotification(request, "Request sent", async (r) => {
+      setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
           const errorText = await response.text(); //Bad Request Text
           return errorText;
