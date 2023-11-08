@@ -47,6 +47,12 @@ namespace Hippo.Core.Services
 
             var puppetData = await _puppetService.GetPuppetData(cluster.Name, cluster.Domain);
 
+            // refresh temp table data
+            await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
+            await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
+            await _dbContext.BulkInsertAsync(puppetData.Users.Select(u => new TempKerberos { Kerberos = u.Kerberos }));
+            await _dbContext.BulkInsertAsync(puppetData.GroupsWithSponsors.Select(g => new TempGroup { Group = g }));
+
             var mapKerbsToUserIds = await _dbContext.Users
                 .Where(u => _dbContext.TempKerberos.Any(tg => tg.Kerberos == u.Kerberos))
                 .Select(u => new { u.Id, u.Kerberos })
@@ -70,19 +76,13 @@ namespace Hippo.Core.Services
                 .Select(groupName => new Group { Name = groupName, DisplayName = groupName, ClusterId = cluster.Id })
                 .ToList();
 
-            // clear temp table data
-            await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
-            await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
-
             // determine what groups need to be deleted
-            await _dbContext.BulkInsertAsync(desiredGroups.Select(g => new TempGroup { Group = g.Name }));
             var deleteGroups = await _dbContext.Groups
                 .Where(g => g.ClusterId == cluster.Id)
                 .Where(g => !_dbContext.TempGroups.Any(tg => tg.Group == g.Name))
                 .ToArrayAsync();
 
             // determine what accounts need to be deleted
-            await _dbContext.BulkInsertAsync(puppetData.Users.Select(u => new TempKerberos { Kerberos = u.Kerberos }));
             var deleteAccounts = await _dbContext.Accounts
                 .Where(a => a.ClusterId == cluster.Id)
                 .Where(a => !_dbContext.TempKerberos.Any(tg => tg.Kerberos == a.Kerberos))
