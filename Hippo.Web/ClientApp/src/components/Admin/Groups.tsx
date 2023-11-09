@@ -117,8 +117,9 @@ export const Groups = () => {
     () => [
       {
         Header: "Group",
-        accessor: (group) => (
-          <GroupNameWithTooltip group={group} showDisplayName={false} />
+        accessor: 'name',
+        Cell: (props) => (
+          <GroupNameWithTooltip group={props.row.original} showDisplayName={false} />
         ),
       },
       {
