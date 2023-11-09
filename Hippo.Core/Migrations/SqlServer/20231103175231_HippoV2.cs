@@ -314,7 +314,16 @@ namespace Hippo.Core.Migrations.SqlServer
                 WHERE u.IsAdmin = 1
                 ");
 
+            // Account.IsAdmin -> Role.ClusterAdmin
+            migrationBuilder.Sql($@"
+                INSERT INTO Permissions (RoleId, UserId, ClusterId)
+                SELECT DISTINCT r.Id, u.Id, a.ClusterId
+                FROM Accounts a JOIN Users u ON u.Id = a.OwnerId
+                    JOIN Roles r ON r.Name = '{Role.Codes.ClusterAdmin}'
+                WHERE a.IsAdmin = 1
+                ");
 
+                
             // copy AccountHistories to Histories
             migrationBuilder.Sql(@"
                 INSERT INTO Histories (ActedDate, ActedById, AdminAction, Action, Details, ClusterId, Status)
