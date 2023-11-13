@@ -7,6 +7,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
+import { getGroupModelString } from "../../util/StringHelpers";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -117,9 +118,12 @@ export const Groups = () => {
     () => [
       {
         Header: "Group",
-        accessor: 'name',
+        accessor: (row) => getGroupModelString(row),
         Cell: (props) => (
-          <GroupNameWithTooltip group={props.row.original} showDisplayName={false} />
+          <GroupNameWithTooltip
+            group={props.row.original}
+            showDisplayName={false}
+          />
         ),
       },
       {

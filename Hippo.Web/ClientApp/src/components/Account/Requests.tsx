@@ -6,7 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
-import { SplitCamelCase } from "../../util/StringHelpers";
+import { SplitCamelCase, getGroupModelString } from "../../util/StringHelpers";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 
 export const Requests = () => {
@@ -88,10 +88,11 @@ export const Requests = () => {
       },
       {
         Header: "Group",
-        accessor: (request) => (
+        accessor: (row) => getGroupModelString(row.groupModel),
+        Cell: (props) => (
           <GroupNameWithTooltip
-            group={request.groupModel}
-            id={request.id.toString()}
+            group={props.row.original.groupModel}
+            showDisplayName={false}
           />
         ),
         sortable: true,

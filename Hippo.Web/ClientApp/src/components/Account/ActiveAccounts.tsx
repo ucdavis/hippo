@@ -5,6 +5,7 @@ import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
+import { getGroupModelString } from "../../util/StringHelpers";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
@@ -15,14 +16,15 @@ export const ActiveAccounts = () => {
     () => [
       {
         Header: "Groups",
-        accessor: (row) => (
+        accessor: (row) => getGroupModelString(row.groups),
+        Cell: (props) => (
           <>
-            {row.groups.map((g, i) => (
+            {props.row.original.groups.map((g, i) => (
               <>
                 {i > 0 && ", "}
                 <GroupNameWithTooltip
                   group={g}
-                  id={row.id.toString()}
+                  id={props.row.original.id.toString()}
                   key={i}
                 />
               </>
