@@ -75,6 +75,7 @@ export const ActiveAccounts = () => {
         .map((a) => a.groups)
         .flat()
         .filter((g) => g !== null)
+        .map((g) => g.name)
     ).size;
     return (
       <div className="row justify-content-center">
