@@ -5,6 +5,7 @@ import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
+import { getGroupModelString } from "../../util/StringHelpers";
 
 export const GroupAdmins = () => {
   // get all accounts that need approval and list them
@@ -32,8 +33,12 @@ export const GroupAdmins = () => {
     () => [
       {
         Header: "Group",
-        accessor: (ga, i) => (
-          <GroupNameWithTooltip group={ga.group} id={i.toString()} />
+        accessor: (row) => getGroupModelString(row.group),
+        Cell: (props) => (
+          <GroupNameWithTooltip
+            group={props.row.original.group}
+            showDisplayName={false}
+          />
         ),
         sortable: true,
       },
