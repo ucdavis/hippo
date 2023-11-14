@@ -27,28 +27,26 @@ namespace Hippo.Web.Extensions
             }
 
             return requests
-                .Where(r =>
-                    r.Cluster.Name == cluster
-                    && dbContext.Permissions.Any(p =>
-                        p.User.Iam == iamId
-                        && (
-                            // system admin can access any request
-                            p.Role.Name == Role.Codes.System
-                            || (
-                                // remaining roles need to be in the same cluster
-                                p.Cluster.Name == cluster
-                                && (
+                .Where(req =>
+                    req.Cluster.Name == cluster
+                    && (
+                        dbContext.Permissions.Any(p =>
+                            p.User.Iam == iamId
+                            && 
+                            (
+                                // system admin can access any request
+                                p.Role.Name == Role.Codes.System
+                                || (
                                     // cluster admin can access any request in the cluster
-                                    p.Role.Name == Role.Codes.ClusterAdmin
-                                    || (
-                                        // group admin can access requests for the given group
-                                        r.Group != null && dbContext.Groups.Any(g =>
-                                            g.Name == r.Group && g.AdminAccounts.Any(a => a.Owner.Iam == iamId)
-                                        )
-                                    )
+                                    p.Cluster.Name == cluster
+                                    && p.Role.Name == Role.Codes.ClusterAdmin
                                 )
                             )
                         )
+                        // group admin can access requests for the given group
+                        || (req.Group != null && dbContext.Groups.Any(g =>
+                            g.ClusterId == req.ClusterId && g.Name == req.Group && g.AdminAccounts.Any(a => a.Owner.Iam == iamId)
+                        ))
                     )
                 );
         }
@@ -59,24 +57,21 @@ namespace Hippo.Web.Extensions
                 .InCluster(cluster)
                 .Where(a =>
                     a.Cluster.Name == cluster
-                    && dbContext.Permissions.Any(p =>
-                        p.User.Iam == iamId
-                        && (
-                            // system admin can access any account
-                            p.Role.Name == Role.Codes.System
-                            || (
-                                // remaining roles need to be in the same cluster
-                                p.Cluster.Name == cluster
-                                && (
+                    && (
+                        dbContext.Permissions.Any(p =>
+                            p.User.Iam == iamId
+                            && (
+                                // system admin can access any account
+                                p.Role.Name == Role.Codes.System
+                                || (
                                     // cluster admin can access any account in the cluster
-                                    p.Role.Name == Role.Codes.ClusterAdmin
-                                    || (
-                                        // group admin can access requests for the given group
-                                        a.AdminOfGroups.Any(g => g.AdminAccounts.Any(a => a.Owner.Iam == iamId))
-                                    )
+                                    p.Cluster.Name == cluster
+                                    && p.Role.Name == Role.Codes.ClusterAdmin
                                 )
                             )
                         )
+                        // group admin can access any account that's a member of their group(s)
+                        || a.MemberOfGroups.Any(g => g.AdminAccounts.Any(a => a.Owner.Iam == iamId))
                     )
                 );
         }

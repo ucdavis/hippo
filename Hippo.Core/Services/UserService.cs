@@ -108,26 +108,41 @@ namespace Hippo.Core.Services
         {
             string iamId = GetCurrentUserId();
 
-            var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail
-            {
-                Id = a.Id,
-                Name = a.Name,
-                Owner = a.Owner.Name,
-                Cluster = a.Cluster.Name,
-                Groups = a.MemberOfGroups.Select(g => new GroupModel
+            var accounts = await _dbContext.Accounts
+                .AsSplitQuery()
+                .Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail
                 {
-                    Id = g.Id,
-                    DisplayName = g.DisplayName,
-                    Name = g.Name,
-                    Admins = g.AdminAccounts
-                        .Select(a => new GroupAccountModel
-                        {
-                            Kerberos = a.Kerberos,
-                            Name = a.Name,
-                            Email = a.Email
-                        }).ToList(),
-                }).ToList(),
-            }).ToListAsync();
+                    Id = a.Id,
+                    Name = a.Name,
+                    Owner = a.Owner.Name,
+                    Cluster = a.Cluster.Name,
+                    MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
+                    {
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }).ToList(),
+                    AdminOfGroups = a.AdminOfGroups.Select(g => new GroupModel
+                    {
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }).ToList(),
+                }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 

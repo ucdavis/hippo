@@ -12,7 +12,8 @@ namespace Hippo.Web.Models
         public DateTime CreatedOn { get; set; }
         public string Cluster { get; set; } = "";
         public User? Owner { get; set; }
-        public List<GroupModel> Groups { get; set; } = new();
+        public List<GroupModel> MemberOfGroups { get; set; } = new();
+        public List<GroupModel> AdminOfGroups { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
 
         public AccountModel()
@@ -28,7 +29,21 @@ namespace Hippo.Web.Models
             CreatedOn = account.CreatedOn;
             Cluster = account.Cluster.Name;
             Owner = account.Owner;
-            Groups = account.MemberOfGroups.Select(g => new GroupModel
+            MemberOfGroups = account.MemberOfGroups.Select(g => new GroupModel
+            {
+                Id = g.Id,
+                DisplayName = g.DisplayName,
+                Name = g.Name,
+                Admins = g.AdminAccounts
+                    .Select(a => new GroupAccountModel
+                    {
+                        Kerberos = a.Kerberos,
+                        Name = a.Name,
+                        Email = a.Email
+                    }).ToList(),
+            })
+            .OrderBy(x => x).ToList();
+            AdminOfGroups = account.AdminOfGroups.Select(g => new GroupModel
             {
                 Id = g.Id,
                 DisplayName = g.DisplayName,
@@ -57,7 +72,20 @@ namespace Hippo.Web.Models
                     CreatedOn = a.CreatedOn,
                     Cluster = a.Cluster.Name,
                     Owner = a.Owner,
-                    Groups = a.MemberOfGroups.Select(g => new GroupModel
+                    MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
+                    {
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }).OrderBy(x => x.Name).ToList(),
+                    AdminOfGroups = a.AdminOfGroups.Select(g => new GroupModel
                     {
                         Id = g.Id,
                         DisplayName = g.DisplayName,

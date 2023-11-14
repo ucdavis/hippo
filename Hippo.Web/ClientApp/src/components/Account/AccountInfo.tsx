@@ -21,7 +21,7 @@ export const AccountInfo = () => {
   const { cluster } = useParams<IRouteParams>();
   const account = context.accounts.find((a) => a.cluster === cluster);
 
-  const currentGroups = useMemo(() => account?.groups ?? [], [account]);
+  const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
   useEffect(() => {

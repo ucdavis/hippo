@@ -47,7 +47,8 @@ export interface AccountModel {
   createdOn: string;
   cluster: string;
   owner?: User;
-  groups: GroupModel[];
+  memberOfGroups: GroupModel[];
+  adminOfGroups: GroupModel[];
   updatedOn: string;
 }
 
