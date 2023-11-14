@@ -16,10 +16,10 @@ export const ActiveAccounts = () => {
     () => [
       {
         Header: "Groups",
-        accessor: (row) => getGroupModelString(row.groups),
+        accessor: (row) => getGroupModelString(row.memberOfGroups),
         Cell: (props) => (
           <>
-            {props.row.original.groups.map((g, i) => (
+            {props.row.original.memberOfGroups.map((g, i) => (
               <>
                 {i > 0 && ", "}
                 <GroupNameWithTooltip
@@ -36,6 +36,11 @@ export const ActiveAccounts = () => {
       {
         Header: "Name",
         accessor: (row) => row.name,
+        sortable: true,
+      },
+      {
+        Header: "Email",
+        accessor: (row) => row.email,
         sortable: true,
       },
       {
@@ -72,7 +77,7 @@ export const ActiveAccounts = () => {
   } else {
     const groupCount = new Set(
       accounts
-        .map((a) => a.groups)
+        .map((a) => a.memberOfGroups)
         .flat()
         .filter((g) => g !== null)
         .map((g) => g.name)

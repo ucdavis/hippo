@@ -21,7 +21,7 @@ export const AccountInfo = () => {
   const { cluster } = useParams<IRouteParams>();
   const account = context.accounts.find((a) => a.cluster === cluster);
 
-  const currentGroups = useMemo(() => account?.groups ?? [], [account]);
+  const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
@@ -221,8 +221,8 @@ export const AccountInfo = () => {
 
               <CardColumns>
                 {context.openRequests.map((r, i) => (
-                  <div className="group-card-admin">
-                    <GroupInfo group={r.groupModel} key={i} />
+                  <div className="group-card-admin" key={i}>
+                    <GroupInfo group={r.groupModel} />
                   </div>
                 ))}
               </CardColumns>

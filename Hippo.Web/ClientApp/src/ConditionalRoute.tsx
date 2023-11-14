@@ -44,6 +44,14 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
     return <Route {...props} component={Restricted}></Route>;
   }
 
+  // group admin role satisfied by presence of at least one group in account.adminOfGroups
+  if (roles.find((r) => r === "GroupAdmin")) {
+    const account = context.accounts.find((a) => a.cluster === cluster);
+    if (account?.adminOfGroups.length) {
+      return <Route {...props} />;
+    }
+  }
+
   // check for any remaining cluster-specific roles
   if (
     context.user.permissions.some(

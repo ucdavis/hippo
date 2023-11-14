@@ -57,7 +57,15 @@ export const ShowFor = (props: Props) => {
     return null;
   }
 
-  // check if user has any cluster-specific role
+  // group admin role satisfied by presence of at least one group in account.adminOfGroups
+  if (roles.find((r) => r === "GroupAdmin")) {
+    const account = context.accounts.find((a) => a.cluster === cluster);
+    if (account?.adminOfGroups.length) {
+      return <>{children}</>;
+    }
+  }
+
+  // check if user has any other cluster-specific role
   if (
     context.user.permissions.some(
       (p) => p.cluster === cluster && roles.includes(p.role)

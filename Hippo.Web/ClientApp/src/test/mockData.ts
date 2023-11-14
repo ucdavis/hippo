@@ -46,18 +46,22 @@ export const fakeAccounts: AccountModel[] = [
   {
     id: 1,
     name: "Account 1",
+    email: fakeUser.email,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    groups: [fakeGroups[0]],
+    memberOfGroups: [fakeGroups[0]],
+    adminOfGroups: [],
   },
   {
     id: 2,
     name: "Account 2",
+    email: fakeUser.email,
     cluster: "caesfarm",
     createdOn: "2020-01-01T00:00:00.000Z",
     updatedOn: "2020-01-01T00:00:00.000Z",
-    groups: [fakeGroups[1]],
+    memberOfGroups: [fakeGroups[1]],
+    adminOfGroups: [],
   },
 ];
 

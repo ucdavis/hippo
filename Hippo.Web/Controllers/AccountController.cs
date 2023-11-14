@@ -45,6 +45,7 @@ public class AccountController : SuperController
         var currentUser = await _userService.GetCurrentUser();
 
         return Ok(await _dbContext.Accounts
+            .AsSplitQuery()
             .InCluster(Cluster)
             .Where(a => a.Owner.Iam == currentUser.Iam)
             .Select(AccountModel.Projection)
@@ -62,7 +63,7 @@ public class AccountController : SuperController
         var currentUser = await _userService.GetCurrentUser();
 
         return Ok(await _dbContext.Accounts
-            .AsNoTracking()
+            .AsSplitQuery()
             .CanAccess(_dbContext, Cluster, currentUser.Iam)
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(a => a.MemberOfGroups.OrderBy(g => g.Name).First().Name)

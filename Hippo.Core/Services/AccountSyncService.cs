@@ -98,7 +98,8 @@ namespace Hippo.Core.Services
             await _dbContext.BulkInsertOrUpdateAsync(desiredAccounts, new BulkConfig
             {
                 PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey), nameof(Account.CreatedOn) },
-                UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) }
+                UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },
+                BatchSize = 500
             });
 
             // get ids for groups and accounts
