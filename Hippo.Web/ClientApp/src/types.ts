@@ -43,6 +43,7 @@ export interface RequestModel {
 export interface AccountModel {
   id: number;
   name: string;
+  email: string;
   createdOn: string;
   cluster: string;
   owner?: User;

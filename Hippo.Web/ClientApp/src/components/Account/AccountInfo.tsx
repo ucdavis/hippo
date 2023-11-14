@@ -221,8 +221,8 @@ export const AccountInfo = () => {
 
               <CardColumns>
                 {context.openRequests.map((r, i) => (
-                  <div className="group-card-admin">
-                    <GroupInfo group={r.groupModel} key={i} />
+                  <div className="group-card-admin" key={i}>
+                    <GroupInfo group={r.groupModel} />
                   </div>
                 ))}
               </CardColumns>

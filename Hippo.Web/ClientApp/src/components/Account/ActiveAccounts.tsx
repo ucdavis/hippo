@@ -39,6 +39,11 @@ export const ActiveAccounts = () => {
         sortable: true,
       },
       {
+        Header: "Email",
+        accessor: (row) => row.email,
+        sortable: true,
+      },
+      {
         Header: "Approved On",
         accessor: (row) => new Date(row.updatedOn).toLocaleDateString(),
         sortable: true,
