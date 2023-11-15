@@ -61,10 +61,12 @@ public class AccountController : SuperController
             return BadRequest("Cluster is required");
         }
         var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
         return Ok(await _dbContext.Accounts
             .AsSplitQuery()
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .CanAccess(Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(a => a.MemberOfGroups.OrderBy(g => g.Name).First().Name)
                 .ThenBy(a => a.Name)
