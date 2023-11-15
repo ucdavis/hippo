@@ -219,6 +219,11 @@ namespace Hippo.Core.Migrations.SqlServer
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Clusters_Name",
+                table: "Clusters",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Email",
                 table: "Accounts",
                 column: "Email");
@@ -376,6 +381,10 @@ namespace Hippo.Core.Migrations.SqlServer
             migrationBuilder.DropIndex(
                 name: "IX_Accounts_SponsorId",
                 table: "Accounts");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Clusters_Name",
+                table: "Clusters");
 
             migrationBuilder.DropColumn(
                 name: "IsAdmin",

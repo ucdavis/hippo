@@ -44,10 +44,13 @@ public class RequestController : SuperController
             return BadRequest("Cluster is required");
         }
 
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
         var requests = await _dbContext.Requests
             .AsNoTracking()
             .Where(r => r.Status == AccountRequest.Statuses.PendingApproval)
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(r => r.Group)
                 .ThenBy(r => r.Requester.FirstName)
@@ -69,11 +72,14 @@ public class RequestController : SuperController
             return BadRequest("Cluster is required");
         }
 
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
             .AsSplitQuery()
             .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             .Include(r => r.Requester)
             .Include(r => r.Cluster)
             .Include(r => r.Group)
@@ -216,11 +222,13 @@ public class RequestController : SuperController
         }
 
         var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
             .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
-            .CanAccess(_dbContext, Cluster, currentUser.Iam)
+            .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             .Include(r => r.Requester)
             .Include(r => r.Cluster)
             .SingleOrDefaultAsync();
@@ -231,8 +239,6 @@ public class RequestController : SuperController
         }
 
         var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
-        var permissions = await _userService.GetCurrentPermissionsAsync();
-        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
         var isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
             ga.GroupId == group.Id
             && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
