@@ -42,8 +42,8 @@ namespace Hippo.Core.Domain
         public int? OwnerId { get; set; }
         public User Owner { get; set; }
 
-        public int ClusterId { get; set; }
         [Required]
+        public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
         [JsonIgnore]

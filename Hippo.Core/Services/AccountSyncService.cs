@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using EFCore.BulkExtensions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
@@ -71,10 +72,12 @@ namespace Hippo.Core.Services
                     CreatedOn = now,
                     UpdatedOn = now,
                 })
+                .Where(a => IsValid(a))
                 .ToArray();
             var desiredGroups = puppetData.GroupsWithSponsors
                 .Select(groupName => new Group { Name = groupName, DisplayName = groupName, ClusterId = cluster.Id })
-                .ToList();
+                .Where(g => IsValid(g))
+                .ToArray();
 
             // determine what groups need to be deleted
             var deleteGroups = await _dbContext.Groups
@@ -89,7 +92,7 @@ namespace Hippo.Core.Services
                 .ToArrayAsync();
 
             // insert/update groups and accounts
-            Log.Information("Inserting/Updating {Count} groups and {Count} accounts for cluster {Cluster}", desiredGroups.Count, desiredAccounts.Length, cluster.Name);
+            Log.Information("Inserting/Updating {GroupQuantity} groups and {AccountQuantity} accounts for cluster {Cluster}", desiredGroups.Length, desiredAccounts.Length, cluster.Name);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroups, new BulkConfig
             {
                 PropertiesToExcludeOnUpdate = new List<string> { nameof(Group.DisplayName) },
@@ -114,12 +117,14 @@ namespace Hippo.Core.Services
 
             // setup desired state of group memberships
             var desiredGroupAccounts = puppetData.Users
+                .Where(u => mapKerberosToAccountId.ContainsKey(u.Kerberos))
                 .SelectMany(u => u.Groups.Select(g => new GroupMemberAccount
                 {
                     GroupId = mapGroupNameToId[g],
                     AccountId = mapKerberosToAccountId[u.Kerberos]
                 }));
             var desiredGroupAdminAccounts = puppetData.Users
+                .Where(u => mapKerberosToAccountId.ContainsKey(u.Kerberos))
                 .SelectMany(u => u.SponsorForGroups.Select(g => new GroupAdminAccount
                 {
                     GroupId = mapGroupNameToId[g],
@@ -127,7 +132,7 @@ namespace Hippo.Core.Services
                 }));
 
             // insert/update group memberships
-            Log.Information("Inserting/Updating {Count} group memberships and {Count} group admin memberships for cluster {Cluster}", desiredGroupAccounts.Count(), desiredGroupAdminAccounts.Count(), cluster.Name);
+            Log.Information("Inserting/Updating {GroupMembershipQuantity} group memberships and {GroupAdminMembershipQuantity} group admin memberships for cluster {Cluster}", desiredGroupAccounts.Count(), desiredGroupAdminAccounts.Count(), cluster.Name);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroupAccounts);
             await _dbContext.BulkInsertOrUpdateAsync(desiredGroupAdminAccounts);
 
@@ -144,12 +149,12 @@ namespace Hippo.Core.Services
                 .ToArrayAsync();
 
             // delete group memberships
-            Log.Information("Deleting {Count} group memberships and {Count} group admin memberships for cluster {Cluster}", deleteGroupAccounts.Length, deleteGroupAdminAccounts.Length, cluster.Name);
+            Log.Information("Deleting {GroupMembershipQuantity} group memberships and {GroupAdminMembershipQuantity} group admin memberships for cluster {Cluster}", deleteGroupAccounts.Length, deleteGroupAdminAccounts.Length, cluster.Name);
             await _dbContext.BulkDeleteAsync(deleteGroupAccounts);
             await _dbContext.BulkDeleteAsync(deleteGroupAdminAccounts);
 
             // delete groups and accounts
-            Log.Information("Deleting {Count} groups and {Count} accounts for cluster {Cluster}", deleteGroups.Length, deleteAccounts.Length, cluster.Name);
+            Log.Information("Deleting {GroupQuantity} groups and {AccountQuantity} accounts for cluster {Cluster}", deleteGroups.Length, deleteAccounts.Length, cluster.Name);
             await _dbContext.BulkDeleteAsync(deleteGroups, new BulkConfig
             {
                 UpdateByProperties = new List<string> { nameof(Group.ClusterId), nameof(Group.Name) }
@@ -175,7 +180,7 @@ namespace Hippo.Core.Services
 
             if (requests.Any())
             {
-                Log.Information("Updating {Count} requests to completed for cluster {Cluster}", requests.Length, cluster.Name);
+                Log.Information("Updating {RequestQuantity} requests to completed for cluster {Cluster}", requests.Length, cluster.Name);
                 var updatedOn = DateTime.UtcNow;
                 foreach (var request in requests)
                 {
@@ -186,5 +191,16 @@ namespace Hippo.Core.Services
             }
         }
 
+        static bool IsValid<T>(T obj)
+        {
+            var results = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(obj, new ValidationContext(obj), results, true))
+            {
+                Log.Warning("Invalid {Type}: {Errors}", typeof(T).Name, results.Select(r => r.ErrorMessage));
+                return false;
+            }
+            return true;
+        }
     }
 }
