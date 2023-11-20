@@ -165,7 +165,7 @@ export const Groups = () => {
             columns={columns}
             data={groupsData}
             initialState={{
-              sortBy: [{ id: "name" }],
+              sortBy: [{ id: "Group" }],
             }}
           />
         </div>
