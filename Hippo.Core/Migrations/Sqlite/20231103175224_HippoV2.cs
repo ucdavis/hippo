@@ -350,6 +350,18 @@ namespace Hippo.Core.Migrations.Sqlite
                 WHERE [SshKey] LIKE '%ssh-%'
             ");
 
+            // copy kerberos from users to accounts (avoiding duplicates to prevent conflicts with account sync)
+            migrationBuilder.Sql(@"
+                UPDATE [dbo].[Accounts]
+                SET [Kerberos] = u.Kerberos
+                FROM [dbo].[Accounts] a INNER JOIN [dbo].[Users] u ON a.OwnerId = u.Id
+                WHERE a.Kerberos IS NULL AND a.Id = (
+                    SELECT TOP 1 a2.Id
+                    FROM [dbo].[Accounts] a2 INNER JOIN [dbo].[Users] u2 ON a2.OwnerId = u2.Id
+                    WHERE a2.Kerberos IS NULL AND u2.Kerberos = u.Kerberos
+                    ORDER BY a2.Id DESC
+                )");
+
 
             // now it's safe to perform destructive operations
             migrationBuilder.DropForeignKey(
