@@ -156,7 +156,7 @@ export const Requests = () => {
             columns={columns}
             data={accountsData}
             initialState={{
-              sortBy: [{ id: "name" }],
+              sortBy: [{ id: "Request" }, { id: "Name" }],
             }}
           />
         </div>

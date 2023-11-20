@@ -176,7 +176,7 @@ export const ClusterAdmins = () => {
             columns={columns}
             data={usersData}
             initialState={{
-              sortBy: [{ id: "lastName" }, { id: "firstName" }],
+              sortBy: [{ id: "Name" }],
             }}
           />
         </div>

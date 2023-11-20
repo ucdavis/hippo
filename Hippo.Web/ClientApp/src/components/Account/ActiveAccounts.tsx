@@ -93,7 +93,7 @@ export const ActiveAccounts = () => {
             columns={columns}
             data={accountsData}
             initialState={{
-              sortBy: [{ id: "name" }],
+              sortBy: [{ id: "Groups" }, { id: "Name" }],
             }}
           />
         </div>

@@ -383,7 +383,7 @@ export const Clusters = () => {
               columns={columns}
               data={clusterModelsData}
               initialState={{
-                sortBy: [{ id: "name" }],
+                sortBy: [{ id: "Name" }],
               }}
             />
           </div>
