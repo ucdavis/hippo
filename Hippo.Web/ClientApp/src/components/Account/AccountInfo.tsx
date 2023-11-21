@@ -107,11 +107,10 @@ export const AccountInfo = () => {
                   required
                   onChange={(e) => {
                     const value = e.target.value
-                      .trim()
                       .replaceAll("\r", "")
                       .replaceAll("\n", "");
                     e.target.value = value;
-                    setReturn(e.target.value);
+                    setReturn(e.target.value.trim());
                   }}
                 ></textarea>
                 <p className="form-helper">

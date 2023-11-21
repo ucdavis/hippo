@@ -141,11 +141,10 @@ export const RequestForm = () => {
             required
             onChange={(e) => {
               const value = e.target.value
-                .trim()
                 .replaceAll("\r", "")
                 .replaceAll("\n", "");
               e.target.value = value;
-              setRequest((r) => ({ ...r, sshKey: value }));
+              setRequest((r) => ({ ...r, sshKey: value.trim() }));
             }}
           ></textarea>
           <p className="form-helper">

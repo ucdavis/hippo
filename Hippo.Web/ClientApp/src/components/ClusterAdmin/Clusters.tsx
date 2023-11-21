@@ -118,7 +118,6 @@ export const Clusters = () => {
               value={editClusterModel.sshKey}
               onChange={(e) => {
                 const value = e.target.value
-                  .trim()
                   .replaceAll("\r", "")
                   .replaceAll("\n", "");
                 const model: ClusterModel = {
@@ -127,7 +126,7 @@ export const Clusters = () => {
                   sshKey: value,
                 };
                 setEditClusterModel(model);
-                setReturn(model);
+                setReturn({ ...model, sshKey: value.trim() });
               }}
             />
           </div>
