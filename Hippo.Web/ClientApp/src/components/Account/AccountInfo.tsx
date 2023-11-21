@@ -103,7 +103,7 @@ export const AccountInfo = () => {
                 <textarea
                   className="form-control"
                   id="sharedKey"
-                  placeholder="Paste your public SSH key here"
+                  placeholder="Paste your public SSH key here. Example:&#10;ssh&#x2011;rsa&nbsp;AAAAB3NzaC1yc....NrRFi9wrf+M7Q&nbsp;fake@addr.local"
                   required
                   onChange={(e) => {
                     const value = e.target.value
@@ -114,11 +114,13 @@ export const AccountInfo = () => {
                   }}
                 ></textarea>
                 <p className="form-helper">
-                  Paste all of the text from your public SSH file here. Example:
-                  <br></br>
-                  <code>
-                    ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
-                  </code>
+                  For more information on SSH keys, please see{" "}
+                  <a
+                    href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+                    target={"blank"}
+                  >
+                    https://wiki.cse.ucdavis.edu/support:general:security:ssh
+                  </a>
                 </p>
               </div>
             </div>
