@@ -118,18 +118,6 @@ public class AdminController : SuperController
         return Ok();
     }
 
-
-
-    [HttpGet]
-    public async Task<IActionResult> GroupAdmins()
-    {
-        // get all users with group admin permissions
-        return Ok(await _dbContext.Accounts
-            .SelectMany(GroupAdminModel.ProjectFromAccount)
-            .OrderBy(ga => ga.Group.Name).ThenBy(ga => ga.Account.Name)
-            .ToArrayAsync());
-    }
-
     [HttpGet]
     public async Task<IActionResult> Groups()
     {

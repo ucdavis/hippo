@@ -10,12 +10,6 @@ export interface User {
 
 export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
-export interface GroupAdminModel {
-  permissionId: number;
-  group: GroupModel;
-  account: GroupAccountModel;
-}
-
 export interface GroupAccountModel {
   kerberos: string;
   name: string;
@@ -71,11 +65,6 @@ export interface AccountCreateModel {
 export interface AddToGroupModel {
   groupId: number;
   supervisingPI: string;
-}
-
-export interface AddGroupAdminModel {
-  lookup: string;
-  group: string;
 }
 
 export interface AppContextShape {

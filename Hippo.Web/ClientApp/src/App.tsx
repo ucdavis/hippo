@@ -13,7 +13,6 @@ import { PendingApproval } from "./components/Account/PendingApproval";
 import { Requests } from "./components/Account/Requests";
 import { ActiveAccounts } from "./components/Account/ActiveAccounts";
 import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
-import { GroupAdmins } from "./components/Admin/GroupAdmins";
 import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
@@ -71,11 +70,6 @@ const App = () => {
               roles={["ClusterAdmin"]}
               path="/:cluster/admin/clusteradmins"
               component={ClusterAdmins}
-            />
-            <ConditionalRoute
-              roles={["ClusterAdmin"]}
-              path="/:cluster/admin/groupadmins"
-              component={GroupAdmins}
             />
             <ConditionalRoute
               roles={["System"]}

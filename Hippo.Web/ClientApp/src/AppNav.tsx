@@ -94,17 +94,6 @@ export const AppNav = () => {
                 >
                   Cluster Admins
                 </NavLink>
-
-                <NavLink
-                  id="groupAdmins"
-                  className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/groupadmins`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Group Admins
-                </NavLink>
               </ShowFor>
             </nav>
           </div>
