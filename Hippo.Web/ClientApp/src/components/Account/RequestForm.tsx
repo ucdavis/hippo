@@ -139,6 +139,7 @@ export const RequestForm = () => {
             onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
           />
         </div>
+        <br />
         <button
           disabled={notification.pending}
           onClick={handleSubmit}
@@ -165,6 +166,15 @@ export const RequestForm = () => {
             Linux, ~/.ssh/, right click in the Name column of the window that
             will open when you click "Choose File" above. Select "Show Hidden
             Files".)
+          </p>
+          <p className="form-helper">
+            For more information on SSH keys, please see{" "}
+            <a
+              href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+              target={"blank"}
+            >
+              https://wiki.cse.ucdavis.edu/support:general:security:ssh
+            </a>
           </p>
         </div>
       </div>

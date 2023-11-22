@@ -20,15 +20,6 @@ const SshKeyInput: React.FC<SshKeyInputProps> = ({ onChange }) => {
           onChange(e.target.value.trim());
         }}
       ></textarea>
-      <p className="form-helper">
-        For more information on SSH keys, please see{" "}
-        <a
-          href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
-          target={"blank"}
-        >
-          https://wiki.cse.ucdavis.edu/support:general:security:ssh
-        </a>
-      </p>
     </>
   );
 };
