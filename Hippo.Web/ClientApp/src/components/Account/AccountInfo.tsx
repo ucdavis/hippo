@@ -14,6 +14,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
 import { authenticatedFetch } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import SshKeyInput from "../../Shared/SshKeyInput";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -100,27 +101,7 @@ export const AccountInfo = () => {
                 <label className="form-label">
                   What is your Public SSH key
                 </label>
-                <textarea
-                  className="form-control"
-                  id="sharedKey"
-                  placeholder="Paste your public SSH key here"
-                  required
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .trim()
-                      .replaceAll("\r", "")
-                      .replaceAll("\n", "");
-                    e.target.value = value;
-                    setReturn(e.target.value);
-                  }}
-                ></textarea>
-                <p className="form-helper">
-                  Paste all of the text from your public SSH file here. Example:
-                  <br></br>
-                  <code>
-                    ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
-                  </code>
-                </p>
+                <SshKeyInput onChange={setReturn} />
               </div>
             </div>
           </div>

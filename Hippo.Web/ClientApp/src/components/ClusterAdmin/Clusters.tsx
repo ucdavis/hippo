@@ -6,6 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
+import SshKeyInput from "../../Shared/SshKeyInput";
 
 const defaultCluster: Cluster = {
   id: 0,
@@ -110,24 +111,17 @@ export const Clusters = () => {
           </div>
           <div className="form-group">
             <label htmlFor="fieldSshKey">SSH Key</label>
-            <textarea
-              className="form-control"
-              id="fieldSshKey"
-              rows={3}
-              wrap="soft"
-              value={editClusterModel.sshKey}
-              onChange={(e) => {
-                const value = e.target.value
-                  .trim()
-                  .replaceAll("\r", "")
-                  .replaceAll("\n", "");
+            <SshKeyInput
+              onChange={(value) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: { ...editClusterModel.cluster },
+                  cluster: {
+                    ...editClusterModel.cluster,
+                  },
                   sshKey: value,
                 };
                 setEditClusterModel(model);
-                setReturn(model);
+                setReturn({ ...model, sshKey: value.trim() });
               }}
             />
           </div>
@@ -339,7 +333,7 @@ export const Clusters = () => {
           <>
             <button
               disabled={notification.pending}
-              onClick={() => handleEdit(m.cluster.id)}
+              onClick={() => handleEdit(m.row.original.cluster.id)}
               className="btn btn-primary"
             >
               Edit
@@ -347,7 +341,7 @@ export const Clusters = () => {
             {" | "}
             <button
               disabled={notification.pending}
-              onClick={() => handleRemove(m.cluster.id)}
+              onClick={() => handleRemove(m.row.original.cluster.id)}
               className="btn btn-danger"
             >
               Remove

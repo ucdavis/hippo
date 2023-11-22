@@ -11,6 +11,7 @@ import {
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
+import SshKeyInput from "../../Shared/SshKeyInput";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
@@ -134,28 +135,11 @@ export const RequestForm = () => {
         </div>
         <div className="form-group">
           <label className="form-label">What is your Public SSH key</label>
-          <textarea
-            className="form-control"
-            id="sharedKey"
-            placeholder="Paste your public SSH key here"
-            required
-            onChange={(e) => {
-              const value = e.target.value
-                .trim()
-                .replaceAll("\r", "")
-                .replaceAll("\n", "");
-              e.target.value = value;
-              setRequest((r) => ({ ...r, sshKey: value }));
-            }}
-          ></textarea>
-          <p className="form-helper">
-            Paste all of the text from your public SSH file here. Example:
-            <br></br>
-            <code>
-              ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
-            </code>
-          </p>
+          <SshKeyInput
+            onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
+          />
         </div>
+        <br />
         <button
           disabled={notification.pending}
           onClick={handleSubmit}
@@ -182,6 +166,15 @@ export const RequestForm = () => {
             Linux, ~/.ssh/, right click in the Name column of the window that
             will open when you click "Choose File" above. Select "Show Hidden
             Files".)
+          </p>
+          <p className="form-helper">
+            For more information on SSH keys, please see{" "}
+            <a
+              href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+              target={"blank"}
+            >
+              https://wiki.cse.ucdavis.edu/support:general:security:ssh
+            </a>
           </p>
         </div>
       </div>
