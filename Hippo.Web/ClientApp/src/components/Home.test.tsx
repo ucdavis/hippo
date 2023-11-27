@@ -4,11 +4,15 @@ import { MemoryRouter } from "react-router-dom";
 import App from "../App";
 import {
   fakeAccounts,
-  fakeAppContext,
+  fakeGroupAdminAppContext,
   fakeAppContextNoAccount,
+  fakeGroups,
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
 import { act } from "react-dom/test-utils";
+
+const testCluster = fakeAccounts[0].cluster;
+const myAccountUrl = `/${testCluster}/myaccount`;
 
 afterEach(() => {
   // cleanup on exiting
@@ -20,7 +24,17 @@ afterEach(() => {
 
 describe("Basic render", () => {
   beforeEach(() => {
-    (global as any).Hippo = fakeAppContext;
+    const groupsResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeGroups),
+    });
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+      })
+    );
+    (global as any).Hippo = fakeGroupAdminAppContext;
   });
 
   it("renders without crashing", async () => {
@@ -36,9 +50,21 @@ describe("Basic render", () => {
   });
 });
 
-describe("Home Redirect when Sponsor", () => {
+describe("Home Redirect when GroupAdmin", () => {
   beforeEach(() => {
-    (global as any).Hippo = fakeAppContext;
+    const groupsResponse = Promise.resolve({
+      status: 200,
+      ok: true,
+      json: () => Promise.resolve(fakeGroups),
+    });
+
+    (global as any).Hippo = fakeGroupAdminAppContext;
+
+    global.fetch = jest.fn().mockImplementation((x) =>
+      responseMap(x, {
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+      })
+    );
   });
 
   it("renders without crashing", async () => {
@@ -57,14 +83,14 @@ describe("Home Redirect when Sponsor", () => {
     const div = document.createElement("div");
     await act(async () => {
       ReactDOM.render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[myAccountUrl]}>
           <App />
         </MemoryRouter>,
         div
       );
     });
     expect(div.textContent).toContain(
-      "Welcome Bob you have an account"
+      "Welcome Bob. Your account is registered with the following group(s):"
     );
   });
 
@@ -84,17 +110,17 @@ describe("Home Redirect when Sponsor", () => {
 
 describe("Home Redirect no account", () => {
   beforeEach(() => {
-    const sponsorsResponse = Promise.resolve({
+    const groupsResponse = Promise.resolve({
       status: 200,
       ok: true,
-      json: () => Promise.resolve(fakeAccounts),
+      json: () => Promise.resolve(fakeGroups),
     });
 
     (global as any).Hippo = fakeAppContextNoAccount;
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/account/sponsors`]: sponsorsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       })
     );
   });
@@ -121,9 +147,7 @@ describe("Home Redirect no account", () => {
       );
     });
     expect(div.textContent).toContain("Welcome, Bob");
-    expect(div.textContent).toContain(
-      "You don't seem to have an account"
-    );
+    expect(div.textContent).toContain("You don't seem to have an account");
   });
 
   it("Does not shows pending approvals button", async () => {

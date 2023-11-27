@@ -8,7 +8,6 @@ import { useRouteMatch } from "react-router-dom";
 interface Props {
   children: any;
   roles: RoleName[];
-  cluster?: string;
   condition?: boolean | (() => boolean);
 }
 
@@ -25,25 +24,54 @@ export const ShowFor = (props: Props) => {
     ? props.condition()
     : true;
 
-  if (conditionSatisfied && context.user.detail.isAdmin) {
+  if (!conditionSatisfied) {
+    return null;
+  }
+
+  // system admins can access anything
+  if (context.user.permissions.some((p) => p.role === "System")) {
     return <>{children}</>;
   }
 
-  // not admin, need to check roles within the cluster
-  const clusterAccount = context.accounts.find((a) => a.cluster === cluster);
+  // if no non-system roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "System")) {
+    return null;
+  }
 
-  if (clusterAccount) {
-    if (conditionSatisfied && roles.includes("Sponsor")) {
-      if (clusterAccount.canSponsor) {
-        return <>{children}</>;
-      }
-    }
+  // remaining roles require cluster to be set
+  if (!Boolean(cluster)) {
+    return null;
+  }
 
-    if (conditionSatisfied && roles.includes("Admin")) {
-      if (clusterAccount.isAdmin) {
-        return <>{children}</>;
-      }
+  // cluster admins can access anything in their cluster
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && p.role === "ClusterAdmin"
+    )
+  ) {
+    return <>{children}</>;
+  }
+
+  // if no non-cluster-admin roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "ClusterAdmin")) {
+    return null;
+  }
+
+  // group admin role satisfied by presence of at least one group in account.adminOfGroups
+  if (roles.find((r) => r === "GroupAdmin")) {
+    const account = context.accounts.find((a) => a.cluster === cluster);
+    if (account?.adminOfGroups.length) {
+      return <>{children}</>;
     }
+  }
+
+  // check if user has any other cluster-specific role
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && roles.includes(p.role)
+    )
+  ) {
+    return <>{children}</>;
   }
 
   return null;

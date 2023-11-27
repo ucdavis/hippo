@@ -6,11 +6,9 @@ namespace Hippo.Core.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Status { get; set; }
-        public bool CanSponsor { get; set; }
         public string Owner { get; set; }
         public string Cluster { get; set; }
-        public string Sponsor { get; set; }
-        public bool IsAdmin { get; set; }
+        public List<GroupModel> MemberOfGroups { get; set; } = new();
+        public List<GroupModel> AdminOfGroups { get; set; } = new();
     }
 }

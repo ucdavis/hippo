@@ -27,9 +27,14 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         public string SshUrl { get; set; } = String.Empty;
         public bool IsActive { get; set; } = true;
+        [MaxLength(250)]
+        public string Domain { get; set; } = String.Empty;
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
+
+        [JsonIgnore]
+        public List<Group> Groups { get; set; }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +47,18 @@ namespace Hippo.Core.Domain
                 .WithMany(a => a.Accounts)
                 .HasForeignKey(a => a.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Group>()
+                .HasOne(a => a.Cluster)
+                .WithMany(a => a.Groups)
+                .HasForeignKey(a => a.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);                
+
+            modelBuilder.Entity<Permission>()
+                .HasOne(p => p.Cluster)
+                .WithMany()
+                .HasForeignKey(p => p.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);                 
         }
     }
 }

@@ -10,30 +10,55 @@ interface ConditionalRouteProps extends RouteProps {
 }
 
 export const ConditionalRoute = (props: ConditionalRouteProps) => {
+  const { roles } = props;
   const [context] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = match?.params.cluster;
 
-  // if the user is admin they can see everything
-  if (context.user.detail.isAdmin) {
+  // system admins can access anything
+  if (context.user.permissions.some((p) => p.role === "System")) {
     return <Route {...props} />;
   }
 
-  // Not an admin, determine if they have sufficient permissions within this cluster
-  const clusterAccount = context.accounts.find((a) => a.cluster === cluster);
+  // if no non-system roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "System")) {
+    return <Route {...props} component={Restricted}></Route>;
+  }
 
-  if (clusterAccount) {
-    if (props.roles.includes("Admin")) {
-      if (clusterAccount.isAdmin) {
-        return <Route {...props} />;
-      }
-    }
+  // remaining roles require cluster to be set
+  if (!Boolean(cluster)) {
+    return <Route {...props} component={Restricted}></Route>;
+  }
 
-    if (props.roles.includes("Sponsor")) {
-      if (clusterAccount.canSponsor) {
-        return <Route {...props} />;
-      }
+  // cluster admins can access anything in their cluster
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && p.role === "ClusterAdmin"
+    )
+  ) {
+    return <Route {...props} />;
+  }
+
+  // if no non-cluster-admin roles are specified, then no one else can access this route
+  if (!roles.some((r) => r !== "ClusterAdmin")) {
+    return <Route {...props} component={Restricted}></Route>;
+  }
+
+  // group admin role satisfied by presence of at least one group in account.adminOfGroups
+  if (roles.find((r) => r === "GroupAdmin")) {
+    const account = context.accounts.find((a) => a.cluster === cluster);
+    if (account?.adminOfGroups.length) {
+      return <Route {...props} />;
     }
+  }
+
+  // check for any remaining cluster-specific roles
+  if (
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && roles.includes(p.role)
+    )
+  ) {
+    return <Route {...props} />;
   }
 
   return <Route {...props} component={Restricted}></Route>;

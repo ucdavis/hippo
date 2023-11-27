@@ -10,6 +10,8 @@ using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Hippo.Core.Models;
+using Serilog;
+using Hippo.Core.Extensions;
 
 namespace Hippo.Core.Services
 {
@@ -18,6 +20,9 @@ namespace Hippo.Core.Services
         Task<User> GetUser(Claim[] userClaims);
         Task<User> GetCurrentUser();
         Task<string> GetCurrentUserJsonAsync();
+        Task<IEnumerable<Permission>> GetCurrentPermissionsAsync();
+        Task<string> GetCurrentPermissionsJsonAsync();
+        Task<string> GetCurrentOpenRequestsAsync();
         string GetCurrentUserId();
         Task<string> GetCurrentAccountsJsonAsync();
         Task<string> GetAvailableClustersJsonAsync();
@@ -47,8 +52,7 @@ namespace Hippo.Core.Services
         {
             if (_httpContextAccessor.HttpContext == null)
             {
-                //TODO: Add when we have logging
-                //Log.Warning("No HttpContext found. Unable to retrieve or create User.");
+                Log.Warning("No HttpContext found. Unable to retrieve or create User.");
                 return null;
             }
 
@@ -63,21 +67,94 @@ namespace Hippo.Core.Services
             return JsonSerializer.Serialize(user, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
+        public async Task<IEnumerable<Permission>> GetCurrentPermissionsAsync()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                Log.Warning("No HttpContext found. Unable to retrieve User permissions.");
+                return new Permission[] { };
+            }
+
+            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;
+            var permissions = await _dbContext.Permissions
+                .Include(p => p.Cluster)
+                .Include(p => p.Role)
+                .Where(p => p.User.Iam == iamId)
+                .ToArrayAsync();
+            return permissions;
+        }
+
+        public async Task<string> GetCurrentPermissionsJsonAsync()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                Log.Warning("No HttpContext found. Unable to retrieve User permissions.");
+                return null;
+            }
+
+            var iamId = _httpContextAccessor.HttpContext.User.Claims.Single(c => c.Type == IamIdClaimType).Value;
+            var permissions = await _dbContext.Permissions
+                .Where(p => p.User.Iam == iamId)
+                .Select(p => new PermissionModel
+                {
+                    Role = p.Role.Name,
+                    Cluster = p.Cluster.Name,
+                })
+                .ToArrayAsync();
+            return JsonSerializer.Serialize(permissions, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
         public async Task<string> GetCurrentAccountsJsonAsync()
         {
             string iamId = GetCurrentUserId();
 
-            var accounts = await _dbContext.Accounts.Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail {
-                Id = a.Id,
-                Name = a.Name,
-                CanSponsor = a.CanSponsor,
-                Status = a.Status,
-                Owner = a.Owner.Name,
-                Cluster = a.Cluster.Name,
-                Sponsor = a.Sponsor.Name,
-                IsAdmin = a.IsAdmin,
-            }).ToListAsync();
+            var accounts = await _dbContext.Accounts
+                .AsSplitQuery()
+                .Where(a => a.Owner.Iam == iamId).Select(a => new AccountDetail
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Owner = a.Owner.Name,
+                    Cluster = a.Cluster.Name,
+                    MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
+                    {
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }).ToList(),
+                    AdminOfGroups = a.AdminOfGroups.Select(g => new GroupModel
+                    {
+                        Id = g.Id,
+                        DisplayName = g.DisplayName,
+                        Name = g.Name,
+                        Admins = g.AdminAccounts
+                            .Select(a => new GroupAccountModel
+                            {
+                                Kerberos = a.Kerberos,
+                                Name = a.Name,
+                                Email = a.Email
+                            }).ToList(),
+                    }).ToList(),
+                }).ToListAsync();
             return JsonSerializer.Serialize(accounts, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        public async Task<string> GetCurrentOpenRequestsAsync()
+        {
+            string iamId = GetCurrentUserId();
+
+            var requests = await _dbContext.Requests
+                .Where(r => r.Requester.Iam == iamId && r.Status != Request.Statuses.Completed && r.Status != Request.Statuses.Rejected)
+                .SelectRequestModel(_dbContext)
+                .ToListAsync();
+            return JsonSerializer.Serialize(requests, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         // Get any user based on their claims, creating if necessary
@@ -113,7 +190,17 @@ namespace Hippo.Core.Services
                 var foundUser = await _identityService.GetByKerberos(newUser.Kerberos);
                 newUser.MothraId = foundUser.MothraId;
 
-                _dbContext.Users.Add(newUser);
+                await _dbContext.Users.AddAsync(newUser);
+
+                // check if any existing accounts need to be associated with this user
+                var existingAccounts = await _dbContext.Accounts.Where(a => a.Kerberos == newUser.Kerberos).ToArrayAsync();
+                if (existingAccounts.Length > 0)
+                {
+                    foreach (var account in existingAccounts)
+                    {
+                        account.Owner = newUser;
+                    }
+                }
 
                 await _dbContext.SaveChangesAsync();
 
@@ -121,7 +208,8 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<string> GetAvailableClustersJsonAsync() {
+        public async Task<string> GetAvailableClustersJsonAsync()
+        {
             var clusters = await _dbContext.Clusters.ToArrayAsync();
             return JsonSerializer.Serialize(clusters, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }

@@ -9,12 +9,7 @@ namespace Hippo.Core.Models
     public static class AccessCodes
     {
         public const string SystemAccess = "SystemAccess";
-        public const string AdminAccess  =  "AdminAccess";
-    }
-
-    public static class RoleCodes
-    {
-        public const string SystemRole = "System";
-        public const string AdminRole  = "Admin";
+        public const string ClusterAdminAccess  =  "ClusterAdminAccess";
+        public const string GroupAdminAccess  =  "GroupAdminAccess";
     }
 }

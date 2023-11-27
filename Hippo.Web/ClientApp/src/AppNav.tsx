@@ -6,9 +6,12 @@ import { ShowFor } from "./Shared/ShowFor";
 import { IRouteParams } from "./types";
 
 export const AppNav = () => {
-  const [{ clusters }] = useContext(AppContext);
+  const [{ clusters, accounts }] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = clusters.find((c) => c.name === match?.params.cluster);
+
+  const accountInCluster =
+    cluster && accounts.some((a) => a.cluster === cluster.name);
 
   return (
     <div>
@@ -35,7 +38,19 @@ export const AppNav = () => {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <nav className="simple-nav">
-              <ShowFor cluster={cluster.name} roles={["Sponsor"]}>
+              {accountInCluster && (
+                <NavLink
+                  id="myAccount"
+                  to={`/${cluster.name}/myaccount`}
+                  className="nav-item nav-link"
+                  activeStyle={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  My Account
+                </NavLink>
+              )}
+              <ShowFor roles={["GroupAdmin"]}>
                 <NavLink
                   id="sponsorApprove"
                   to={`/${cluster.name}/approve`}
@@ -47,48 +62,37 @@ export const AppNav = () => {
                   Pending Approvals
                 </NavLink>
                 <NavLink
-                  id="sponsored"
-                  to={`/${cluster.name}/sponsored`}
+                  id="activeAccounts"
+                  to={`/${cluster.name}/activeaccounts`}
                   className="nav-item nav-link"
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Sponsored Accounts
+                  Active Accounts
                 </NavLink>
               </ShowFor>
-              <ShowFor cluster={cluster.name} roles={["Admin"]}>
+              <ShowFor roles={["ClusterAdmin"]}>
                 <NavLink
-                  id="adminApprovals"
+                  id="groups"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/accountApprovals`}
+                  to={`/${cluster.name}/admin/groups`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Override Approvals
+                  Groups
                 </NavLink>
 
                 <NavLink
-                  id="AdminIndex"
+                  id="clusterAdmins"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/users`}
+                  to={`/${cluster.name}/admin/clusteradmins`}
                   activeStyle={{
                     fontWeight: "bold",
                   }}
                 >
-                  Manage Admins
-                </NavLink>
-
-                <NavLink
-                  id="adminSponsors"
-                  className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/sponsors`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Manage Sponsors
+                  Cluster Admins
                 </NavLink>
               </ShowFor>
             </nav>

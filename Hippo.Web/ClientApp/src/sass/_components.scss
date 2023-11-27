@@ -29,7 +29,7 @@
   .table & {
     font-size: 0.9rem;
     color: $primary-color !important;
-    background-color: #fff;
+    background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
     padding: 1% 2%;
     &:hover {
@@ -105,7 +105,7 @@
   .table & {
     font-size: 0.9rem;
     color: $merlot !important;
-    background-color: #fff;
+    background-color: rgba(0, 0, 0, 0);
     box-shadow: none;
     padding: 1% 2%;
     &:hover {
@@ -216,4 +216,33 @@ hr {
   border-color: $primary-color;
   color: $primary-font;
   box-shadow: 0 0 0 0.1rem transparentize($primary-color, 0.75);
+}
+.card-columns {
+  .card {
+    padding: 12px;
+  }
+}
+.group-card-admin {
+  border-left: 2px solid $primary-color;
+}
+
+.group-info-baseline {
+  margin: 2% 0;
+  padding-left: 16px;
+  text-align: left;
+  .card-subtitle {
+    color: $primary-font;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .group-info-header {
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+}
+.tooltip-inner {
+  max-width: 100% !important;
+}
+.dotted-underline {
+  border-bottom: 1px dotted $primary-color;
 }

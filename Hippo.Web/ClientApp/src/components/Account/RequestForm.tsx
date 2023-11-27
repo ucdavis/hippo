@@ -1,40 +1,45 @@
 import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { Account, IRouteParams, RequestPostModel } from "../../types";
+import {
+  GroupModel,
+  IRouteParams,
+  AccountCreateModel,
+  RequestModel,
+} from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { Typeahead } from "react-bootstrap-typeahead";
 import { usePromiseNotification } from "../../util/Notifications";
+import { GroupLookup } from "../Group/GroupLookup";
+import SshKeyInput from "../../Shared/SshKeyInput";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
   const [notification, setNotification] = usePromiseNotification();
 
-  const [sponsors, setSponsors] = useState<Account[]>([]);
-  const [request, setRequest] = useState<RequestPostModel>({
-    sponsorId: 0,
+  const [groups, setGroups] = useState<GroupModel[]>([]);
+  const [request, setRequest] = useState<AccountCreateModel>({
+    groupId: 0,
     sshKey: "",
+    supervisingPI: "",
   });
 
   const history = useHistory();
   const { cluster } = useParams<IRouteParams>();
 
-  // load up possible sponsors
+  // load up possible groups
   useEffect(() => {
-    const fetchSponsors = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/account/sponsors`
-      );
+    const fetchGroups = async () => {
+      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
 
-      const sponsorResult = await response.json();
+      const groupsResult = await response.json();
 
       if (response.ok) {
-        setSponsors(sponsorResult);
+        setGroups(groupsResult);
       }
     };
 
-    fetchSponsors();
+    fetchGroups();
   }, [cluster]);
 
   const handleSubmit = async () => {
@@ -43,30 +48,41 @@ export const RequestForm = () => {
       body: JSON.stringify(request),
     });
 
-    setNotification(req, "Saving", "Request Created. Please wait for your sponsor to approve your request.", async (r) => {
-      if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
-      } else {
-        return "An error happened, please try again.";
+    setNotification(
+      req,
+      "Saving",
+      "Request Created. Please wait for your sponsor to approve your request.",
+      async (r) => {
+        if (r.status === 400) {
+          const errorText = await response.text(); //Bad Request Text
+          return errorText;
+        } else {
+          return "An error happened, please try again.";
+        }
       }
-    });
+    );
 
     const response = await req;
 
     if (response.ok) {
-      const newAccount = await response.json();
+      const request = (await response.json()) as RequestModel;
 
       setContext((ctx) => ({
         ...ctx,
-        accounts: [
-          ...ctx.accounts,
-          { ...newAccount, cluster: newAccount.cluster.name },
-        ],
+        openRequests: [...ctx.openRequests, { ...request }],
       }));
       history.replace(`/${cluster}/pendingapproval`);
     }
   };
+
+  if (
+    context.openRequests.find(
+      (r) => r.cluster === cluster && r.action === "CreateAccount"
+    )
+  ) {
+    // there's already a request for this cluster, redirect to pending page
+    return <Redirect to={`/${cluster}/pendingapproval`} />;
+  }
 
   return (
     <div className="row justify-content-center">
@@ -82,52 +98,48 @@ export const RequestForm = () => {
         <hr />
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
-          <Typeahead
-            id="sponsorLookup"
-            labelKey="name"
-            placeholder="Select a sponsor"
-            onChange={(selected) => {
-              if (selected.length > 0) {
-                setRequest((r) => ({
-                  ...r,
-                  sponsorId: Object.values(selected[0])[0],
-                }));
-              } else {
-                setRequest((r) => ({ ...r, sponsorId: 0 }));
-              }
-            }}
-            options={sponsors.map(({ id, name }) => ({ id, name }))}
+          <GroupLookup
+            setSelection={(group) =>
+              setRequest((r) => ({ ...r, groupId: group.id }))
+            }
+            options={groups}
           />
           <p className="form-helper">
-            Your sponsor is probably your PI or your Department. You can filter
-            this list by typing in it.
+            Your group is probably named after your PI or your Department. You
+            can filter this list by typing in it.
             <br />
-            If you don't see your sponsor, you may contact HPC help to request
-            they be added.{" "}
-            <a href="mailto: hpc-help@ucdavis.edu?subject=Please add my sponsor to the Farm Cluster&body=Sponsor Name:  %0D%0ASponsor Email: ">
+            If you don't see your group, you may contact HPC help to request it
+            be added.{" "}
+            <a
+              href={`mailto: hpc-help@ucdavis.edu?subject=Please add a group to the ${cluster} cluster&body=Group Name:  %0D%0API or Dept Email: `}
+            >
               Click here to contact HPC Help
             </a>
           </p>
         </div>
         <div className="form-group">
-          <label className="form-label">What is your Public SSH key</label>
-          <textarea
+          <label className="form-label">Who is your supervising PI?</label>
+          <input
             className="form-control"
-            id="sharedKey"
-            placeholder="Paste your public SSH key here"
-            required
+            id="supervisingPI"
+            placeholder="Supervising PI"
+            value={request.supervisingPI}
             onChange={(e) =>
-              setRequest((r) => ({ ...r, sshKey: e.target.value }))
+              setRequest((r) => ({ ...r, supervisingPI: e.target.value }))
             }
-          ></textarea>
+          ></input>
           <p className="form-helper">
-            Paste all of the text from your public SSH file here. Example:
-            <br></br>
-            <code>
-              ssh-rsa AAAAB3NzaC1yc....NrRFi9wrf+M7Q== fake@addr.local
-            </code>
+            Some clusters may require additional clarification on who your
+            supervising PI will be. If you are unsure, please ask your sponsor.
           </p>
         </div>
+        <div className="form-group">
+          <label className="form-label">What is your Public SSH key</label>
+          <SshKeyInput
+            onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
+          />
+        </div>
+        <br />
         <button
           disabled={notification.pending}
           onClick={handleSubmit}
@@ -154,6 +166,15 @@ export const RequestForm = () => {
             Linux, ~/.ssh/, right click in the Name column of the window that
             will open when you click "Choose File" above. Select "Show Hidden
             Files".)
+          </p>
+          <p className="form-helper">
+            For more information on SSH keys, please see{" "}
+            <a
+              href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+              target={"blank"}
+            >
+              https://wiki.cse.ucdavis.edu/support:general:security:ssh
+            </a>
           </p>
         </div>
       </div>

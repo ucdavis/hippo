@@ -31,7 +31,6 @@ namespace Hippo.Core.Data
                 FirstName   = "Jason",
                 LastName    = "Sylvestre",
                 Iam         = "1000009309",
-                IsAdmin     = true,
                 MothraId    = "00600825",
             });
             var ScottUser   = await CheckAndCreateUser(new User
@@ -70,7 +69,6 @@ namespace Hippo.Core.Data
                 Iam         = "1000019756",
                 FirstName   = "Omen",
                 LastName    = "Wild",
-                IsAdmin     = true,
                 MothraId    = "00457597",
             });
 
@@ -81,7 +79,6 @@ namespace Hippo.Core.Data
             //        LastName = "Fake",
             //        Kerberos = $"fake{i}",
             //        Iam = $"100000000{i}",
-            //        IsAdmin = true,
             //    };
             //    await CheckAndCreateUser(user);
             //}
@@ -110,64 +107,45 @@ namespace Hippo.Core.Data
                 var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
                 var scottAccount   = new Account()
                 {
-                    CanSponsor     = true,
                     Owner          = ScottUser,
-                    IsActive       = true,
                     Name           = "Scott's Account",
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.Active,
                     Cluster        = cluster,
-                    IsAdmin        = true,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
 
                 var owenAccount = new Account()
                 {
-                    CanSponsor = false,
                     Owner = OmenAdmin,
-                    IsActive = true,
                     Name = OmenAdmin.Name,
                     SshKey = null,
-                    Status = Account.Statuses.Active,
                     Cluster = cluster,
-                    IsAdmin = true,
                 };
                 await _dbContext.Accounts.AddAsync(owenAccount);
 
                 var slupskyAccount = new Account()
                 {
-                    CanSponsor     = true,
                     Owner          = SlupskyUser,
-                    IsActive       = true,
                     Name           = "Slupsky",
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.Active,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(slupskyAccount);
 
                 var otherAccount   = new Account()
                 {
-                    CanSponsor     = false,
                     Owner          = JasonUser,
-                    Sponsor        = scottAccount,
                     Name           = "Jason's Account",
-                    IsActive       = true,
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
 
                 var pendingAccount = new Account()
                 {
-                    CanSponsor     = false,
                     Owner          = JamesUser,
-                    Sponsor        = scottAccount,
                     Name           = "James' Account",
-                    IsActive       = true,
                     SshKey         = sampleSsh,
-                    Status         = Account.Statuses.PendingApproval,
                     Cluster        = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);

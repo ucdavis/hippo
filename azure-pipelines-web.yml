@@ -90,10 +90,18 @@ stages:
         projects: './Hippo.Web/Hippo.Web.csproj'
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/'
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Hippo Jobs: PuppetSync'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        zipAfterPublish: false
+        projects: './Hippo.Jobs.PuppetSync/Hippo.Jobs.PuppetSync.csproj'
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/app_data/jobs/triggered'
 
     - task: PublishBuildArtifacts@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-      displayName: 'Publish Build Artifacts for main branch builds'
+      condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+      displayName: 'Publish Build Artifacts for main or dev branch builds'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'

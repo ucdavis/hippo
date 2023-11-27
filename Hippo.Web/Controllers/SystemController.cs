@@ -1,7 +1,7 @@
 ﻿using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
-using Hippo.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +18,6 @@ namespace Hippo.Web.Controllers
         private readonly AppDbContext _dbContext;
         private readonly IIdentityService _identityService;
         private readonly IUserService _userService;
-        public const string IamIdClaimType = "ucdPersonIAMID";
 
         public SystemController(AppDbContext dbContext, IIdentityService identityService, IUserService userService)
         {
@@ -44,9 +43,9 @@ namespace Hippo.Web.Controllers
 
                 if (user != null)
                 {
-                    // user found in IAM but not in our db, add them and save before we continue
-                    _dbContext.Users.Add(user);
-                    await _dbContext.SaveChangesAsync();
+                    // user found in IAM but not in our db
+                    // let the UserService handle creating it and setting up account ownership when applicable
+                    await _userService.GetUser(user.GetClaims());
                 }
                 else
                 {
@@ -54,16 +53,7 @@ namespace Hippo.Web.Controllers
                 }
             }
 
-            var identity = new ClaimsIdentity(new[]
-{
-                new Claim(ClaimTypes.NameIdentifier, user.Kerberos),
-                new Claim(ClaimTypes.Name, user.Kerberos),
-                new Claim(ClaimTypes.GivenName, user.FirstName),
-                new Claim(ClaimTypes.Surname, user.LastName),
-                new Claim("name", user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(IamIdClaimType, user.Iam),
-            }, CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(user.GetClaims(), CookieAuthenticationDefaults.AuthenticationScheme);
 
             // kill old login
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

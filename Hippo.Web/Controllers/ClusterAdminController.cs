@@ -62,9 +62,17 @@ namespace Hippo.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey))
             {
-                clusterModel.Cluster.SshKeyId = Guid.NewGuid().ToString();
+
+                if (string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+                {
+                    if (!clusterModel.SshKey.IsValidSshKey())
+                    {
+                        return BadRequest("Invalid SSH Key");
+                    }
+                    clusterModel.Cluster.SshKeyId = Guid.NewGuid().ToString();
+                }
             }
 
             _dbContext.Clusters.Add(clusterModel.Cluster);
@@ -88,31 +96,26 @@ namespace Hippo.Web.Controllers
 
             if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
             {
+                if (!clusterModel.SshKey.IsValidSshKey())
+                {
+                    return BadRequest("Invalid SSH Key");
+                }
                 clusterModel.Cluster.SshKeyId = Guid.NewGuid().ToString();
             }
 
             _dbContext.Clusters.Update(clusterModel.Cluster);
             await _dbContext.SaveChangesAsync();
 
-            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && !string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey))
             {
-                await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
+                if (!string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+                {
+                    await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
+                }
             }
 
             return Ok(clusterModel);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Id == id);
-            if (cluster == null)
-            {
-                return NotFound();
-            }
-            cluster.IsActive = false;
-            await _dbContext.SaveChangesAsync();
-            return Ok();
-        }
     }
 }

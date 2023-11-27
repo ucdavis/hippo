@@ -29,10 +29,17 @@ namespace Hippo.Core.Data
         }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Account> Accounts { get; set; }
-        public virtual DbSet<AccountHistory> AccountHistories { get; set; }
         public virtual DbSet<History> Histories { get; set; }
-
         public virtual DbSet<Cluster> Clusters { get; set; }
+        public virtual DbSet<Group> Groups { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Permission> Permissions { get; set; }
+        public virtual DbSet<Request> Requests { get; set; }
+        public virtual DbSet<GroupAdminAccount> GroupAdminAccount { get; set; }
+        public virtual DbSet<GroupMemberAccount> GroupMemberAccount { get; set; }
+        public virtual DbSet<TempGroup> TempGroups { get; set; }
+        public virtual DbSet<TempKerberos> TempKerberos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -40,6 +47,10 @@ namespace Hippo.Core.Data
             User.OnModelCreating(builder);
             History.OnModelCreating(builder);
             Cluster.OnModelCreating(builder);
+            Group.OnModelCreating(builder);
+            Role.OnModelCreating(builder);
+            Permission.OnModelCreating(builder);
+            Request.OnModelCreating(builder);
         }
     }
  }

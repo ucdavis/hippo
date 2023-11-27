@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Hippo.Jobs.Core": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Key": "Value",
+        "ASPNETCORE_ENVIRONMENT": "development"
+      }
+    }
+  }
+}

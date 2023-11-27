@@ -4,15 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Routing.Constraints;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Hippo.Web.Services;
 using System.Security.Claims;
-using Hippo.Core.Utilities;
 using Serilog;
 using Hippo.Web.Middleware;
 using Hippo.Core.Models;
@@ -20,6 +17,8 @@ using Hippo.Web.Handlers;
 using Microsoft.AspNetCore.Authorization;
 using MvcReact;
 using Microsoft.Extensions.Options;
+using Hippo.Web.Extensions;
+using Mjml.Net;
 
 namespace Hippo.Web
 {
@@ -127,11 +126,9 @@ namespace Hippo.Web
 
             services.AddAuthorization(options =>
             { 
-                options.AddPolicy(AccessCodes.SystemAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.SystemAccess))));
-
-                options.AddPolicy(AccessCodes.AdminAccess, policy => policy.Requirements.Add(
-                    new VerifyRoleAccess(AccessConfig.GetRoles(AccessCodes.AdminAccess))));
+                options.AddAccessPolicy(AccessCodes.SystemAccess);
+                options.AddAccessPolicy(AccessCodes.ClusterAdminAccess);
+                options.AddAccessPolicy(AccessCodes.GroupAdminAccess);
             });
             services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 
@@ -184,9 +181,10 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IYamlService, YamlService>();
+            services.AddScoped<IAccountUpdateService, AccountUpdateService>();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddHttpContextAccessor();
+            services.AddScoped<IMjmlRenderer, MjmlRenderer>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)
