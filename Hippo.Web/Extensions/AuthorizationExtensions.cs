@@ -16,10 +16,12 @@ namespace Hippo.Web.Extensions
         {
             return accessCode switch
             {
-                // System can access anything
+                // System requirement can only be fulfilled by a system user
                 AccessCodes.SystemAccess => new[] { Role.Codes.System },
-                AccessCodes.ClusterAdminAccess => new[] { Role.Codes.ClusterAdmin },
-                AccessCodes.GroupAdminAccess => new[] { Role.Codes.GroupAdmin },
+                // ClusterAdmin requirement can be fulfilled by a system user or a cluster admin
+                AccessCodes.ClusterAdminAccess => new[] { Role.Codes.System, Role.Codes.ClusterAdmin },
+                // GroupAdmin requirement can be fulfilled by a system user, cluster admin, or group admin
+                AccessCodes.GroupAdminAccess => new[] { Role.Codes.System, Role.Codes.ClusterAdmin, Role.Codes.GroupAdmin },
                 _ => throw new ArgumentException($"{nameof(accessCode)} is not a valid {nameof(AccessCodes)} constant")
             };
         }
