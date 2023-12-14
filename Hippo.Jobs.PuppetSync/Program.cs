@@ -69,7 +69,7 @@ namespace Hippo.Jobs.PuppetSync
 #endif
                 });
             }
-
+            services.AddMemoryCache();
             services.Configure<PuppetSettings>(Configuration.GetSection("Puppet"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.AddSingleton<IPuppetService, PuppetService>();

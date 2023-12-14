@@ -1,9 +1,11 @@
 
 using System.Collections.Concurrent;
-using Hippo.Core.Domain;
-using Hippo.Core.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using Hippo.Core.Models.Settings;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Octokit;
 using YamlDotNet.RepresentationModel;
 
@@ -17,23 +19,54 @@ namespace Hippo.Core.Services
     public class PuppetService : IPuppetService
     {
         private readonly PuppetSettings _settings;
-        private readonly GitHubClient _gitHubClient;
+        private readonly IMemoryCache _memoryCache;
 
-        public PuppetService(IOptions<PuppetSettings> settings)
+        public PuppetService(IOptions<PuppetSettings> settings, IMemoryCache memoryCache)
         {
             _settings = settings.Value;
-            _gitHubClient = new GitHubClient(new ProductHeaderValue("Hippo"))
+            _memoryCache = memoryCache;
+        }
+
+        private async Task<GitHubClient> GetGithubClient()
+        {
+            if (!_memoryCache.TryGetValue("github-app-installation-token", out string appInstallationToken))
             {
-                Credentials = new Credentials(_settings.AuthToken)
+                // create an app token to authenticate our request for an app installation token
+                var now = DateTime.UtcNow;
+                var handler = new JwtSecurityTokenHandler();
+                var rsa = RSA.Create();
+                rsa.ImportFromPem(_settings.GithubAppKey.DecodeBase64());
+                var appToken = handler.WriteToken(handler.CreateJwtSecurityToken(
+                    issuer: _settings.GithubAppId,
+                    issuedAt: now,
+                    expires: now.AddMinutes(10),
+                    signingCredentials: new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256)
+                ));
+                // send request for an app installation token
+                var tempGitHubClient = new GitHubClient(new ProductHeaderValue("Hippo"))
+                {
+                    Credentials = new Credentials(appToken, AuthenticationType.Bearer)
+                };
+                var accessToken = await tempGitHubClient.GitHubApps.CreateInstallationToken(_settings.GithubAppInstallationId);
+                appInstallationToken = accessToken.Token;
+                _memoryCache.Set("github-app-installation-token", appInstallationToken, new MemoryCacheEntryOptions().SetAbsoluteExpiration(now.AddMinutes(10)));
+            }
+
+            var gitHubClient = new GitHubClient(new ProductHeaderValue("Hippo"))
+            {
+                Credentials = new Credentials(appInstallationToken, AuthenticationType.Bearer)
             };
+
+            return gitHubClient;
         }
 
         public async Task<PuppetData> GetPuppetData(string clusterName, string domain)
         {
+            var gitHubClient = await GetGithubClient();
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
             // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
-            var contents = await _gitHubClient.Repository.Content.GetAllContentsByRef(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath, _settings.RepositoryBranch);
+            var contents = await gitHubClient.Repository.Content.GetAllContentsByRef(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath, _settings.RepositoryBranch);
             var yaml = contents.First().Content;
             using var reader = new StringReader(yaml);
 
