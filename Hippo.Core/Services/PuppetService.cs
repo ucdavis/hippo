@@ -30,7 +30,7 @@ namespace Hippo.Core.Services
         private async Task<GitHubClient> GetGithubClient()
         {
             // caching token for 10 minutes, which is the limit for GitHub API's
-            if (!_memoryCache.TryGetValue("github-app-installation-token", out string appInstallationToken))
+            var appInstallationToken = await _memoryCache.GetOrCreateAsync("github-app-installation-token", async entry =>
             {
                 // create an app token to authenticate our request for an app installation token
                 var now = DateTime.UtcNow;
@@ -49,9 +49,9 @@ namespace Hippo.Core.Services
                     Credentials = new Credentials(appToken, AuthenticationType.Bearer)
                 };
                 var accessToken = await tempGitHubClient.GitHubApps.CreateInstallationToken(_settings.GithubAppInstallationId);
-                appInstallationToken = accessToken.Token;
-                _memoryCache.Set("github-app-installation-token", appInstallationToken, new MemoryCacheEntryOptions().SetAbsoluteExpiration(now.AddMinutes(10)));
-            }
+                entry.SetAbsoluteExpiration(now.AddMinutes(10));
+                return accessToken.Token;
+            });
 
             var gitHubClient = new GitHubClient(new ProductHeaderValue("Hippo"))
             {
