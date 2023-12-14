@@ -82,7 +82,6 @@ public class RequestController : SuperController
             .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             .Include(r => r.Requester)
             .Include(r => r.Cluster)
-            .Include(r => r.Group)
             .SingleOrDefaultAsync();
 
         if (request == null)
