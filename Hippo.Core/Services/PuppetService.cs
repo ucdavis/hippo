@@ -29,6 +29,7 @@ namespace Hippo.Core.Services
 
         private async Task<GitHubClient> GetGithubClient()
         {
+            // caching token for 10 minutes, which is the limit for GitHub API's
             if (!_memoryCache.TryGetValue("github-app-installation-token", out string appInstallationToken))
             {
                 // create an app token to authenticate our request for an app installation token
