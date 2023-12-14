@@ -6,6 +6,8 @@ namespace Hippo.Core.Models.Settings
         public string RepositoryOwner { get; set; }
         public string RepositoryName { get; set; }
         public string RepositoryBranch { get; set; } = "main";
-        public string AuthToken { get; set; }
+        public string GithubAppKey { get; set; }
+        public string GithubAppId { get; set; }
+        public long GithubAppInstallationId { get; set; }
     }
 }
