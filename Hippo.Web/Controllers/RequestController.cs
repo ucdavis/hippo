@@ -139,7 +139,7 @@ public class RequestController : SuperController
         }
 
         request.Status = AccountRequest.Statuses.Processing;
-
+        request.UpdatedOn = DateTime.UtcNow;
 
         var success = await _notificationService.AccountDecision(request, true);
         if (!success)
@@ -192,6 +192,7 @@ public class RequestController : SuperController
         }
 
         request.Status = AccountRequest.Statuses.Processing;
+        request.UpdatedOn = DateTime.UtcNow;
 
         var success = await _notificationService.AccountDecision(request, true);
         if (!success)
@@ -246,6 +247,9 @@ public class RequestController : SuperController
         {
             return Forbid();
         }
+
+        request.Status = AccountRequest.Statuses.Rejected;
+        request.UpdatedOn = DateTime.UtcNow;
 
         var success = await _notificationService.AccountDecision(request, false, reason: model.Reason);
         if (!success)
