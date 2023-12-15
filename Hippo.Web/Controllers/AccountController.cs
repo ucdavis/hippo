@@ -120,6 +120,7 @@ public class AccountController : SuperController
             Status = AccountRequest.Statuses.PendingApproval,
             Cluster = cluster,
             SupervisingPI = model.SupervisingPI,
+            SshKey = model.SshKey,
         };
         await _dbContext.Requests.AddAsync(request);
         await _historyService.RequestCreated(request);
