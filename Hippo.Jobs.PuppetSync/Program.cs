@@ -16,19 +16,39 @@ namespace Hippo.Jobs.PuppetSync
 {
     class Program : JobBase
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            Configure(jobName: typeof(Program).Assembly.GetName().Name, jobId: Guid.NewGuid());
-            var assembyName = typeof(Program).Assembly.GetName();
+            try
+            {
+                Configure(jobName: typeof(Program).Assembly.GetName().Name, jobId: Guid.NewGuid());
+                var assembyName = typeof(Program).Assembly.GetName();
 
-            Log.Information("Running {job} build {build}", assembyName.Name, assembyName.Version);
+                Log.Information("Running {job} build {build}", assembyName.Name, assembyName.Version);
 
-            // setup di
-            var provider = ConfigureServices();
+                // setup di
+                var provider = ConfigureServices();
 
-            var syncService = provider.GetRequiredService<IAccountSyncService>();
+                var syncService = provider.GetRequiredService<IAccountSyncService>();
 
-            SyncPuppetAccounts(syncService).GetAwaiter().GetResult();
+                var success = SyncPuppetAccounts(syncService).GetAwaiter().GetResult();
+
+                if (!success)
+                {
+                    Log.Error("There was an error syncing Puppet accounts. See previous log entries for details.");
+                    return 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Unhandled exception");
+                return 1;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+
+            return 0;
         }
 
 
@@ -80,11 +100,11 @@ namespace Hippo.Jobs.PuppetSync
             return services.BuildServiceProvider();
         }
 
-        private static async Task SyncPuppetAccounts(IAccountSyncService syncService)
+        private static async Task<bool> SyncPuppetAccounts(IAccountSyncService syncService)
         {
             Log.Information("Syncing Puppet accounts");
 
-            await syncService.Run();
+            return await syncService.Run();
         }
     }
 }
