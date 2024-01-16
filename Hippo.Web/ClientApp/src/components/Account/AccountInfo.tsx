@@ -243,18 +243,6 @@ export const AccountInfo = () => {
               Update SSH Key
             </button>
           </div>
-
-          <p>
-            Documentation about this cluster can be found{" "}
-            <a
-              href="https://wiki.cse.ucdavis.edu/support/systems/farm"
-              target={"_blank"}
-              rel="noreferrer"
-            >
-              at the UC Davis Farm Wiki
-            </a>
-            .
-          </p>
         </div>
       </div>
     </>
