@@ -99,9 +99,18 @@ export const AccountInfo = () => {
             <div className="col-md-8">
               <div className="form-group">
                 <label className="form-label">
-                  What is your Public SSH key
+                  Please paste your public SSH key.
                 </label>
                 <SshKeyInput onChange={setReturn} />
+                <p className="form-helper">
+                  To generate a ssh key pair please see this link:{" "}
+                  <a
+                    href="https://hpc.ucdavis.edu/faq#ssh-key"
+                    target={"blank"}
+                  >
+                    https://hpc.ucdavis.edu/faq#ssh-key
+                  </a>
+                </p>
               </div>
             </div>
           </div>

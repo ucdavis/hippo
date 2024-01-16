@@ -134,7 +134,9 @@ export const RequestForm = () => {
           </p>
         </div>
         <div className="form-group">
-          <label className="form-label">What is your Public SSH key</label>
+          <label className="form-label">
+            Please paste your public SSH key.
+          </label>
           <SshKeyInput
             onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
           />
