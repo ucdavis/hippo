@@ -9,6 +9,7 @@ namespace Hippo.Web.Models
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public string Email { get; set; } = "";
+        public string Kerberos { get; set; } = "";
         public DateTime CreatedOn { get; set; }
         public string Cluster { get; set; } = "";
         public User? Owner { get; set; }
@@ -26,6 +27,7 @@ namespace Hippo.Web.Models
             Id = account.Id;
             Name = account.Name;
             Email = account.Email;
+            Kerberos = account.Kerberos;
             CreatedOn = account.CreatedOn;
             Cluster = account.Cluster.Name;
             Owner = account.Owner;
@@ -69,6 +71,7 @@ namespace Hippo.Web.Models
                     Id = a.Id,
                     Name = a.Name,
                     Email = a.Email,
+                    Kerberos = a.Kerberos,
                     CreatedOn = a.CreatedOn,
                     Cluster = a.Cluster.Name,
                     Owner = a.Owner,
