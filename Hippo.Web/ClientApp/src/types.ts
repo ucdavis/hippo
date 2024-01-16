@@ -38,6 +38,7 @@ export interface AccountModel {
   id: number;
   name: string;
   email: string;
+  kerberos: string;
   createdOn: string;
   cluster: string;
   owner?: User;

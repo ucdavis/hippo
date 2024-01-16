@@ -44,7 +44,12 @@ export const ActiveAccounts = () => {
         sortable: true,
       },
       {
-        Header: "Approved On",
+        Header: "Kerberos",
+        accessor: (row) => row.kerberos,
+        sortable: true,
+      },
+      {
+        Header: "Updated On",
         accessor: (row) => new Date(row.updatedOn).toLocaleDateString(),
         sortable: true,
       },
