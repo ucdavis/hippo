@@ -192,10 +192,17 @@ export const AccountInfo = () => {
     <>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>
-            Welcome {context.user.detail.firstName}. Your account is registered
-            with the following group(s):
-          </p>
+          {currentGroups.length ? (
+            <p>
+              Welcome {context.user.detail.firstName}. Your account is
+              registered with the following group(s):
+            </p>
+          ) : (
+            <p>
+              Welcome {context.user.detail.firstName}. Your account is not
+              associated with any groups.
+            </p>
+          )}
 
           <CardColumns>
             {currentGroups.map((g, i) => (
