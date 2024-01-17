@@ -124,6 +124,12 @@ export const Clusters = () => {
                 setReturn({ ...model, sshKey: value.trim() });
               }}
             />
+            <p className="form-helper">
+              To generate a ssh key pair please see this link:{" "}
+              <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
+                https://hpc.ucdavis.edu/faq#ssh-key
+              </a>
+            </p>
           </div>
           <div className="form-group">
             <label htmlFor="fieldDomain">Domain</label>

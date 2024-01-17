@@ -99,9 +99,18 @@ export const AccountInfo = () => {
             <div className="col-md-8">
               <div className="form-group">
                 <label className="form-label">
-                  What is your Public SSH key
+                  Please paste your public SSH key.
                 </label>
                 <SshKeyInput onChange={setReturn} />
+                <p className="form-helper">
+                  To generate a ssh key pair please see this link:{" "}
+                  <a
+                    href="https://hpc.ucdavis.edu/faq#ssh-key"
+                    target={"blank"}
+                  >
+                    https://hpc.ucdavis.edu/faq#ssh-key
+                  </a>
+                </p>
               </div>
             </div>
           </div>
@@ -183,10 +192,17 @@ export const AccountInfo = () => {
     <>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <p>
-            Welcome {context.user.detail.firstName}. Your account is registered
-            with the following group(s):
-          </p>
+          {currentGroups.length ? (
+            <p>
+              Welcome {context.user.detail.firstName}. Your account is
+              registered with the following group(s):
+            </p>
+          ) : (
+            <p>
+              Welcome {context.user.detail.firstName}. Your account is not
+              associated with any groups.
+            </p>
+          )}
 
           <CardColumns>
             {currentGroups.map((g, i) => (
@@ -227,18 +243,6 @@ export const AccountInfo = () => {
               Update SSH Key
             </button>
           </div>
-
-          <p>
-            Documentation about this cluster can be found{" "}
-            <a
-              href="https://wiki.cse.ucdavis.edu/support/systems/farm"
-              target={"_blank"}
-              rel="noreferrer"
-            >
-              at the UC Davis Farm Wiki
-            </a>
-            .
-          </p>
         </div>
       </div>
     </>
