@@ -29,6 +29,8 @@ namespace Hippo.Core.Domain
         public bool IsActive { get; set; } = true;
         [MaxLength(250)]
         public string Domain { get; set; } = String.Empty;
+        [MaxLength(250)]
+        public string Email { get; set; } = String.Empty;
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }

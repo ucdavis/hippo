@@ -29,15 +29,21 @@ export const Clusters = () => {
         <ul className="list-clusters">
           {clusters.map((cluster) => (
             <li key={cluster.name}>
-              <NavLink 
+              <NavLink
                 to={`/${cluster.name}`}
                 style={{
-                  fontWeight: "bolder"
+                  fontWeight: "bolder",
                 }}
               >
                 {`${cluster.name}:`}
               </NavLink>
               <p>{cluster.description}</p>
+              {cluster.email && (
+                <p>
+                  Contact:{" "}
+                  <a href={`mailto:${cluster.email}`}>{cluster.email}</a>
+                </p>
+              )}
             </li>
           ))}
         </ul>

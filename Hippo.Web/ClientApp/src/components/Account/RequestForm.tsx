@@ -26,6 +26,7 @@ export const RequestForm = () => {
 
   const history = useHistory();
   const { cluster } = useParams<IRouteParams>();
+  const clusterEmail = context.clusters.find((c) => c.name === cluster)?.email;
 
   // load up possible groups
   useEffect(() => {
@@ -107,14 +108,18 @@ export const RequestForm = () => {
           <p className="form-helper">
             Your group is probably named after your PI or your Department. You
             can filter this list by typing in it.
-            <br />
-            If you don't see your group, you may contact HPC help to request it
-            be added.{" "}
-            <a
-              href={`mailto: hpc-help@ucdavis.edu?subject=Please add a group to the ${cluster} cluster&body=Group Name:  %0D%0API or Dept Email: `}
-            >
-              Click here to contact HPC Help
-            </a>
+            {clusterEmail && (
+              <>
+                <br />
+                If you don't see your group, you may contact {cluster} help to
+                request it be added.{" "}
+                <a
+                  href={`mailto: ${clusterEmail}?subject=Please add a group to the ${cluster} cluster&body=Group Name:  %0D%0API or Dept Email:  `}
+                >
+                  Click here to contact {cluster} help
+                </a>
+              </>
+            )}
           </p>
         </div>
         <div className="form-group">
