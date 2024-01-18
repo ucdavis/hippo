@@ -179,7 +179,7 @@ namespace Hippo.Core.Migrations.Sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ActedById")
+                    b.Property<int?>("ActedById")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ActedDate")
@@ -205,6 +205,10 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasKey("Id");
 
                     b.HasIndex("ActedById");
+
+                    b.HasIndex("ActedDate");
+
+                    b.HasIndex("Action");
 
                     b.HasIndex("ClusterId");
 
@@ -453,8 +457,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.User", "ActedBy")
                         .WithMany()
                         .HasForeignKey("ActedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany()

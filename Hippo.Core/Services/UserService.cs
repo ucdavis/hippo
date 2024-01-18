@@ -26,6 +26,7 @@ namespace Hippo.Core.Services
         string GetCurrentUserId();
         Task<string> GetCurrentAccountsJsonAsync();
         Task<string> GetAvailableClustersJsonAsync();
+        Task<string> GetLastPuppetSync();
     }
 
     public class UserService : IUserService
@@ -212,6 +213,16 @@ namespace Hippo.Core.Services
         {
             var clusters = await _dbContext.Clusters.ToArrayAsync();
             return JsonSerializer.Serialize(clusters, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        public async Task<string> GetLastPuppetSync()
+        {
+            var lastSync = await _dbContext.Histories
+                .Where(h => h.Action == History.Actions.PuppetDataSynced)
+                .OrderByDescending(h => h.ActedDate)
+                .Select(h => h.ActedDate)
+                .FirstOrDefaultAsync();
+            return JsonSerializer.Serialize(lastSync.ToPacificTime(), new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
     }
 }

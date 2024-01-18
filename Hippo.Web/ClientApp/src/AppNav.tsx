@@ -6,7 +6,7 @@ import { ShowFor } from "./Shared/ShowFor";
 import { IRouteParams } from "./types";
 
 export const AppNav = () => {
-  const [{ clusters, accounts }] = useContext(AppContext);
+  const [{ clusters, accounts, lastPuppetSync }] = useContext(AppContext);
   const match = useRouteMatch<IRouteParams>("/:cluster/:path");
   const cluster = clusters.find((c) => c.name === match?.params.cluster);
 
@@ -29,6 +29,18 @@ export const AppNav = () => {
             <p>
               <strong>{cluster.description}</strong> |{" "}
               <NavLink to="/clusters">Change Cluster</NavLink>
+            </p>
+          )}
+          {lastPuppetSync && (
+            <p className="sync-status">
+              Last synced with Puppet{" "}
+              {new Date(lastPuppetSync).toLocaleDateString("en-us", {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+              })}
             </p>
           )}
         </div>

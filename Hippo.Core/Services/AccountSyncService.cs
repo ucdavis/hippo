@@ -19,13 +19,13 @@ namespace Hippo.Core.Services
     {
         private readonly IPuppetService _puppetService;
         private readonly AppDbContext _dbContext;
-        private readonly IIdentityService _identityService;
+        private readonly IHistoryService _historyService;
 
-        public AccountSyncService(IPuppetService puppetService, AppDbContext dbContext, IIdentityService identityService)
+        public AccountSyncService(IPuppetService puppetService, AppDbContext dbContext, IHistoryService historyService)
         {
             _puppetService = puppetService;
             _dbContext = dbContext;
-            _identityService = identityService;
+            _historyService = historyService;
         }
 
         public async Task<bool> Run()
@@ -187,6 +187,9 @@ namespace Hippo.Core.Services
                     new SqlParameter("@UpdatedOn", DateTime.UtcNow),
                     new SqlParameter("@ClusterId", cluster.Id));
                 Log.Information("Marked {RequestsCompleted} requests 'Completed' for cluster {Cluster}", requestsCompleted, cluster.Name);
+
+                await _historyService.PuppetDataSynced(cluster.Id);
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
