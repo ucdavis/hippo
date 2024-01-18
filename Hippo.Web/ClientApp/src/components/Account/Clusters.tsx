@@ -45,7 +45,9 @@ export const Clusters = () => {
 
               {cluster.email && (
                 <p>
-                  {cluster.description} | Contact:{" "}
+                  {cluster.description}
+                  <br />
+                  Contact:{" "}
                   <a href={`mailto:${cluster.email}`}>{cluster.email}</a>
                 </p>
               )}
