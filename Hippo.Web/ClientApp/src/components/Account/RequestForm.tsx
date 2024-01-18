@@ -26,7 +26,6 @@ export const RequestForm = () => {
 
   const history = useHistory();
   const { cluster } = useParams<IRouteParams>();
-  const clusterEmail = context.clusters.find((c) => c.name === cluster)?.email;
 
   // load up possible groups
   useEffect(() => {
@@ -107,19 +106,9 @@ export const RequestForm = () => {
           />
           <p className="form-helper">
             Your group is probably named after your PI or your Department. You
-            can filter this list by typing in it.
-            {clusterEmail && (
-              <>
-                <br />
-                If you don't see your group, you may contact {cluster} help to
-                request it be added.{" "}
-                <a
-                  href={`mailto: ${clusterEmail}?subject=Please add a group to the ${cluster} cluster&body=Group Name:  %0D%0API or Dept Email:  `}
-                >
-                  Click here to contact {cluster} help
-                </a>
-              </>
-            )}
+            can filter this list by typing in it. If you don't see your sponsor,
+            please contact your PI and ask them to request an account,
+            specifying "New Sponsor Onboarding" as the group.
           </p>
         </div>
         <div className="form-group">
