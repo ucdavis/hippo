@@ -94,7 +94,7 @@ namespace Hippo.Jobs.PuppetSync
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.AddSingleton<IPuppetService, PuppetService>();
             services.AddSingleton<IAccountSyncService, AccountSyncService>();
-            services.AddSingleton<IIdentityService, IdentityService>();
+            services.AddSingleton<IHistoryService, HistoryService>();
 
 
             return services.BuildServiceProvider();

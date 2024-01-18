@@ -192,7 +192,7 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ActedById")
+                    b.Property<int?>("ActedById")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ActedDate")
@@ -218,6 +218,10 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasKey("Id");
 
                     b.HasIndex("ActedById");
+
+                    b.HasIndex("ActedDate");
+
+                    b.HasIndex("Action");
 
                     b.HasIndex("ClusterId");
 
@@ -475,8 +479,7 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasOne("Hippo.Core.Domain.User", "ActedBy")
                         .WithMany()
                         .HasForeignKey("ActedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany()

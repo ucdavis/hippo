@@ -33,14 +33,20 @@ namespace Hippo.Core.Services
             _userService = userService;
         }
 
+        // This constructor for use by jobs, which don't register the IHttpContextAccessor or IUserService in DI
+        public HistoryService(AppDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         public async Task AddHistory(History history)
         {
-            if (history.ActedBy == null)
+            if (history.ActedBy == null && _userService != null)
             {
                 history.ActedBy = await _userService.GetCurrentUser();
             }
 
-            if (history.ClusterId == 0)
+            if (history.ClusterId == 0 && _httpContextAccessor != null)
             {
                 var cluster = _httpContextAccessor.HttpContext.GetRouteValue("cluster") as string;
                 if (!string.IsNullOrWhiteSpace(cluster))
@@ -149,15 +155,25 @@ namespace Hippo.Core.Services
 
         public static async Task RoleAdded(this IHistoryService historyService, User user, Permission perm)
         {
-            var history = CreateHistory(user, perm, "Role Added");
+            var history = CreateHistory(user, perm, Actions.RoleAdded);
             await historyService.AddHistory(history);
         }
 
         public static async Task RoleRemoved(this IHistoryService historyService, User user, Permission perm)
         {
-            var history = CreateHistory(user, perm, "Role Removed");
+            var history = CreateHistory(user, perm, Actions.RoleRemoved);
             await historyService.AddHistory(history);
         }
 
+        public static async Task PuppetDataSynced(this IHistoryService historyService, int clusterId)
+        {
+            var history = new History
+            {
+                Action = Actions.PuppetDataSynced,
+                ClusterId = clusterId,
+                ActedDate = DateTime.UtcNow,
+            };
+            await historyService.AddHistory(history);
+        }
     }
 }

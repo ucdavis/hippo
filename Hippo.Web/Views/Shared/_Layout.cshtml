@@ -57,6 +57,7 @@
         Hippo.openRequests = @Html.Raw(await UserService.GetCurrentOpenRequestsAsync());
         Hippo.clusters = @Html.Raw(await UserService.GetAvailableClustersJsonAsync());
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";
+        Hippo.lastPuppetSync = @Html.Raw(await UserService.GetLastPuppetSync());
     </script>
 
     <react-scripts />
