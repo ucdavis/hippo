@@ -23,21 +23,40 @@ export const Clusters = () => {
             </NavLink>
           </ShowFor>
         </nav>
+        <h3>Clusters at Hippo</h3>
         <p>
           HiPPO supports multiple clusters. Please select a cluster to view.
         </p>
+        <hr />
+
         <ul className="list-clusters">
           {clusters.map((cluster) => (
             <li key={cluster.name}>
-              <NavLink 
-                to={`/${cluster.name}`}
-                style={{
-                  fontWeight: "bolder"
-                }}
-              >
-                {`${cluster.name}:`}
-              </NavLink>
-              <p>{cluster.description}</p>
+              <h4>
+                <NavLink
+                  to={`/${cluster.name}`}
+                  style={{
+                    fontWeight: "bolder",
+                  }}
+                >
+                  {`${cluster.name}:`}
+                </NavLink>
+              </h4>
+
+              <p>
+                {cluster.description}
+                {cluster.email && (
+                  <>
+                    <br />
+                    Contact:{" "}
+                    <a
+                      href={`mailto:${cluster.email}?subject=Inquiry about cluster ${cluster.name}`}
+                    >
+                      {cluster.email}
+                    </a>
+                  </>
+                )}
+              </p>
             </li>
           ))}
         </ul>

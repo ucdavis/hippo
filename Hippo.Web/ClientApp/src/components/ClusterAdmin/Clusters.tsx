@@ -16,6 +16,7 @@ const defaultCluster: Cluster = {
   sshKeyId: "",
   sshUrl: "",
   domain: "",
+  email: "",
 };
 
 export const Clusters = () => {
@@ -143,6 +144,25 @@ export const Clusters = () => {
                   cluster: {
                     ...editClusterModel.cluster,
                     domain: e.target.value,
+                  },
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldEmail">Email</label>
+            <input
+              className="form-control"
+              id="fieldEmail"
+              value={editClusterModel.cluster.email}
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  cluster: {
+                    ...editClusterModel.cluster,
+                    email: e.target.value,
                   },
                 };
                 setEditClusterModel(model);
@@ -329,6 +349,12 @@ export const Clusters = () => {
       {
         Header: "Domain",
         accessor: (m) => m.cluster.domain,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        Header: "Email",
+        accessor: (m) => m.cluster.email,
         sortable: true,
         wrap: true,
       },

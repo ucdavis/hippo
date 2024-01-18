@@ -28,7 +28,7 @@ export const AppNav = () => {
           {cluster && (
             <p>
               <strong>{cluster.description}</strong> |{" "}
-              <NavLink to="/multiple">Change Cluster</NavLink>
+              <NavLink to="/clusters">Change Cluster</NavLink>
             </p>
           )}
         </div>
