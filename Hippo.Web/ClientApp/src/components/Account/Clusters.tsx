@@ -43,14 +43,20 @@ export const Clusters = () => {
                 </NavLink>
               </h4>
 
-              {cluster.email && (
-                <p>
-                  {cluster.description}
-                  <br />
-                  Contact:{" "}
-                  <a href={`mailto:${cluster.email}`}>{cluster.email}</a>
-                </p>
-              )}
+              <p>
+                {cluster.description}
+                {cluster.email && (
+                  <>
+                    <br />
+                    Contact:{" "}
+                    <a
+                      href={`mailto:${cluster.email}?subject=Inquiry about cluster ${cluster.name}`}
+                    >
+                      {cluster.email}
+                    </a>
+                  </>
+                )}
+              </p>
             </li>
           ))}
         </ul>
