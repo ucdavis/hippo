@@ -51,6 +51,8 @@ namespace Hippo.Core.Data
             Role.OnModelCreating(builder);
             Permission.OnModelCreating(builder);
             Request.OnModelCreating(builder);
+            Domain.GroupAdminAccount.OnModelCreating(builder);
+            Domain.GroupMemberAccount.OnModelCreating(builder);
         }
     }
  }

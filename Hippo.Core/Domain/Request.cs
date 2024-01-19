@@ -39,6 +39,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Request>().HasQueryFilter(r => r.Cluster.IsActive);
             modelBuilder.Entity<Request>().HasIndex(r => r.Action);
             modelBuilder.Entity<Request>().HasIndex(r => r.Status);
             modelBuilder.Entity<Request>().HasIndex(r => r.Group);
