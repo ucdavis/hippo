@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
 {
@@ -14,5 +15,10 @@ namespace Hippo.Core.Domain
         public int AccountId { get; set; }
         [JsonIgnore]
         public Account Account { get; set; }
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<GroupMemberAccount>().HasQueryFilter(gm => gm.Account.Cluster.IsActive);
+        }
     }
 }

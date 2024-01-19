@@ -28,6 +28,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Group>().HasQueryFilter(g => g.Cluster.IsActive);
             modelBuilder.Entity<Group>().HasIndex(g => new { g.ClusterId, g.Name }).IsUnique();
 
             modelBuilder.Entity<Account>()

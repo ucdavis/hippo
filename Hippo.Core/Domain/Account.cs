@@ -54,6 +54,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Account>().HasQueryFilter(a => a.Cluster.IsActive);
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);
