@@ -89,22 +89,24 @@ public class AccountController : SuperController
         {
             return BadRequest("Please select a group from the list.");
         }
-        if (string.IsNullOrWhiteSpace(model.SshKey))
-        {
-            return BadRequest("Missing SSH Key");
-        }
-        if (!model.SshKey.IsValidSshKey())
-        {
-            return BadRequest("Invalid SSH key");
-        }
-
         var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
         if (cluster == null)
         {
             return BadRequest("Cluster not found");
         }
+        if (cluster.EnableUserSshKey)
+        {
+            if (string.IsNullOrWhiteSpace(model.SshKey))
+            {
+                return BadRequest("Missing SSH Key");
+            }
+            if (!model.SshKey.IsValidSshKey())
+            {
+                return BadRequest("Invalid SSH key");
+            }
+        }
 
-        var hasAccount = await _dbContext.Accounts.AnyAsync(a =>a.OwnerId == currentUser.Id
+        var hasAccount = await _dbContext.Accounts.AnyAsync(a => a.OwnerId == currentUser.Id
                 && a.ClusterId == cluster.Id);
 
         if (hasAccount)
@@ -149,6 +151,16 @@ public class AccountController : SuperController
         {
             return BadRequest("Cluster is required");
         }
+        var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
+        if (cluster == null)
+        {
+            return BadRequest("Cluster not found");
+        }
+        if (!cluster.EnableUserSshKey)
+        {
+            return BadRequest("User SSH Keys are not enabled for this cluster");
+        }
+
         if (string.IsNullOrWhiteSpace(model.SshKey))
         {
             return BadRequest("SSH Key is required");

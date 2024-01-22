@@ -15,6 +15,7 @@ interface Props<T> {
     | ReactNode
     | ((setReturnValue: Dispatch<SetStateAction<T | undefined>>) => ReactNode);
   canConfirm?: boolean | ((returnValue: T) => boolean);
+  buttons?: ["Confirm" | "Cancel" | "OK"];
 }
 
 export const useConfirmationDialog = <T extends any = undefined>(
@@ -37,6 +38,8 @@ export const useConfirmationDialog = <T extends any = undefined>(
     resolveRef.current = undefined;
   };
 
+  const buttons = props.buttons ?? ["Confirm", "Cancel"];
+
   const [showModal, hideModal] = useModal(
     () => (
       <Modal isOpen={true}>
@@ -47,31 +50,35 @@ export const useConfirmationDialog = <T extends any = undefined>(
             : props.message}
         </ModalBody>
         <ModalFooter>
-          <Button
-            color="primary"
-            onClick={() => {
-              confirm();
-              hideModal();
-            }}
-            disabled={
-              props.canConfirm === undefined
-                ? false
-                : isBoolean(props.canConfirm)
-                ? !props.canConfirm
-                : !props.canConfirm(returnValue)
-            }
-          >
-            Confirm
-          </Button>{" "}
-          <Button
-            color="primary"
-            onClick={() => {
-              dismiss();
-              hideModal();
-            }}
-          >
-            Cancel
-          </Button>
+          {buttons.includes("Confirm") && (
+            <Button
+              color="primary"
+              onClick={() => {
+                confirm();
+                hideModal();
+              }}
+              disabled={
+                props.canConfirm === undefined
+                  ? false
+                  : isBoolean(props.canConfirm)
+                  ? !props.canConfirm
+                  : !props.canConfirm(returnValue)
+              }
+            >
+              Confirm
+            </Button>
+          )}{" "}
+          {buttons.some((b) => b === "Cancel" || b === "OK") && (
+            <Button
+              color="primary"
+              onClick={() => {
+                dismiss();
+                hideModal();
+              }}
+            >
+              {buttons.includes("Cancel") ? " Cancel" : "OK"}
+            </Button>
+          )}
         </ModalFooter>
       </Modal>
     ),

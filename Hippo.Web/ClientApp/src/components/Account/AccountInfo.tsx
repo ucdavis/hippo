@@ -19,15 +19,18 @@ import SshKeyInput from "../../Shared/SshKeyInput";
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [context, setContext] = useContext(AppContext);
-  const { cluster } = useParams<IRouteParams>();
-  const account = context.accounts.find((a) => a.cluster === cluster);
+  const { cluster: clusterName } = useParams<IRouteParams>();
+  const account = context.accounts.find((a) => a.cluster === clusterName);
+  const cluster = context.clusters.find((c) => c.name === clusterName);
 
   const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
+      const response = await authenticatedFetch(
+        `/api/${clusterName}/group/groups`
+      );
 
       if (response.ok) {
         setGroups(
@@ -43,7 +46,7 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [cluster, context.openRequests, currentGroups]);
+  }, [clusterName, context.openRequests, currentGroups]);
 
   const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -125,7 +128,7 @@ export const AccountInfo = () => {
     const [confirmed, addToGroupModel] = await getGroupConfirmation();
     if (confirmed) {
       const request = authenticatedFetch(
-        `/api/${cluster}/group/requestaccess/`,
+        `/api/${clusterName}/group/requestaccess/`,
         {
           method: "POST",
           body: JSON.stringify(addToGroupModel),
@@ -151,19 +154,22 @@ export const AccountInfo = () => {
         setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));
       }
     }
-  }, [cluster, getGroupConfirmation, setNotification, setContext]);
+  }, [clusterName, getGroupConfirmation, setNotification, setContext]);
 
   const handleUpdateSshKey = useCallback(async () => {
     const [confirmed, sshKey] = await getSshKeyConfirmation();
 
     if (confirmed) {
-      const request = authenticatedFetch(`/api/${cluster}/account/updatessh`, {
-        method: "POST",
-        body: JSON.stringify({
-          accountId: account?.id,
-          sshKey: sshKey,
-        }),
-      });
+      const request = authenticatedFetch(
+        `/api/${clusterName}/account/updatessh`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            accountId: account?.id,
+            sshKey: sshKey,
+          }),
+        }
+      );
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
@@ -176,16 +182,16 @@ export const AccountInfo = () => {
 
       const response = await request;
     }
-  }, [account?.id, cluster, getSshKeyConfirmation, setNotification]);
+  }, [account?.id, clusterName, getSshKeyConfirmation, setNotification]);
 
   if (!account) {
     const request = context.openRequests.find(
-      (r) => r.cluster === cluster && r.action === "CreateAccount"
+      (r) => r.cluster === clusterName && r.action === "CreateAccount"
     );
     if (request) {
-      return <Redirect to={`/${cluster}/pendingapproval`} />;
+      return <Redirect to={`/${clusterName}/pendingapproval`} />;
     }
-    return <Redirect to={`/${cluster}/create`} />;
+    return <Redirect to={`/${clusterName}/create`} />;
   }
 
   return (
@@ -235,13 +241,15 @@ export const AccountInfo = () => {
             >
               Request Access to Another Group
             </button>{" "}
-            <button
-              disabled={notification.pending || groups.length === 0}
-              onClick={() => handleUpdateSshKey()}
-              className="btn btn-primary btn-sm"
-            >
-              Update SSH Key
-            </button>
+            {cluster.enableUserSshKey && (
+              <button
+                disabled={notification.pending || groups.length === 0}
+                onClick={() => handleUpdateSshKey()}
+                className="btn btn-primary btn-sm"
+              >
+                Update SSH Key
+              </button>
+            )}
           </div>
         </div>
       </div>

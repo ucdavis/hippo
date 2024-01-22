@@ -25,12 +25,15 @@ export const RequestForm = () => {
   });
 
   const history = useHistory();
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster: clusterName } = useParams<IRouteParams>();
+  const cluster = context.clusters.find((c) => c.name === clusterName);
 
   // load up possible groups
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
+      const response = await authenticatedFetch(
+        `/api/${clusterName}/group/groups`
+      );
 
       const groupsResult = await response.json();
 
@@ -40,10 +43,10 @@ export const RequestForm = () => {
     };
 
     fetchGroups();
-  }, [cluster]);
+  }, [clusterName]);
 
   const handleSubmit = async () => {
-    const req = authenticatedFetch(`/api/${cluster}/account/create`, {
+    const req = authenticatedFetch(`/api/${clusterName}/account/create`, {
       method: "POST",
       body: JSON.stringify(request),
     });
@@ -71,17 +74,17 @@ export const RequestForm = () => {
         ...ctx,
         openRequests: [...ctx.openRequests, { ...request }],
       }));
-      history.replace(`/${cluster}/pendingapproval`);
+      history.replace(`/${clusterName}/pendingapproval`);
     }
   };
 
   if (
     context.openRequests.find(
-      (r) => r.cluster === cluster && r.action === "CreateAccount"
+      (r) => r.cluster === clusterName && r.action === "CreateAccount"
     )
   ) {
     // there's already a request for this cluster, redirect to pending page
-    return <Redirect to={`/${cluster}/pendingapproval`} />;
+    return <Redirect to={`/${clusterName}/pendingapproval`} />;
   }
 
   return (
@@ -127,14 +130,16 @@ export const RequestForm = () => {
             supervising PI will be. If you are unsure, please ask your sponsor.
           </p>
         </div>
-        <div className="form-group">
-          <label className="form-label">
-            Please paste your public SSH key.
-          </label>
-          <SshKeyInput
-            onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
-          />
-        </div>
+        {cluster.enableUserSshKey && (
+          <div className="form-group">
+            <label className="form-label">
+              Please paste your public SSH key.
+            </label>
+            <SshKeyInput
+              onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
+            />
+          </div>
+        )}
         <br />
         <button
           disabled={notification.pending}
@@ -143,36 +148,38 @@ export const RequestForm = () => {
         >
           Submit
         </button>
-        <div>
-          <br />
-          <br />
-          <p className="form-helper">
-            To generate a ssh key pair please see this link:{" "}
-            <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
-              https://hpc.ucdavis.edu/faq#ssh-key
-            </a>
-          </p>
-          <p className="form-helper">
-            You will find instructions here for Windows, OS X, and Linux
-            environments. Windows users: an openssh or SSH2 formatted ssh public
-            key is required. See screenshots.
-          </p>
-          <p className="form-helper">
-            (If your public key resides in the default location for OS X and
-            Linux, ~/.ssh/, right click in the Name column of the window that
-            will open when you click "Choose File" above. Select "Show Hidden
-            Files".)
-          </p>
-          <p className="form-helper">
-            For more information on SSH keys, please see{" "}
-            <a
-              href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
-              target={"blank"}
-            >
-              https://wiki.cse.ucdavis.edu/support:general:security:ssh
-            </a>
-          </p>
-        </div>
+        {cluster.enableUserSshKey && (
+          <div>
+            <br />
+            <br />
+            <p className="form-helper">
+              To generate a ssh key pair please see this link:{" "}
+              <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
+                https://hpc.ucdavis.edu/faq#ssh-key
+              </a>
+            </p>
+            <p className="form-helper">
+              You will find instructions here for Windows, OS X, and Linux
+              environments. Windows users: an openssh or SSH2 formatted ssh
+              public key is required. See screenshots.
+            </p>
+            <p className="form-helper">
+              (If your public key resides in the default location for OS X and
+              Linux, ~/.ssh/, right click in the Name column of the window that
+              will open when you click "Choose File" above. Select "Show Hidden
+              Files".)
+            </p>
+            <p className="form-helper">
+              For more information on SSH keys, please see{" "}
+              <a
+                href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+                target={"blank"}
+              >
+                https://wiki.cse.ucdavis.edu/support:general:security:ssh
+              </a>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

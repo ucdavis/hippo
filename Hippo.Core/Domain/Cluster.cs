@@ -32,6 +32,7 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         [EmailAddress]
         public string Email { get; set; } = String.Empty;
+        public bool EnableUserSshKey { get; set; } = true;
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
@@ -43,6 +44,7 @@ namespace Hippo.Core.Domain
         {
             modelBuilder.Entity<Cluster>().HasQueryFilter(a => a.IsActive);
             modelBuilder.Entity<Cluster>().Property(a => a.IsActive).HasDefaultValue(true);
+            modelBuilder.Entity<Cluster>().Property(a => a.EnableUserSshKey).HasDefaultValue(true);
             modelBuilder.Entity<Cluster>().HasIndex(a => a.Name);
 
             modelBuilder.Entity<Account>()
