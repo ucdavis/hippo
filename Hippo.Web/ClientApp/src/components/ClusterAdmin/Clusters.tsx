@@ -17,6 +17,7 @@ const defaultCluster: Cluster = {
   sshUrl: "",
   domain: "",
   email: "",
+  enableUserSshKey: false,
 };
 
 export const Clusters = () => {
@@ -170,12 +171,119 @@ export const Clusters = () => {
               }}
             />
           </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              id="fieldEnableUserSshKey"
+              type="checkbox"
+              checked={editClusterModel.cluster.enableUserSshKey}
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  cluster: {
+                    ...editClusterModel.cluster,
+                    enableUserSshKey: e.target.checked,
+                  },
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+            <label className="form-check-label" htmlFor="fieldEnableUserSshKey">
+              Enable User SSH Keys
+            </label>
+          </div>
         </>
       ),
       canConfirm:
         notEmptyOrFalsey(editClusterModel.cluster.name) &&
         notEmptyOrFalsey(editClusterModel.cluster.description) &&
         !notification.pending,
+    },
+    [
+      editClusterModel,
+      setEditClusterModel,
+      notification.pending,
+      editConfirmationTitle,
+    ]
+  );
+
+  const [getDetailsConfirmation] = useConfirmationDialog<ClusterModel>(
+    {
+      title: editConfirmationTitle,
+      message: (setReturn) => (
+        <>
+          <div className="form-group">
+            <label htmlFor="fieldName">Name</label>
+            <input
+              className="form-control"
+              id="fieldName"
+              required
+              value={editClusterModel.cluster.name}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldDescription">Description</label>
+            <input
+              className="form-control"
+              id="fieldDescription"
+              required
+              value={editClusterModel.cluster.description}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldSshUrl">SSH Url</label>
+            <input
+              className="form-control"
+              id="fieldSshUrl"
+              value={editClusterModel.cluster.sshUrl}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldSshName">SSH Name</label>
+            <input
+              className="form-control"
+              id="fieldSshName"
+              value={editClusterModel.cluster.sshName}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldDomain">Domain</label>
+            <input
+              className="form-control"
+              id="fieldDomain"
+              value={editClusterModel.cluster.domain}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldEmail">Email</label>
+            <input
+              className="form-control"
+              id="fieldEmail"
+              value={editClusterModel.cluster.email}
+              readOnly
+            />
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              id="fieldEnableUserSshKey"
+              type="checkbox"
+              checked={editClusterModel.cluster.enableUserSshKey}
+              disabled
+            />
+            <label className="form-check-label" htmlFor="fieldEnableUserSshKey">
+              Enable User SSH Keys
+            </label>
+          </div>
+        </>
+      ),
+      buttons: ["OK"],
     },
     [
       editClusterModel,
@@ -311,6 +419,21 @@ export const Clusters = () => {
     [clusterModels, getEditConfirmation, setNotification]
   );
 
+  const handleDetails = useCallback(
+    async (id: number) => {
+      const editClusterModel = clusterModels.filter(
+        (m) => m.cluster.id === id
+      )[0];
+      setEditClusterModel({
+        cluster: { ...editClusterModel.cluster },
+        sshKey: editClusterModel.sshKey,
+      });
+      setEditConfirmationTitle("Cluster Details");
+      await getDetailsConfirmation();
+    },
+    [clusterModels, getDetailsConfirmation]
+  );
+
   const columns: Column<ClusterModel>[] = useMemo(
     () => [
       {
@@ -326,25 +449,6 @@ export const Clusters = () => {
         sortable: true,
         wrap: true,
         width: "100px",
-      },
-      {
-        Header: "SSH URL",
-        accessor: (m) => m.cluster.sshUrl,
-        sortable: true,
-        wrap: true,
-      },
-      {
-        Header: "SSH Name",
-        accessor: (m) => m.cluster.sshName,
-        sortable: true,
-        wrap: true,
-        width: "100px",
-      },
-      {
-        Header: "SSH Key ID",
-        accessor: (m) => m.cluster.sshKeyId,
-        sortable: true,
-        wrap: true,
       },
       {
         Header: "Domain",
@@ -363,6 +467,14 @@ export const Clusters = () => {
         sortable: false,
         Cell: (m) => (
           <>
+            <button
+              disabled={notification.pending}
+              onClick={() => handleDetails(m.row.original.cluster.id)}
+              className="btn btn-primary"
+            >
+              Details
+            </button>
+            {" | "}
             <button
               disabled={notification.pending}
               onClick={() => handleEdit(m.row.original.cluster.id)}

@@ -99,6 +99,7 @@ const fakeCluster: Cluster = {
   sshUrl: "ssh-url.com",
   domain: "repo/yaml/path.yml",
   email: "an-email@address.com",
+  enableUserSshKey: true,
 };
 
 export const fakeAppContext: AppContextShape = {
