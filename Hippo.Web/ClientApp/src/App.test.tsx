@@ -1,8 +1,9 @@
-import ReactDOM from "react-dom";
 import { MemoryRouter } from "react-router-dom";
 import App from "./App";
 import { fakeAppContext } from "./test/mockData";
-import { act } from "react-dom/test-utils";
+import { render } from "@testing-library/react";
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 beforeEach(() => {
   (global as any).Hippo = fakeAppContext;
@@ -17,13 +18,9 @@ afterEach(() => {
 });
 
 it("renders without crashing", async () => {
-  const div = document.createElement("div");
-  await act(async () => {
-    ReactDOM.render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-      div
-    );
-  });
+  await render(
+    <MemoryRouter>
+      <App />
+    </MemoryRouter>,
+  );
 });

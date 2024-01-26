@@ -1,18 +1,18 @@
 import React, { useContext } from "react";
 
-import { Route, RouteProps, useRouteMatch } from "react-router-dom";
+import { Route, RouteProps, useMatch } from "react-router-dom";
 
 import AppContext from "./Shared/AppContext";
-import { IRouteParams, RoleName } from "./types";
+import { RoleName } from "./types";
 
-interface ConditionalRouteProps extends RouteProps {
+type ConditionalRouterProps = RouteProps & {
   roles: RoleName[];
 }
 
-export const ConditionalRoute = (props: ConditionalRouteProps) => {
+export const ConditionalRoute = (props: ConditionalRouterProps) => {
   const { roles } = props;
   const [context] = useContext(AppContext);
-  const match = useRouteMatch<IRouteParams>("/:cluster/:path");
+  const match = useMatch("/:cluster/:path");
   const cluster = match?.params.cluster;
 
   // system admins can access anything
@@ -22,12 +22,12 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
 
   // if no non-system roles are specified, then no one else can access this route
   if (!roles.some((r) => r !== "System")) {
-    return <Route {...props} component={Restricted}></Route>;
+    return <Route {...props} element={<Restricted />}></Route>;
   }
 
   // remaining roles require cluster to be set
   if (!Boolean(cluster)) {
-    return <Route {...props} component={Restricted}></Route>;
+    return <Route {...props} element={<Restricted />}></Route>;
   }
 
   // cluster admins can access anything in their cluster
@@ -41,7 +41,7 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
 
   // if no non-cluster-admin roles are specified, then no one else can access this route
   if (!roles.some((r) => r !== "ClusterAdmin")) {
-    return <Route {...props} component={Restricted}></Route>;
+    return <Route {...props} element={<Restricted />}></Route>;
   }
 
   // group admin role satisfied by presence of at least one group in account.adminOfGroups
@@ -61,7 +61,7 @@ export const ConditionalRoute = (props: ConditionalRouteProps) => {
     return <Route {...props} />;
   }
 
-  return <Route {...props} component={Restricted}></Route>;
+  return <Route {...props} element={<Restricted />}></Route>;
 };
 
 const Restricted = () => (

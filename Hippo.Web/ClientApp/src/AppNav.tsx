@@ -1,13 +1,12 @@
 import { useContext } from "react";
-import { NavLink, useRouteMatch } from "react-router-dom";
+import { NavLink, useMatch } from "react-router-dom";
 import AppContext from "./Shared/AppContext";
 import HippoLogo from "./Shared/hippoLogo";
 import { ShowFor } from "./Shared/ShowFor";
-import { IRouteParams } from "./types";
 
 export const AppNav = () => {
   const [{ clusters, accounts, lastPuppetSync }] = useContext(AppContext);
-  const match = useRouteMatch<IRouteParams>("/:cluster/:path");
+  const match = useMatch("/:cluster/*");
   const cluster = clusters.find((c) => c.name === match?.params.cluster);
 
   const accountInCluster =
@@ -55,9 +54,9 @@ export const AppNav = () => {
                   id="myAccount"
                   to={`/${cluster.name}/myaccount`}
                   className="nav-item nav-link"
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
                 >
                   My Account
                 </NavLink>
@@ -67,9 +66,9 @@ export const AppNav = () => {
                   id="sponsorApprove"
                   to={`/${cluster.name}/approve`}
                   className="nav-item nav-link"
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
                 >
                   Pending Approvals
                 </NavLink>
@@ -77,9 +76,9 @@ export const AppNav = () => {
                   id="activeAccounts"
                   to={`/${cluster.name}/activeaccounts`}
                   className="nav-item nav-link"
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
                 >
                   Active Accounts
                 </NavLink>
@@ -89,9 +88,9 @@ export const AppNav = () => {
                   id="groups"
                   className="nav-item nav-link"
                   to={`/${cluster.name}/admin/groups`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
                 >
                   Groups
                 </NavLink>
@@ -100,9 +99,9 @@ export const AppNav = () => {
                   id="clusterAdmins"
                   className="nav-item nav-link"
                   to={`/${cluster.name}/admin/clusteradmins`}
-                  activeStyle={{
-                    fontWeight: "bold",
-                  }}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
                 >
                   Cluster Admins
                 </NavLink>

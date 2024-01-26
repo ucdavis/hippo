@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { User, IRouteParams } from "../../types";
+import { User } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
@@ -16,7 +16,7 @@ export const ClusterAdmins = () => {
   const [request, setRequest] = useState({
     id: "",
   });
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster } = useParams();
   const [notification, setNotification] = usePromiseNotification();
 
   const [getConfirmation] = useConfirmationDialog<string>(

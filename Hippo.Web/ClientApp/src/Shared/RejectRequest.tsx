@@ -42,7 +42,7 @@ export const RejectRequest = (props: Props) => {
       ),
       canConfirm: notEmptyOrFalsey(reason) && !notification.pending,
     },
-    [reason, setReason, notification.pending]
+    [reason, setReason, notification.pending],
   );
 
   const reject = async () => {
@@ -56,7 +56,7 @@ export const RejectRequest = (props: Props) => {
       {
         method: "POST",
         body: JSON.stringify({ reason }),
-      }
+      },
     );
 
     setNotification(request, "Saving", "Request Rejection Saved", async (r) => {
@@ -76,6 +76,7 @@ export const RejectRequest = (props: Props) => {
   };
   return (
     <button
+      id="rejectButton"
       disabled={props.disabled === true}
       onClick={reject}
       className="btn btn-danger"

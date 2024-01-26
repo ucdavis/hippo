@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { GroupModel, IRouteParams } from "../../types";
+import { GroupModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
@@ -16,7 +16,7 @@ export const Groups = () => {
   const [groups, setGroups] = useState<GroupModel[]>();
   const [editing, setEditing] = useState<number>();
   const [editGroupDisplayName, setEditGroupDisplayName] = useState<string>("");
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster } = useParams();
 
   const [getEditConfirmation] = useConfirmationDialog<string>(
     {

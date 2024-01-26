@@ -27,7 +27,7 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
           group.admins.some(
             (a) =>
               a.name.toLowerCase().includes(text) ||
-              a.email.toLowerCase().includes(text)
+              a.email.toLowerCase().includes(text),
           )
         );
       }}

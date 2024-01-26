@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { RequestModel, IRouteParams } from "../../types";
+import { RequestModel } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -17,12 +17,12 @@ export const Requests = () => {
   const [requestApproving, setRequestApproving] = useState<number>();
   const [notification, setNotification] = usePromiseNotification();
 
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster } = useParams();
 
   useEffect(() => {
     const fetchRequests = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/request/pending`
+        `/api/${cluster}/request/pending`,
       );
 
       if (response.ok) {
@@ -41,13 +41,13 @@ export const Requests = () => {
         `/api/${cluster}/request/approve/${request.id}`,
         {
           method: "POST",
-        }
+        },
       );
 
       setNotification(
         req,
         "Approving",
-        "Request Approved. Please allow 2 to 3 hours for changes to take place."
+        "Request Approved. Please allow 2 to 3 hours for changes to take place.",
       );
 
       const response = await req;
@@ -58,7 +58,7 @@ export const Requests = () => {
         setRequests(requests?.filter((a) => a.id !== request.id));
       }
     },
-    [requests, cluster, setNotification]
+    [requests, cluster, setNotification],
   );
 
   const handleReject = useCallback(
@@ -66,7 +66,7 @@ export const Requests = () => {
       // remove the request from the list
       setRequests(requests?.filter((a) => a.id !== request.id));
     },
-    [requests]
+    [requests],
   );
 
   const columns: Column<RequestModel>[] = useMemo(
@@ -136,7 +136,7 @@ export const Requests = () => {
       notification.pending,
       handleApprove,
       handleReject,
-    ]
+    ],
   );
 
   const accountsData = useMemo(() => requests ?? [], [requests]);

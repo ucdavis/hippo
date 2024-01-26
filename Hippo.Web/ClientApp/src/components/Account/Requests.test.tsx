@@ -1,24 +1,24 @@
-import React from "react";
-import { render, unmountComponentAtNode } from "react-dom";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import {
   fakeAccounts,
   fakeGroupAdminAppContext,
+  fakeGroups,
   fakeRequests,
 } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
-import { act, Simulate } from "react-dom/test-utils";
-
 import App from "../../App";
 import { Requests } from "./Requests";
 import { ModalProvider } from "react-modal-hook";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const testCluster = fakeAccounts[0].cluster;
 const approveUrl = `/${testCluster}/approve`;
-
-let container: Element;
 
 beforeEach(() => {
   const requestResponse = Promise.resolve({
@@ -30,16 +30,20 @@ beforeEach(() => {
     status: 200,
     ok: true,
   });
+  const groupsResponse = Promise.resolve({
+    status: 200,
+    ok: true,
+    json: () => Promise.resolve(fakeGroups),
+  });
 
   (global as any).Hippo = fakeGroupAdminAppContext;
-  container = document.createElement("div");
-  document.body.appendChild(container);
 
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
       [`/api/${testCluster}/request/pending`]: requestResponse,
       [`/api/${testCluster}/request/approve/2`]: approveResponse,
-    })
+      [`/api/${testCluster}/group/groups`]: groupsResponse,
+    }),
   );
 });
 
@@ -49,138 +53,80 @@ afterEach(() => {
   if ((global.fetch as any).mockClear) {
     (global.fetch as any).mockClear();
   }
-  unmountComponentAtNode(container);
-  container.remove();
 });
 
 it("shows pending approvals count", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.textContent).toContain(
-    "There are 2 request(s) awaiting approval"
+  render(
+    <MemoryRouter initialEntries={[approveUrl]}>
+      <App />
+    </MemoryRouter>,
   );
+  expect(
+    await screen.findByText("There are 2 request(s) awaiting approval"),
+  ).toBeVisible();
 });
 
 it("shows approval button for each pending account", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.querySelectorAll("button.btn.btn-primary").length).toBe(2);
+  render(
+    <MemoryRouter initialEntries={[approveUrl]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    await screen.findAllByRole("button", { name: "Approve" }),
+  ).toHaveLength(2);
 });
 
 it("shows reject button for each pending account", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.querySelectorAll("button.btn.btn-danger").length).toBe(2);
-});
-
-it("approve button has expected text", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.querySelector("button.btn.btn-primary")?.textContent).toBe(
-    "Approve"
+  render(
+    <MemoryRouter initialEntries={[approveUrl]}>
+      <App />
+    </MemoryRouter>,
   );
-});
-it("reject button has expected text", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.querySelector("button.btn.btn-danger")?.textContent).toBe(
-    "Reject"
+
+  expect(await screen.findAllByRole("button", { name: "Reject" })).toHaveLength(
+    2,
   );
 });
 
-it("table header has expected text", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.querySelector("#approveButton")?.textContent).toBe(
-    "Approve"
+// //Enable this when the test works
+it("displays dialog when reject is clicked", async () => {
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter initialEntries={[approveUrl]}>
+      <ModalProvider>
+        <Routes>
+          <Route path={"/:cluster/approve"} element={<Requests />} />
+        </Routes>
+      </ModalProvider>
+    </MemoryRouter>,
   );
-});
+  expect(
+    await screen.findByText("There are 2 request(s) awaiting approval"),
+  ).toBeVisible();
 
-//Enable this when the test works
-xit("displays dialog when reject is clicked", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <App />
-      </MemoryRouter>,
-      container
-    );
-  });
-  console.log(container.innerHTML);
-  const rejectButton = container.querySelector(
-    "button.btn.btn-danger"
-  ) as HTMLButtonElement;
-  expect(rejectButton).toBeTruthy();
+  await user.click(screen.getAllByRole("button", { name: "Reject" })[0]);
 
-  Simulate.click(rejectButton);
-  console.log(container.innerHTML);
-  expect(container.querySelector("div.modal-dialog")).toBeTruthy();
+  expect(await screen.findByText("Reject Request")).toBeVisible();
 });
 
 it("calls approve and filters list when approve is clicked", async () => {
-  await act(async () => {
-    render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <ModalProvider>
-          <Route path={"/:cluster/approve"}>
-            <Requests />
-          </Route>
-        </ModalProvider>
-      </MemoryRouter>,
-      container
-    );
-  });
-  expect(container.textContent).toContain(
-    "There are 2 request(s) awaiting approval"
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter initialEntries={[approveUrl]}>
+      <ModalProvider>
+        <Routes>
+          <Route path={"/:cluster/approve"} element={<Requests />} />
+        </Routes>
+      </ModalProvider>
+    </MemoryRouter>,
   );
-  //console.log(container.innerHTML);
-  const approveButton = container.querySelector(
-    "button.btn.btn-primary"
-  ) as HTMLButtonElement;
-  expect(approveButton).toBeTruthy();
-  await act(async () => {
-    Simulate.click(approveButton);
-  });
-  //console.log(container.innerHTML);
-  // expect(container.textContent).toContain(
-  //   "There are 1 account(s) awaiting approval"
-  // );
+  expect(
+    await screen.findByText("There are 2 request(s) awaiting approval"),
+  ).toBeVisible();
+
+  await user.click(screen.getAllByRole("button", { name: "Approve" })[0]);
 
   expect(global.fetch).toHaveBeenCalledTimes(2);
   expect(global.fetch).toHaveBeenCalledWith(
@@ -192,7 +138,7 @@ it("calls approve and filters list when approve is clicked", async () => {
         "Content-Type": "application/json",
         RequestVerificationToken: "fakeAntiForgeryToken",
       },
-    }
+    },
   );
   expect(global.fetch).toHaveBeenLastCalledWith(
     `/api/${testCluster}/request/approve/2`,
@@ -204,6 +150,6 @@ it("calls approve and filters list when approve is clicked", async () => {
         RequestVerificationToken: "fakeAntiForgeryToken",
       },
       method: "POST",
-    }
+    },
   );
 });

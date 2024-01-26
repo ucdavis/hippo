@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { AccountModel, IRouteParams } from "../../types";
+import { AccountModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -10,7 +10,7 @@ import { getGroupModelString } from "../../util/StringHelpers";
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
 
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster } = useParams();
 
   const columns: Column<AccountModel>[] = useMemo(
     () => [
