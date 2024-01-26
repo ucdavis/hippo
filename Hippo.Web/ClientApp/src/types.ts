@@ -92,10 +92,6 @@ export interface PromiseStatus {
   success: boolean;
 }
 
-export interface IRouteParams {
-  cluster: string;
-}
-
 export interface ClusterModel {
   cluster: Cluster;
   sshKey?: string;

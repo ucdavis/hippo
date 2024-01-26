@@ -14,6 +14,7 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
   return (
     <Typeahead
       id="groupTypeahead"
+      data-testid="groupTypeahead"
       options={options}
       selected={groupSelection}
       placeholder="Select a group"
@@ -27,7 +28,7 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
           group.admins.some(
             (a) =>
               a.name.toLowerCase().includes(text) ||
-              a.email.toLowerCase().includes(text)
+              a.email.toLowerCase().includes(text),
           )
         );
       }}

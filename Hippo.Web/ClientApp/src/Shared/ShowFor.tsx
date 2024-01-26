@@ -1,21 +1,22 @@
-import React, { useContext } from "react";
+import React, { ReactElement, useContext } from "react";
 
 import AppContext from "./AppContext";
-import { IRouteParams, RoleName } from "../types";
+import { RoleName } from "../types";
 import { isBoolean, isFunction } from "../util/TypeChecks";
-import { useRouteMatch } from "react-router-dom";
+import { useMatch } from "react-router-dom";
 
 interface Props {
   children: any;
   roles: RoleName[];
   condition?: boolean | (() => boolean);
+  alternative?: JSX.Element;
 }
 
 // Determines if the user has access to the route based on roles and cluster
 export const ShowFor = (props: Props) => {
-  const { children, roles } = props;
+  const { children, roles, alternative } = props;
   const [context] = useContext(AppContext);
-  const match = useRouteMatch<IRouteParams>("/:cluster/:path");
+  const match = useMatch("/:cluster/:path");
   const cluster = match?.params.cluster;
 
   const conditionSatisfied = isBoolean(props.condition)
@@ -25,7 +26,7 @@ export const ShowFor = (props: Props) => {
     : true;
 
   if (!conditionSatisfied) {
-    return null;
+    return alternative ?? null;
   }
 
   // system admins can access anything
@@ -35,12 +36,12 @@ export const ShowFor = (props: Props) => {
 
   // if no non-system roles are specified, then no one else can access this route
   if (!roles.some((r) => r !== "System")) {
-    return null;
+    return alternative ?? null;
   }
 
   // remaining roles require cluster to be set
   if (!Boolean(cluster)) {
-    return null;
+    return alternative ?? null;
   }
 
   // cluster admins can access anything in their cluster
@@ -54,7 +55,7 @@ export const ShowFor = (props: Props) => {
 
   // if no non-cluster-admin roles are specified, then no one else can access this route
   if (!roles.some((r) => r !== "ClusterAdmin")) {
-    return null;
+    return alternative ?? null;
   }
 
   // group admin role satisfied by presence of at least one group in account.adminOfGroups
@@ -74,7 +75,7 @@ export const ShowFor = (props: Props) => {
     return <>{children}</>;
   }
 
-  return null;
+  return alternative ?? null;
 };
 
 // Can be used as either a hook or a component. Exporting under

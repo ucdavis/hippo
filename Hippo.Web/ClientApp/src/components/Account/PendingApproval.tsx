@@ -1,12 +1,11 @@
 import { useContext } from "react";
 import AppContext from "../../Shared/AppContext";
 import { useParams } from "react-router-dom";
-import { IRouteParams } from "../../types";
 import { SplitCamelCase } from "../../util/StringHelpers";
 
 export const PendingApproval = () => {
   const [context] = useContext(AppContext);
-  const { cluster } = useParams<IRouteParams>();
+  const { cluster } = useParams();
   const request = context.openRequests.find(
     (r) => r.cluster === cluster && r.action === "CreateAccount"
   );

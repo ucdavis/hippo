@@ -15,9 +15,9 @@ export const Clusters = () => {
               id="adminClusters"
               className="nav-item nav-link"
               to={`/clusteradmin/clusters`}
-              activeStyle={{
-                fontWeight: "bold",
-              }}
+              style={({ isActive }) =>
+                isActive ? { fontWeight: "bold" } : {}
+              }
             >
               Manage Clusters
             </NavLink>

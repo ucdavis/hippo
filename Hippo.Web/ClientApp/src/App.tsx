@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Route, Switch, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import { AppNav } from "./AppNav";
 import AppContext from "./Shared/AppContext";
@@ -13,14 +13,18 @@ import { PendingApproval } from "./components/Account/PendingApproval";
 import { Requests } from "./components/Account/Requests";
 import { ActiveAccounts } from "./components/Account/ActiveAccounts";
 import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
-import { ConditionalRoute } from "./ConditionalRoute";
 import { ModalProvider } from "react-modal-hook";
 import { Toaster } from "react-hot-toast";
 import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
+import { ShowFor } from "./Shared/ShowFor";
 
 declare var Hippo: AppContextShape;
+
+const Restricted = () => (
+  <div>Sorry, you don't have access to see this page</div>
+);
 
 const App = () => {
   const [context, setContext] = useState<AppContextShape>(Hippo);
@@ -41,42 +45,37 @@ const App = () => {
           <div className="top-svg">
             <BottomSvg />
           </div>
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/clusters" component={Clusters} />
-            <Route exact path="/:cluster" component={ClusterHome} />
-            <Route path="/:cluster/myaccount" component={AccountInfo} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/clusters" element={<Clusters />} />
+            <Route path="/:cluster" element={<ClusterHome />} />
+            <Route path="/:cluster/myaccount" element={<AccountInfo />} />
             <Route
               path="/:cluster/pendingapproval"
-              component={PendingApproval}
+              element={<PendingApproval />}
             />
-            <Route path="/:cluster/create" component={RequestForm} />
-            <ConditionalRoute
-              roles={["GroupAdmin"]}
+            <Route path="/:cluster/create" element={<RequestForm />} />
+            <Route
               path="/:cluster/approve"
-              component={Requests}
+              element={<ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}><Requests /></ShowFor>}
             />
-            <ConditionalRoute
-              roles={["GroupAdmin"]}
+            <Route
               path="/:cluster/activeaccounts"
-              component={ActiveAccounts}
+              element={<ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}><ActiveAccounts /></ShowFor>}
             />
-            <ConditionalRoute
-              roles={["ClusterAdmin"]}
+            <Route
               path="/:cluster/admin/groups"
-              component={Groups}
+              element={<ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}><Groups /></ShowFor>}
             />
-            <ConditionalRoute
-              roles={["ClusterAdmin"]}
+            <Route
               path="/:cluster/admin/clusteradmins"
-              component={ClusterAdmins}
+              element={<ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}><ClusterAdmins /></ShowFor>}
             />
-            <ConditionalRoute
-              roles={["System"]}
+            <Route
               path="/clusteradmin/clusters"
-              component={AdminClusters}
+              element={<ShowFor roles={["System"]} alternative={<Restricted />}><AdminClusters /></ShowFor>}
             />
-          </Switch>
+          </Routes>
         </div>
       </ModalProvider>
     </AppContext.Provider>

@@ -1,13 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import {
-  GroupModel,
-  IRouteParams,
-  AccountCreateModel,
-  RequestModel,
-} from "../../types";
+import { GroupModel, AccountCreateModel, RequestModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
@@ -24,15 +19,15 @@ export const RequestForm = () => {
     supervisingPI: "",
   });
 
-  const history = useHistory();
-  const { cluster: clusterName } = useParams<IRouteParams>();
+  const navigate = useNavigate();
+  const { cluster: clusterName } = useParams();
   const cluster = context.clusters.find((c) => c.name === clusterName);
 
   // load up possible groups
   useEffect(() => {
     const fetchGroups = async () => {
       const response = await authenticatedFetch(
-        `/api/${clusterName}/group/groups`
+        `/api/${clusterName}/group/groups`,
       );
 
       const groupsResult = await response.json();
@@ -62,7 +57,7 @@ export const RequestForm = () => {
         } else {
           return "An error happened, please try again.";
         }
-      }
+      },
     );
 
     const response = await req;
@@ -74,18 +69,20 @@ export const RequestForm = () => {
         ...ctx,
         openRequests: [...ctx.openRequests, { ...request }],
       }));
-      history.replace(`/${clusterName}/pendingapproval`);
+      navigate(`/${clusterName}/pendingapproval`);
     }
   };
 
-  if (
-    context.openRequests.find(
-      (r) => r.cluster === clusterName && r.action === "CreateAccount"
-    )
-  ) {
-    // there's already a request for this cluster, redirect to pending page
-    return <Redirect to={`/${clusterName}/pendingapproval`} />;
-  }
+  useEffect(() => {
+    if (
+      context.openRequests.find(
+        (r) => r.cluster === clusterName && r.action === "CreateAccount",
+      )
+    ) {
+      // there's already a request for this cluster, redirect to pending page
+      navigate(`/${clusterName}/pendingapproval`);
+    }
+  }, [clusterName, context.openRequests, navigate]);
 
   return (
     <div className="row justify-content-center">

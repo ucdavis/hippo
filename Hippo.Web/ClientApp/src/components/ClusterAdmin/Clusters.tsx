@@ -22,7 +22,7 @@ const defaultCluster: Cluster = {
 
 export const Clusters = () => {
   const [notification, setNotification] = usePromiseNotification();
-  const [clusterModels, setClusters] = useState<ClusterModel[]>([]);
+  const [clusterModels, setClusters] = useState<ClusterModel[]>();
   const [editClusterModel, setEditClusterModel] = useState<ClusterModel>({
     cluster: { ...defaultCluster },
   });
@@ -205,7 +205,7 @@ export const Clusters = () => {
       setEditClusterModel,
       notification.pending,
       editConfirmationTitle,
-    ]
+    ],
   );
 
   const [getDetailsConfirmation] = useConfirmationDialog<ClusterModel>(
@@ -290,7 +290,7 @@ export const Clusters = () => {
       setEditClusterModel,
       notification.pending,
       editConfirmationTitle,
-    ]
+    ],
   );
 
   const [getRemoveConfirmation] = useConfirmationDialog<string>(
@@ -298,13 +298,12 @@ export const Clusters = () => {
       title: "Remove Cluster",
       message: "Are you sure you want to remove this cluster?",
     },
-    []
+    [],
   );
 
   useEffect(() => {
     const fetchClusters = async () => {
       const response = await authenticatedFetch(`/api/clusteradmin/clusters`);
-
       if (response.ok) {
         setClusters(await response.json());
       } else {
@@ -335,7 +334,7 @@ export const Clusters = () => {
       }
       //todo deal with error
     },
-    [clusterModels, getRemoveConfirmation, setNotification]
+    [clusterModels, getRemoveConfirmation, setNotification],
   );
 
   const handleCreate = async () => {
@@ -367,8 +366,8 @@ export const Clusters = () => {
       const newCluster = await response.json();
       setClusters(
         [...clusterModels, newCluster].sort((a, b) =>
-          a.cluster.name.localeCompare(b.cluster.name)
-        )
+          a.cluster.name.localeCompare(b.cluster.name),
+        ),
       );
       setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
     }
@@ -377,7 +376,7 @@ export const Clusters = () => {
   const handleEdit = useCallback(
     async (id: number) => {
       const editClusterModel = clusterModels.filter(
-        (m) => m.cluster.id === id
+        (m) => m.cluster.id === id,
       )[0];
       setEditClusterModel({
         cluster: { ...editClusterModel.cluster },
@@ -411,18 +410,18 @@ export const Clusters = () => {
         setClusters(
           clusterModels
             .map((m) => (m.cluster.id === id ? newCluster : m))
-            .sort((a, b) => a.cluster.name.localeCompare(b.cluster.name))
+            .sort((a, b) => a.cluster.name.localeCompare(b.cluster.name)),
         );
         setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
       }
     },
-    [clusterModels, getEditConfirmation, setNotification]
+    [clusterModels, getEditConfirmation, setNotification],
   );
 
   const handleDetails = useCallback(
     async (id: number) => {
       const editClusterModel = clusterModels.filter(
-        (m) => m.cluster.id === id
+        (m) => m.cluster.id === id,
       )[0];
       setEditClusterModel({
         cluster: { ...editClusterModel.cluster },
@@ -431,7 +430,7 @@ export const Clusters = () => {
       setEditConfirmationTitle("Cluster Details");
       await getDetailsConfirmation();
     },
-    [clusterModels, getDetailsConfirmation]
+    [clusterModels, getDetailsConfirmation],
   );
 
   const columns: Column<ClusterModel>[] = useMemo(
@@ -494,12 +493,12 @@ export const Clusters = () => {
         ),
       },
     ],
-    [handleEdit, handleRemove, notification.pending]
+    [handleDetails, handleEdit, handleRemove, notification.pending],
   );
 
   const clusterModelsData = useMemo(() => clusterModels ?? [], [clusterModels]);
 
-  if (notification.pending) {
+  if (!clusterModels) {
     return (
       <div className="row justify-content-center">
         <div className="col-md-8">Loading...</div>

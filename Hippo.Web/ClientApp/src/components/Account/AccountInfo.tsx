@@ -1,12 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import {
-  AddToGroupModel,
-  GroupModel,
-  IRouteParams,
-  RequestModel,
-} from "../../types";
+import { AddToGroupModel, GroupModel, RequestModel } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -19,9 +14,10 @@ import SshKeyInput from "../../Shared/SshKeyInput";
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [context, setContext] = useContext(AppContext);
-  const { cluster: clusterName } = useParams<IRouteParams>();
+  const { cluster: clusterName } = useParams();
   const account = context.accounts.find((a) => a.cluster === clusterName);
   const cluster = context.clusters.find((c) => c.name === clusterName);
+  const navigate = useNavigate();
 
   const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
 
@@ -29,7 +25,7 @@ export const AccountInfo = () => {
   useEffect(() => {
     const fetchGroups = async () => {
       const response = await authenticatedFetch(
-        `/api/${clusterName}/group/groups`
+        `/api/${clusterName}/group/groups`,
       );
 
       if (response.ok) {
@@ -37,8 +33,8 @@ export const AccountInfo = () => {
           ((await response.json()) as GroupModel[]).filter(
             (g) =>
               !currentGroups.some((cg) => cg.id === g.id) &&
-              !context.openRequests.some((r) => r.groupModel.id === g.id)
-          )
+              !context.openRequests.some((r) => r.groupModel.id === g.id),
+          ),
         );
       } else {
         alert("Error fetching groups");
@@ -90,7 +86,7 @@ export const AccountInfo = () => {
       },
       canConfirm: (returnValue) => returnValue !== undefined,
     },
-    [groups]
+    [groups],
   );
 
   const [getSshKeyConfirmation] = useConfirmationDialog<string>(
@@ -121,7 +117,7 @@ export const AccountInfo = () => {
       },
       canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
     },
-    []
+    [],
   );
 
   const handleRequestAccess = useCallback(async () => {
@@ -132,7 +128,7 @@ export const AccountInfo = () => {
         {
           method: "POST",
           body: JSON.stringify(addToGroupModel),
-        }
+        },
       );
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
@@ -168,7 +164,7 @@ export const AccountInfo = () => {
             accountId: account?.id,
             sshKey: sshKey,
           }),
-        }
+        },
       );
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
@@ -184,15 +180,17 @@ export const AccountInfo = () => {
     }
   }, [account?.id, clusterName, getSshKeyConfirmation, setNotification]);
 
-  if (!account) {
-    const request = context.openRequests.find(
-      (r) => r.cluster === clusterName && r.action === "CreateAccount"
-    );
-    if (request) {
-      return <Redirect to={`/${clusterName}/pendingapproval`} />;
+  useEffect(() => {
+    if (!account) {
+      const request = context.openRequests.find(
+        (r) => r.cluster === clusterName && r.action === "CreateAccount",
+      );
+      if (request) {
+        navigate(`/${clusterName}/pendingapproval`);
+      }
+      navigate(`/${clusterName}/create`);
     }
-    return <Redirect to={`/${clusterName}/create`} />;
-  }
+  }, [account, clusterName, context.openRequests, navigate]);
 
   return (
     <>
