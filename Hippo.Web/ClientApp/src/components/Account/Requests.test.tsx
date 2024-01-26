@@ -73,7 +73,9 @@ it("shows approval button for each pending account", async () => {
     </MemoryRouter>,
   );
 
-  expect(await screen.findAllByTestId("approveButton")).toHaveLength(2);
+  expect(
+    await screen.findAllByRole("button", { name: "Approve" }),
+  ).toHaveLength(2);
 });
 
 it("shows reject button for each pending account", async () => {
@@ -83,7 +85,9 @@ it("shows reject button for each pending account", async () => {
     </MemoryRouter>,
   );
 
-  expect(await screen.findAllByTestId("rejectButton")).toHaveLength(2);
+  expect(await screen.findAllByRole("button", { name: "Reject" })).toHaveLength(
+    2,
+  );
 });
 
 // //Enable this when the test works
@@ -102,7 +106,7 @@ it("displays dialog when reject is clicked", async () => {
     await screen.findByText("There are 2 request(s) awaiting approval"),
   ).toBeVisible();
 
-  await user.click(screen.getAllByTestId("rejectButton")[0]);
+  await user.click(screen.getAllByRole("button", { name: "Reject" })[0]);
 
   expect(await screen.findByText("Reject Request")).toBeVisible();
 });
@@ -122,7 +126,7 @@ it("calls approve and filters list when approve is clicked", async () => {
     await screen.findByText("There are 2 request(s) awaiting approval"),
   ).toBeVisible();
 
-  await user.click(screen.getAllByTestId("approveButton")[0]);
+  await user.click(screen.getAllByRole("button", { name: "Approve" })[0]);
 
   expect(global.fetch).toHaveBeenCalledTimes(2);
   expect(global.fetch).toHaveBeenCalledWith(

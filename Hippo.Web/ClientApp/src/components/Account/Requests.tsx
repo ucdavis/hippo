@@ -109,7 +109,6 @@ export const Requests = () => {
           <>
             <button
               id="approveButton"
-              data-testid="approveButton"
               disabled={notification.pending}
               onClick={() => handleApprove(props.row.original)}
               className="btn btn-primary"

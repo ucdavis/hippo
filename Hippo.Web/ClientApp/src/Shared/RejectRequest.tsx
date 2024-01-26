@@ -77,7 +77,6 @@ export const RejectRequest = (props: Props) => {
   return (
     <button
       id="rejectButton"
-      data-testid="rejectButton"
       disabled={props.disabled === true}
       onClick={reject}
       className="btn btn-danger"

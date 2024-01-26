@@ -14,7 +14,6 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
   return (
     <Typeahead
       id="groupTypeahead"
-      data-testid="groupTypeahead"
       options={options}
       selected={groupSelection}
       placeholder="Select a group"
