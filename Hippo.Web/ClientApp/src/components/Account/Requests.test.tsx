@@ -37,9 +37,6 @@ beforeEach(() => {
   });
 
   (global as any).Hippo = fakeGroupAdminAppContext;
-  // container = document.createElement("div");
-  // document.body.appendChild(container);
-  // root = ReactDOM.createRoot(container);
 
   global.fetch = jest.fn().mockImplementation((x) =>
     responseMap(x, {
