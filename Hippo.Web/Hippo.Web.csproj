@@ -10,6 +10,8 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>c14737e0-e801-4dfa-bc8d-ce9130c807c6</UserSecretsId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.19" />
     <PackageReference Include="MvcReact" Version="1.0.1" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.0.2" />
     <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
     <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="1.1.4" />
     <PackageReference Include="Serilog.Exceptions" Version="8.0.0" />
