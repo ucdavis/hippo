@@ -36,6 +36,7 @@ namespace Hippo.Core.Domain
         public string SupervisingPI { get; set; } = "";
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
+        public List<QueuedEvent> QueuedEvents { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +74,7 @@ namespace Hippo.Core.Domain
             public const string Rejected = "Rejected";
             public const string Processing = "Processing";
             public const string Completed = "Completed";
+            public const string Canceled = "Canceled";
         }
     }
 }
