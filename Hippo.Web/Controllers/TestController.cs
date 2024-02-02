@@ -56,7 +56,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            var results = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
+            var results = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
 
             return Content(results);
         }
