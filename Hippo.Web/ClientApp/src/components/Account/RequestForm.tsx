@@ -69,7 +69,7 @@ export const RequestForm = () => {
         ...ctx,
         openRequests: [...ctx.openRequests, { ...request }],
       }));
-      navigate(`/${clusterName}/pendingapproval`);
+      navigate(`/${clusterName}/accountstatus`);
     }
   };
 
@@ -80,7 +80,7 @@ export const RequestForm = () => {
       )
     ) {
       // there's already a request for this cluster, redirect to pending page
-      navigate(`/${clusterName}/pendingapproval`);
+      navigate(`/${clusterName}/accountstatus`);
     }
   }, [clusterName, context.openRequests, navigate]);
 

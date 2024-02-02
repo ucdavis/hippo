@@ -203,7 +203,6 @@ namespace Hippo.Web
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)
         {
-            // TODO: DB config/init
             ConfigureDb(dbContext);
 
             if (env.IsDevelopment())
@@ -244,11 +243,11 @@ namespace Hippo.Web
                     constraints: new { controller = "(home|system)" }
                 );
 
-                // clusteradmin and puppetqueue API routes don't include a {cluster} segment
+                // clusteradmin and eventqueue API routes don't include a {cluster} segment
                 endpoints.MapControllerRoute(
                     name: "clusteradminAPI",
                     pattern: "/api/{controller}/{action=Index}/{id?}",
-                    constraints: new { controller = "(clusteradmin|puppetqueue)" });
+                    constraints: new { controller = "(clusteradmin|eventqueue)" });
 
                 // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(

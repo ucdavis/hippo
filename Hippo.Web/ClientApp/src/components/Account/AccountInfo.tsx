@@ -186,7 +186,7 @@ export const AccountInfo = () => {
         (r) => r.cluster === clusterName && r.action === "CreateAccount",
       );
       if (request) {
-        navigate(`/${clusterName}/pendingapproval`);
+        navigate(`/${clusterName}/accountstatus`);
       }
       navigate(`/${clusterName}/create`);
     }

@@ -119,23 +119,10 @@ public class RequestController : SuperController
             return Forbid();
         }
 
-        var account = new Account
+        var result = await _accountUpdateService.QueueCreateAccount(group, request);
+        if (result.IsError)
         {
-            Name = request.Requester.Name,
-            Email = request.Requester.Email,
-            Kerberos = request.Requester.Kerberos,
-            Owner = request.Requester,
-            Cluster = request.Cluster,
-            SshKey = request.SshKey,
-            MemberOfGroups = new List<Group> { group },
-        };
-
-        await _dbContext.Accounts.AddAsync(account);
-
-        if (!await _accountUpdateService.UpdateAccount(account, group))
-        {
-            // It could be that ssh is down
-            return BadRequest("Error updating account. Please try again later.");
+            return BadRequest($"Error queuing {QueuedEvent.Actions.CreateAccount} request: {result.Message}");
         }
 
         request.Status = AccountRequest.Statuses.Processing;
@@ -184,11 +171,10 @@ public class RequestController : SuperController
             return BadRequest("No account found for this request");
         }
 
-
-        if (!await _accountUpdateService.UpdateAccount(account, group))
+        var result = await _accountUpdateService.QueueAddAccountToGroup(account, group, request);
+        if (result.IsError)
         {
-            // It could be that ssh is down
-            return BadRequest("Error updating account. Please try again later.");
+            return BadRequest($"Error queuing {QueuedEvent.Actions.AddAccountToGroup} request: {result.Message}");
         }
 
         request.Status = AccountRequest.Statuses.Processing;

@@ -9,7 +9,7 @@ import BottomSvg from "./Shared/bottomSvg";
 import { ClusterHome, Home } from "./components/Home";
 import { AccountInfo } from "./components/Account/AccountInfo";
 import { RequestForm } from "./components/Account/RequestForm";
-import { PendingApproval } from "./components/Account/PendingApproval";
+import { AccountStatus } from "./components/Account/AccountStatus";
 import { Requests } from "./components/Account/Requests";
 import { ActiveAccounts } from "./components/Account/ActiveAccounts";
 import { ClusterAdmins } from "./components/Admin/ClusterAdmins";
@@ -33,7 +33,7 @@ const App = () => {
 
   const accountClassName = useMemo(
     () => loc.pathname.replace("/", ""),
-    [loc.pathname]
+    [loc.pathname],
   );
 
   return (
@@ -50,30 +50,47 @@ const App = () => {
             <Route path="/clusters" element={<Clusters />} />
             <Route path="/:cluster" element={<ClusterHome />} />
             <Route path="/:cluster/myaccount" element={<AccountInfo />} />
-            <Route
-              path="/:cluster/pendingapproval"
-              element={<PendingApproval />}
-            />
+            <Route path="/:cluster/accountstatus" element={<AccountStatus />} />
             <Route path="/:cluster/create" element={<RequestForm />} />
             <Route
               path="/:cluster/approve"
-              element={<ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}><Requests /></ShowFor>}
+              element={
+                <ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}>
+                  <Requests />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/activeaccounts"
-              element={<ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}><ActiveAccounts /></ShowFor>}
+              element={
+                <ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}>
+                  <ActiveAccounts />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/admin/groups"
-              element={<ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}><Groups /></ShowFor>}
+              element={
+                <ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}>
+                  <Groups />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/admin/clusteradmins"
-              element={<ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}><ClusterAdmins /></ShowFor>}
+              element={
+                <ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}>
+                  <ClusterAdmins />
+                </ShowFor>
+              }
             />
             <Route
               path="/clusteradmin/clusters"
-              element={<ShowFor roles={["System"]} alternative={<Restricted />}><AdminClusters /></ShowFor>}
+              element={
+                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                  <AdminClusters />
+                </ShowFor>
+              }
             />
           </Routes>
         </div>
