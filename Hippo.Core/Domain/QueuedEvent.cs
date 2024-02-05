@@ -23,7 +23,6 @@ public class QueuedEvent
         modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.Status);
         modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.CreatedAt);
         modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.UpdatedAt);
-        modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.RequestId);
         modelBuilder.Entity<QueuedEvent>().HasOne(qe => qe.Request)
             .WithMany(r => r.QueuedEvents)
             .HasForeignKey(qe => qe.RequestId)
