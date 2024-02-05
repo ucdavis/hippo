@@ -194,7 +194,14 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAccountUpdateService, AccountUpdateService>();
+            if (Configuration.GetValue<bool>("EventQueueEnabled"))
+            {
+                services.AddScoped<IAccountUpdateService, AccountUpdateService>();
+            }
+            else
+            {
+                services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
+            }
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddHttpContextAccessor();
             services.AddScoped<IMjmlRenderer, MjmlRenderer>();
