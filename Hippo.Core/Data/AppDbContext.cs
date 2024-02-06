@@ -39,6 +39,7 @@ namespace Hippo.Core.Data
         public virtual DbSet<GroupMemberAccount> GroupMemberAccount { get; set; }
         public virtual DbSet<TempGroup> TempGroups { get; set; }
         public virtual DbSet<TempKerberos> TempKerberos { get; set; }
+        public virtual DbSet<QueuedEvent> QueuedEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -53,6 +54,7 @@ namespace Hippo.Core.Data
             Request.OnModelCreating(builder);
             Domain.GroupAdminAccount.OnModelCreating(builder);
             Domain.GroupMemberAccount.OnModelCreating(builder);
+            QueuedEvent.OnModelCreating(builder);
         }
     }
  }

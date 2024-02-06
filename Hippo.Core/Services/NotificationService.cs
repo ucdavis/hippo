@@ -81,7 +81,7 @@ namespace Hippo.Core.Services
                     model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
                 }
 
-                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecission_mjml.cshtml", model);
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
 
                 await _emailService.SendEmail(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
 
@@ -151,7 +151,7 @@ namespace Hippo.Core.Services
                 };
 
 
-                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecission_mjml.cshtml", model);
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
 
                 await _emailService.SendEmail(emails, ccEmails: new[] { adminUser.Email }, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
 

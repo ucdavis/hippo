@@ -19,6 +19,7 @@ using MvcReact;
 using Microsoft.Extensions.Options;
 using Hippo.Web.Extensions;
 using Mjml.Net;
+using NSwag.Generation.Processors.Security;
 
 namespace Hippo.Web
 {
@@ -164,11 +165,23 @@ namespace Hippo.Web
                 });
             }
 
-            // TODO: authorization
+            // Add NSwag (OpenAPI/Swagger) services
+            services.AddOpenApiDocument(document =>
+            {
+                // add security definition for api key
+                document.DocumentProcessors.Add(
+                    new SecurityDefinitionAppender("apikey", new NSwag.OpenApiSecurityScheme
+                    {
+                        Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
+                        Name = ApiKeyConstants.ApiKeyHeaderName,
+                        In = NSwag.OpenApiSecurityApiKeyLocation.Header,
+                        Description = "API Key Authentication"
+                    })
+                );
+                // include api key in request headers
+                document.OperationProcessors.Add(new OperationSecurityScopeProcessor("apikey"));
+            });
 
-            // TODO: config
-
-            // TODO: DI
             //Settings:
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
@@ -181,15 +194,22 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAccountUpdateService, AccountUpdateService>();
+            if (Configuration.GetValue<bool>("EventQueueEnabled"))
+            {
+                services.AddScoped<IAccountUpdateService, AccountUpdateService>();
+            }
+            else
+            {
+                services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
+            }
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddHttpContextAccessor();
             services.AddScoped<IMjmlRenderer, MjmlRenderer>();
+            services.AddScoped<ApiKeyAuthFilter>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)
         {
-            // TODO: DB config/init
             ConfigureDb(dbContext);
 
             if (env.IsDevelopment())
@@ -214,6 +234,9 @@ namespace Hippo.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseOpenApi();
+            app.UseSwaggerUi();
+
             app.UseMiddleware<LogUserNameMiddleware>();
             app.UseSerilogRequestLogging();
 
@@ -227,11 +250,11 @@ namespace Hippo.Web
                     constraints: new { controller = "(home|system)" }
                 );
 
-                // clusteradmin API routes don't include a {cluster} segment
+                // clusteradmin and eventqueue API routes don't include a {cluster} segment
                 endpoints.MapControllerRoute(
                     name: "clusteradminAPI",
                     pattern: "/api/{controller}/{action=Index}/{id?}",
-                    constraints: new { controller = "(clusteradmin)" });
+                    constraints: new { controller = "(clusteradmin|eventqueue)" });
 
                 // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(

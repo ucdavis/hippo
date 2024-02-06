@@ -56,6 +56,8 @@ namespace Hippo.Core.Domain
             public const string PuppetDataSynced = "Puppet Data Synced";
             public const string RoleRemoved = "Role Removed";
             public const string RoleAdded = "Role Added";
+            public const string QueuedEventCreated = "Queued Event Created";
+            public const string QueuedEventUpdated = "Queued Event Updated";
 
             public static List<string> TypeList = new List<string>
             {
@@ -67,7 +69,9 @@ namespace Hippo.Core.Domain
                 Processing,
                 PuppetDataSynced,
                 RoleRemoved,
-                RoleAdded
+                RoleAdded,
+                QueuedEventCreated,
+                QueuedEventUpdated
             }.ToList();
         }
     }

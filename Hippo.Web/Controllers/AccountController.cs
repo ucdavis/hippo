@@ -186,10 +186,11 @@ public class AccountController : SuperController
 
         existingAccount.SshKey = model.SshKey;
 
-        if (!await _accountUpdateService.UpdateAccount(existingAccount))
+        var result = await _accountUpdateService.QueueUpdateSshKey(existingAccount, model.SshKey);
+        if (result.IsError)
         {
-            // It could be that ssh is down
-            return BadRequest("Error updating account. Please try again later.");
+            // shouldn't ever get here, but just in case
+            return BadRequest($"Error queuing {QueuedEvent.Actions.UpdateSshKey}. The error has been logged for review. Please try again later.");
         }
 
         // safe to assume admin override if current user is not the owner

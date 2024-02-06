@@ -246,6 +246,50 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("Permissions");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.QueuedEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RequestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("QueuedEvents");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
                 {
                     b.Property<int>("Id")
@@ -501,6 +545,16 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.QueuedEvent", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Request", "Request")
+                        .WithMany("QueuedEvents")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Request");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
                 {
                     b.HasOne("Hippo.Core.Domain.User", "Actor")
@@ -532,6 +586,11 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Accounts");
 
                     b.Navigation("Groups");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
+                {
+                    b.Navigation("QueuedEvents");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>

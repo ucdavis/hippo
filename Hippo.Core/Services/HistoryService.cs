@@ -1,6 +1,7 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Migrations.Sqlite;
+using Hippo.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace Hippo.Core.Services
 {
     public interface IHistoryService
     {
-        Task AddHistory(History history);
+        Task AddHistory(History history, string clusterName = null);
     }
 
     public class HistoryService : IHistoryService
@@ -39,19 +40,23 @@ namespace Hippo.Core.Services
             _dbContext = dbContext;
         }
 
-        public async Task AddHistory(History history)
+        public async Task AddHistory(History history, string clusterName = null)
         {
             if (history.ActedBy == null && _userService != null)
             {
                 history.ActedBy = await _userService.GetCurrentUser();
             }
 
-            if (history.ClusterId == 0 && _httpContextAccessor != null)
+            if (history.ClusterId == 0)
             {
-                var cluster = _httpContextAccessor.HttpContext.GetRouteValue("cluster") as string;
-                if (!string.IsNullOrWhiteSpace(cluster))
+                if (string.IsNullOrWhiteSpace(clusterName) && _httpContextAccessor != null)
                 {
-                    history.ClusterId = await _dbContext.Clusters.AsNoTracking().Where(c => c.Name == cluster).Select(c => c.Id).SingleOrDefaultAsync();
+                    clusterName = _httpContextAccessor.HttpContext.GetRouteValue("cluster") as string;
+                }
+
+                if (!string.IsNullOrWhiteSpace(clusterName))
+                {
+                    history.ClusterId = await _dbContext.Clusters.Where(c => c.Name == clusterName).Select(c => c.Id).SingleOrDefaultAsync();
                 }
             }
 
@@ -116,6 +121,32 @@ namespace Hippo.Core.Services
                 ClusterId = perm.ClusterId ?? 0,
                 AdminAction = true
             };
+        }
+
+        public static async Task QueuedEventCreated(this IHistoryService historyService, QueuedEvent queuedEvent)
+        {
+            // convert the QueuedEvent to a QueuedEventModel for cleaner serialization
+            var queuedEventModel = QueuedEventModel.FromQueuedEvent(queuedEvent);
+            var history = new History
+            {
+                Action = Actions.QueuedEventCreated,
+                Details = Serialize(queuedEventModel),
+                ActedDate = DateTime.UtcNow
+            };
+            await historyService.AddHistory(history, queuedEventModel.Data.Cluster);
+        }
+
+        public static async Task QueuedEventUpdated(this IHistoryService historyService, QueuedEvent queuedEvent)
+        {
+            // convert the QueuedEvent to a QueuedEventModel for cleaner serialization
+            var queuedEventModel = QueuedEventModel.FromQueuedEvent(queuedEvent);
+            var history = new History
+            {
+                Action = Actions.QueuedEventUpdated,
+                Details = Serialize(queuedEventModel),
+                ActedDate = DateTime.UtcNow
+            };
+            await historyService.AddHistory(history, queuedEventModel.Data.Cluster);
         }
 
         public static async Task RequestCreated(this IHistoryService historyService, Request request, string note = "")
