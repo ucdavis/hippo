@@ -20,6 +20,10 @@ export const AccountInfo = () => {
   const navigate = useNavigate();
 
   const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
+  const currentOpenRequests = useMemo(
+    () => context.openRequests.filter((r) => r.cluster === clusterName),
+    [context.openRequests, clusterName],
+  );
 
   const [groups, setGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
@@ -33,7 +37,7 @@ export const AccountInfo = () => {
           ((await response.json()) as GroupModel[]).filter(
             (g) =>
               !currentGroups.some((cg) => cg.id === g.id) &&
-              !context.openRequests.some((r) => r.groupModel.id === g.id),
+              !currentOpenRequests.some((r) => r.groupModel.id === g.id),
           ),
         );
       } else {
@@ -42,7 +46,7 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [clusterName, context.openRequests, currentGroups]);
+  }, [clusterName, currentOpenRequests, currentGroups]);
 
   const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -182,7 +186,7 @@ export const AccountInfo = () => {
 
   useEffect(() => {
     if (!account) {
-      const request = context.openRequests.find(
+      const request = currentOpenRequests.find(
         (r) => r.cluster === clusterName && r.action === "CreateAccount",
       );
       if (request) {
@@ -190,7 +194,7 @@ export const AccountInfo = () => {
       }
       navigate(`/${clusterName}/create`);
     }
-  }, [account, clusterName, context.openRequests, navigate]);
+  }, [account, clusterName, currentOpenRequests, navigate]);
 
   return (
     <>
@@ -216,12 +220,12 @@ export const AccountInfo = () => {
             ))}
           </CardColumns>
 
-          {Boolean(context.openRequests.length) && (
+          {Boolean(currentOpenRequests.length) && (
             <>
               <p>You have pending requests for the following group(s):</p>
 
               <CardColumns>
-                {context.openRequests.map((r, i) => (
+                {currentOpenRequests.map((r, i) => (
                   <div className="group-card-admin" key={i}>
                     <GroupInfo group={r.groupModel} />
                   </div>
