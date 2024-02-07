@@ -16,7 +16,7 @@ interface Props {
 export const ShowFor = (props: Props) => {
   const { children, roles, alternative } = props;
   const [context] = useContext(AppContext);
-  const match = useMatch("/:cluster/:path");
+  const match = useMatch("/:cluster/*");
   const cluster = match?.params.cluster;
 
   const conditionSatisfied = isBoolean(props.condition)
