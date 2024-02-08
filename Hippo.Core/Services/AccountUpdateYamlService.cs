@@ -28,7 +28,7 @@ public class AccountUpdateYamlService : IAccountUpdateService
         {
             var connectionInfo = await _dbContext.Clusters.GetSshConnectionInfo(queuedEventModel.Data.Cluster);
             var tempFileName = $"/var/lib/remote-api/.{kerberos}.yaml";
-            var fileName = $"/var/lib/remote-api/.{kerberos}.yaml";
+            var fileName = $"/var/lib/remote-api/{kerberos}.yaml";
             var yaml = GetYaml(queuedEventModel);
             await _sshService.PlaceFile(yaml, tempFileName, connectionInfo);
             await _sshService.RenameFile(tempFileName, fileName, connectionInfo);
