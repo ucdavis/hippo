@@ -150,29 +150,30 @@ export const RequestForm = () => {
             <br />
             <br />
             <p className="form-helper">
-              To generate a ssh key pair please see this link:{" "}
+              For information on generating a ssh key pair, see this link:{" "}
               <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
                 https://hpc.ucdavis.edu/faq#ssh-key
               </a>
             </p>
             <p className="form-helper">
-              You will find instructions here for Windows, OS X, and Linux
-              environments. Windows users: an openssh or SSH2 formatted ssh
-              public key is required. See screenshots.
+              For common issues and questions, see this link:{" "}
+              <a href="https://hpc.ucdavis.edu/faq" target={"blank"}>
+                https://hpc.ucdavis.edu/faq
+              </a>
             </p>
             <p className="form-helper">
-              (If your public key resides in the default location for OS X and
-              Linux, ~/.ssh/, right click in the Name column of the window that
-              will open when you click "Choose File" above. Select "Show Hidden
-              Files".)
+              To learn about Linux commands and scripts, see this link:{" "}
+              <a href="https://hpc.ucdavis.edu/helpdocs" target={"blank"}>
+                https://hpc.ucdavis.edu/helpdocs
+              </a>
             </p>
             <p className="form-helper">
-              For more information on SSH keys, please see{" "}
+              Data Science Training tutorials:{" "}
               <a
-                href="https://wiki.cse.ucdavis.edu/support:general:security:ssh"
+                href="https://ngs-docs.github.io/2021-august-remote-computing/index.html"
                 target={"blank"}
               >
-                https://wiki.cse.ucdavis.edu/support:general:security:ssh
+                https://ngs-docs.github.io/2021-august-remote-computing/index.html
               </a>
             </p>
           </div>
