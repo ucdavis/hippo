@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Hippo.Core.Domain
 {
-    public class Cluster
+    public class Cluster : IValidatableObject
     {
         [Key]
         public int Id { get; set; }
@@ -33,6 +33,7 @@ namespace Hippo.Core.Domain
         [EmailAddress]
         public string Email { get; set; } = String.Empty;
         public bool EnableUserSshKey { get; set; } = true;
+        public bool EnableOpenOnDemand { get; set; }
 
         [JsonIgnore]
         public List<Account> Accounts { get; set; }
@@ -57,13 +58,22 @@ namespace Hippo.Core.Domain
                 .HasOne(a => a.Cluster)
                 .WithMany(a => a.Groups)
                 .HasForeignKey(a => a.ClusterId)
-                .OnDelete(DeleteBehavior.Restrict);                
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Permission>()
                 .HasOne(p => p.Cluster)
                 .WithMany()
                 .HasForeignKey(p => p.ClusterId)
-                .OnDelete(DeleteBehavior.Restrict);                 
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!EnableOpenOnDemand && !EnableUserSshKey)
+            {
+                yield return new ValidationResult(
+                    "At least one of Enable Open OnDemand or Enable User SSH Key must be selected.");
+            }
         }
     }
 }

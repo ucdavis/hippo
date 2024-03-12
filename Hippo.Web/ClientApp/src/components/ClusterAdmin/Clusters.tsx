@@ -18,6 +18,7 @@ const defaultCluster: Cluster = {
   domain: "",
   email: "",
   enableUserSshKey: false,
+  enableOpenOnDemand: false,
 };
 
 export const Clusters = () => {
@@ -193,6 +194,28 @@ export const Clusters = () => {
               Enable User SSH Keys
             </label>
           </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              id="fieldEnableOpenOnDemand"
+              type="checkbox"
+              checked={editClusterModel.cluster.enableOpenOnDemand}
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  cluster: {
+                    ...editClusterModel.cluster,
+                    enableOpenOnDemand: e.target.checked,
+                  },
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+            <label className="form-check-label" htmlFor="enableOpenOnDemand">
+              Enable Open OnDemand
+            </label>
+          </div>
         </>
       ),
       canConfirm:
@@ -211,7 +234,7 @@ export const Clusters = () => {
   const [getDetailsConfirmation] = useConfirmationDialog<ClusterModel>(
     {
       title: editConfirmationTitle,
-      message: (setReturn) => (
+      message: () => (
         <>
           <div className="form-group">
             <label htmlFor="fieldName">Name</label>
@@ -279,6 +302,21 @@ export const Clusters = () => {
             />
             <label className="form-check-label" htmlFor="fieldEnableUserSshKey">
               Enable User SSH Keys
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              id="fieldEnableOpenOnDemand"
+              type="checkbox"
+              checked={editClusterModel.cluster.enableOpenOnDemand}
+              disabled
+            />
+            <label
+              className="form-check-label"
+              htmlFor="fieldEnableOpenOnDemand"
+            >
+              Enable Open OnDemand
             </label>
           </div>
         </>

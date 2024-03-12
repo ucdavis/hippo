@@ -57,6 +57,7 @@ export interface Cluster {
   domain: string;
   email: string;
   enableUserSshKey: boolean;
+  enableOpenOnDemand: boolean;
 }
 
 export interface AccountCreateModel {

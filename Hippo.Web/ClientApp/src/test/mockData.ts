@@ -100,6 +100,7 @@ const fakeCluster: Cluster = {
   domain: "repo/yaml/path.yml",
   email: "an-email@address.com",
   enableUserSshKey: true,
+  enableOpenOnDemand: true,
 };
 
 export const fakeAppContext: AppContextShape = {
