@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AddToGroupModel, GroupModel, RequestModel } from "../../types";
+import { AddToGroupModel, GroupModel } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -146,10 +146,14 @@ export const AccountInfo = () => {
 
       const response = await request;
       if (response.ok) {
-        const newRequest = (await response.json()) as RequestModel;
+        const r = await response.json();
+
         setContext((c) => ({
           ...c,
-          openRequests: [...c.openRequests, newRequest],
+          openRequests: [
+            ...c.openRequests,
+            { ...r, data: r.data && JSON.parse(r.data) },
+          ],
         }));
         setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));
       }
@@ -243,7 +247,7 @@ export const AccountInfo = () => {
             >
               Request Access to Another Group
             </button>{" "}
-            {cluster.enableUserSshKey && (
+            {cluster.accessTypes.includes("SshKey") && (
               <button
                 disabled={notification.pending || groups.length === 0}
                 onClick={() => handleUpdateSshKey()}

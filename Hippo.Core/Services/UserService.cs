@@ -211,7 +211,9 @@ namespace Hippo.Core.Services
 
         public async Task<string> GetAvailableClustersJsonAsync()
         {
-            var clusters = await _dbContext.Clusters.ToArrayAsync();
+            var clusters = await _dbContext.Clusters
+                .Select(ClusterModel.Projection)
+                .ToArrayAsync();
             return JsonSerializer.Serialize(clusters, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 

@@ -2,26 +2,27 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { GroupModel, AccountCreateModel, RequestModel } from "../../types";
+import { GroupModel, AccountCreateModel, AccessType } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
+import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
   const [notification, setNotification] = usePromiseNotification();
 
+  const navigate = useNavigate();
+  const { cluster: clusterName } = useParams();
   const [groups, setGroups] = useState<GroupModel[]>([]);
+  const cluster = context.clusters.find((c) => c.name === clusterName);
   const [request, setRequest] = useState<AccountCreateModel>({
     groupId: 0,
     sshKey: "",
     supervisingPI: "",
+    accessTypes: [...cluster.accessTypes],
   });
-
-  const navigate = useNavigate();
-  const { cluster: clusterName } = useParams();
-  const cluster = context.clusters.find((c) => c.name === clusterName);
 
   // load up possible groups
   useEffect(() => {
@@ -63,11 +64,14 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const request = (await response.json()) as RequestModel;
+      const r = await response.json();
 
       setContext((ctx) => ({
         ...ctx,
-        openRequests: [...ctx.openRequests, { ...request }],
+        openRequests: [
+          ...ctx.openRequests,
+          { ...r, data: r.data && JSON.parse(r.data) },
+        ],
       }));
       navigate(`/${clusterName}/accountstatus`);
     }
@@ -127,16 +131,32 @@ export const RequestForm = () => {
             supervising PI will be. If you are unsure, please ask your sponsor.
           </p>
         </div>
-        {cluster.enableUserSshKey && (
-          <div className="form-group">
-            <label className="form-label">
-              Please paste your public SSH key.
-            </label>
-            <SshKeyInput
-              onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
-            />
-          </div>
-        )}
+        <div className="form-group">
+          <label className="form-label">Access Type</label>
+          <SearchDefinedOptions<AccessType>
+            definedOptions={cluster.accessTypes}
+            selected={request.accessTypes}
+            onSelect={(accessTypes) =>
+              setRequest((r) => ({ ...r, accessTypes }))
+            }
+            disabled={false}
+            placeHolder="Select one or more access types"
+            id="selectAccessTypes"
+          />
+        </div>
+        {cluster.accessTypes.includes("SshKey") &&
+          request.accessTypes.includes("SshKey") && (
+            <div className="form-group">
+              <label className="form-label">
+                Please paste your public SSH key.
+              </label>
+              <SshKeyInput
+                onChange={(value) =>
+                  setRequest((r) => ({ ...r, sshKey: value }))
+                }
+              />
+            </div>
+          )}
         <br />
         <button
           disabled={notification.pending}
@@ -145,7 +165,7 @@ export const RequestForm = () => {
         >
           Submit
         </button>
-        {cluster.enableUserSshKey && (
+        {cluster.accessTypes.includes("SshKey") && (
           <div>
             <br />
             <br />

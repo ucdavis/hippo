@@ -1,4 +1,6 @@
-﻿export const isString = (value: any): value is string =>
+﻿import { AccountRequestModel } from "../types";
+
+export const isString = (value: any): value is string =>
   typeof value === "string";
 export const isBoolean = (value: any): value is boolean =>
   typeof value === "boolean";
@@ -8,3 +10,8 @@ export const isFunction = (value: unknown): value is Function =>
   typeof value === "function";
 export const isPromise = (value: any): value is Promise<any> =>
   value instanceof Promise;
+export const isAccountRequest = (
+  value: AccountRequestModel,
+): value is AccountRequestModel =>
+  value &&
+  (value.action === "CreateAccount" || value.action === "AddAccountToGroup");

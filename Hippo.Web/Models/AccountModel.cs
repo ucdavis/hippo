@@ -15,6 +15,7 @@ namespace Hippo.Web.Models
         public User? Owner { get; set; }
         public List<GroupModel> MemberOfGroups { get; set; } = new();
         public List<GroupModel> AdminOfGroups { get; set; } = new();
+        public List<string> AccessTypes { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
 
         public AccountModel()
@@ -60,6 +61,7 @@ namespace Hippo.Web.Models
             })
             .OrderBy(x => x).ToList();
             UpdatedOn = account.UpdatedOn;
+            AccessTypes = account.AccessTypes.Select(at => at.Name).ToList();
         }
 
         public static Expression<Func<Account, AccountModel>> Projection
@@ -101,7 +103,8 @@ namespace Hippo.Web.Models
                                 Email = a.Email
                             }).ToList(),
                     }).OrderBy(x => x.Name).ToList(),
-                    UpdatedOn = a.UpdatedOn
+                    UpdatedOn = a.UpdatedOn,
+                    AccessTypes = a.AccessTypes.Select(at => at.Name).ToList()
                 };
             }
         }

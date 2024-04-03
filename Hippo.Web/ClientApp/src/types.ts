@@ -10,6 +10,8 @@ export interface User {
 
 export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
 
+export type AccessType = "SshKey" | "OpenOnDemand";
+
 export interface GroupAccountModel {
   kerberos: string;
   name: string;
@@ -23,16 +25,28 @@ export interface GroupModel {
   admins: GroupAccountModel[];
 }
 
-export interface RequestModel {
+interface RequestModelCommon {
   id: number;
   requesterEmail: string;
   requesterName: string;
-  action: "CreateAccount" | "AddAccountToGroup";
   groupModel: GroupModel;
   status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
   cluster: string;
-  supervisingPI: string;
 }
+
+// action-specific RequestModel fields defined here...
+export interface AccountRequestDataModel {
+  supervisingPI: string;
+  sshKey?: string;
+  accessTypes: AccessType[];
+}
+export type AccountRequestModel = RequestModelCommon & {
+  action: "CreateAccount" | "AddAccountToGroup";
+  data: AccountRequestDataModel;
+};
+
+// make RequestMode a union of all possible action-specific RequestModels (currently only one)
+export type RequestModel = AccountRequestModel;
 
 export interface AccountModel {
   id: number;
@@ -45,25 +59,14 @@ export interface AccountModel {
   memberOfGroups: GroupModel[];
   adminOfGroups: GroupModel[];
   updatedOn: string;
-}
-
-export interface Cluster {
-  id: number;
-  name: string;
-  description: string;
-  sshName: string;
-  sshKeyId: string;
-  sshUrl: string;
-  domain: string;
-  email: string;
-  enableUserSshKey: boolean;
-  enableOpenOnDemand: boolean;
+  accessTypes: AccessType[];
 }
 
 export interface AccountCreateModel {
   groupId: number;
   sshKey: string;
   supervisingPI: string;
+  accessTypes: AccessType[];
 }
 
 export interface AddToGroupModel {
@@ -78,7 +81,7 @@ export interface AppContextShape {
     permissions: Permission[];
   };
   accounts: AccountModel[];
-  clusters: Cluster[];
+  clusters: ClusterModel[];
   openRequests: RequestModel[];
   lastPuppetSync?: string;
 }
@@ -94,6 +97,14 @@ export interface PromiseStatus {
 }
 
 export interface ClusterModel {
-  cluster: Cluster;
+  id: number;
+  name: string;
+  description: string;
+  sshName: string;
+  sshKeyId: string;
+  sshUrl: string;
+  domain: string;
+  email: string;
+  accessTypes: AccessType[];
   sshKey?: string;
 }

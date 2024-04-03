@@ -4,7 +4,7 @@ import {
   fakeAccounts,
   fakeGroupAdminAppContext,
   fakeGroups,
-  fakeRequests,
+  fakeRawRequests,
 } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
@@ -24,7 +24,7 @@ beforeEach(() => {
   const requestResponse = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve(fakeRequests),
+    json: () => Promise.resolve(fakeRawRequests),
   });
   const approveResponse = Promise.resolve({
     status: 200,

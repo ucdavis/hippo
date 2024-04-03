@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Text.Json;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
@@ -21,6 +22,7 @@ namespace Hippo.Core.Extensions
                     RequesterName = $"{r.Left.Requester.LastName}, {r.Left.Requester.FirstName}",
                     Status = r.Left.Status,
                     Cluster = r.Left.Cluster.Name,
+                    Data = r.Left.Data,
                     GroupModel = r.Right == null ? null : new GroupModel
                     {
                         Id = r.Right.Id,

@@ -12,6 +12,7 @@ using Serilog;
 using Hippo.Core.Models;
 using AccountRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
+using System.Text.Json;
 
 namespace Hippo.Web.Controllers;
 
@@ -89,20 +90,42 @@ public class AccountController : SuperController
         {
             return BadRequest("Please select a group from the list.");
         }
-        var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
+        var cluster = await _dbContext.Clusters
+            .Include(c => c.AccessTypes)
+            .SingleOrDefaultAsync(c => c.Name == Cluster);
         if (cluster == null)
         {
             return BadRequest("Cluster not found");
         }
-        if (cluster.EnableUserSshKey)
+
+        if (model.AccessTypes.Contains(AccessType.Codes.SshKey))
         {
+            if (!cluster.AccessTypes.Any(at => at.Name == AccessType.Codes.SshKey))
+            {
+                return BadRequest("SSH Key access is not allowed for this cluster");
+            }
+
             if (string.IsNullOrWhiteSpace(model.SshKey))
             {
                 return BadRequest("Missing SSH Key");
             }
+
             if (!model.SshKey.IsValidSshKey())
             {
                 return BadRequest("Invalid SSH key");
+            }
+        }
+        else
+        {
+            if (cluster.AccessTypes.Count == 1 && cluster.AccessTypes[0].Name == AccessType.Codes.SshKey)
+            {
+                return BadRequest("SSH Key is required for this cluster");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.SshKey))
+            {
+                // This shouldn't ever happen, but...
+                return BadRequest("SSH Key provided without accompanying AccessType 'SshKey'");
             }
         }
 
@@ -114,16 +137,22 @@ public class AccountController : SuperController
             return BadRequest("You already have an account for this cluster");
         }
 
+        // AccountRequest is an alias for Hippo.Core.Domain.Request to avoid clash with ControllerBase.Request
         var request = new AccountRequest
         {
             Requester = currentUser,
             Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).Select(g => g.Name).SingleAsync(),
             Action = AccountRequest.Actions.CreateAccount,
             Status = AccountRequest.Statuses.PendingApproval,
-            Cluster = cluster,
+            Cluster = cluster
+        }
+        .WithAccountRequestData(new AccountRequestDataModel
+        {
             SupervisingPI = model.SupervisingPI,
             SshKey = model.SshKey,
-        };
+            AccessTypes = model.AccessTypes
+        });
+
         await _dbContext.Requests.AddAsync(request);
         await _historyService.RequestCreated(request);
 
@@ -151,12 +180,14 @@ public class AccountController : SuperController
         {
             return BadRequest("Cluster is required");
         }
-        var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Name == Cluster);
+        var cluster = await _dbContext.Clusters
+            .Include(c => c.AccessTypes)
+            .SingleOrDefaultAsync(c => c.Name == Cluster);
         if (cluster == null)
         {
             return BadRequest("Cluster not found");
         }
-        if (!cluster.EnableUserSshKey)
+        if (!cluster.AccessTypes.Any(at => at.Name == AccessType.Codes.SshKey))
         {
             return BadRequest("User SSH Keys are not enabled for this cluster");
         }
@@ -174,6 +205,8 @@ public class AccountController : SuperController
         var existingAccount = await _dbContext.Accounts
             .Include(a => a.Owner)
             .Include(a => a.Cluster)
+            .Include(a => a.AccessTypes)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(a =>
                 a.Id == model.AccountId
                 && a.OwnerId == currentUser.Id
@@ -185,6 +218,10 @@ public class AccountController : SuperController
         }
 
         existingAccount.SshKey = model.SshKey;
+        if (!existingAccount.AccessTypes.Any(at => at.Name == AccessType.Codes.SshKey))
+        {
+            existingAccount.AccessTypes.Add(await _dbContext.AccessTypes.SingleAsync(at => at.Name == AccessType.Codes.SshKey));
+        }
 
         var result = await _accountUpdateService.QueueUpdateSshKey(existingAccount, model.SshKey);
         if (result.IsError)

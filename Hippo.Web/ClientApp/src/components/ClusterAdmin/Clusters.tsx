@@ -1,14 +1,17 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useContext } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { ClusterModel, Cluster } from "../../types";
+import { ClusterModel, AccessType } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import SshKeyInput from "../../Shared/SshKeyInput";
+import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
+import { AccessTypes } from "../../constants";
+import AppContext from "../../Shared/AppContext";
 
-const defaultCluster: Cluster = {
+const defaultCluster: ClusterModel = {
   id: 0,
   name: "",
   description: "",
@@ -17,17 +20,16 @@ const defaultCluster: Cluster = {
   sshUrl: "",
   domain: "",
   email: "",
-  enableUserSshKey: false,
-  enableOpenOnDemand: false,
+  accessTypes: AccessTypes,
 };
 
 export const Clusters = () => {
   const [notification, setNotification] = usePromiseNotification();
-  const [clusterModels, setClusters] = useState<ClusterModel[]>();
   const [editClusterModel, setEditClusterModel] = useState<ClusterModel>({
-    cluster: { ...defaultCluster },
+    ...defaultCluster,
   });
   const [editConfirmationTitle, setEditConfirmationTitle] = useState("");
+  const [context, setContext] = useContext(AppContext);
 
   const [getEditConfirmation] = useConfirmationDialog<ClusterModel>(
     {
@@ -40,14 +42,11 @@ export const Clusters = () => {
               className="form-control"
               id="fieldName"
               required
-              value={editClusterModel.cluster.name}
+              value={editClusterModel.name}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    name: e.target.value,
-                  },
+                  name: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -60,14 +59,11 @@ export const Clusters = () => {
               className="form-control"
               id="fieldDescription"
               required
-              value={editClusterModel.cluster.description}
+              value={editClusterModel.description}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    description: e.target.value,
-                  },
+                  description: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -79,14 +75,11 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldSshUrl"
-              value={editClusterModel.cluster.sshUrl}
+              value={editClusterModel.sshUrl}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    sshUrl: e.target.value,
-                  },
+                  sshUrl: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -98,14 +91,11 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldSshName"
-              value={editClusterModel.cluster.sshName}
+              value={editClusterModel.sshName}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    sshName: e.target.value,
-                  },
+                  sshName: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -118,9 +108,6 @@ export const Clusters = () => {
               onChange={(value) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                  },
                   sshKey: value,
                 };
                 setEditClusterModel(model);
@@ -139,14 +126,11 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldDomain"
-              value={editClusterModel.cluster.domain}
+              value={editClusterModel.domain}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    domain: e.target.value,
-                  },
+                  domain: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
@@ -158,69 +142,40 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldEmail"
-              value={editClusterModel.cluster.email}
+              value={editClusterModel.email}
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    email: e.target.value,
-                  },
+                  email: e.target.value,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
               }}
             />
           </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              id="fieldEnableUserSshKey"
-              type="checkbox"
-              checked={editClusterModel.cluster.enableUserSshKey}
-              onChange={(e) => {
+          <div className="form-group">
+            <label className="form-label">Access Type</label>
+            <SearchDefinedOptions<AccessType>
+              definedOptions={AccessTypes}
+              selected={editClusterModel.accessTypes}
+              onSelect={(accessTypes) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    enableUserSshKey: e.target.checked,
-                  },
+                  accessTypes,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
               }}
+              disabled={false}
+              placeHolder="Select one or more access types"
+              id="selectAccessTypes"
             />
-            <label className="form-check-label" htmlFor="fieldEnableUserSshKey">
-              Enable User SSH Keys
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              id="fieldEnableOpenOnDemand"
-              type="checkbox"
-              checked={editClusterModel.cluster.enableOpenOnDemand}
-              onChange={(e) => {
-                const model: ClusterModel = {
-                  ...editClusterModel,
-                  cluster: {
-                    ...editClusterModel.cluster,
-                    enableOpenOnDemand: e.target.checked,
-                  },
-                };
-                setEditClusterModel(model);
-                setReturn(model);
-              }}
-            />
-            <label className="form-check-label" htmlFor="enableOpenOnDemand">
-              Enable Open OnDemand
-            </label>
           </div>
         </>
       ),
       canConfirm:
-        notEmptyOrFalsey(editClusterModel.cluster.name) &&
-        notEmptyOrFalsey(editClusterModel.cluster.description) &&
+        notEmptyOrFalsey(editClusterModel.name) &&
+        notEmptyOrFalsey(editClusterModel.description) &&
         !notification.pending,
     },
     [
@@ -242,7 +197,7 @@ export const Clusters = () => {
               className="form-control"
               id="fieldName"
               required
-              value={editClusterModel.cluster.name}
+              value={editClusterModel.name}
               readOnly
             />
           </div>
@@ -252,7 +207,7 @@ export const Clusters = () => {
               className="form-control"
               id="fieldDescription"
               required
-              value={editClusterModel.cluster.description}
+              value={editClusterModel.description}
               readOnly
             />
           </div>
@@ -261,7 +216,7 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldSshUrl"
-              value={editClusterModel.cluster.sshUrl}
+              value={editClusterModel.sshUrl}
               readOnly
             />
           </div>
@@ -270,7 +225,7 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldSshName"
-              value={editClusterModel.cluster.sshName}
+              value={editClusterModel.sshName}
               readOnly
             />
           </div>
@@ -279,7 +234,7 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldDomain"
-              value={editClusterModel.cluster.domain}
+              value={editClusterModel.domain}
               readOnly
             />
           </div>
@@ -288,36 +243,20 @@ export const Clusters = () => {
             <input
               className="form-control"
               id="fieldEmail"
-              value={editClusterModel.cluster.email}
+              value={editClusterModel.email}
               readOnly
             />
           </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              id="fieldEnableUserSshKey"
-              type="checkbox"
-              checked={editClusterModel.cluster.enableUserSshKey}
-              disabled
+          <div className="form-group">
+            <label className="form-label">Access Type</label>
+            <SearchDefinedOptions<AccessType>
+              definedOptions={AccessTypes}
+              selected={editClusterModel.accessTypes}
+              onSelect={() => {}}
+              disabled={true}
+              placeHolder="none selected"
+              id="selectedAccessTypes"
             />
-            <label className="form-check-label" htmlFor="fieldEnableUserSshKey">
-              Enable User SSH Keys
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              id="fieldEnableOpenOnDemand"
-              type="checkbox"
-              checked={editClusterModel.cluster.enableOpenOnDemand}
-              disabled
-            />
-            <label
-              className="form-check-label"
-              htmlFor="fieldEnableOpenOnDemand"
-            >
-              Enable Open OnDemand
-            </label>
           </div>
         </>
       ),
@@ -339,19 +278,6 @@ export const Clusters = () => {
     [],
   );
 
-  useEffect(() => {
-    const fetchClusters = async () => {
-      const response = await authenticatedFetch(`/api/clusteradmin/clusters`);
-      if (response.ok) {
-        setClusters(await response.json());
-      } else {
-        alert("Error");
-      }
-    };
-
-    fetchClusters();
-  }, []);
-
   const handleRemove = useCallback(
     async (id: number) => {
       const [confirmed] = await getRemoveConfirmation();
@@ -368,15 +294,18 @@ export const Clusters = () => {
       const response = await req;
       if (response.ok) {
         // remove the cluster from the list
-        setClusters(clusterModels.filter((m) => m.cluster.id !== id));
+        setContext((c) => ({
+          ...c,
+          clusters: c.clusters.filter((c) => c.id !== id),
+        }));
       }
       //todo deal with error
     },
-    [clusterModels, getRemoveConfirmation, setNotification],
+    [getRemoveConfirmation, setNotification, setContext],
   );
 
   const handleCreate = async () => {
-    setEditClusterModel({ cluster: { ...defaultCluster }, sshKey: "" });
+    setEditClusterModel({ ...defaultCluster, sshKey: "" });
     setEditConfirmationTitle("Create Cluster");
     const [confirmed, newModel] = await getEditConfirmation();
 
@@ -401,23 +330,22 @@ export const Clusters = () => {
     const response = await req;
 
     if (response.ok) {
-      const newCluster = await response.json();
-      setClusters(
-        [...clusterModels, newCluster].sort((a, b) =>
-          a.cluster.name.localeCompare(b.cluster.name),
+      const newCluster = (await response.json()) as ClusterModel;
+      setContext((c) => ({
+        ...c,
+        clusters: [...c.clusters, newCluster].sort((a, b) =>
+          a.name.localeCompare(b.name),
         ),
-      );
+      }));
       setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
     }
   };
 
   const handleEdit = useCallback(
     async (id: number) => {
-      const editClusterModel = clusterModels.filter(
-        (m) => m.cluster.id === id,
-      )[0];
+      const editClusterModel = context.clusters.filter((m) => m.id === id)[0];
       setEditClusterModel({
-        cluster: { ...editClusterModel.cluster },
+        ...editClusterModel,
         sshKey: editClusterModel.sshKey,
       });
       setEditConfirmationTitle("Edit Cluster");
@@ -445,57 +373,56 @@ export const Clusters = () => {
 
       if (response.ok) {
         const newCluster = await response.json();
-        setClusters(
-          clusterModels
-            .map((m) => (m.cluster.id === id ? newCluster : m))
-            .sort((a, b) => a.cluster.name.localeCompare(b.cluster.name)),
-        );
+        setContext((c) => ({
+          ...c,
+          clusters: c.clusters
+            .map((m) => (m.id === id ? newCluster : m))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        }));
         setEditClusterModel((r) => ({ ...r, lookup: "", name: "" }));
       }
     },
-    [clusterModels, getEditConfirmation, setNotification],
+    [context.clusters, getEditConfirmation, setContext, setNotification],
   );
 
   const handleDetails = useCallback(
     async (id: number) => {
-      const editClusterModel = clusterModels.filter(
-        (m) => m.cluster.id === id,
-      )[0];
+      const editClusterModel = context.clusters.filter((m) => m.id === id)[0];
       setEditClusterModel({
-        cluster: { ...editClusterModel.cluster },
+        ...editClusterModel,
         sshKey: editClusterModel.sshKey,
       });
       setEditConfirmationTitle("Cluster Details");
       await getDetailsConfirmation();
     },
-    [clusterModels, getDetailsConfirmation],
+    [context.clusters, getDetailsConfirmation],
   );
 
   const columns: Column<ClusterModel>[] = useMemo(
     () => [
       {
         Header: "Name",
-        accessor: (m) => m.cluster.name,
+        accessor: (m) => m.name,
         sortable: true,
         wrap: true,
         width: "100px",
       },
       {
         Header: "Description",
-        accessor: (m) => m.cluster.description,
+        accessor: (m) => m.description,
         sortable: true,
         wrap: true,
         width: "100px",
       },
       {
         Header: "Domain",
-        accessor: (m) => m.cluster.domain,
+        accessor: (m) => m.domain,
         sortable: true,
         wrap: true,
       },
       {
         Header: "Email",
-        accessor: (m) => m.cluster.email,
+        accessor: (m) => m.email,
         sortable: true,
         wrap: true,
       },
@@ -506,7 +433,7 @@ export const Clusters = () => {
           <>
             <button
               disabled={notification.pending}
-              onClick={() => handleDetails(m.row.original.cluster.id)}
+              onClick={() => handleDetails(m.row.original.id)}
               className="btn btn-primary"
             >
               Details
@@ -514,7 +441,7 @@ export const Clusters = () => {
             {" | "}
             <button
               disabled={notification.pending}
-              onClick={() => handleEdit(m.row.original.cluster.id)}
+              onClick={() => handleEdit(m.row.original.id)}
               className="btn btn-primary"
             >
               Edit
@@ -522,7 +449,7 @@ export const Clusters = () => {
             {" | "}
             <button
               disabled={notification.pending}
-              onClick={() => handleRemove(m.row.original.cluster.id)}
+              onClick={() => handleRemove(m.row.original.id)}
               className="btn btn-danger"
             >
               Remove
@@ -534,36 +461,26 @@ export const Clusters = () => {
     [handleDetails, handleEdit, handleRemove, notification.pending],
   );
 
-  const clusterModelsData = useMemo(() => clusterModels ?? [], [clusterModels]);
-
-  if (!clusterModels) {
-    return (
+  return (
+    <>
       <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
-      </div>
-    );
-  } else {
-    return (
-      <>
-        <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="float-end">
-              <button onClick={handleCreate} className="btn btn-primary">
-                Create
-              </button>
-            </div>
-          </div>
-          <div className="col-md-8">
-            <ReactTable
-              columns={columns}
-              data={clusterModelsData}
-              initialState={{
-                sortBy: [{ id: "Name" }],
-              }}
-            />
+        <div className="col-md-8">
+          <div className="float-end">
+            <button onClick={handleCreate} className="btn btn-primary">
+              Create
+            </button>
           </div>
         </div>
-      </>
-    );
-  }
+        <div className="col-md-8">
+          <ReactTable
+            columns={columns}
+            data={context.clusters}
+            initialState={{
+              sortBy: [{ id: "Name" }],
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
 };

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hippo.Core.Migrations.SqlServer
 {
     [DbContext(typeof(AppDbContextSqlServer))]
-    [Migration("20240308172650_OpenOnDemand")]
+    [Migration("20240327214556_OpenOnDemand")]
     partial class OpenOnDemand
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,57 @@ namespace Hippo.Core.Migrations.SqlServer
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("AccessTypeAccount", b =>
+                {
+                    b.Property<int>("AccessTypesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AccountsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccessTypesId", "AccountsId");
+
+                    b.HasIndex("AccountsId");
+
+                    b.ToTable("AccessTypeAccount");
+                });
+
+            modelBuilder.Entity("AccessTypeCluster", b =>
+                {
+                    b.Property<int>("AccessTypesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClustersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccessTypesId", "ClustersId");
+
+                    b.HasIndex("ClustersId");
+
+                    b.ToTable("AccessTypeCluster");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.AccessType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("AccessTypes");
+                });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
                 {
@@ -98,14 +149,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<string>("Email")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
-
-                    b.Property<bool>("EnableOpenOnDemand")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EnableUserSshKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -334,7 +377,7 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Details")
+                    b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Group")
@@ -461,6 +504,36 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasFilter("[Iam] IS NOT NULL");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("AccessTypeAccount", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.AccessType", null)
+                        .WithMany()
+                        .HasForeignKey("AccessTypesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AccessTypeCluster", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.AccessType", null)
+                        .WithMany()
+                        .HasForeignKey("AccessTypesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Cluster", null)
+                        .WithMany()
+                        .HasForeignKey("ClustersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>

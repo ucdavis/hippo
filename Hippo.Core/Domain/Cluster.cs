@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Hippo.Core.Domain
 {
-    public class Cluster : IValidatableObject
+    public class Cluster
     {
         [Key]
         public int Id { get; set; }
@@ -32,20 +32,22 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         [EmailAddress]
         public string Email { get; set; } = String.Empty;
-        public bool EnableUserSshKey { get; set; } = true;
-        public bool EnableOpenOnDemand { get; set; }
+
 
         [JsonIgnore]
-        public List<Account> Accounts { get; set; }
+        public List<Account> Accounts { get; set; } = new();
 
         [JsonIgnore]
-        public List<Group> Groups { get; set; }
+        public List<Group> Groups { get; set; } = new();
+
+        [JsonIgnore]
+        [MinLength(1)]
+        public List<AccessType> AccessTypes { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cluster>().HasQueryFilter(a => a.IsActive);
             modelBuilder.Entity<Cluster>().Property(a => a.IsActive).HasDefaultValue(true);
-            modelBuilder.Entity<Cluster>().Property(a => a.EnableUserSshKey).HasDefaultValue(true);
             modelBuilder.Entity<Cluster>().HasIndex(a => a.Name);
 
             modelBuilder.Entity<Account>()
@@ -65,15 +67,6 @@ namespace Hippo.Core.Domain
                 .WithMany()
                 .HasForeignKey(p => p.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
-        }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (!EnableOpenOnDemand && !EnableUserSshKey)
-            {
-                yield return new ValidationResult(
-                    "At least one of Enable Open OnDemand or Enable User SSH Key must be selected.");
-            }
         }
     }
 }
