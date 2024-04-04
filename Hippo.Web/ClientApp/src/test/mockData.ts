@@ -4,8 +4,9 @@ import {
   AccountModel,
   GroupModel,
   ClusterModel,
-  RequestModel,
+  RawRequestModel,
 } from "../types";
+import { parseRawRequestModel } from "../util/api";
 
 const fakeUser: User = {
   id: 1,
@@ -69,8 +70,6 @@ export const fakeAccounts: AccountModel[] = [
   },
 ];
 
-type RawRequestModel = Omit<RequestModel, "data"> & { data: string };
-
 export const fakeRawRequests: RawRequestModel[] = [
   {
     id: 1,
@@ -94,9 +93,7 @@ export const fakeRawRequests: RawRequestModel[] = [
   },
 ];
 
-export const fakeRequests = fakeRawRequests.map(
-  (r) => ({ ...r, data: JSON.parse(r.data) }) as RequestModel,
-);
+export const fakeRequests = fakeRawRequests.map((r) => parseRawRequestModel(r));
 
 const fakeCluster: ClusterModel = {
   id: 1,

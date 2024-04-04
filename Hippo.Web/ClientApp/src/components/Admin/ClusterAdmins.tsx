@@ -96,9 +96,9 @@ export const ClusterAdmins = () => {
     const response = await req;
 
     if (response.ok) {
-      const newAccount = await response.json();
+      const user = (await response.json()) as User;
       //Add the user to the list
-      setUsers((r) => (r ? [...r, newAccount] : [newAccount]));
+      setUsers((r) => (r ? [...r, user] : [user]));
       setRequest((r) => ({ ...r, id: "" }));
     }
   };

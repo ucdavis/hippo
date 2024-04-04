@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { RequestModel } from "../../types";
+import { RawRequestModel, RequestModel } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseRawRequestModel } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
@@ -28,10 +28,9 @@ export const Requests = () => {
 
       if (response.ok) {
         setRequests(
-          (await response.json()).map((r) => ({
-            ...r,
-            data: r.data && JSON.parse(r.data),
-          })),
+          (await response.json()).map((r: RawRequestModel) =>
+            parseRawRequestModel(r),
+          ),
         );
       }
     };

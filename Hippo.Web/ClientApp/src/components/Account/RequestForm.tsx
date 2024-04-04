@@ -2,8 +2,17 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { GroupModel, AccountCreateModel, AccessType } from "../../types";
-import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import {
+  GroupModel,
+  AccountCreateModel,
+  AccessType,
+  RawRequestModel,
+} from "../../types";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawRequestModel,
+} from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
@@ -31,7 +40,7 @@ export const RequestForm = () => {
         `/api/${clusterName}/group/groups`,
       );
 
-      const groupsResult = await response.json();
+      const groupsResult = (await response.json()) as GroupModel[];
 
       if (response.ok) {
         setGroups(groupsResult);
@@ -64,13 +73,13 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const r = await response.json();
+      const rawRequestModel = (await response.json()) as RawRequestModel;
 
       setContext((ctx) => ({
         ...ctx,
         openRequests: [
           ...ctx.openRequests,
-          { ...r, data: r.data && JSON.parse(r.data) },
+          parseRawRequestModel(rawRequestModel),
         ],
       }));
       navigate(`/${clusterName}/accountstatus`);
@@ -159,7 +168,7 @@ export const RequestForm = () => {
           )}
         <br />
         <button
-          disabled={notification.pending}
+          disabled={notification.pending || !request.accessTypes.length}
           onClick={handleSubmit}
           className="btn btn-primary"
         >

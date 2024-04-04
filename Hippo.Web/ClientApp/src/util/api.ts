@@ -1,4 +1,9 @@
-import { AppContextShape, ModelState } from "../types";
+import {
+  AppContextShape,
+  ModelState,
+  RawRequestModel,
+  RequestModel,
+} from "../types";
 
 declare var Hippo: AppContextShape;
 
@@ -39,4 +44,11 @@ export const tryParseJSONObject = (val: string) => {
   } catch (e) {}
 
   return undefined;
+};
+
+export const parseRawRequestModel = (rawRequest: RawRequestModel) => {
+  return {
+    ...rawRequest,
+    data: rawRequest.data && JSON.parse(rawRequest.data),
+  } as RequestModel;
 };

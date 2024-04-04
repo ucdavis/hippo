@@ -100,7 +100,7 @@ export const TransferSponsor = (props: Props) => {
     const response = await request;
 
     if (response.ok) {
-      const newAccount: AccountModel = await response.json();
+      const newAccount = (await response.json()) as AccountModel;
       props.transferSponsor(props.account, newAccount);
     }
   };

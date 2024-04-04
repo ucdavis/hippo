@@ -373,7 +373,7 @@ export const Clusters = () => {
       const response = await req;
 
       if (response.ok) {
-        const newCluster = await response.json();
+        const newCluster = (await response.json()) as ClusterModel;
         setContext((c) => ({
           ...c,
           clusters: c.clusters

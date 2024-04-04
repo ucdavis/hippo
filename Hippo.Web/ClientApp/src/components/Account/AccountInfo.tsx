@@ -1,13 +1,17 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AddToGroupModel, GroupModel } from "../../types";
+import { AddToGroupModel, GroupModel, RawRequestModel } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
-import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawRequestModel,
+} from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 
@@ -146,13 +150,13 @@ export const AccountInfo = () => {
 
       const response = await request;
       if (response.ok) {
-        const r = await response.json();
+        const rawRequestModel = (await response.json()) as RawRequestModel;
 
         setContext((c) => ({
           ...c,
           openRequests: [
             ...c.openRequests,
-            { ...r, data: r.data && JSON.parse(r.data) },
+            parseRawRequestModel(rawRequestModel),
           ],
         }));
         setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));

@@ -25,14 +25,18 @@ export interface GroupModel {
   admins: GroupAccountModel[];
 }
 
-interface RequestModelCommon {
+export interface RawRequestModel {
   id: number;
   requesterEmail: string;
   requesterName: string;
   groupModel: GroupModel;
   status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
   cluster: string;
+  action: string;
+  data: string;
 }
+
+type RequestModelCommon = Omit<RawRequestModel, "action" | "data">;
 
 // action-specific RequestModel fields defined here...
 export interface AccountRequestDataModel {
