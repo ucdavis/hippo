@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -44,7 +44,7 @@ export const Groups = () => {
         );
       },
     },
-    [editGroupDisplayName, setEditGroupDisplayName]
+    [editGroupDisplayName, setEditGroupDisplayName],
   );
 
   useEffect(() => {
@@ -78,8 +78,8 @@ export const Groups = () => {
 
       setNotification(req, "Saving", "Group Updated", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -103,15 +103,15 @@ export const Groups = () => {
         //sort the list
         setGroups(
           updatedGroups.sort((a, b) =>
-            (a.displayName ?? "").localeCompare(b.displayName ?? "")
-          )
+            (a.displayName ?? "").localeCompare(b.displayName ?? ""),
+          ),
         );
         setEditGroupDisplayName("");
       }
 
       setEditing(undefined);
     },
-    [cluster, getEditConfirmation, groups, setNotification]
+    [cluster, getEditConfirmation, groups, setNotification],
   );
 
   const columns: Column<GroupModel>[] = useMemo(
@@ -145,7 +145,7 @@ export const Groups = () => {
         ),
       },
     ],
-    [editing, handleEdit, notification.pending]
+    [editing, handleEdit, notification.pending],
   );
 
   const groupsData = useMemo(() => groups ?? [], [groups]);

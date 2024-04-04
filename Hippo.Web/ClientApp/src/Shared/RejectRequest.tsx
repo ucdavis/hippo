@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { RequestModel } from "../types";
-import { authenticatedFetch } from "../util/api";
+import { authenticatedFetch, parseBadRequest } from "../util/api";
 import { usePromiseNotification } from "../util/Notifications";
 import { useConfirmationDialog } from "./ConfirmationDialog";
 import { notEmptyOrFalsey } from "../util/ValueChecks";
@@ -61,8 +61,8 @@ export const RejectRequest = (props: Props) => {
 
     setNotification(request, "Saving", "Request Rejection Saved", async (r) => {
       if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
+        const errors = await parseBadRequest(response);
+        return errors;
       } else {
         return "An error happened, please try again.";
       }

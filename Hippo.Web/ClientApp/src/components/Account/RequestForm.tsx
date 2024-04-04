@@ -3,7 +3,7 @@ import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
 import { GroupModel, AccountCreateModel, AccessType } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
@@ -53,8 +53,8 @@ export const RequestForm = () => {
       "Request Created. Please wait for your sponsor to approve your request.",
       async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { AccountModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
@@ -66,7 +66,7 @@ export const TransferSponsor = (props: Props) => {
         notEmptyOrFalsey(name) &&
         !notification.pending,
     },
-    [lookup, setLookup, name, setName, notification.pending]
+    [lookup, setLookup, name, setName, notification.pending],
   );
 
   const transfer = async () => {
@@ -80,7 +80,7 @@ export const TransferSponsor = (props: Props) => {
       {
         method: "POST",
         body: JSON.stringify(transferData),
-      }
+      },
     );
 
     setNotification(
@@ -89,12 +89,12 @@ export const TransferSponsor = (props: Props) => {
       "Sponsor Transfer Successful",
       async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
-      }
+      },
     );
 
     const response = await request;

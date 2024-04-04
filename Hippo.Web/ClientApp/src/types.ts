@@ -108,3 +108,6 @@ export interface ClusterModel {
   accessTypes: AccessType[];
   sshKey?: string;
 }
+
+export type ModelState = Record<string, string>;
+export type BadRequest = string | ModelState;

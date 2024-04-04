@@ -7,7 +7,7 @@ import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 
@@ -137,8 +137,8 @@ export const AccountInfo = () => {
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -177,8 +177,8 @@ export const AccountInfo = () => {
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }

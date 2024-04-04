@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useContext } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { ClusterModel, AccessType } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ReactTable } from "../../Shared/ReactTable";
@@ -321,8 +321,8 @@ export const Clusters = () => {
 
     setNotification(req, "Saving", "Cluster Created", async (r) => {
       if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
+        const errors = await parseBadRequest(response);
+        return errors;
       } else {
         return "An error happened, please try again.";
       }
@@ -363,8 +363,8 @@ export const Clusters = () => {
 
       setNotification(req, "Saving", "Cluster Updated", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
