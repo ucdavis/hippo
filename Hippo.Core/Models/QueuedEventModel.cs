@@ -11,10 +11,10 @@ public class QueuedEventModel
 {
     public int Id { get; set; }
     [Required]
-    [RegularExpression(QueuedEvent.Actions.RegexPattern)]
+    [StringOptions(QueuedEvent.Actions.RegexPattern)]
     public string Action { get; set; } = "";
     [Required]
-    [RegularExpression(QueuedEvent.Statuses.RegexPattern)]
+    [StringOptions(QueuedEvent.Statuses.RegexPattern)]
     public string Status { get; set; } = "";
     [Required]
     public QueuedEventDataModel Data { get; set; } = new();
@@ -108,7 +108,7 @@ public class QueuedEventAccountModel
     [MaxLength(20)]
     public string Mothra { get; set; } = "";
     public string Key { get; set; } = "";
-    [RegularExpressionList(AccessType.Codes.RegexPattern, nonEmpty: true)]
+    [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
     public List<string> AccessTypes { get; set; } = new();
 
 

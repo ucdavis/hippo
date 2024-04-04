@@ -31,7 +31,7 @@ public class ClusterModel
     [EmailAddress]
     public string Email { get; set; } = String.Empty;
     public string SshKey { get; set; } = String.Empty;
-    [RegularExpressionList(AccessType.Codes.RegexPattern, nonEmpty: true)]
+    [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
     public List<string> AccessTypes { get; set; } = new();
 
     public ClusterModel()
