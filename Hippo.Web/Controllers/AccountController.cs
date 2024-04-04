@@ -80,6 +80,11 @@ public class AccountController : SuperController
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] AccountCreateModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("Cluster is required");

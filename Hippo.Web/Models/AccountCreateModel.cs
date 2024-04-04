@@ -10,7 +10,7 @@ namespace Hippo.Web.Models
         public string SshKey { get; set; } = String.Empty;
         [MaxLength(100)]
         public string SupervisingPI { get; set; } = String.Empty;
-        [RegularExpressionList(AccessType.Codes.RegexPattern)]
+        [RegularExpressionList(AccessType.Codes.RegexPattern, nonEmpty: true)]
         public List<string> AccessTypes { get; set; } = new();
     }
 }

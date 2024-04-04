@@ -108,7 +108,7 @@ public class QueuedEventAccountModel
     [MaxLength(20)]
     public string Mothra { get; set; } = "";
     public string Key { get; set; } = "";
-    [RegularExpressionList(AccessType.Codes.RegexPattern)]
+    [RegularExpressionList(AccessType.Codes.RegexPattern, nonEmpty: true)]
     public List<string> AccessTypes { get; set; } = new();
 
 

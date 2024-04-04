@@ -176,6 +176,7 @@ export const Clusters = () => {
       canConfirm:
         notEmptyOrFalsey(editClusterModel.name) &&
         notEmptyOrFalsey(editClusterModel.description) &&
+        !!editClusterModel.accessTypes.length &&
         !notification.pending,
     },
     [

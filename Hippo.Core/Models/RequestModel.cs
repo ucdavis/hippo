@@ -25,7 +25,7 @@ namespace Hippo.Core.Models
         [MaxLength(100)]
         public string SupervisingPI { get; set; } = "";
         public string SshKey { get; set; } = "";
-        [RegularExpressionList(AccessType.Codes.RegexPattern)]
+        [RegularExpressionList(AccessType.Codes.RegexPattern, nonEmpty: true)]
         public List<string> AccessTypes { get; set; } = new();
 
         public static List<string> ValidActions = new List<string>
