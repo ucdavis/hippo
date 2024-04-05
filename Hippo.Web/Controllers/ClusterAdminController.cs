@@ -3,6 +3,7 @@ using System.Linq;
 using Hippo.Core.Data;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
+using Hippo.Core.Extensions;
 using Hippo.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,12 +33,10 @@ namespace Hippo.Web.Controllers
         {
             var currentSecretKeyIds = new HashSet<string>(await _secretsService.GetSecretNames());
 
-            var clusterModels = (await _dbContext.Clusters
-                .AsNoTracking()
+            var clusterModels = await _dbContext.Clusters
                 .OrderBy(c => c.Name)
-                .ToArrayAsync())
-                .Select(c => new ClusterModel(c, string.Empty))
-                .ToArray();
+                .Select(ClusterModel.Projection)
+                .ToArrayAsync();
 
             return Ok(clusterModels);
         }
@@ -55,6 +54,19 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var cluster = await _dbContext.Clusters.SingleOrDefaultAsync(c => c.Id == id);
+            if (cluster == null)
+            {
+                return NotFound();
+            }
+            cluster.IsActive = false;
+            await _dbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] ClusterModel clusterModel)
         {
             if (!ModelState.IsValid)
@@ -65,23 +77,27 @@ namespace Hippo.Web.Controllers
             if (!string.IsNullOrWhiteSpace(clusterModel.SshKey))
             {
 
-                if (string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+                if (string.IsNullOrWhiteSpace(clusterModel.SshKeyId))
                 {
                     if (!clusterModel.SshKey.IsValidSshKey())
                     {
                         return BadRequest("Invalid SSH Key");
                     }
-                    clusterModel.Cluster.SshKeyId = Guid.NewGuid().ToString();
+                    clusterModel.SshKeyId = Guid.NewGuid().ToString();
                 }
             }
 
-            _dbContext.Clusters.Add(clusterModel.Cluster);
+            var cluster = await clusterModel.ToCluster(_dbContext);
+
+            await _dbContext.Clusters.AddAsync(cluster);
             await _dbContext.SaveChangesAsync();
 
-            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && !string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && !string.IsNullOrWhiteSpace(clusterModel.SshKeyId))
             {
-                await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
+                await _secretsService.SetSecret(clusterModel.SshKeyId, clusterModel.SshKey);
             }
+
+            clusterModel.Id = cluster.Id;
 
             return Ok(clusterModel);
         }
@@ -94,23 +110,39 @@ namespace Hippo.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+            if (!string.IsNullOrWhiteSpace(clusterModel.SshKey) && string.IsNullOrWhiteSpace(clusterModel.SshKeyId))
             {
                 if (!clusterModel.SshKey.IsValidSshKey())
                 {
                     return BadRequest("Invalid SSH Key");
                 }
-                clusterModel.Cluster.SshKeyId = Guid.NewGuid().ToString();
+                clusterModel.SshKeyId = Guid.NewGuid().ToString();
             }
 
-            _dbContext.Clusters.Update(clusterModel.Cluster);
+            var cluster = await _dbContext.Clusters
+                .Include(c => c.AccessTypes)
+                .Where(c => c.Id == clusterModel.Id)
+                .SingleOrDefaultAsync();
+
+            if (cluster == null)
+            {
+                return NotFound();
+            }
+
+            //sync cluster.AccessTypes with clusterModel.AccessTypes
+            var accessTypes = await _dbContext.AccessTypes
+                .Where(at => clusterModel.AccessTypes.Contains(at.Name))
+                .ToListAsync();
+            cluster.AccessTypes = accessTypes;
+
+            _dbContext.Clusters.Update(cluster);
             await _dbContext.SaveChangesAsync();
 
             if (!string.IsNullOrWhiteSpace(clusterModel.SshKey))
             {
-                if (!string.IsNullOrWhiteSpace(clusterModel.Cluster.SshKeyId))
+                if (!string.IsNullOrWhiteSpace(clusterModel.SshKeyId))
                 {
-                    await _secretsService.SetSecret(clusterModel.Cluster.SshKeyId, clusterModel.SshKey);
+                    await _secretsService.SetSecret(clusterModel.SshKeyId, clusterModel.SshKey);
                 }
             }
 

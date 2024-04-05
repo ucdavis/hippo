@@ -3,9 +3,10 @@ import {
   User,
   AccountModel,
   GroupModel,
-  Cluster,
-  RequestModel,
+  ClusterModel,
+  RawRequestModel,
 } from "../types";
+import { parseRawRequestModel } from "../util/api";
 
 const fakeUser: User = {
   id: 1,
@@ -53,6 +54,7 @@ export const fakeAccounts: AccountModel[] = [
     updatedOn: "2020-01-01T00:00:00.000Z",
     memberOfGroups: [fakeGroups[0]],
     adminOfGroups: [],
+    accessTypes: ["OpenOnDemand", "SshKey"],
   },
   {
     id: 2,
@@ -64,10 +66,11 @@ export const fakeAccounts: AccountModel[] = [
     updatedOn: "2020-01-01T00:00:00.000Z",
     memberOfGroups: [fakeGroups[1]],
     adminOfGroups: [],
+    accessTypes: ["OpenOnDemand", "SshKey"],
   },
 ];
 
-export const fakeRequests: RequestModel[] = [
+export const fakeRawRequests: RawRequestModel[] = [
   {
     id: 1,
     requesterEmail: fakeUser.email,
@@ -76,7 +79,7 @@ export const fakeRequests: RequestModel[] = [
     groupModel: fakeGroups[0],
     status: "PendingApproval",
     cluster: "caesfarm",
-    supervisingPI: "Dr. Bob Dobalina",
+    data: '{ "supervisingPI": "Dr. Bob Dobalina", "accessTypes": ["SshKey"] }',
   },
   {
     id: 2,
@@ -86,11 +89,13 @@ export const fakeRequests: RequestModel[] = [
     groupModel: fakeGroups[1],
     status: "PendingApproval",
     cluster: "caesfarm",
-    supervisingPI: "Dr. Bob Dobalina",
+    data: '{ "supervisingPI": "Dr. Bob Dobalina", "accessTypes": ["SshKey"] }',
   },
 ];
 
-const fakeCluster: Cluster = {
+export const fakeRequests = fakeRawRequests.map((r) => parseRawRequestModel(r));
+
+const fakeCluster: ClusterModel = {
   id: 1,
   name: "caesfarm",
   description: "The farm cluster",
@@ -99,7 +104,7 @@ const fakeCluster: Cluster = {
   sshUrl: "ssh-url.com",
   domain: "repo/yaml/path.yml",
   email: "an-email@address.com",
-  enableUserSshKey: true,
+  accessTypes: ["OpenOnDemand", "SshKey"],
 };
 
 export const fakeAppContext: AppContextShape = {

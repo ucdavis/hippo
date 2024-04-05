@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Hippo.Core.Domain;
+using Hippo.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
@@ -30,9 +31,11 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(50)]
         public string Status { get; set; } = "";
-        public string Details { get; set; } = "";
+        public string Data { get; set; } = "";
+        [Obsolete($"Use {nameof(AccountRequestDataModel)}.{nameof(AccountRequestDataModel.SshKey)}")]
         public string SshKey { get; set; } = "";
         [MaxLength(100)]
+        [Obsolete($"Use {nameof(AccountRequestDataModel)}.{nameof(AccountRequestDataModel.SupervisingPI)}")]
         public string SupervisingPI { get; set; } = "";
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;

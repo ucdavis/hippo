@@ -1,13 +1,14 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { RequestModel } from "../../types";
+import { RawRequestModel, RequestModel } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseRawRequestModel } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { SplitCamelCase, getGroupModelString } from "../../util/StringHelpers";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
+import { isAccountRequest } from "../../util/TypeChecks";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -26,7 +27,11 @@ export const Requests = () => {
       );
 
       if (response.ok) {
-        setRequests(await response.json());
+        setRequests(
+          (await response.json()).map((r: RawRequestModel) =>
+            parseRawRequestModel(r),
+          ),
+        );
       }
     };
 
@@ -99,7 +104,14 @@ export const Requests = () => {
       },
       {
         Header: "Supervising PI",
-        accessor: (request) => request.supervisingPI,
+        accessor: (request) =>
+          isAccountRequest(request) && request.data.supervisingPI,
+        sortable: true,
+      },
+      {
+        Header: "Access Types",
+        accessor: (request) =>
+          isAccountRequest(request) && request.data.accessTypes.join(", "),
         sortable: true,
       },
       {

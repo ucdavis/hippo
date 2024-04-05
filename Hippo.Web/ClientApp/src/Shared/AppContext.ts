@@ -2,7 +2,7 @@ import React from "react";
 import {
   AccountModel,
   AppContextShape,
-  Cluster,
+  ClusterModel,
   User,
   Permission,
   RequestModel,
@@ -18,7 +18,7 @@ const AppContext = React.createContext<
       permissions: [] as Permission[],
     },
     accounts: [] as AccountModel[],
-    clusters: [] as Cluster[],
+    clusters: [] as ClusterModel[],
     openRequests: [] as RequestModel[],
   },
   () => {},

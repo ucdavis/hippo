@@ -1,13 +1,17 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AddToGroupModel, GroupModel, RequestModel } from "../../types";
+import { AddToGroupModel, GroupModel, RawRequestModel } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
-import { authenticatedFetch } from "../../util/api";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawRequestModel,
+} from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 
@@ -137,8 +141,8 @@ export const AccountInfo = () => {
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -146,10 +150,14 @@ export const AccountInfo = () => {
 
       const response = await request;
       if (response.ok) {
-        const newRequest = (await response.json()) as RequestModel;
+        const rawRequestModel = (await response.json()) as RawRequestModel;
+
         setContext((c) => ({
           ...c,
-          openRequests: [...c.openRequests, newRequest],
+          openRequests: [
+            ...c.openRequests,
+            parseRawRequestModel(rawRequestModel),
+          ],
         }));
         setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));
       }
@@ -173,8 +181,8 @@ export const AccountInfo = () => {
 
       setNotification(request, "Sending Request", "Request Sent", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -243,7 +251,7 @@ export const AccountInfo = () => {
             >
               Request Access to Another Group
             </button>{" "}
-            {cluster.enableUserSshKey && (
+            {cluster.accessTypes.includes("SshKey") && (
               <button
                 disabled={notification.pending || groups.length === 0}
                 onClick={() => handleUpdateSshKey()}

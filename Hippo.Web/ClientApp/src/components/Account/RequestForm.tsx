@@ -2,26 +2,36 @@ import { useContext, useEffect, useState } from "react";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { GroupModel, AccountCreateModel, RequestModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import {
+  GroupModel,
+  AccountCreateModel,
+  AccessType,
+  RawRequestModel,
+} from "../../types";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawRequestModel,
+} from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
+import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
   const [notification, setNotification] = usePromiseNotification();
 
+  const navigate = useNavigate();
+  const { cluster: clusterName } = useParams();
   const [groups, setGroups] = useState<GroupModel[]>([]);
+  const cluster = context.clusters.find((c) => c.name === clusterName);
   const [request, setRequest] = useState<AccountCreateModel>({
     groupId: 0,
     sshKey: "",
     supervisingPI: "",
+    accessTypes: [...cluster.accessTypes],
   });
-
-  const navigate = useNavigate();
-  const { cluster: clusterName } = useParams();
-  const cluster = context.clusters.find((c) => c.name === clusterName);
 
   // load up possible groups
   useEffect(() => {
@@ -30,7 +40,7 @@ export const RequestForm = () => {
         `/api/${clusterName}/group/groups`,
       );
 
-      const groupsResult = await response.json();
+      const groupsResult = (await response.json()) as GroupModel[];
 
       if (response.ok) {
         setGroups(groupsResult);
@@ -52,8 +62,8 @@ export const RequestForm = () => {
       "Request Created. Please wait for your sponsor to approve your request.",
       async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -63,11 +73,14 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const request = (await response.json()) as RequestModel;
+      const rawRequestModel = (await response.json()) as RawRequestModel;
 
       setContext((ctx) => ({
         ...ctx,
-        openRequests: [...ctx.openRequests, { ...request }],
+        openRequests: [
+          ...ctx.openRequests,
+          parseRawRequestModel(rawRequestModel),
+        ],
       }));
       navigate(`/${clusterName}/accountstatus`);
     }
@@ -127,25 +140,41 @@ export const RequestForm = () => {
             supervising PI will be. If you are unsure, please ask your sponsor.
           </p>
         </div>
-        {cluster.enableUserSshKey && (
-          <div className="form-group">
-            <label className="form-label">
-              Please paste your public SSH key.
-            </label>
-            <SshKeyInput
-              onChange={(value) => setRequest((r) => ({ ...r, sshKey: value }))}
-            />
-          </div>
-        )}
+        <div className="form-group">
+          <label className="form-label">Access Type</label>
+          <SearchDefinedOptions<AccessType>
+            definedOptions={cluster.accessTypes}
+            selected={request.accessTypes}
+            onSelect={(accessTypes) =>
+              setRequest((r) => ({ ...r, accessTypes }))
+            }
+            disabled={false}
+            placeHolder="Select one or more access types"
+            id="selectAccessTypes"
+          />
+        </div>
+        {cluster.accessTypes.includes("SshKey") &&
+          request.accessTypes.includes("SshKey") && (
+            <div className="form-group">
+              <label className="form-label">
+                Please paste your public SSH key.
+              </label>
+              <SshKeyInput
+                onChange={(value) =>
+                  setRequest((r) => ({ ...r, sshKey: value }))
+                }
+              />
+            </div>
+          )}
         <br />
         <button
-          disabled={notification.pending}
+          disabled={notification.pending || !request.accessTypes.length}
           onClick={handleSubmit}
           className="btn btn-primary"
         >
           Submit
         </button>
-        {cluster.enableUserSshKey && (
+        {cluster.accessTypes.includes("SshKey") && (
           <div>
             <br />
             <br />

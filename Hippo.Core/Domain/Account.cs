@@ -52,6 +52,9 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<Group> AdminOfGroups { get; set; } = new();
 
+        [JsonIgnore]
+        public List<AccessType> AccessTypes { get; set; } = new();
+        
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Account>().HasQueryFilter(a => a.Cluster.IsActive);

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Hippo.Core.Data;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Hippo.Core.Utilities;
 using Hippo.Jobs.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;

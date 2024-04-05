@@ -60,6 +60,7 @@ namespace Hippo.Core.Services
                 var emailTo = request.Requester.Email;
 
                 var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
+                var requestData = request.GetAccountRequestData();
 
                 var model = new DecisionModel()
                 {
@@ -74,6 +75,8 @@ namespace Hippo.Core.Services
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
                     ClusterName = request.Cluster.Name,
+                    AccessTypes = requestData.AccessTypes,
+                    SupervisingPI = requestData.SupervisingPI
                 };
 
                 if (!isApproved)
@@ -101,6 +104,7 @@ namespace Hippo.Core.Services
                 var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
                 var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}/approve";
                 var emails = await GetGroupAdminEmails(group);
+                var requestData = request.GetAccountRequestData();
 
                 var model = new NewRequestModel()
                 {
@@ -109,8 +113,9 @@ namespace Hippo.Core.Services
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     RequestUrl = requestUrl,
                     ClusterName = request.Cluster.Name,
-                    SupervisingPI = request.SupervisingPI,
+                    SupervisingPI = requestData.SupervisingPI,
                     Action = request.Action.SplitCamelCase(),
+                    AccessTypes = requestData.AccessTypes
                 };
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { User } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -24,13 +24,13 @@ export const ClusterAdmins = () => {
       title: "Remove Admin",
       message: "Are you sure you want to remove this administrator?",
     },
-    []
+    [],
   );
 
   useEffect(() => {
     const fetchClusterAdmins = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/admin/ClusterAdmins`
+        `/api/${cluster}/admin/ClusterAdmins`,
       );
 
       if (response.ok) {
@@ -54,13 +54,13 @@ export const ClusterAdmins = () => {
         `/api/${cluster}/admin/RemoveClusterAdmin/${user.id}`,
         {
           method: "POST",
-        }
+        },
       );
 
       setNotification(req, "Removing", "Admin Removed", async (r) => {
         if (r.status === 400) {
-          const errorText = await response.text(); //Bad Request Text
-          return errorText;
+          const errors = await parseBadRequest(response);
+          return errors;
         } else {
           return "An error happened, please try again.";
         }
@@ -74,7 +74,7 @@ export const ClusterAdmins = () => {
       }
       setAdminRemoving(undefined);
     },
-    [cluster, getConfirmation, setNotification, users]
+    [cluster, getConfirmation, setNotification, users],
   );
 
   const handleSubmit = async () => {
@@ -82,13 +82,13 @@ export const ClusterAdmins = () => {
       `/api/${cluster}/admin/AddClusterAdmin/${request.id}`,
       {
         method: "POST",
-      }
+      },
     );
 
     setNotification(req, "Saving", "Admin Added", async (r) => {
       if (r.status === 400) {
-        const errorText = await response.text(); //Bad Request Text
-        return errorText;
+        const errors = await parseBadRequest(response);
+        return errors;
       } else {
         return "An error happened, please try again.";
       }
@@ -96,9 +96,9 @@ export const ClusterAdmins = () => {
     const response = await req;
 
     if (response.ok) {
-      const newAccount = await response.json();
+      const user = (await response.json()) as User;
       //Add the user to the list
-      setUsers((r) => (r ? [...r, newAccount] : [newAccount]));
+      setUsers((r) => (r ? [...r, user] : [user]));
       setRequest((r) => ({ ...r, id: "" }));
     }
   };
@@ -133,7 +133,7 @@ export const ClusterAdmins = () => {
         ),
       },
     ],
-    [adminRemoving, handleRemove, notification.pending]
+    [adminRemoving, handleRemove, notification.pending],
   );
 
   const usersData = useMemo(() => users ?? [], [users]);

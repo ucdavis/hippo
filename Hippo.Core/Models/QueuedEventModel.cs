@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
+using Hippo.Core.Validation;
 
 namespace Hippo.Core.Models;
 
@@ -9,10 +11,10 @@ public class QueuedEventModel
 {
     public int Id { get; set; }
     [Required]
-    [RegularExpression(QueuedEvent.Actions.RegexPattern)]
+    [StringOptions(QueuedEvent.Actions.RegexPattern)]
     public string Action { get; set; } = "";
     [Required]
-    [RegularExpression(QueuedEvent.Statuses.RegexPattern)]
+    [StringOptions(QueuedEvent.Statuses.RegexPattern)]
     public string Status { get; set; } = "";
     [Required]
     public QueuedEventDataModel Data { get; set; } = new();
@@ -106,6 +108,9 @@ public class QueuedEventAccountModel
     [MaxLength(20)]
     public string Mothra { get; set; } = "";
     public string Key { get; set; } = "";
+    [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
+    public List<string> AccessTypes { get; set; } = new();
+
 
     public static QueuedEventAccountModel FromAccount(Account account)
     {
@@ -116,12 +121,14 @@ public class QueuedEventAccountModel
             Email = account.Owner.Email,
             Iam = account.Owner.Iam,
             Mothra = account.Owner.MothraId,
-            Key = account.SshKey
+            Key = account.SshKey,
+            AccessTypes = account.AccessTypes.Select(at => at.Name).ToList()
         };
     }
 
     public static QueuedEventAccountModel FromRequest(Request request)
     {
+        var requestData = request.GetAccountRequestData();
         return new QueuedEventAccountModel
         {
             Kerberos = request.Requester.Kerberos,
@@ -129,7 +136,8 @@ public class QueuedEventAccountModel
             Email = request.Requester.Email,
             Iam = request.Requester.Iam,
             Mothra = request.Requester.MothraId,
-            Key = request.SshKey,
+            Key = requestData.SshKey,
+            AccessTypes = requestData.AccessTypes
         };
     }
 }

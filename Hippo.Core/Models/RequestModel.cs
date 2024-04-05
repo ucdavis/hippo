@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Validation;
 
 namespace Hippo.Core.Models
 {
@@ -12,8 +14,24 @@ namespace Hippo.Core.Models
         public string RequesterName { get; set; } = "";
         public string Status { get; set; } = "";
         public string Cluster { get; set; } = "";
-        public string SupervisingPI { get; set; } = "";
 
         public GroupModel GroupModel { get; set; } = new();
+
+        public string Data { get; set; }
+    }
+
+    public class AccountRequestDataModel
+    {
+        [MaxLength(100)]
+        public string SupervisingPI { get; set; } = "";
+        public string SshKey { get; set; } = "";
+        [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
+        public List<string> AccessTypes { get; set; } = new();
+
+        public static List<string> ValidActions = new List<string>
+        {
+            Request.Actions.CreateAccount,
+            Request.Actions.AddAccountToGroup 
+        };
     }
 }

@@ -18,5 +18,6 @@ namespace Hippo.Email.Models
         public string ButtonText { get; set; } = "View Request";
         public string SupervisingPI { get; set; } = String.Empty;
         public string Action { get; set; } = String.Empty;
+        public List<string> AccessTypes { get; set; } = new();
     }
 }

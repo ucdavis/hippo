@@ -139,8 +139,11 @@ public class GroupController : SuperController
             Status = AccountRequest.Statuses.PendingApproval,
             Cluster = group.Cluster,
             ClusterId = group.ClusterId,
+        }
+        .WithAccountRequestData(new AccountRequestDataModel
+        {
             SupervisingPI = addToGroupModel.SupervisingPI,
-        };
+        });
 
         await _dbContext.Requests.AddAsync(request);
         await _historyService.RequestCreated(request);
