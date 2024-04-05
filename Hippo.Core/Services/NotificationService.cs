@@ -60,6 +60,7 @@ namespace Hippo.Core.Services
                 var emailTo = request.Requester.Email;
 
                 var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
+                var requestData = request.GetAccountRequestData();
 
                 var model = new DecisionModel()
                 {
@@ -74,6 +75,8 @@ namespace Hippo.Core.Services
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     Reason = reason,
                     ClusterName = request.Cluster.Name,
+                    AccessTypes = requestData.AccessTypes,
+                    SupervisingPI = requestData.SupervisingPI
                 };
 
                 if (!isApproved)

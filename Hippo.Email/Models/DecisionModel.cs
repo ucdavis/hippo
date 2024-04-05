@@ -23,6 +23,8 @@ namespace Hippo.Email.Models
         public string DecisionColor { get; set; } = Colors.Approved;
         public string Reason { get; set; } = String.Empty;
         public string AdminName { get; set; } = String.Empty; //Used for admin override email
+        public List<string> AccessTypes { get; set; } = new();
+        public string SupervisingPI { get; set; } = String.Empty;
 
         public class Colors
         {

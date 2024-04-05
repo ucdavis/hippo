@@ -81,6 +81,10 @@
         @Model?.ClusterName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
         @Model?.GroupName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Superivising PI",
+        string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified": @Model.SupervisingPI))"));
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Access Types",
+        string.Join(", ", @Model?.AccessTypes ?? new())))"));
     </mj-column>
 </mj-section>
 

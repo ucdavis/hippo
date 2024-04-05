@@ -50,7 +50,7 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Superivising PI",
-        @Model?.SupervisingPI ?? "Unspecified"))"));
+        string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified": @Model.SupervisingPI))"));
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Access Types",
         string.Join(", ", @Model?.AccessTypes ?? new())))"));
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
