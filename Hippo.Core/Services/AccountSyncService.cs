@@ -55,7 +55,7 @@ namespace Hippo.Core.Services
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
                 await _dbContext.BulkInsertAsync(puppetData.Users.Select(u => new TempKerberos { Kerberos = u.Kerberos }));
-                await _dbContext.BulkInsertAsync(puppetData.GroupsWithSponsors.Select(g => new TempGroup { Group = g }));
+                await _dbContext.BulkInsertAsync(puppetData.GroupsWithSponsors.Select(g => new TempGroup { Group = g.Name }));
 
                 var mapKerbsToUserIds = await _dbContext.Users
                     .Where(u => _dbContext.TempKerberos.Any(tg => tg.Kerberos == u.Kerberos))
@@ -74,11 +74,18 @@ namespace Hippo.Core.Services
                         ClusterId = cluster.Id,
                         CreatedOn = now,
                         UpdatedOn = now,
+                        Data = u.Data
                     })
                     .Where(a => IsValid(a))
                     .ToArray();
                 var desiredGroups = puppetData.GroupsWithSponsors
-                    .Select(groupName => new Group { Name = groupName, DisplayName = groupName, ClusterId = cluster.Id })
+                    .Select(g => new Group 
+                    {
+                        Name = g.Name, 
+                        DisplayName = g.Name, 
+                        ClusterId = cluster.Id, 
+                        Data = g.Data 
+                    })
                     .Where(g => IsValid(g))
                     .ToArray();
 

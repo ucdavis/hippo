@@ -87,6 +87,9 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
@@ -187,6 +190,9 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
                         .HasMaxLength(250)

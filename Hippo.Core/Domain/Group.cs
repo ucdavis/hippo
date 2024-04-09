@@ -20,6 +20,8 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
+        public string Data { get; set; } = "";
+
         [JsonIgnore]
         public List<Account> MemberAccounts { get; set; } = new();
 

@@ -1,5 +1,6 @@
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using Hippo.Core.Models.Settings;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Octokit;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
 namespace Hippo.Core.Services
 {
@@ -20,11 +21,14 @@ namespace Hippo.Core.Services
     {
         private readonly PuppetSettings _settings;
         private readonly IMemoryCache _memoryCache;
-
+        private readonly ISerializer _jsonSerializer;
         public PuppetService(IOptions<PuppetSettings> settings, IMemoryCache memoryCache)
         {
             _settings = settings.Value;
             _memoryCache = memoryCache;
+            _jsonSerializer = new SerializerBuilder()
+                .JsonCompatible()
+                .Build();
         }
 
         private async Task<GitHubClient> GetGithubClient()
@@ -66,44 +70,46 @@ namespace Hippo.Core.Services
             var gitHubClient = await GetGithubClient();
             var yamlPath = $"domains/{domain}/merged/all.yaml";
 
-            // TODO: Octokit doesn't provide a way to get at the file stream, so look into using a plain RestClient.
             var contents = await gitHubClient.Repository.Content.GetAllContentsByRef(_settings.RepositoryOwner, _settings.RepositoryName, yamlPath, _settings.RepositoryBranch);
             var yaml = contents.First().Content;
             using var reader = new StringReader(yaml);
-
-            // TODO: YamlStream is a bit of a misnomer. It actually loads entire root node into a DOM. Look into using the lower-level YamlParser.
-            var yamlStream = new YamlStream();
-            yamlStream.Load(reader);
-            var rootNode = (YamlMappingNode)yamlStream.Documents[0].RootNode;
-
+            var yamlDeserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build();
+            var rootNode = yamlDeserializer.Deserialize(reader) as Dictionary<object, object>;
             var data = new PuppetData();
 
             // Normalize group sponsor lists to be consistent with group member lists
             var groupSponsors = new ConcurrentDictionary<string, List<string>>();
-            var groupListNode = rootNode.GetNode("group") as YamlMappingNode;
+            var groupListNode = rootNode.GetNode("group") as Dictionary<object, object>;
             foreach (var kvp in groupListNode)
             {
                 var groupName = kvp.Key.ToString();
-                var groupNode = kvp.Value as YamlMappingNode;
+                var groupNode = kvp.Value as Dictionary<object, object>;
                 var sponsors = groupNode.GetStrings("sponsors");
                 // only add groups that have sponsors
                 if (sponsors.Length > 0)
                 {
-                    data.GroupsWithSponsors.Add(groupName);
-                    foreach (var user in groupNode.GetStrings("sponsors"))
+                    data.GroupsWithSponsors.Add(new PuppetGroup 
+                    {
+                        Name = groupName, 
+                        Data = _jsonSerializer.Serialize(groupNode) 
+                    });
+                    foreach (var user in sponsors)
                     {
                         groupSponsors.AddOrUpdate(user, new List<string> { groupName }, (k, v) => { v.Add(groupName); return v; });
                     }
                 }
             }
 
-            var userListNode = rootNode.GetNode("user") as YamlMappingNode;
-            var groupsSet = new HashSet<string>(data.GroupsWithSponsors);
+            var userListNode = rootNode.GetNode("user") as Dictionary<object, object>;
+            var groupsSet = new HashSet<string>(data.GroupsWithSponsors.Select(g => g.Name));
 
             foreach (var kvp in userListNode)
             {
                 var puppetUser = new PuppetUser { Kerberos = kvp.Key.ToString() };
-                var userNode = kvp.Value as YamlMappingNode;
+                var userNode = kvp.Value as Dictionary<object, object>;
+                userNode.Remove("password");
 
                 puppetUser.Name = userNode.GetString("fullname");
                 puppetUser.Email = userNode.GetString("email");
@@ -115,6 +121,7 @@ namespace Hippo.Core.Services
                 {
                     puppetUser.SponsorForGroups = groups.ToArray();
                 }
+                puppetUser.Data = _jsonSerializer.Serialize(userNode);
 
                 data.Users.Add(puppetUser);
             }
@@ -123,28 +130,25 @@ namespace Hippo.Core.Services
         }
     }
 
-    internal static class YamlNodeExtensions
+    internal static class UntypedDataExtensions
     {
-        private static readonly ConcurrentDictionary<string, YamlNode> _cache = new();
-
-        public static YamlNode GetNode(this YamlMappingNode node, string key)
+        public static object GetNode(this Dictionary<object, object> node, string key)
         {
-            var yamlKey = _cache.GetOrAdd(key, k => new YamlScalarNode(k));
-            if (node.Children.ContainsKey(yamlKey))
+            if (node.ContainsKey(key))
             {
-                return node.Children[yamlKey];
+                return node[key];
             }
             return null;
         }
 
-        public static string GetString(this YamlMappingNode node, string key)
+        public static string GetString(this Dictionary<object, object> node, string key)
         {
             return GetNode(node, key)?.ToString();
         }
 
-        public static string[] GetStrings(this YamlMappingNode node, string key)
+        public static string[] GetStrings(this Dictionary<object, object> node, string key)
         {
-            var sequenceNdode = GetNode(node, key) as YamlSequenceNode;
+            var sequenceNdode = GetNode(node, key) as List<object>;
             if (sequenceNdode != null)
             {
                 return sequenceNdode.Select(g => g.ToString()).ToArray();
@@ -155,7 +159,7 @@ namespace Hippo.Core.Services
 
     public class PuppetData
     {
-        public List<string> GroupsWithSponsors { get; set; } = new();
+        public List<PuppetGroup> GroupsWithSponsors { get; set; } = new();
         public List<PuppetUser> Users { get; set; } = new();
     }
 
@@ -166,6 +170,14 @@ namespace Hippo.Core.Services
         public string Email { get; set; }
         public string[] Groups { get; set; } = new string[] { };
         public string[] SponsorForGroups { get; set; } = new string[] { };
+        public string Data { get; set; }
+    }
+
+    public class PuppetGroup
+    {
+        public string Name { get; set; }
+        public string Data { get; set; }
+
     }
 
 }
