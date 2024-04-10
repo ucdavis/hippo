@@ -39,11 +39,15 @@ public class GroupController : SuperController
             return BadRequest("You must supply a cluster name.");
         }
 
+        var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
         var groups = await _dbContext.Groups
             .AsNoTracking()
             .Where(g => g.Cluster.Name == Cluster)
             .OrderBy(g => g.DisplayName)
-            .Select(GroupModel.Projection)
+            .Select(GroupModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
             .ToArrayAsync();
 
         return Ok(groups);
