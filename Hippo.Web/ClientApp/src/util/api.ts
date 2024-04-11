@@ -1,6 +1,10 @@
 import {
+  AccountModel,
   AppContextShape,
+  GroupModel,
   ModelState,
+  RawAccountModel,
+  RawGroupModel,
   RawRequestModel,
   RequestModel,
 } from "../types";
@@ -47,8 +51,46 @@ export const tryParseJSONObject = (val: string) => {
 };
 
 export const parseRawRequestModel = (rawRequest: RawRequestModel) => {
-  return {
-    ...rawRequest,
-    data: rawRequest.data && JSON.parse(rawRequest.data),
-  } as RequestModel;
+  try {
+    return {
+      ...rawRequest,
+      data: rawRequest.data && JSON.parse(rawRequest.data),
+    } as RequestModel;
+  } catch (error) {
+    console.log(error);
+    return {
+      ...rawRequest,
+      data: undefined,
+    } as RequestModel;
+  }
+};
+
+export const parseRawGroupModel = (rawGroup: RawGroupModel) => {
+  try {
+    return {
+      ...rawGroup,
+      data: rawGroup.data && JSON.parse(rawGroup.data),
+    } as GroupModel;
+  } catch (error) {
+    console.log(error);
+    return {
+      ...rawGroup,
+      data: undefined,
+    } as GroupModel;
+  }
+};
+
+export const parseRawAccountModel = (rawAccount: RawAccountModel) => {
+  try {
+    return {
+      ...rawAccount,
+      data: rawAccount.data && JSON.parse(rawAccount.data),
+    } as AccountModel;
+  } catch (error) {
+    console.log(error);
+    return {
+      ...rawAccount,
+      data: undefined,
+    } as AccountModel;
+  }
 };

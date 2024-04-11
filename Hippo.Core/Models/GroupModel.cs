@@ -12,7 +12,7 @@ namespace Hippo.Core.Models
 
         public List<GroupAccountModel> Admins { get; set; } = new();
 
-        public static Expression<Func<Group, GroupModel>> GetProjection(bool isClusterOrSystemAdmin, int currentUserId)
+        public static Expression<Func<Group, GroupModel>> GetProjection(bool isClusterOrSystemAdmin, int currentUserId = 0)
         {
 
             return g => new GroupModel

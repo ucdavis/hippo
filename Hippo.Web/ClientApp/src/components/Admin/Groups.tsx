@@ -1,8 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { GroupModel } from "../../types";
-import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import { GroupModel, RawGroupModel } from "../../types";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawGroupModel,
+} from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -52,7 +56,9 @@ export const Groups = () => {
       const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
 
       if (response.ok) {
-        setGroups(await response.json());
+        setGroups(
+          ((await response.json()) as RawGroupModel[]).map(parseRawGroupModel),
+        );
       } else {
         alert("Error fetching groups");
       }
@@ -73,7 +79,7 @@ export const Groups = () => {
 
       const req = authenticatedFetch(`/api/${cluster}/group/update`, {
         method: "POST",
-        body: JSON.stringify({ ...group, displayName }),
+        body: JSON.stringify({ id: group.id, displayName }),
       });
 
       setNotification(req, "Saving", "Group Updated", async (r) => {
@@ -88,7 +94,9 @@ export const Groups = () => {
       const response = await req;
 
       if (response.ok) {
-        const updatedGroup = (await response.json()) as GroupModel;
+        const updatedGroup = parseRawGroupModel(
+          (await response.json()) as RawGroupModel,
+        );
         let updatedGroups = [] as GroupModel[];
         //check if the updatedGroup is already in the list
         if (groups?.find((g) => g.id === updatedGroup.id)) {

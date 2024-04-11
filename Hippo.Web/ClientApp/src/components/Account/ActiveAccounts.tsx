@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { AccountModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { AccountModel, RawAccountModel } from "../../types";
+import { authenticatedFetch, parseRawAccountModel } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
@@ -54,7 +54,7 @@ export const ActiveAccounts = () => {
         sortable: true,
       },
     ],
-    []
+    [],
   );
 
   const accountsData = useMemo(() => accounts ?? [], [accounts]);
@@ -62,11 +62,15 @@ export const ActiveAccounts = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/account/active`
+        `/api/${cluster}/account/active`,
       );
 
       if (response.ok) {
-        setAccounts(await response.json());
+        setAccounts(
+          ((await response.json()) as RawAccountModel[]).map(
+            parseRawAccountModel,
+          ),
+        );
       }
     };
 
@@ -85,7 +89,7 @@ export const ActiveAccounts = () => {
         .map((a) => a.memberOfGroups)
         .flat()
         .filter((g) => g !== null)
-        .map((g) => g.name)
+        .map((g) => g.name),
     ).size;
     return (
       <div className="row justify-content-center">

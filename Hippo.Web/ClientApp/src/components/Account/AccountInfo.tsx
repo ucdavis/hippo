@@ -1,7 +1,12 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AddToGroupModel, GroupModel, RawRequestModel } from "../../types";
+import {
+  AddToGroupModel,
+  GroupModel,
+  RawGroupModel,
+  RawRequestModel,
+} from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -10,6 +15,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import {
   authenticatedFetch,
   parseBadRequest,
+  parseRawGroupModel,
   parseRawRequestModel,
 } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
@@ -38,11 +44,13 @@ export const AccountInfo = () => {
 
       if (response.ok) {
         setGroups(
-          ((await response.json()) as GroupModel[]).filter(
-            (g) =>
-              !currentGroups.some((cg) => cg.id === g.id) &&
-              !currentOpenRequests.some((r) => r.groupModel.id === g.id),
-          ),
+          ((await response.json()) as RawGroupModel[])
+            .filter(
+              (g) =>
+                !currentGroups.some((cg) => cg.id === g.id) &&
+                !currentOpenRequests.some((r) => r.groupModel.id === g.id),
+            )
+            .map(parseRawGroupModel),
         );
       } else {
         alert("Error fetching groups");

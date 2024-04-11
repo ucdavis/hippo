@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { AccountModel } from "../../types";
-import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import { AccountModel, RawAccountModel } from "../../types";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawAccountModel,
+} from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
@@ -100,7 +104,9 @@ export const TransferSponsor = (props: Props) => {
     const response = await request;
 
     if (response.ok) {
-      const newAccount = (await response.json()) as AccountModel;
+      const newAccount = parseRawAccountModel(
+        (await response.json()) as RawAccountModel,
+      );
       props.transferSponsor(props.account, newAccount);
     }
   };

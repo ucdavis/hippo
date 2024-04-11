@@ -7,10 +7,12 @@ import {
   AccountCreateModel,
   AccessType,
   RawRequestModel,
+  RawGroupModel,
 } from "../../types";
 import {
   authenticatedFetch,
   parseBadRequest,
+  parseRawGroupModel,
   parseRawRequestModel,
 } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -40,10 +42,10 @@ export const RequestForm = () => {
         `/api/${clusterName}/group/groups`,
       );
 
-      const groupsResult = (await response.json()) as GroupModel[];
+      const groupsResult = (await response.json()) as RawGroupModel[];
 
       if (response.ok) {
-        setGroups(groupsResult);
+        setGroups(groupsResult.map(parseRawGroupModel));
       }
     };
 
