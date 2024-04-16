@@ -109,7 +109,6 @@ namespace Hippo.Core.Services
             {
                 var puppetUser = new PuppetUser { Kerberos = kvp.Key.ToString() };
                 var userNode = kvp.Value as Dictionary<object, object>;
-                userNode.Remove("password");
 
                 puppetUser.Name = userNode.GetString("fullname");
                 puppetUser.Email = userNode.GetString("email");
@@ -121,6 +120,11 @@ namespace Hippo.Core.Services
                 {
                     puppetUser.SponsorForGroups = groups.ToArray();
                 }
+
+                // remove fields we don't want stored in Data json property
+                userNode.Remove("password");
+                userNode.Remove("fullname");
+                userNode.Remove("email");
                 puppetUser.Data = _jsonSerializer.Serialize(userNode);
 
                 data.Users.Add(puppetUser);
