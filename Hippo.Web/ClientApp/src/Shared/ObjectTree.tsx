@@ -25,7 +25,10 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
       const isObject = typeof value === "object" && value;
       const item = (
         <React.Fragment key={id}>
-          <ListGroupItem className="border-top-0 border-bottom-0 border-end-0">
+          <ListGroupItem
+            className="border-top-0 border-bottom-0 border-end-0"
+            style={{ paddingRight: 0, paddingTop: 2, paddingBottom: 2 }}
+          >
             <div
               style={isObject ? { cursor: "pointer" } : {}}
               id={id}
