@@ -1,16 +1,85 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { AccountModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { AccountModel, RawAccountModel } from "../../types";
+import { authenticatedFetch, parseRawAccountModel } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
+import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
+import ObjectTree from "../../Shared/ObjectTree";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
+  const [viewing, setViewing] = useState<number>();
 
   const { cluster } = useParams();
+
+  const [showDetails] = useConfirmationDialog(
+    {
+      title: "Account Details",
+      message: () => {
+        const account = accounts.find((a) => a.id === viewing);
+        return (
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input
+                  className="form-control"
+                  id="accountDetailsName"
+                  value={account.name}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  className="form-control"
+                  id="accountDetailsEmail"
+                  value={account.email}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Kerberos</label>
+                <input
+                  className="form-control"
+                  id="accountDetailsKerberos"
+                  value={account.kerberos}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Updated On</label>
+                <input
+                  className="form-control"
+                  id="accountDetailsUpdatedOn"
+                  value={new Date(account.updatedOn).toLocaleDateString()}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Details</label>
+                <ObjectTree obj={account.data} />
+              </div>
+            </div>
+          </div>
+        );
+      },
+      buttons: ["OK"],
+    },
+    [accounts, viewing],
+  );
+
+  const handleDetails = useCallback(
+    async (account: AccountModel) => {
+      setViewing(account.id);
+      await showDetails();
+      setViewing(undefined);
+    },
+    [showDetails],
+  );
 
   const columns: Column<AccountModel>[] = useMemo(
     () => [
@@ -53,8 +122,21 @@ export const ActiveAccounts = () => {
         accessor: (row) => new Date(row.updatedOn).toLocaleDateString(),
         sortable: true,
       },
+      {
+        Header: "Action",
+        Cell: (props) => (
+          <>
+            <button
+              onClick={() => handleDetails(props.row.original)}
+              className="btn btn-primary"
+            >
+              {viewing === props.row.original.id ? "Viewing..." : "Details"}
+            </button>
+          </>
+        ),
+      },
     ],
-    []
+    [handleDetails, viewing],
   );
 
   const accountsData = useMemo(() => accounts ?? [], [accounts]);
@@ -62,11 +144,15 @@ export const ActiveAccounts = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/account/active`
+        `/api/${cluster}/account/active`,
       );
 
       if (response.ok) {
-        setAccounts(await response.json());
+        setAccounts(
+          ((await response.json()) as RawAccountModel[]).map(
+            parseRawAccountModel,
+          ),
+        );
       }
     };
 
@@ -85,7 +171,7 @@ export const ActiveAccounts = () => {
         .map((a) => a.memberOfGroups)
         .flat()
         .filter((g) => g !== null)
-        .map((g) => g.name)
+        .map((g) => g.name),
     ).size;
     return (
       <div className="row justify-content-center">

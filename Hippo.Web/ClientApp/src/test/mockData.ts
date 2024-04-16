@@ -1,12 +1,16 @@
 import {
   AppContextShape,
   User,
-  AccountModel,
-  GroupModel,
   ClusterModel,
   RawRequestModel,
+  RawGroupModel,
+  RawAccountModel,
 } from "../types";
-import { parseRawRequestModel } from "../util/api";
+import {
+  parseRawAccountModel,
+  parseRawGroupModel,
+  parseRawRequestModel,
+} from "../util/api";
 
 const fakeUser: User = {
   id: 1,
@@ -28,22 +32,26 @@ const fakeAdminUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
-export const fakeGroups: GroupModel[] = [
+export const fakeRawGroups: RawGroupModel[] = [
   {
     id: 1,
     name: "group1",
     displayName: "Group 1",
     admins: [],
+    data: "",
   },
   {
     id: 2,
     name: "group2",
     displayName: "Group 2",
     admins: [],
+    data: "",
   },
 ];
 
-export const fakeAccounts: AccountModel[] = [
+export const fakeGroups = fakeRawGroups.map(parseRawGroupModel);
+
+export const fakeRawAccounts: RawAccountModel[] = [
   {
     id: 1,
     name: "Account 1",
@@ -55,6 +63,7 @@ export const fakeAccounts: AccountModel[] = [
     memberOfGroups: [fakeGroups[0]],
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
+    data: "",
   },
   {
     id: 2,
@@ -67,8 +76,11 @@ export const fakeAccounts: AccountModel[] = [
     memberOfGroups: [fakeGroups[1]],
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
+    data: "",
   },
 ];
+
+export const fakeAccounts = fakeRawAccounts.map(parseRawAccountModel);
 
 export const fakeRawRequests: RawRequestModel[] = [
   {

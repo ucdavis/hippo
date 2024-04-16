@@ -44,12 +44,14 @@ public class AccountController : SuperController
             return BadRequest("Cluster is required");
         }
         var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
         return Ok(await _dbContext.Accounts
             .AsSplitQuery()
             .InCluster(Cluster)
             .Where(a => a.Owner.Iam == currentUser.Iam)
-            .Select(AccountModel.Projection)
+            .Select(AccountModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
             .ToArrayAsync());
     }
 
@@ -71,7 +73,7 @@ public class AccountController : SuperController
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(a => a.MemberOfGroups.OrderBy(g => g.Name).First().Name)
                 .ThenBy(a => a.Name)
-            .Select(AccountModel.Projection)
+            .Select(AccountModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
             .ToArrayAsync());
     }
 

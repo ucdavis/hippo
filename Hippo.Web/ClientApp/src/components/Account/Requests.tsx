@@ -28,8 +28,8 @@ export const Requests = () => {
 
       if (response.ok) {
         setRequests(
-          (await response.json()).map((r: RawRequestModel) =>
-            parseRawRequestModel(r),
+          ((await response.json()) as RawRequestModel[]).map(
+            parseRawRequestModel,
           ),
         );
       }

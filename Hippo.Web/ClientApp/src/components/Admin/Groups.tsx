@@ -1,13 +1,18 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
-import { GroupModel } from "../../types";
-import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import { GroupModel, RawGroupModel } from "../../types";
+import {
+  authenticatedFetch,
+  parseBadRequest,
+  parseRawGroupModel,
+} from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
+import ObjectTree from "../../Shared/ObjectTree";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -15,6 +20,7 @@ export const Groups = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [groups, setGroups] = useState<GroupModel[]>();
   const [editing, setEditing] = useState<number>();
+  const [viewing, setViewing] = useState<number>();
   const [editGroupDisplayName, setEditGroupDisplayName] = useState<string>("");
   const { cluster } = useParams();
 
@@ -39,6 +45,10 @@ export const Groups = () => {
                   }}
                 ></input>
               </div>
+              <div className="form-group">
+                <label className="form-label">Details</label>
+                <ObjectTree obj={groups.find((g) => g.id === editing).data} />
+              </div>
             </div>
           </div>
         );
@@ -47,12 +57,53 @@ export const Groups = () => {
     [editGroupDisplayName, setEditGroupDisplayName],
   );
 
+  const [showDetails] = useConfirmationDialog(
+    {
+      title: "View Group Details",
+      message: () => {
+        const viewingIndex = groups.findIndex((g) => g.id === viewing);
+        return (
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input
+                  className="form-control"
+                  id="viewDetailsName"
+                  value={groups[viewingIndex].name}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Display Name</label>
+                <input
+                  className="form-control"
+                  id="viewDetailsDisplayName"
+                  value={groups[viewingIndex].displayName}
+                  readOnly
+                ></input>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Details</label>
+                <ObjectTree obj={groups[viewingIndex].data} />
+              </div>
+            </div>
+          </div>
+        );
+      },
+      buttons: ["OK"],
+    },
+    [groups, viewing],
+  );
+
   useEffect(() => {
     const fetchGroups = async () => {
       const response = await authenticatedFetch(`/api/${cluster}/group/groups`);
 
       if (response.ok) {
-        setGroups(await response.json());
+        setGroups(
+          ((await response.json()) as RawGroupModel[]).map(parseRawGroupModel),
+        );
       } else {
         alert("Error fetching groups");
       }
@@ -73,7 +124,7 @@ export const Groups = () => {
 
       const req = authenticatedFetch(`/api/${cluster}/group/update`, {
         method: "POST",
-        body: JSON.stringify({ ...group, displayName }),
+        body: JSON.stringify({ id: group.id, displayName }),
       });
 
       setNotification(req, "Saving", "Group Updated", async (r) => {
@@ -88,7 +139,9 @@ export const Groups = () => {
       const response = await req;
 
       if (response.ok) {
-        const updatedGroup = (await response.json()) as GroupModel;
+        const updatedGroup = parseRawGroupModel(
+          (await response.json()) as RawGroupModel,
+        );
         let updatedGroups = [] as GroupModel[];
         //check if the updatedGroup is already in the list
         if (groups?.find((g) => g.id === updatedGroup.id)) {
@@ -112,6 +165,15 @@ export const Groups = () => {
       setEditing(undefined);
     },
     [cluster, getEditConfirmation, groups, setNotification],
+  );
+
+  const handleDetails = useCallback(
+    async (group: GroupModel) => {
+      setViewing(group.id);
+      await showDetails();
+      setViewing(undefined);
+    },
+    [showDetails],
   );
 
   const columns: Column<GroupModel>[] = useMemo(
@@ -140,12 +202,19 @@ export const Groups = () => {
               className="btn btn-primary"
             >
               {editing === props.row.original.id ? "Updating..." : "Edit"}
+            </button>{" "}
+            <button
+              disabled={notification.pending}
+              onClick={() => handleDetails(props.row.original)}
+              className="btn btn-primary"
+            >
+              {viewing === props.row.original.id ? "Viewing..." : "Details"}
             </button>
           </>
         ),
       },
     ],
-    [editing, handleEdit, notification.pending],
+    [editing, handleDetails, handleEdit, notification.pending, viewing],
   );
 
   const groupsData = useMemo(() => groups ?? [], [groups]);

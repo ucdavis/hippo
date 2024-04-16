@@ -39,6 +39,8 @@ namespace Hippo.Core.Domain
 
         public string SshKey { get; set; }
 
+        public string Data { get; set; }
+
         public int? OwnerId { get; set; }
         public User Owner { get; set; }
 

@@ -39,11 +39,15 @@ public class GroupController : SuperController
             return BadRequest("You must supply a cluster name.");
         }
 
+        var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
         var groups = await _dbContext.Groups
             .AsNoTracking()
             .Where(g => g.Cluster.Name == Cluster)
             .OrderBy(g => g.DisplayName)
-            .Select(GroupModel.Projection)
+            .Select(GroupModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
             .ToArrayAsync();
 
         return Ok(groups);
@@ -51,29 +55,34 @@ public class GroupController : SuperController
 
     [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     [HttpPost]
-    public async Task<IActionResult> Update([FromBody] Group group)
+    public async Task<IActionResult> Update([FromBody] UpdateGroupModel updateGroupModel)
     {
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("You must supply a cluster name.");
         }
 
-        if (group.Id == 0)
+        if (updateGroupModel.Id == 0)
         {
             return BadRequest("You must specify an Id when updating a group.");
         }
 
         var existingGroup = await _dbContext.Groups
             .Where(g => g.Cluster.Name == Cluster)
-            .SingleOrDefaultAsync(g => g.Id == group.Id);
+            .SingleOrDefaultAsync(g => g.Id == updateGroupModel.Id);
         if (existingGroup == null)
         {
             return BadRequest($"Group does not exist.");
         }
 
-        existingGroup.DisplayName = group.DisplayName;
+        existingGroup.DisplayName = updateGroupModel.DisplayName;
         await _dbContext.SaveChangesAsync();
-        return Ok(existingGroup);
+
+        var groupModel = await _dbContext.Groups
+            .Where(g => g.Id == updateGroupModel.Id)
+            .Select(GroupModel.GetProjection(true))
+            .SingleAsync();
+        return Ok(groupModel);
     }
 
     [HttpPost]

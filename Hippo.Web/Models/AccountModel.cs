@@ -17,6 +17,7 @@ namespace Hippo.Web.Models
         public List<GroupModel> AdminOfGroups { get; set; } = new();
         public List<string> AccessTypes { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
+        public string Data { get; set; } = "";
 
         public AccountModel()
         {
@@ -44,6 +45,7 @@ namespace Hippo.Web.Models
                         Name = a.Name,
                         Email = a.Email
                     }).ToList(),
+                Data = g.Data
             })
             .OrderBy(x => x).ToList();
             AdminOfGroups = account.AdminOfGroups.Select(g => new GroupModel
@@ -58,55 +60,65 @@ namespace Hippo.Web.Models
                         Name = a.Name,
                         Email = a.Email
                     }).ToList(),
+                Data = g.Data
             })
             .OrderBy(x => x).ToList();
             UpdatedOn = account.UpdatedOn;
             AccessTypes = account.AccessTypes.Select(at => at.Name).ToList();
+            Data = account.Data;
         }
 
-        public static Expression<Func<Account, AccountModel>> Projection
+        public static Expression<Func<Account, AccountModel>> GetProjection(bool isClusterOrSystemAdmin, int currentUserId)
         {
-            get
+            return a => new AccountModel
             {
-                return a => new AccountModel
+                Id = a.Id,
+                Name = a.Name,
+                Email = a.Email,
+                Kerberos = a.Kerberos,
+                CreatedOn = a.CreatedOn,
+                Cluster = a.Cluster.Name,
+                Owner = a.Owner,
+                MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
                 {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Email = a.Email,
-                    Kerberos = a.Kerberos,
-                    CreatedOn = a.CreatedOn,
-                    Cluster = a.Cluster.Name,
-                    Owner = a.Owner,
-                    MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
-                    {
-                        Id = g.Id,
-                        DisplayName = g.DisplayName,
-                        Name = g.Name,
-                        Admins = g.AdminAccounts
-                            .Select(a => new GroupAccountModel
-                            {
-                                Kerberos = a.Kerberos,
-                                Name = a.Name,
-                                Email = a.Email
-                            }).ToList(),
-                    }).OrderBy(x => x.Name).ToList(),
-                    AdminOfGroups = a.AdminOfGroups.Select(g => new GroupModel
-                    {
-                        Id = g.Id,
-                        DisplayName = g.DisplayName,
-                        Name = g.Name,
-                        Admins = g.AdminAccounts
-                            .Select(a => new GroupAccountModel
-                            {
-                                Kerberos = a.Kerberos,
-                                Name = a.Name,
-                                Email = a.Email
-                            }).ToList(),
-                    }).OrderBy(x => x.Name).ToList(),
-                    UpdatedOn = a.UpdatedOn,
-                    AccessTypes = a.AccessTypes.Select(at => at.Name).ToList()
-                };
-            }
+                    Id = g.Id,
+                    DisplayName = g.DisplayName,
+                    Name = g.Name,
+                    Admins = g.AdminAccounts
+                        .Select(a => new GroupAccountModel
+                        {
+                            Kerberos = a.Kerberos,
+                            Name = a.Name,
+                            Email = a.Email
+                        }).ToList(),
+                    // permission to view account doesn't imply permission to view groups that account belongs to
+                    Data = isClusterOrSystemAdmin
+                        || g.AdminAccounts.Any(a => a.OwnerId == currentUserId)
+                        || g.MemberAccounts.Any(a => a.OwnerId == currentUserId)
+                        ? g.Data : null
+                }).OrderBy(x => x.Name).ToList(),
+                AdminOfGroups = a.AdminOfGroups.Select(g => new GroupModel
+                {
+                    Id = g.Id,
+                    DisplayName = g.DisplayName,
+                    Name = g.Name,
+                    Admins = g.AdminAccounts
+                        .Select(a => new GroupAccountModel
+                        {
+                            Kerberos = a.Kerberos,
+                            Name = a.Name,
+                            Email = a.Email
+                        }).ToList(),
+                    // permission to view account doesn't imply permission to view groups that account belongs to
+                    Data = isClusterOrSystemAdmin
+                        || g.AdminAccounts.Any(a => a.OwnerId == currentUserId)
+                        || g.MemberAccounts.Any(a => a.OwnerId == currentUserId)
+                        ? g.Data : null
+                }).OrderBy(x => x.Name).ToList(),
+                UpdatedOn = a.UpdatedOn,
+                AccessTypes = a.AccessTypes.Select(at => at.Name).ToList(),
+                Data = a.Data
+            };
         }
     }
 }
