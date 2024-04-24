@@ -195,6 +195,8 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
+
             if (Configuration.GetValue<bool>("EventQueueEnabled"))
             {
                 services.AddScoped<IAccountUpdateService, AccountUpdateService>();
