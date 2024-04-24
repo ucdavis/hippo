@@ -12,6 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+    <PackageReference Include="AggieEnterpriseApi" Version="0.2.219" />
     <PackageReference Include="EFCore.BulkExtensions" Version="6.7.15" />
     <PackageReference Include="ietws" Version="0.2.12" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
