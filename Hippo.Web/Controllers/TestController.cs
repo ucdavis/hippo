@@ -23,8 +23,10 @@ namespace Hippo.Web.Controllers
         public ISecretsService _secretsService { get; }
         private readonly IMjmlRenderer _mjmlRenderer;
 
+        public IAggieEnterpriseService _aggieEnterpriseService { get; }
+
         public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext,
-            ISecretsService secretsService, IMjmlRenderer mjmlRenderer)
+            ISecretsService secretsService, IMjmlRenderer mjmlRenderer, IAggieEnterpriseService aggieEnterpriseService)
         {
             _emailService = emailService;
             _sshService = sshService;
@@ -32,6 +34,7 @@ namespace Hippo.Web.Controllers
             _dbContext = dbContext;
             _secretsService = secretsService;
             _mjmlRenderer = mjmlRenderer;
+            _aggieEnterpriseService = aggieEnterpriseService;
         }
 
         public async Task<IActionResult> TestEmail()
@@ -164,6 +167,14 @@ namespace Hippo.Web.Controllers
             }
 
             return Content(sb.ToString());
+        }
+
+        public async Task<IActionResult> TestAggieEnterprise()
+        {
+            var model = await _aggieEnterpriseService.IsChartStringValid("3110-13U02-ADNO006-522201-43-000-0000000000-200504-0000-000000-000000");
+
+            return Content(model.IsValid.ToString());
+
         }
 
         [Authorize(Policy = AccessCodes.ClusterAdminAccess)]

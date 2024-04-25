@@ -186,6 +186,7 @@ namespace Hippo.Web
             services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
+            services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<IEmailService, EmailService>();
@@ -194,6 +195,8 @@ namespace Hippo.Web
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
+
             if (Configuration.GetValue<bool>("EventQueueEnabled"))
             {
                 services.AddScoped<IAccountUpdateService, AccountUpdateService>();
