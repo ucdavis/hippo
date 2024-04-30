@@ -32,6 +32,8 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; } //When we have a cluster identifier 
         public Cluster Cluster { get; set; }
 
+        //TODO: Link to the order that is nullable
+
         [MaxLength(50)]
         public string Status { get; set; }
 
@@ -72,6 +74,32 @@ namespace Hippo.Core.Domain
                 RoleAdded,
                 QueuedEventCreated,
                 QueuedEventUpdated
+            }.ToList();
+        }
+
+        public class OrderActions
+        {
+            public const string Created = "Created";
+            public const string Updated = "Updated";
+            public const string Submitted = "Submitted";
+            public const string Processing = "Processing";
+            public const string Cancelled = "Cancelled";
+            public const string Active = "Active";
+            public const string Rejected = "Rejected";
+            public const string Completed = "Completed";
+            public const string AdhocPayment = "Adhoc Payment";
+
+            public static List<string> TypeList = new List<string>
+            {
+                Created,
+                Updated,
+                Submitted,
+                Processing,
+                Cancelled,
+                Active,
+                Rejected,
+                Completed,
+                AdhocPayment
             }.ToList();
         }
     }
