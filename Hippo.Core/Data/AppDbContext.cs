@@ -44,6 +44,9 @@ namespace Hippo.Core.Data
         public virtual DbSet<FinancialDetail> FinancialDetails { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Billing> Billings { get; set; }
+        public virtual DbSet<OrderMetaData> MetaData { get; set; }
+        public virtual DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -62,6 +65,7 @@ namespace Hippo.Core.Data
             AccessType.OnModelCreating(builder);
             FinancialDetail.OnModelCreating(builder);
             Product.OnModelCreating(builder);
+            OrderMetaData.OnModelCreating(builder);
         }
     }
  }
