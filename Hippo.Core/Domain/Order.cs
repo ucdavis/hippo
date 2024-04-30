@@ -50,6 +50,10 @@ namespace Hippo.Core.Domain
         public int PrincipalInvestigatorId { get; set; }
         public User PrincipalInvestigator { get; set; }
 
+        public DateTime Created { get; set; } = DateTime.UtcNow;
+
+        public List<Billing> Billings { get; set; } = new();
+
         [JsonIgnore]
         public List<History> History { get; set; } = new();
 
@@ -81,6 +85,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Order>().HasIndex(o => o.PrincipalInvestigatorId);
             modelBuilder.Entity<Order>().HasOne(o => o.CreatedBy).WithMany().HasForeignKey(o => o.CreatedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(o => o.Order).WithMany().HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             //The Principal Investigator reference is declared in the User class
         }
     }
