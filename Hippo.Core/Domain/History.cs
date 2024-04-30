@@ -32,7 +32,8 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; } //When we have a cluster identifier 
         public Cluster Cluster { get; set; }
 
-        //TODO: Link to the order that is nullable
+        public int? OrderId { get; set; }
+        public Order Order { get; set; }
 
         [MaxLength(50)]
         public string Status { get; set; }
@@ -45,6 +46,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<History>().HasIndex(h => h.ClusterId);
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.Order).WithMany().HasForeignKey(a => a.OrderId).OnDelete(DeleteBehavior.Restrict);
         }
 
         public class Actions

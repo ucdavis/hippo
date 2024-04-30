@@ -47,6 +47,12 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public FinancialDetail FinancialDetail { get; set; }
 
+        [JsonIgnore]
+        public List<Product> Products { get; set; } = new();
+
+        [JsonIgnore]
+        public List<Order> Orders { get; set; } = new();
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cluster>().HasQueryFilter(a => a.IsActive);
@@ -76,6 +82,17 @@ namespace Hippo.Core.Domain
                 .HasOne(c => c.FinancialDetail)
                 .WithOne(c => c.Cluster)
                 .HasForeignKey<FinancialDetail>(fd => fd.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Cluster)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Cluster)
+                .WithMany(c => c.Orders)
+                .HasForeignKey(o => o.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
