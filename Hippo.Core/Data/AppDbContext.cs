@@ -41,6 +41,7 @@ namespace Hippo.Core.Data
         public virtual DbSet<TempKerberos> TempKerberos { get; set; }
         public virtual DbSet<QueuedEvent> QueuedEvents { get; set; }
         public virtual DbSet<AccessType> AccessTypes { get; set; }
+        public virtual DbSet<FinancialDetail> FinancialDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -57,6 +58,7 @@ namespace Hippo.Core.Data
             Domain.GroupMemberAccount.OnModelCreating(builder);
             QueuedEvent.OnModelCreating(builder);
             AccessType.OnModelCreating(builder);
+            FinancialDetail.OnModelCreating(builder);
         }
     }
  }

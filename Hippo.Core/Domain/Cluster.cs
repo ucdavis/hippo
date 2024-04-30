@@ -44,6 +44,9 @@ namespace Hippo.Core.Domain
         [MinLength(1)]
         public List<AccessType> AccessTypes { get; set; } = new();
 
+        [JsonIgnore]
+        public FinancialDetail FinancialDetail { get; set; }
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cluster>().HasQueryFilter(a => a.IsActive);
@@ -66,6 +69,13 @@ namespace Hippo.Core.Domain
                 .HasOne(p => p.Cluster)
                 .WithMany()
                 .HasForeignKey(p => p.ClusterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cluster has a one to one relationship with FinancialDetail where the financial detail is nullable
+            modelBuilder.Entity<Cluster>()
+                .HasOne(c => c.FinancialDetail)
+                .WithOne(c => c.Cluster)
+                .HasForeignKey<FinancialDetail>(fd => fd.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
