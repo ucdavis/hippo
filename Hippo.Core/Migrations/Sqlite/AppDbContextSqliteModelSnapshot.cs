@@ -121,6 +121,32 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Billing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChartString")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Updated")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Billings");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
                 {
                     b.Property<int>("Id")
@@ -167,6 +193,28 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("Name");
 
                     b.ToTable("Clusters");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.FinancialDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AutoApprove")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId")
+                        .IsUnique();
+
+                    b.ToTable("FinancialDetails");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
@@ -253,6 +301,12 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("Details")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("OrderId1")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
@@ -267,7 +321,155 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("ClusterId");
 
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("OrderId1");
+
                     b.ToTable("Histories");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Adjustment")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AdjustmentReason")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("BalanceRemaining")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalReference")
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Installments")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PrincipalInvestigatorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Units")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
+
+                    b.HasIndex("PrincipalInvestigatorId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.OrderMetaData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("OrderId", "Name", "Value");
+
+                    b.ToTable("MetaData");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FinancialSystemId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrackingNumber")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Permission", b =>
@@ -294,6 +496,52 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("UserId");
 
                     b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Installments")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Units")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.QueuedEvent", b =>
@@ -532,6 +780,28 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Billing", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Order", "Order")
+                        .WithMany("Billings")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.FinancialDetail", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithOne("FinancialDetail")
+                        .HasForeignKey("Hippo.Core.Domain.FinancialDetail", "ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Group", b =>
                 {
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
@@ -594,9 +864,67 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Hippo.Core.Domain.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hippo.Core.Domain.Order", null)
+                        .WithMany("History")
+                        .HasForeignKey("OrderId1");
+
                     b.Navigation("ActedBy");
 
                     b.Navigation("Cluster");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Order", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany("Orders")
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.User", "PrincipalInvestigator")
+                        .WithMany("Orders")
+                        .HasForeignKey("PrincipalInvestigatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
+
+                    b.Navigation("PrincipalInvestigator");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.OrderMetaData", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Order", "Order")
+                        .WithMany("MetaData")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Payment", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.HasOne("Hippo.Core.Domain.Order", "Order")
+                        .WithMany("Payments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Permission", b =>
@@ -623,6 +951,17 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Product", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany("Products")
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.QueuedEvent", b =>
@@ -665,7 +1004,24 @@ namespace Hippo.Core.Migrations.Sqlite
                 {
                     b.Navigation("Accounts");
 
+                    b.Navigation("FinancialDetail");
+
                     b.Navigation("Groups");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Order", b =>
+                {
+                    b.Navigation("Billings");
+
+                    b.Navigation("History");
+
+                    b.Navigation("MetaData");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Request", b =>
@@ -676,6 +1032,8 @@ namespace Hippo.Core.Migrations.Sqlite
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Permissions");
                 });
