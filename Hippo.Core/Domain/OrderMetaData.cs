@@ -12,8 +12,7 @@ namespace Hippo.Core.Domain
     public class OrderMetaData
     {
         [Key]
-        [JsonIgnore]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public int Id { get; set; }
         [Required]
         public int OrderId { get; set; }
         public Order Order { get; set; }

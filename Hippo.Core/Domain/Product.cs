@@ -15,11 +15,14 @@ namespace Hippo.Core.Domain
         public string Name { get; set; }
         [MaxLength(250)]
         public string Description { get; set; }
+        public string Units { get; set; } //Informational like TB, or fairshair points
         [Required]
         [Range(0.01, double.MaxValue)]
-        public decimal Price { get; set; }
+        public decimal UnitPrice { get; set; }
         //Not sure if we want to do this, but it lets a default number of payment installments to be specified
         public int Installments { get; set; }
+
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         [Required]
         public int ClusterId { get; set; }

@@ -23,9 +23,10 @@ namespace Hippo.Core.Domain
         public string Description { get; set; }
         [MaxLength(150)]
         public string ExternalReference { get; set; }
+        public string Units { get; set; } //Informational like TB, or fairshair points
         [Required]
         [Range(0.01, double.MaxValue)]
-        public decimal Price { get; set; }
+        public decimal UnitPrice { get; set; }
         [Required]
         [Range(0.0001, double.MaxValue)]
         public decimal Quantity { get; set; }
@@ -38,12 +39,12 @@ namespace Hippo.Core.Domain
         public string AdjustmentReason { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Total { get; set; }
-        public decimal BalanceRemaining { get; set; } // do here, or just get the total of the billings?
+        public decimal BalanceRemaining { get; set; } //We will also calculate this when we do a payment
         public string Notes { get; set; }
         public string AdminNotes { get; set; }
         public string Status { get; set; }
 
-        public decimal InstalmentAmount => Math.Round(Total / Installments, 2);
+        public decimal InstallmentAmount => Math.Round(Total / Installments, 2);
 
         [Required]
         public int ClusterId { get; set; }

@@ -11,14 +11,13 @@ namespace Hippo.Core.Domain
     {
         [Key]
         public int Id { get; set; }
-        public string SlothId { get; set; }
+        public string FinancialSystemId { get; set; }
         public string TrackingNumber { get; set; } // KFS tracking number
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public decimal Amount { get; set; }
         public string Status { get; set; }
 
-        public string ClusterChartString { get; set; }
-        public string OrderChartStrings { get; set; } //.Serialize() of the billings chart strings and percentages used
+        public string Details { get; set; } //chart strings, credit/debit, and amounts
 
 
         [Required]
