@@ -50,9 +50,6 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
-        [Required]
-        public int CreatedById { get; set; }
-        public User CreatedBy { get; set; }
 
         [Required]
         public int PrincipalInvestigatorId { get; set; }
