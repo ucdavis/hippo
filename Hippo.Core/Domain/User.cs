@@ -49,6 +49,7 @@ namespace Hippo.Core.Domain
         public List<Order> Orders { get; set; } = new();
 
 
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
@@ -70,11 +71,7 @@ namespace Hippo.Core.Domain
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.PrincipalInvestigatorId)
                 .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.CreatedBy)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
