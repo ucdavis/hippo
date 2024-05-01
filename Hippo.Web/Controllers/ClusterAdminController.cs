@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hippo.Core.Domain;
+using Hippo.Core.Models.OrderModels;
 
 namespace Hippo.Web.Controllers
 {
@@ -150,7 +151,7 @@ namespace Hippo.Web.Controllers
             return Ok(clusterModel);
         }
 
-        public async Task<IActionResult> UpdateFinancialDetails(int id, [FromBody] FinancialDetail model)
+        public async Task<IActionResult> UpdateFinancialDetails(int id, [FromBody] FinancialDetailPostModel model)
         {
             //Possibly use the secret service to set the FinancialSystemApiKey
             var cluster = await _dbContext.Clusters.SingleAsync(c => c.Id == id);
@@ -159,12 +160,16 @@ namespace Hippo.Web.Controllers
             {
                 existingFinancialDetail = new FinancialDetail
                 {
-                    ClusterId = id
+                    ClusterId = id,
+                    SecretAccessKey = Guid.NewGuid(),
+
                 };
             }
-            await _secretsService.SetSecret($"FinancialApiKeyCluster{cluster.Id}", model.FinancialSystemApiKey);
-            //var xxx = await _secretsService.GetSecret($"FinancialApiKeyCluster{cluster.Id}");
-            //existingFinancialDetail.FinancialSystemApiKey = model.FinancialSystemApiKey;
+            if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
+            {
+                await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey.ToString(), model.FinancialSystemApiKey);
+            }
+            //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
             existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
             existingFinancialDetail.ChartString = model.ChartString;
             existingFinancialDetail.AutoApprove = model.AutoApprove;
