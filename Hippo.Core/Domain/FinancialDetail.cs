@@ -6,7 +6,7 @@ namespace Hippo.Core.Domain
     public class FinancialDetail
     {
         [Key]
-        int Id { get; set; }
+        public int Id { get; set; }
         [StringLength(128)] //Probably doesn't need to be this big...
         string FinancialSystemApiKey { get; set; }
         [MaxLength(50)]
