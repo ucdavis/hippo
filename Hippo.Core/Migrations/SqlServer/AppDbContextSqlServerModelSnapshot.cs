@@ -221,8 +221,19 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("ChartString")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
+
+                    b.Property<string>("FinancialSystemApiKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("FinancialSystemApiSource")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
