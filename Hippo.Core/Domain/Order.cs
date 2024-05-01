@@ -21,22 +21,29 @@ namespace Hippo.Core.Domain
         public string Name { get; set; }
         [MaxLength(250)]
         public string Description { get; set; }
+        [MaxLength(150)]
         public string ExternalReference { get; set; }
         [Required]
         [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
-        public int Quantity { get; set; }
-
+        [Required]
+        [Range(0.0001, double.MaxValue)]
+        public decimal Quantity { get; set; }
+        [Required]
+        [Range(1, int.MaxValue)]
         public int Installments { get; set; }
 
 
-        public decimal Adjustments { get; set; }
+        public decimal Adjustment { get; set; }
         public string AdjustmentReason { get; set; }
+        public decimal SubTotal { get; set; }
         public decimal Total { get; set; }
+        public decimal BalanceRemaining { get; set; } // do here, or just get the total of the billings?
         public string Notes { get; set; }
         public string AdminNotes { get; set; }
         public string Status { get; set; }
 
+        public decimal InstalmentAmount => Math.Round(Total / Installments, 2);
 
         [Required]
         public int ClusterId { get; set; }
@@ -87,12 +94,11 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Order>().HasQueryFilter(o => o.Cluster.IsActive);
             modelBuilder.Entity<Order>().HasIndex(o => o.CreatedById);
             modelBuilder.Entity<Order>().HasIndex(o => o.PrincipalInvestigatorId);
-            modelBuilder.Entity<Order>().HasOne(o => o.CreatedBy).WithMany().HasForeignKey(o => o.CreatedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(o => o.Order).WithMany().HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OrderMetaData>().HasOne(o => o.Order).WithMany(o => o.MetaData).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Payment>().HasOne(o => o.Order).WithMany(o => o.Payments).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
-            //The Principal Investigator reference is declared in the User class
+
         }
     }
 }

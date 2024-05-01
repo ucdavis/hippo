@@ -70,6 +70,11 @@ namespace Hippo.Core.Domain
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.PrincipalInvestigatorId)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.CreatedBy)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
