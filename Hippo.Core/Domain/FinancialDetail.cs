@@ -8,11 +8,11 @@ namespace Hippo.Core.Domain
         [Key]
         public int Id { get; set; }
         [StringLength(128)] //Probably doesn't need to be this big...
-        string FinancialSystemApiKey { get; set; }
+        public string FinancialSystemApiKey { get; set; }
         [MaxLength(50)]
-        string FinancialSystemApiSource { get; set; }
-        string ChartString { get; set; }
-        bool AutoApprove { get; set; }
+        public string FinancialSystemApiSource { get; set; }
+        public string ChartString { get; set; }
+        public bool AutoApprove { get; set; }
         [Required]
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
