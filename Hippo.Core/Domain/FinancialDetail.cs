@@ -8,9 +8,9 @@ namespace Hippo.Core.Domain
         [Key]
         int Id { get; set; }
         [StringLength(128)] //Probably doesn't need to be this big...
-        string SlothApiKey { get; set; }
+        string ApiKey { get; set; }
         [MaxLength(50)]
-        string SlothSource { get; set; }
+        string ApiSource { get; set; }
         string ChartString { get; set; }
         bool AutoApprove { get; set; }
         [Required]
