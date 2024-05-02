@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { FinancialDetailModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
+import { useParams } from "react-router-dom";
 
 const FinancialDetail: React.FC = () => {
   const [financialDetail, setFinancialDetail] =
     useState<FinancialDetailModel | null>(null);
+  const { cluster: clusterName } = useParams();
 
   useEffect(() => {
     // Fetch financial detail data from API or any other data source
     // and set it to the state
     const fetchFinancialDetail = async () => {
       try {
-        const response = await fetch("/api/caesfarm/admin/FinancialDetails"); // Replace with your API endpoint
+        const response = await fetch(
+          `/api/${clusterName}/admin/FinancialDetails`,
+        ); // Replace with your API endpoint
         const data = await response.json();
         setFinancialDetail(data);
       } catch (error) {
@@ -32,7 +36,7 @@ const FinancialDetail: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    authenticatedFetch(`/api/caesfarm/admin/UpdateFinancialDetails`, {
+    authenticatedFetch(`/api/${clusterName}/admin/UpdateFinancialDetails`, {
       method: "POST",
       body: JSON.stringify(financialDetail),
     });
@@ -46,6 +50,7 @@ const FinancialDetail: React.FC = () => {
   return (
     <div>
       <h1>Financial Detail</h1>
+      <h2>{clusterName}</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
