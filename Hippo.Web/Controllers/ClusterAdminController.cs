@@ -1,15 +1,10 @@
-using System;
-using System.Linq;
 using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
-using Hippo.Core.Extensions;
-using Hippo.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Hippo.Core.Domain;
-using Hippo.Core.Models.OrderModels;
 
 namespace Hippo.Web.Controllers
 {
@@ -151,42 +146,6 @@ namespace Hippo.Web.Controllers
             return Ok(clusterModel);
         }
 
-        public async Task<IActionResult> UpdateFinancialDetails(int id, [FromBody] FinancialDetailPostModel model)
-        {
-            //Possibly use the secret service to set the FinancialSystemApiKey
-            var cluster = await _dbContext.Clusters.SingleAsync(c => c.Id == id);
-            var existingFinancialDetail = await _dbContext.FinancialDetails.SingleOrDefaultAsync(fd => fd.ClusterId == id);
-            if (existingFinancialDetail == null)
-            {
-                existingFinancialDetail = new FinancialDetail
-                {
-                    ClusterId = id,
-                    SecretAccessKey = Guid.NewGuid(),
-
-                };
-            }
-            if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
-            {
-                await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey.ToString(), model.FinancialSystemApiKey);
-            }
-            //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
-            existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
-            existingFinancialDetail.ChartString = model.ChartString;
-            existingFinancialDetail.AutoApprove = model.AutoApprove;
-
-            if (existingFinancialDetail.Id == 0)
-            {
-                await _dbContext.FinancialDetails.AddAsync(existingFinancialDetail);
-            }
-            else
-            {
-                _dbContext.FinancialDetails.Update(existingFinancialDetail);
-            }
-
-            await _dbContext.SaveChangesAsync();
-            return Ok(existingFinancialDetail);
-
-        }
 
     }
 }

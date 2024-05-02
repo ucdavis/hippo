@@ -212,3 +212,11 @@ export interface PuppetGroupRecord {
   storage?: PuppetGroupStorage[];
   slurm?: SlurmRecord;
 }
+
+export interface FinancialDetailModel {
+  financialSystemApiKey: string;
+  financialSystemApiSource: string;
+  chartString: string;
+  autoApprove: boolean;
+  maskedApiKey: string;
+}

@@ -94,7 +94,6 @@ export const AppNav = () => {
                 >
                   Groups
                 </NavLink>
-
                 <NavLink
                   id="clusterAdmins"
                   className="nav-item nav-link"
@@ -104,6 +103,18 @@ export const AppNav = () => {
                   }
                 >
                   Cluster Admins
+                </NavLink>
+              </ShowFor>
+              <ShowFor roles={["System"]}>
+                <NavLink
+                  id="financialDetails"
+                  className="nav-item nav-link"
+                  to={`/${cluster.name}/admin/FinancialDetails`}
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
+                >
+                  Financial
                 </NavLink>
               </ShowFor>
             </nav>
