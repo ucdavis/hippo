@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FinancialDetailModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useParams } from "react-router-dom";
+import { usePromiseNotification } from "../../util/Notifications";
 
 const FinancialDetail: React.FC = () => {
   const [financialDetail, setFinancialDetail] =
     useState<FinancialDetailModel | null>(null);
   const { cluster: clusterName } = useParams();
+  const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     // Fetch financial detail data from API or any other data source
@@ -24,7 +26,7 @@ const FinancialDetail: React.FC = () => {
     };
 
     fetchFinancialDetail();
-  }, []);
+  }, [clusterName]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -34,13 +36,32 @@ const FinancialDetail: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    authenticatedFetch(`/api/${clusterName}/admin/UpdateFinancialDetails`, {
-      method: "POST",
-      body: JSON.stringify(financialDetail),
-    });
-    console.log("Updated financial detail:", financialDetail);
+    const request = authenticatedFetch(
+      `/api/${clusterName}/admin/UpdateFinancialDetails`,
+      {
+        method: "POST",
+        body: JSON.stringify(financialDetail),
+      },
+    );
+    setNotification(
+      request,
+      "Updating Financial Details",
+      "Financial Details Updated",
+      async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(await request);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      },
+    );
+    if ((await request).ok) {
+      // refresh the page
+      window.location.reload();
+    }
   };
 
   if (!financialDetail) {
@@ -50,13 +71,12 @@ const FinancialDetail: React.FC = () => {
   return (
     <div>
       <h1>Financial Detail</h1>
-      <h2>{clusterName}</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
         </div>
         <div>
-          <label htmlFor="name">financialSystemApiKey:</label>
+          <label htmlFor="name">Update Financial API Key:</label>
           <input
             type="text"
             id="financialSystemApiKey"
@@ -67,28 +87,47 @@ const FinancialDetail: React.FC = () => {
         </div>
 
         <div>
-          <label htmlFor="chartstring">Chart String:</label>
+          <label htmlFor="chartString">Chart String:</label>
           <input
             type="text"
-            id="chartstring"
-            name="chartstring"
+            id="chartString"
+            name="chartString"
             value={financialDetail.chartString}
             onChange={handleInputChange}
+            required
           />
         </div>
 
         <div>
-          <label htmlFor="chartstring">API Source:</label>
+          <label htmlFor="financialSystemApiSource">API Source:</label>
           <input
             type="text"
             id="financialSystemApiSource"
             name="financialSystemApiSource"
             value={financialDetail.financialSystemApiSource}
             onChange={handleInputChange}
+            required
           />
         </div>
-        {/* Add more input fields for other properties */}
-        <button type="submit">Save</button>
+
+        <div>
+          <label htmlFor="autoApprove">Auto Approve:</label>
+          <input
+            type="checkbox"
+            id="autoApprove"
+            name="autoApprove"
+            checked={financialDetail.autoApprove}
+            onChange={(e) =>
+              setFinancialDetail((prevFinancialDetail) => ({
+                ...prevFinancialDetail,
+                autoApprove: e.target.checked,
+              }))
+            }
+          />
+        </div>
+        <button disabled={notification.pending} type="submit">
+          Save
+        </button>
       </form>
     </div>
   );
