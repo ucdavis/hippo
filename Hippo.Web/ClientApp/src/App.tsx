@@ -19,6 +19,7 @@ import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
+import FinancialDetail from "./components/Financial/FinancialDetail";
 
 declare var Hippo: AppContextShape;
 
@@ -89,6 +90,14 @@ const App = () => {
               element={
                 <ShowFor roles={["System"]} alternative={<Restricted />}>
                   <AdminClusters />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/admin/financialdetails"
+              element={
+                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                  <FinancialDetail />
                 </ShowFor>
               }
             />

@@ -109,7 +109,7 @@ export const AppNav = () => {
                 <NavLink
                   id="financialDetails"
                   className="nav-item nav-link"
-                  to={`/${cluster.name}/admin/FinancialDetails`}
+                  to={`/${cluster.name}/admin/financialdetails`}
                   style={({ isActive }) =>
                     isActive ? { fontWeight: "bold" } : {}
                   }

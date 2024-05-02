@@ -134,6 +134,7 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
     public async Task<IActionResult> FinancialDetails()
     {
         var cluster = await _dbContext.Clusters.AsNoTracking().SingleAsync(c => c.Name == Cluster);
@@ -173,6 +174,7 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
     public async Task<IActionResult> UpdateFinancialDetails([FromBody] FinancialDetailModel model)
     {
         //Possibly use the secret service to set the FinancialSystemApiKey
