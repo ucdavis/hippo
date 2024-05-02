@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FinancialDetailModel } from "../../types";
+import { authenticatedFetch } from "../../util/api";
 
 const FinancialDetail: React.FC = () => {
   const [financialDetail, setFinancialDetail] =
@@ -31,8 +32,10 @@ const FinancialDetail: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // Send updated financial detail data to API or any other data source
-    // for saving changes
+    authenticatedFetch(`/api/caesfarm/admin/UpdateFinancialDetails`, {
+      method: "POST",
+      body: JSON.stringify(financialDetail),
+    });
     console.log("Updated financial detail:", financialDetail);
   };
 
@@ -48,11 +51,11 @@ const FinancialDetail: React.FC = () => {
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
         </div>
         <div>
-          <label htmlFor="name">Fund:</label>
+          <label htmlFor="name">financialSystemApiKey:</label>
           <input
             type="text"
-            id="name"
-            name="name"
+            id="financialSystemApiKey"
+            name="financialSystemApiKey"
             value={financialDetail.financialSystemApiKey}
             onChange={handleInputChange}
           />
@@ -69,6 +72,16 @@ const FinancialDetail: React.FC = () => {
           />
         </div>
 
+        <div>
+          <label htmlFor="chartstring">API Source:</label>
+          <input
+            type="text"
+            id="financialSystemApiSource"
+            name="financialSystemApiSource"
+            value={financialDetail.financialSystemApiSource}
+            onChange={handleInputChange}
+          />
+        </div>
         {/* Add more input fields for other properties */}
         <button type="submit">Save</button>
       </form>
