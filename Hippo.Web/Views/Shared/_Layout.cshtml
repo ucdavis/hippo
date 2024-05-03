@@ -47,6 +47,7 @@
             All rights reserved. <br> Questions? <a href="/clusters">See contact info for each cluster.</a></p> 
     </footer>
 
+    <script src="https://finjector.ucdavis.edu/finjector.js?v=3" type="text/javascript" asp-add-nonce="true"></script>
 
     <script>
         var Hippo = { user: {}};
@@ -59,6 +60,10 @@
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";
         Hippo.lastPuppetSync = @Html.Raw(await UserService.GetLastPuppetSync());
     </script>
+
+
+    
+
 
     <react-scripts />
 

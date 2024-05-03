@@ -4,6 +4,11 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useParams } from "react-router-dom";
 import { usePromiseNotification } from "../../util/Notifications";
 
+declare const window: Window &
+  typeof globalThis & {
+    Finjector: any;
+  };
+
 const FinancialDetail: React.FC = () => {
   const [financialDetail, setFinancialDetail] =
     useState<FinancialDetailModel | null>(null);
@@ -64,6 +69,57 @@ const FinancialDetail: React.FC = () => {
     }
   };
 
+  const lookupcoa = async () => {
+    const chart = await window.Finjector.findChartSegmentString();
+
+    if (chart.status === "success") {
+      //alert("Chart Segment: " + chart.data);
+
+      financialDetail.chartString = chart.data;
+      setFinancialDetail((prevFinancialDetail) => ({
+        ...prevFinancialDetail,
+        chartString: chart.data,
+      }));
+
+      //Copied from Harvest. Keeping for now in case we call an api end point to validate the chart string here instead of in the backend
+      // const response = await authenticatedFetch(
+      //   `/api/financialaccount/get?account=${chart.data}`
+      // );
+
+      // if (response.ok) {
+      //   if (response.status === 204) {
+      //     alert("Account Selected is not valid");
+      //     return;
+      //   } else {
+      //     var result = await response.json();
+
+      //     if (result.success === false) {
+      //       alert("Account Selected is not valid: " + result.error);
+      //       return;
+      //     }
+
+      //     const accountInfo: ProjectAccount = result;
+
+      //     if (accounts.some((a) => a.number === accountInfo.number)) {
+      //       alert("Account already selected -- choose a different account");
+      //       return;
+      //     } else {
+      //       alert(undefined);
+      //     }
+
+      //     if (accounts.length === 0) {
+      //       // if it's our first account, default to 100%
+      //       accountInfo.percentage = 100.0;
+      //     }
+
+      //     setAccounts([...accounts, accountInfo]);
+      //   }
+      //}
+    } else {
+      alert("Failed!");
+    }
+  };
+
   if (!financialDetail) {
     return <div>Loading...</div>;
   }
@@ -88,7 +144,16 @@ const FinancialDetail: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="chartString">Chart String:</label>
+          <label htmlFor="chartString">Chart String:</label>{" "}
+          {financialDetail.chartString && (
+            <a
+              href={`https://finjector.ucdavis.edu/Details/${financialDetail.chartString}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {financialDetail.chartString}
+            </a>
+          )}
           <input
             type="text"
             className="form-control"
@@ -99,6 +164,9 @@ const FinancialDetail: React.FC = () => {
             required
           />
         </div>
+        <button className="btn btn-primary" onClick={lookupcoa} type="button">
+          Pick Chart String
+        </button>
 
         <div className="form-group">
           <label htmlFor="financialSystemApiSource">API Source:</label>
