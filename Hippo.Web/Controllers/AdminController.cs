@@ -24,8 +24,9 @@ public class AdminController : SuperController
     private ISshService _sshService;
     private INotificationService _notificationService;
     private ISecretsService _secretsService;
+    private IAggieEnterpriseService _aggieEnterpriseService;
 
-    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService)
+    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService)
     {
         _dbContext = dbContext;
         _userService = userService;
@@ -34,6 +35,7 @@ public class AdminController : SuperController
         _sshService = sshService;
         _notificationService = notificationService;
         _secretsService = secretsService;
+        _aggieEnterpriseService = aggieEnterpriseService;
     }
 
     [HttpGet]
@@ -188,6 +190,11 @@ public class AdminController : SuperController
                 SecretAccessKey = Guid.NewGuid(),
 
             };
+        }
+        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString);
+        if (!validateChartString.IsValid)
+        {
+            return BadRequest("Invalid Chart String");
         }
         if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
         {
