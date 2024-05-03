@@ -75,10 +75,11 @@ const FinancialDetail: React.FC = () => {
         <div>
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="name">Update Financial API Key:</label>
           <input
             type="text"
+            className="form-control"
             id="financialSystemApiKey"
             name="financialSystemApiKey"
             value={financialDetail.financialSystemApiKey}
@@ -86,10 +87,11 @@ const FinancialDetail: React.FC = () => {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label htmlFor="chartString">Chart String:</label>
           <input
             type="text"
+            className="form-control"
             id="chartString"
             name="chartString"
             value={financialDetail.chartString}
@@ -98,10 +100,11 @@ const FinancialDetail: React.FC = () => {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label htmlFor="financialSystemApiSource">API Source:</label>
           <input
             type="text"
+            className="form-control"
             id="financialSystemApiSource"
             name="financialSystemApiSource"
             value={financialDetail.financialSystemApiSource}
@@ -110,7 +113,7 @@ const FinancialDetail: React.FC = () => {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label htmlFor="autoApprove">Auto Approve:</label>
           <input
             type="checkbox"
@@ -125,8 +128,12 @@ const FinancialDetail: React.FC = () => {
             }
           />
         </div>
-        <button disabled={notification.pending} type="submit">
-          Save
+        <button
+          className="btn btn-primary"
+          disabled={notification.pending}
+          type="submit"
+        >
+          Submit
         </button>
       </form>
     </div>
