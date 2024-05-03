@@ -131,11 +131,14 @@ namespace Hippo.Core.Services
 
 
                 await GetPpmAccountManager(rtValue);
-
-                if (rtValue.PpmSegments.ExpenditureType != AeSettings.NaturalAccount)
+                if (!string.IsNullOrWhiteSpace(AeSettings.NaturalAccount))
                 {
-                    rtValue.Messages.Add($"Expenditure Type must be {AeSettings.NaturalAccount}");
-                    rtValue.IsValid = false;
+
+                    if (rtValue.PpmSegments.ExpenditureType != AeSettings.NaturalAccount)
+                    {
+                        rtValue.Messages.Add($"Expenditure Type must be {AeSettings.NaturalAccount}");
+                        rtValue.IsValid = false;
+                    }
                 }
 
                 return rtValue;
