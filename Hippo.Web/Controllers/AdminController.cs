@@ -194,7 +194,7 @@ public class AdminController : SuperController
         var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString);
         if (!validateChartString.IsValid)
         {
-            return BadRequest("Invalid Chart String");
+            return BadRequest($"Invalid Chart String Errors: {validateChartString.Message}");
         }
         if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
         {
