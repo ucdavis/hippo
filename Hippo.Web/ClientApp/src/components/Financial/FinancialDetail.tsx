@@ -140,25 +140,27 @@ const FinancialDetail: React.FC = () => {
               {financialDetail.chartString}
             </a>
           )}
-          <input
-            type="text"
-            className="form-control"
-            id="chartString"
-            name="chartString"
-            value={financialDetail.chartString}
-            onChange={handleInputChange}
-            onBlur={(e) => {
-              validateChartString(e.target.value);
-            }}
-            required
-          />
-          <button
-            className="btn btn-primary"
-            onClick={lookupChartString}
-            type="button"
-          >
-            Pick Chart String
-          </button>
+          <div className="input-group">
+            <input
+              type="text"
+              className="form-control"
+              id="chartString"
+              name="chartString"
+              value={financialDetail.chartString}
+              onChange={handleInputChange}
+              onBlur={(e) => {
+                validateChartString(e.target.value);
+              }}
+              required
+            />
+            <button
+              className="btn btn-primary"
+              onClick={lookupChartString}
+              type="button"
+            >
+              <i className="fas fa-search"></i>
+            </button>
+          </div>
           {chartStringValidation && (
             <div>
               <div>Chart String Validation:</div>
@@ -221,7 +223,7 @@ const FinancialDetail: React.FC = () => {
           disabled={notification.pending}
           type="submit"
         >
-          Submit
+          <i className="fas fa-search"></i> Submit
         </button>
       </form>
     </div>
