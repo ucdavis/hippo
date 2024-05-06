@@ -38,7 +38,6 @@ const FinancialDetail: React.FC = () => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    alert(name + " " + value);
     setFinancialDetail((prevFinancialDetail) => ({
       ...prevFinancialDetail,
       [name]: value,
@@ -73,7 +72,7 @@ const FinancialDetail: React.FC = () => {
     }
   };
 
-  const lookupcoa = async () => {
+  const lookupChartString = async () => {
     const chart = await window.Finjector.findChartSegmentString();
 
     if (chart.status === "success") {
@@ -148,9 +147,16 @@ const FinancialDetail: React.FC = () => {
             name="chartString"
             value={financialDetail.chartString}
             onChange={handleInputChange}
+            onBlur={(e) => {
+              validateChartString(e.target.value);
+            }}
             required
           />
-          <button className="btn btn-primary" onClick={lookupcoa} type="button">
+          <button
+            className="btn btn-primary"
+            onClick={lookupChartString}
+            type="button"
+          >
             Pick Chart String
           </button>
           {chartStringValidation && (
