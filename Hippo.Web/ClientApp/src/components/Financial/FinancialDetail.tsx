@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FinancialDetailModel } from "../../types";
+import { ChartStringValidationModel, FinancialDetailModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useParams } from "react-router-dom";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -14,6 +14,8 @@ const FinancialDetail: React.FC = () => {
     useState<FinancialDetailModel | null>(null);
   const { cluster: clusterName } = useParams();
   const [notification, setNotification] = usePromiseNotification();
+  const [chartStringValidation, setChartStringValidation] =
+    useState<ChartStringValidationModel | null>(null);
 
   useEffect(() => {
     // Fetch financial detail data from API or any other data source
@@ -35,6 +37,7 @@ const FinancialDetail: React.FC = () => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+    alert(name + " " + value);
     setFinancialDetail((prevFinancialDetail) => ({
       ...prevFinancialDetail,
       [name]: value,
@@ -76,10 +79,25 @@ const FinancialDetail: React.FC = () => {
       //alert("Chart Segment: " + chart.data);
 
       financialDetail.chartString = chart.data;
+
       setFinancialDetail((prevFinancialDetail) => ({
         ...prevFinancialDetail,
         chartString: chart.data,
       }));
+
+      //call api/order/validate-chart-string/{chart.data} to validate the chart string
+      let response = await authenticatedFetch(
+        `/api/order/validate-chart-string/${chart.data}`,
+        {
+          method: "GET",
+        },
+      );
+      //console.log(response);
+      if (response.ok) {
+        const result = await response.json();
+        console.log(result);
+        setChartStringValidation(result);
+      }
 
       //Copied from Harvest. Keeping for now in case we call an api end point to validate the chart string here instead of in the backend
       // const response = await authenticatedFetch(
@@ -163,10 +181,37 @@ const FinancialDetail: React.FC = () => {
             onChange={handleInputChange}
             required
           />
+          <button className="btn btn-primary" onClick={lookupcoa} type="button">
+            Pick Chart String
+          </button>
+          {chartStringValidation && (
+            <div>
+              <div>Chart String Validation:</div>
+              <div>
+                Is Valid: {chartStringValidation.isValid ? "Yes" : "No"}
+              </div>
+              <div>Description: {chartStringValidation.description}</div>
+              {chartStringValidation.accountManager && (
+                <div>
+                  <div>
+                    Account Manager: {chartStringValidation.accountManager}
+                  </div>
+                  <div>
+                    Account Manager Email:{" "}
+                    {chartStringValidation.accountManagerEmail}
+                  </div>
+                </div>
+              )}
+              {chartStringValidation.message && (
+                <div>Message: {chartStringValidation.message}</div>
+              )}
+
+              {chartStringValidation.warning && (
+                <div>Warning: {chartStringValidation.warning}</div>
+              )}
+            </div>
+          )}
         </div>
-        <button className="btn btn-primary" onClick={lookupcoa} type="button">
-          Pick Chart String
-        </button>
 
         <div className="form-group">
           <label htmlFor="financialSystemApiSource">API Source:</label>

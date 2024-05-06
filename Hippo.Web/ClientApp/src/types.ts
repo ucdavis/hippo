@@ -220,3 +220,11 @@ export interface FinancialDetailModel {
   autoApprove: boolean;
   maskedApiKey: string;
 }
+export interface ChartStringValidationModel {
+  isValid: boolean;
+  description: string;
+  accountManager: string;
+  accountManagerEmail: string;
+  message: string;
+  warning: string;
+}

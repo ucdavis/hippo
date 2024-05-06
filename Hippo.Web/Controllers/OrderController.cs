@@ -1,4 +1,4 @@
-﻿using Hippo.Core.Models;
+using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +21,7 @@ namespace Hippo.Web.Controllers
         public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
         {
             return await _aggieEnterpriseService.IsChartStringValid(chartString);
+            
         }
 
     }
