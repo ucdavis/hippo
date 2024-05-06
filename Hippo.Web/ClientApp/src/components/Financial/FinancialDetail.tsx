@@ -27,6 +27,7 @@ const FinancialDetail: React.FC = () => {
         ); // Replace with your API endpoint
         const data = await response.json();
         setFinancialDetail(data);
+        await validateChartString(data.chartString);
       } catch (error) {
         console.error("Error fetching financial detail:", error);
       }
@@ -85,56 +86,24 @@ const FinancialDetail: React.FC = () => {
         chartString: chart.data,
       }));
 
-      //call api/order/validate-chart-string/{chart.data} to validate the chart string
-      let response = await authenticatedFetch(
-        `/api/order/validate-chart-string/${chart.data}`,
-        {
-          method: "GET",
-        },
-      );
-      //console.log(response);
-      if (response.ok) {
-        const result = await response.json();
-        console.log(result);
-        setChartStringValidation(result);
-      }
-
-      //Copied from Harvest. Keeping for now in case we call an api end point to validate the chart string here instead of in the backend
-      // const response = await authenticatedFetch(
-      //   `/api/financialaccount/get?account=${chart.data}`
-      // );
-
-      // if (response.ok) {
-      //   if (response.status === 204) {
-      //     alert("Account Selected is not valid");
-      //     return;
-      //   } else {
-      //     var result = await response.json();
-
-      //     if (result.success === false) {
-      //       alert("Account Selected is not valid: " + result.error);
-      //       return;
-      //     }
-
-      //     const accountInfo: ProjectAccount = result;
-
-      //     if (accounts.some((a) => a.number === accountInfo.number)) {
-      //       alert("Account already selected -- choose a different account");
-      //       return;
-      //     } else {
-      //       alert(undefined);
-      //     }
-
-      //     if (accounts.length === 0) {
-      //       // if it's our first account, default to 100%
-      //       accountInfo.percentage = 100.0;
-      //     }
-
-      //     setAccounts([...accounts, accountInfo]);
-      //   }
-      //}
+      await validateChartString(chart.data);
     } else {
       alert("Failed!");
+    }
+  };
+
+  const validateChartString = async (chartString: string) => {
+    let response = await authenticatedFetch(
+      `/api/order/validate-chart-string/${chartString}`,
+      {
+        method: "GET",
+      },
+    );
+    //console.log(response);
+    if (response.ok) {
+      const result = await response.json();
+      console.log(result);
+      setChartStringValidation(result);
     }
   };
 
