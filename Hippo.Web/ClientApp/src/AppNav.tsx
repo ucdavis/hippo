@@ -117,6 +117,16 @@ export const AppNav = () => {
                   Financial
                 </NavLink>
               </ShowFor>
+              <NavLink
+                id="products"
+                to={`/${cluster.name}/product/index`}
+                className="nav-item nav-link"
+                style={({ isActive }) =>
+                  isActive ? { fontWeight: "bold" } : {}
+                }
+              >
+                Products
+              </NavLink>
             </nav>
           </div>
         </div>

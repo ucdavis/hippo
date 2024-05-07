@@ -130,6 +130,34 @@ const FinancialDetail: React.FC = () => {
         </div>
 
         <div className="form-group">
+          <label htmlFor="financialSystemApiSource">API Source:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="financialSystemApiSource"
+            name="financialSystemApiSource"
+            value={financialDetail.financialSystemApiSource}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="autoApprove">Auto Approve:</label>
+          <input
+            type="checkbox"
+            id="autoApprove"
+            name="autoApprove"
+            checked={financialDetail.autoApprove}
+            onChange={(e) =>
+              setFinancialDetail((prevFinancialDetail) => ({
+                ...prevFinancialDetail,
+                autoApprove: e.target.checked,
+              }))
+            }
+          />
+        </div>
+        <div className="form-group">
           <label htmlFor="chartString">Chart String:</label>{" "}
           {financialDetail.chartString && (
             <a
@@ -188,35 +216,6 @@ const FinancialDetail: React.FC = () => {
               )}
             </div>
           )}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="financialSystemApiSource">API Source:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="financialSystemApiSource"
-            name="financialSystemApiSource"
-            value={financialDetail.financialSystemApiSource}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="autoApprove">Auto Approve:</label>
-          <input
-            type="checkbox"
-            id="autoApprove"
-            name="autoApprove"
-            checked={financialDetail.autoApprove}
-            onChange={(e) =>
-              setFinancialDetail((prevFinancialDetail) => ({
-                ...prevFinancialDetail,
-                autoApprove: e.target.checked,
-              }))
-            }
-          />
         </div>
         <button
           className="btn btn-primary"

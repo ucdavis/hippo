@@ -17,11 +17,11 @@ namespace Hippo.Web.Controllers
             _dbContext = dbContext;
         }
 
-
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var products = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster).ToListAsync(); //Filters out inactive products
-            return View();
+            return Ok(products);
         }
 
         [HttpPost]
