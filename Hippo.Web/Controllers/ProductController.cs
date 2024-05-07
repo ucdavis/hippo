@@ -26,7 +26,7 @@ namespace Hippo.Web.Controllers
 
         [HttpPost]
         [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
-        public async Task<IActionResult> CreateProduct(Product model)
+        public async Task<IActionResult> CreateProduct([FromBody] Product model)
         {
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
 
@@ -35,7 +35,7 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Invalid");
             }
 
-            var procuct = new Product
+            var product = new Product
             {
                 Name = model.Name,
                 Description = model.Description,
@@ -45,10 +45,10 @@ namespace Hippo.Web.Controllers
                 Cluster = cluster,
                 Installments = model.Installments
             };
-            _dbContext.Products.Add(procuct);
+            _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync();
 
-            return View();
+            return Ok(product);
         }
 
         [HttpGet]

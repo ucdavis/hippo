@@ -98,6 +98,7 @@ export interface AppContextShape {
   clusters: ClusterModel[];
   openRequests: RequestModel[];
   lastPuppetSync?: string;
+  //products: ProductModel[];
 }
 
 export interface Permission {
@@ -235,6 +236,6 @@ export interface ProductModel {
   name: string;
   description: string;
   units: string;
-  unitPrice: number;
+  unitPrice: string;
   installments: number;
 }
