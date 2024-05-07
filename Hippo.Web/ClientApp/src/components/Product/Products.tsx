@@ -9,7 +9,6 @@ import { ShowFor } from "../../Shared/ShowFor";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
-//import AppContext from "../../Shared/AppContext";
 
 const defaultProduct: ProductModel = {
   id: 0,
@@ -27,7 +26,6 @@ export const Products = () => {
     ...defaultProduct,
   });
   const [editConfirmationTitle, setEditConfirmationTitle] = useState("");
-  //const [context, setContext] = useContext(AppContext); //need?
   const [products, setProducts] = useState<ProductModel[]>();
   const { cluster } = useParams();
 
@@ -213,8 +211,6 @@ export const Products = () => {
         notEmptyOrFalsey(editProductModel.name) &&
         !notification.pending &&
         parseFloat(editProductModel.unitPrice) > 0 &&
-        parseFloat(editProductModel.unitPrice).toString() ===
-          editProductModel.unitPrice &&
         editProductModel.installments > 0,
     },
     [],
@@ -234,7 +230,7 @@ export const Products = () => {
       body: JSON.stringify(newModel),
     });
 
-    setNotification(req, "Saving", "Cluster Created", async (r) => {
+    setNotification(req, "Saving", "Product Added", async (r) => {
       if (r.status === 400) {
         const errors = await parseBadRequest(response);
         return errors;
@@ -246,17 +242,9 @@ export const Products = () => {
     const response = await req;
 
     if (response.ok) {
-      //refresh the page
-      window.location.reload();
-
-      //   const newProduct = (await response.json()) as ProductModel;
-      //   setContext((c) => ({
-      //     ...c,
-      //     products: [...c.products, newProduct].sort((a, b) =>
-      //       a.name.localeCompare(b.name),
-      //     ),
-      //   }));
-      //   setEditProductModel((r) => ({ ...r, name: "" }));
+      const data = await response.json();
+      //add data to the projects
+      setProducts([...products, data]);
     }
   };
 

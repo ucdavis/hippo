@@ -98,7 +98,6 @@ export interface AppContextShape {
   clusters: ClusterModel[];
   openRequests: RequestModel[];
   lastPuppetSync?: string;
-  //products: ProductModel[];
 }
 
 export interface Permission {
