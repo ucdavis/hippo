@@ -61,6 +61,11 @@ namespace Hippo.Core.Domain
 
         public List<OrderMetaData> MetaData { get; set; } = new();
 
+        public void AddMetaData(string key, string value)
+        {
+            MetaData.Add(new OrderMetaData { Name = key, Value = value, Order = this });
+        }
+
         public List<Payment> Payments { get; set; } = new();
 
         [JsonIgnore]
