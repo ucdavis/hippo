@@ -308,11 +308,6 @@ export const Products = () => {
       {
         Header: "Name",
         accessor: "name",
-        Cell: ({ row }) => (
-          <a href={`/${cluster}/product/${row.original.id}`}>
-            {row.original.name}
-          </a>
-        ),
       },
       {
         Header: "Category",
