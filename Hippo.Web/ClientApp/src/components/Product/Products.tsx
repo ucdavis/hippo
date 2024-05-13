@@ -185,7 +185,7 @@ export const Products = () => {
         return;
       }
 
-      const req = authenticatedFetch(`/api/${cluster}/product/EditProduct/`, {
+      const req = authenticatedFetch(`/api/${cluster}/product/UpdateProduct/`, {
         method: "POST",
         body: JSON.stringify(newModel),
       });
