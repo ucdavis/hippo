@@ -1,10 +1,7 @@
-using System;
-using System.Linq;
 using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
-using Hippo.Core.Extensions;
-using Hippo.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -148,6 +145,7 @@ namespace Hippo.Web.Controllers
 
             return Ok(clusterModel);
         }
+
 
     }
 }

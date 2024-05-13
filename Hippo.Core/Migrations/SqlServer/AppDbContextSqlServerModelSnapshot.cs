@@ -227,13 +227,13 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
 
-                    b.Property<string>("FinancialSystemApiKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<string>("FinancialSystemApiSource")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("SecretAccessKey")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

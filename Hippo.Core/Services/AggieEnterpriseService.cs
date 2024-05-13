@@ -46,7 +46,7 @@ namespace Hippo.Core.Services
 
             if (segmentStringType == FinancialChartStringType.Gl)
             {
-                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount);
+                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount, rtValue);
                 rtValue.ChartString = chartString;
 
                 var result = await _aggieClient.GlValidateChartstring.ExecuteAsync(chartString, validateCVRs);
@@ -97,7 +97,7 @@ namespace Hippo.Core.Services
 
             if (segmentStringType == FinancialChartStringType.Ppm)
             {
-                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount);
+                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount, rtValue);
                 rtValue.ChartString = chartString;
                 var result = await _aggieClient.PpmSegmentStringValidate.ExecuteAsync(chartString);
 
@@ -131,11 +131,14 @@ namespace Hippo.Core.Services
 
 
                 await GetPpmAccountManager(rtValue);
-
-                if (rtValue.PpmSegments.ExpenditureType != AeSettings.NaturalAccount)
+                if (!string.IsNullOrWhiteSpace(AeSettings.NaturalAccount))
                 {
-                    rtValue.Messages.Add($"Expenditure Type must be {AeSettings.NaturalAccount}");
-                    rtValue.IsValid = false;
+
+                    if (rtValue.PpmSegments.ExpenditureType != AeSettings.NaturalAccount)
+                    {
+                        rtValue.Messages.Add($"Expenditure Type must be {AeSettings.NaturalAccount}");
+                        rtValue.IsValid = false;
+                    }
                 }
 
                 return rtValue;
@@ -147,7 +150,7 @@ namespace Hippo.Core.Services
             return rtValue;
         }
 
-        public string ReplaceNaturalAccount(string chartString, string naturalAccount)
+        public string ReplaceNaturalAccount(string chartString, string naturalAccount, ChartStringValidationModel model)
         {
             if(string.IsNullOrWhiteSpace(naturalAccount))
             {
@@ -158,12 +161,20 @@ namespace Hippo.Core.Services
             if (segmentStringType == FinancialChartStringType.Gl)
             {
                 var segments = FinancialChartValidation.GetGlSegments(chartString);
+                if(segments.Account != naturalAccount)
+                {
+                    model.Warnings.Add(new KeyValuePair<string, string>("Account", $"Natural Account {segments.Account} replaced with {naturalAccount}"));
+                }
                 segments.Account = naturalAccount;
                 return segments.ToSegmentString();
             }
             if (segmentStringType == FinancialChartStringType.Ppm)
             {
                 var segments = FinancialChartValidation.GetPpmSegments(chartString);
+                if (segments.ExpenditureType != naturalAccount)
+                {
+                    model.Warnings.Add(new KeyValuePair<string, string>("Expenditure Type", $"Natural Account {segments.ExpenditureType} replaced with {naturalAccount}"));
+                }
                 segments.ExpenditureType = naturalAccount;
                 return segments.ToSegmentString();
             }
