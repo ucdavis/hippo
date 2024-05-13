@@ -70,7 +70,7 @@ namespace Hippo.Web.Controllers
 
             await _dbContext.SaveChangesAsync();
 
-            return Ok();
+            return Ok(product);
         }   
 
         [HttpGet]
