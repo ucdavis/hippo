@@ -26,6 +26,8 @@ export const Products = () => {
     ...defaultProduct,
   });
   const [editConfirmationTitle, setEditConfirmationTitle] = useState("");
+  const [deleteConfirmationTitle, setDeleteConfirmationTitle] =
+    useState("Delete Product");
   const [products, setProducts] = useState<ProductModel[]>();
   const { cluster } = useParams();
 
@@ -168,6 +170,57 @@ export const Products = () => {
     [editProductModel, notification.pending],
   );
 
+  const [getDeleteConfirmation] = useConfirmationDialog<string>(
+    {
+      title: deleteConfirmationTitle,
+      message:
+        "Are you sure you want to delete this product? This does not effect any orders.",
+    },
+    [deleteConfirmationTitle],
+  );
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      const product = products?.find((p) => p.id === id);
+      // console.log(product);
+      if (product === undefined) {
+        alert("Product not found");
+        return;
+      }
+
+      setDeleteConfirmationTitle(`Delete Product "${product.name}"?`);
+
+      const [confirmed] = await getDeleteConfirmation();
+
+      if (!confirmed) {
+        return;
+      }
+
+      const req = authenticatedFetch(
+        `/api/${cluster}/product/DeleteProduct/${id}`,
+        {
+          method: "POST",
+        },
+      );
+
+      setNotification(req, "Deleting", "Product Deleted", async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(response);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await req;
+
+      if (response.ok) {
+        setProducts(products?.filter((p) => p.id !== id));
+      }
+    },
+    [products, getDeleteConfirmation, cluster, setNotification],
+  );
+
   const handleEdit = useCallback(
     async (id: number) => {
       const product = products?.find((p) => p.id === id);
@@ -294,7 +347,12 @@ export const Products = () => {
               >
                 Edit
               </button>{" "}
-              <button className="btn btn-danger">Delete</button>
+              <button
+                onClick={() => handleDelete(row.original.id)}
+                className="btn btn-danger"
+              >
+                Delete
+              </button>
             </ShowFor>
           </div>
         ),
