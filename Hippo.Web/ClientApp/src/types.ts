@@ -228,3 +228,13 @@ export interface ChartStringValidationModel {
   message: string;
   warning: string;
 }
+
+export interface ProductModel {
+  id: number;
+  category: string;
+  name: string;
+  description: string;
+  units: string;
+  unitPrice: string;
+  installments: number;
+}

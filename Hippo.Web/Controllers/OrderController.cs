@@ -1,7 +1,10 @@
+using Hippo.Core.Data;
+using Hippo.Core.Domain;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Web.Controllers
 {
@@ -9,12 +12,17 @@ namespace Hippo.Web.Controllers
     [Authorize]
     public class OrderController : SuperController
     {
-        private IAggieEnterpriseService _aggieEnterpriseService;
+        private readonly AppDbContext _dbContext;
+        private readonly IAggieEnterpriseService _aggieEnterpriseService;
 
-        public OrderController(IAggieEnterpriseService aggieEnterpriseService)
+
+        public OrderController(AppDbContext dbContext, IAggieEnterpriseService aggieEnterpriseService)
         {
+            _dbContext = dbContext;
             _aggieEnterpriseService = aggieEnterpriseService;
         }
+
+
 
         [HttpGet]
         [Route("api/order/validate-chart-string/{chartString}")]

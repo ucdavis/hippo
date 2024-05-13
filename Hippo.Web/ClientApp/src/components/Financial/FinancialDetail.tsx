@@ -130,6 +130,34 @@ const FinancialDetail: React.FC = () => {
         </div>
 
         <div className="form-group">
+          <label htmlFor="financialSystemApiSource">API Source:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="financialSystemApiSource"
+            name="financialSystemApiSource"
+            value={financialDetail.financialSystemApiSource}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="autoApprove">Auto Approve:</label>
+          <input
+            type="checkbox"
+            id="autoApprove"
+            name="autoApprove"
+            checked={financialDetail.autoApprove}
+            onChange={(e) =>
+              setFinancialDetail((prevFinancialDetail) => ({
+                ...prevFinancialDetail,
+                autoApprove: e.target.checked,
+              }))
+            }
+          />
+        </div>
+        <div className="form-group">
           <label htmlFor="chartString">Chart String:</label>{" "}
           {financialDetail.chartString && (
             <a
@@ -140,25 +168,27 @@ const FinancialDetail: React.FC = () => {
               {financialDetail.chartString}
             </a>
           )}
-          <input
-            type="text"
-            className="form-control"
-            id="chartString"
-            name="chartString"
-            value={financialDetail.chartString}
-            onChange={handleInputChange}
-            onBlur={(e) => {
-              validateChartString(e.target.value);
-            }}
-            required
-          />
-          <button
-            className="btn btn-primary"
-            onClick={lookupChartString}
-            type="button"
-          >
-            Pick Chart String
-          </button>
+          <div className="input-group">
+            <input
+              type="text"
+              className="form-control"
+              id="chartString"
+              name="chartString"
+              value={financialDetail.chartString}
+              onChange={handleInputChange}
+              onBlur={(e) => {
+                validateChartString(e.target.value);
+              }}
+              required
+            />
+            <button
+              className="btn btn-primary"
+              onClick={lookupChartString}
+              type="button"
+            >
+              <i className="fas fa-search"></i>
+            </button>
+          </div>
           {chartStringValidation && (
             <div>
               <div>Chart String Validation:</div>
@@ -187,41 +217,12 @@ const FinancialDetail: React.FC = () => {
             </div>
           )}
         </div>
-
-        <div className="form-group">
-          <label htmlFor="financialSystemApiSource">API Source:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="financialSystemApiSource"
-            name="financialSystemApiSource"
-            value={financialDetail.financialSystemApiSource}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="autoApprove">Auto Approve:</label>
-          <input
-            type="checkbox"
-            id="autoApprove"
-            name="autoApprove"
-            checked={financialDetail.autoApprove}
-            onChange={(e) =>
-              setFinancialDetail((prevFinancialDetail) => ({
-                ...prevFinancialDetail,
-                autoApprove: e.target.checked,
-              }))
-            }
-          />
-        </div>
         <button
           className="btn btn-primary"
           disabled={notification.pending}
           type="submit"
         >
-          Submit
+          <i className="fas fa-search"></i> Submit
         </button>
       </form>
     </div>
