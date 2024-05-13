@@ -25,7 +25,7 @@ namespace Hippo.Web.Controllers
 
 
         [HttpGet]
-        [Route("api/order/validate-chart-string/{chartString}")]
+        [Route("api/order/validateChartString/{chartString}")]
         public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
         {
             return await _aggieEnterpriseService.IsChartStringValid(chartString);

@@ -3,6 +3,7 @@ import { ChartStringValidationModel, FinancialDetailModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useParams } from "react-router-dom";
 import { usePromiseNotification } from "../../util/Notifications";
+import { Card, CardBody, CardTitle } from "reactstrap";
 
 declare const window: Window &
   typeof globalThis & {
@@ -93,7 +94,7 @@ const FinancialDetail: React.FC = () => {
 
   const validateChartString = async (chartString: string) => {
     let response = await authenticatedFetch(
-      `/api/order/validate-chart-string/${chartString}`,
+      `/api/order/validateChartString/${chartString}`,
       {
         method: "GET",
       },
@@ -191,38 +192,46 @@ const FinancialDetail: React.FC = () => {
           </div>
           {chartStringValidation && (
             <div>
-              <div>Chart String Validation:</div>
-              <div>
-                Is Valid: {chartStringValidation.isValid ? "Yes" : "No"}
-              </div>
-              <div>Description: {chartStringValidation.description}</div>
-              {chartStringValidation.accountManager && (
-                <div>
+              <br />
+              <Card>
+                <CardTitle>
+                  <h3>Chart String Details:</h3>
+                </CardTitle>
+                <CardBody>
                   <div>
-                    Account Manager: {chartStringValidation.accountManager}
+                    Is Valid: {chartStringValidation.isValid ? "Yes" : "No"}
                   </div>
-                  <div>
-                    Account Manager Email:{" "}
-                    {chartStringValidation.accountManagerEmail}
-                  </div>
-                </div>
-              )}
-              {chartStringValidation.message && (
-                <div>Message: {chartStringValidation.message}</div>
-              )}
+                  <div>Description: {chartStringValidation.description}</div>
+                  {chartStringValidation.accountManager && (
+                    <div>
+                      <div>
+                        Account Manager: {chartStringValidation.accountManager}
+                      </div>
+                      <div>
+                        Account Manager Email:{" "}
+                        {chartStringValidation.accountManagerEmail}
+                      </div>
+                    </div>
+                  )}
+                  {chartStringValidation.message && (
+                    <div>Message: {chartStringValidation.message}</div>
+                  )}
 
-              {chartStringValidation.warning && (
-                <div>Warning: {chartStringValidation.warning}</div>
-              )}
+                  {chartStringValidation.warning && (
+                    <div>Warning: {chartStringValidation.warning}</div>
+                  )}
+                </CardBody>
+              </Card>
             </div>
           )}
         </div>
+        <br />
         <button
           className="btn btn-primary"
           disabled={notification.pending}
           type="submit"
         >
-          <i className="fas fa-search"></i> Submit
+          Submit
         </button>
       </form>
     </div>
