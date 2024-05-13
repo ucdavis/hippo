@@ -331,7 +331,7 @@ export const Products = () => {
       },
       {
         Header: "Actions",
-        accessor: "id",
+        sortable: false,
         Cell: ({ row }) => (
           <div>
             <button className="btn btn-primary">Order</button>{" "}
