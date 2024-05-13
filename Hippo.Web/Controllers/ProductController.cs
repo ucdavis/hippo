@@ -51,6 +51,28 @@ namespace Hippo.Web.Controllers
             return Ok(product);
         }
 
+        [HttpPost]
+        [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+        public async Task<IActionResult> EditProduct([FromBody] Product model)
+        {
+            var product = await _dbContext.Products.FirstOrDefaultAsync(a => a.Id == model.Id && a.Cluster.Name == Cluster);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Category = model.Category;
+            product.UnitPrice = model.UnitPrice;
+            product.Units = model.Units;
+            product.Installments = model.Installments;
+
+            await _dbContext.SaveChangesAsync();
+
+            return Ok();
+        }   
+
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {

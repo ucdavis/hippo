@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, useContext } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 import { ReactTable } from "../../Shared/ReactTable";
@@ -45,54 +45,6 @@ export const Products = () => {
 
     fetchProducts();
   }, [cluster]);
-
-  const columns = useMemo<Column<ProductModel>[]>(
-    () => [
-      {
-        Header: "Name",
-        accessor: "name",
-        Cell: ({ row }) => (
-          <a href={`/${cluster}/product/${row.original.id}`}>
-            {row.original.name}
-          </a>
-        ),
-      },
-      {
-        Header: "Category",
-        accessor: "category",
-      },
-      {
-        Header: "Description",
-        accessor: "description",
-      },
-      {
-        Header: "Unit Price",
-        accessor: "unitPrice",
-      },
-      {
-        Header: "Units",
-        accessor: "units",
-      },
-      {
-        Header: "Installments",
-        accessor: "installments",
-      },
-      {
-        Header: "Actions",
-        accessor: "id",
-        Cell: ({ row }) => (
-          <div>
-            <button className="btn btn-primary">Order</button>{" "}
-            <ShowFor roles={["ClusterAdmin"]}>
-              <button className="btn btn-primary">Edit</button>{" "}
-              <button className="btn btn-danger">Delete</button>
-            </ShowFor>
-          </div>
-        ),
-      },
-    ],
-    [cluster],
-  );
 
   const [getEditConfirmation] = useConfirmationDialog<ProductModel>(
     {
@@ -213,7 +165,57 @@ export const Products = () => {
         parseFloat(editProductModel.unitPrice) > 0 &&
         editProductModel.installments > 0,
     },
-    [],
+    [editProductModel, notification.pending],
+  );
+
+  const handleEdit = useCallback(
+    async (id: number) => {
+      const product = products?.find((p) => p.id === id);
+      console.log(product);
+      if (product === undefined) {
+        alert("Product not found");
+        return;
+      }
+
+      setEditProductModel(product);
+      setEditConfirmationTitle("Edit Product");
+      const [confirmed, newModel] = await getEditConfirmation();
+
+      if (!confirmed) {
+        return;
+      }
+
+      const req = authenticatedFetch(`/api/${cluster}/product/EditProduct/`, {
+        method: "POST",
+        body: JSON.stringify(newModel),
+      });
+
+      setNotification(req, "Saving", "Product Updated", async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(response);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await req;
+
+      if (response.ok) {
+        const data = await response.json();
+        //add data to the projects
+        setProducts(
+          products?.map((p) => {
+            if (p.id === id) {
+              return data;
+            } else {
+              return p;
+            }
+          }),
+        );
+      }
+    },
+    [products, getEditConfirmation, cluster, setNotification],
   );
 
   const handleCreate = async () => {
@@ -247,6 +249,60 @@ export const Products = () => {
       setProducts([...products, data]);
     }
   };
+
+  const columns = useMemo<Column<ProductModel>[]>(
+    () => [
+      {
+        Header: "Name",
+        accessor: "name",
+        Cell: ({ row }) => (
+          <a href={`/${cluster}/product/${row.original.id}`}>
+            {row.original.name}
+          </a>
+        ),
+      },
+      {
+        Header: "Category",
+        accessor: "category",
+      },
+      {
+        Header: "Description",
+        accessor: "description",
+      },
+      {
+        Header: "Unit Price",
+        accessor: "unitPrice",
+      },
+      {
+        Header: "Units",
+        accessor: "units",
+      },
+      {
+        Header: "Installments",
+        accessor: "installments",
+      },
+      {
+        Header: "Actions",
+        accessor: "id",
+        Cell: ({ row }) => (
+          <div>
+            <button className="btn btn-primary">Order</button>{" "}
+            <ShowFor roles={["ClusterAdmin"]}>
+              <button
+                onClick={() => handleEdit(row.original.id)}
+                className="btn btn-primary"
+              >
+                Edit
+              </button>{" "}
+              <button className="btn btn-danger">Delete</button>
+            </ShowFor>
+          </div>
+        ),
+      },
+    ],
+
+    [cluster, handleEdit],
+  );
 
   if (products === undefined) {
     return (
