@@ -14,12 +14,16 @@ namespace Hippo.Web.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly IAggieEnterpriseService _aggieEnterpriseService;
+        private readonly IUserService _userService;
+        private readonly IHistoryService _historyService;
 
 
-        public OrderController(AppDbContext dbContext, IAggieEnterpriseService aggieEnterpriseService)
+        public OrderController(AppDbContext dbContext, IAggieEnterpriseService aggieEnterpriseService, IUserService userService, IHistoryService historyService)
         {
             _dbContext = dbContext;
             _aggieEnterpriseService = aggieEnterpriseService;
+            _userService = userService;
+            _historyService = historyService;
         }
 
 
@@ -32,11 +36,35 @@ namespace Hippo.Web.Controllers
             
         }
 
+        [HttpGet]
+        public async Task<IActionResult> MyOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var orders = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).ToListAsync(); //Filters out inactive orders
+            return Ok(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get(int id)
+        {
+            var order = await _dbContext.Orders.Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).Include(a => a.History).SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.Id == id); 
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return Ok(order);
+        }
+
+
         [HttpPost]  
         public async Task<IActionResult> CreateOrder([FromBody] Order model)
         {
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
             User principalInvestigator = null;
+
+
+
+            var currentUser = await _userService.GetCurrentUser();
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
             if (User.IsInRole(AccessCodes.ClusterAdminAccess))
             {
@@ -44,7 +72,7 @@ namespace Hippo.Web.Controllers
             }
             else
             {
-                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Email == User.Identity.Name); //TODO: Check if this is how we do it.
+                principalInvestigator = currentUser;
             }
 
             if (!ModelState.IsValid)
@@ -81,6 +109,18 @@ namespace Hippo.Web.Controllers
                 order.AddMetaData(metaData.Name, metaData.Value);
             }
 
+            //var history = new History
+            //{
+            //    Order = order,
+            //    ClusterId = cluster.Id,
+            //    Status = History.OrderActions.Created,
+            //    ActedBy = currentUser,
+            //    AdminAction = currentUser != principalInvestigator,
+            //    Action = History.OrderActions.Created,
+            //    Details = $"Order created by {currentUser.Email}" //Dump in json of the order? //Write if it is an adhoc order?
+            //};
+            //_dbContext.Histories.Add(history); //Add it here or call history service?
+            await _historyService.OrderCreated(order, currentUser);
 
             _dbContext.Orders.Add(order);
             await _dbContext.SaveChangesAsync();

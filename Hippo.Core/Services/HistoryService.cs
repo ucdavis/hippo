@@ -206,5 +206,21 @@ namespace Hippo.Core.Services
             };
             await historyService.AddHistory(history);
         }
+
+        public static async Task OrderCreated(this IHistoryService historyService, Order order, User actedBy)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator,
+                Action = History.OrderActions.Created,
+                Details = $"Order created by {actedBy.Email}" //Dump in json of the order? //Write if it is an adhoc order?
+            };
+
+            await historyService.AddHistory(history);
+        }
     }
 }
