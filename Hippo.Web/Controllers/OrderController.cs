@@ -100,6 +100,7 @@ namespace Hippo.Web.Controllers
                 AdminNotes = model.AdminNotes,
                 Status = Order.Statuses.Created,
                 Cluster = cluster,
+                ClusterId = cluster.Id,
                 PrincipalInvestigator = principalInvestigator,
                 CreatedOn = DateTime.UtcNow
             };
