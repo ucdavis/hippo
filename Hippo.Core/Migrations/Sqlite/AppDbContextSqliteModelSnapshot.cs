@@ -315,6 +315,9 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<int?>("OrderId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowToUser")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");

@@ -38,6 +38,8 @@ namespace Hippo.Core.Domain
         [MaxLength(50)]
         public string Status { get; set; }
 
+        public bool ShowToUser { get; set; } = false;
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<History>().HasQueryFilter(h => h.Cluster.IsActive);
