@@ -238,3 +238,25 @@ export interface ProductModel {
   unitPrice: string;
   installments: number;
 }
+
+export interface OrderMetadataModel {
+  id: number;
+  key: string;
+  value: string;
+}
+
+export interface OrderBillingModel {
+  id: number;
+  chartString: string;
+  percent: string;
+  chartStringValidation: ChartStringValidationModel;
+}
+
+export interface OrderModel {
+  id: number;
+  product: ProductModel;
+  quantity: number;
+  status: string;
+  metadata: OrderMetadataModel[];
+  billing: OrderBillingModel[];
+}
