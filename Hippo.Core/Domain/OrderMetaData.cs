@@ -15,6 +15,7 @@ namespace Hippo.Core.Domain
         public int Id { get; set; }
         [Required]
         public int OrderId { get; set; }
+        [JsonIgnore]
         public Order Order { get; set; }
         [Required]
         [MaxLength(128)]

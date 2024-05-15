@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Hippo.Core.Domain
 {
@@ -11,6 +12,7 @@ namespace Hippo.Core.Domain
         public decimal Percentage { get; set; } = 100;
         [Required]
         public int OrderId { get; set; }
+        [JsonIgnore]
         public Order Order { get; set; }
         public DateTime Updated { get; set; } = DateTime.UtcNow;
     }
