@@ -334,10 +334,11 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("ShowToUser")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -352,6 +353,8 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("Type");
 
                     b.ToTable("Histories");
                 });

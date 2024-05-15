@@ -217,7 +217,7 @@ namespace Hippo.Core.Services
                 ActedBy = actedBy,
                 AdminAction = actedBy != order.PrincipalInvestigator,
                 Action = History.OrderActions.Created,
-                ShowToUser = true,
+                Type = HistoryTypes.Primary,
                 Details = $"Order total: {order.Total}"
             };
 
@@ -234,7 +234,7 @@ namespace Hippo.Core.Services
                 ActedBy = actedBy,
                 AdminAction = actedBy != order.PrincipalInvestigator,
                 Action = action,
-                ShowToUser = false,
+                Type = HistoryTypes.Detail,
                 Details = Serialize(order)
             };
 
