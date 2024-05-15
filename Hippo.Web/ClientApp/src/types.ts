@@ -260,3 +260,16 @@ export interface OrderModel {
   metadata: OrderMetadataModel[];
   billing: OrderBillingModel[];
 }
+
+export interface OrderListModel {
+  id: number;
+  name: string;
+  description: string;
+  units: string;
+  quantity: number;
+  createdOn: string;
+  status: string;
+  total: string;
+  installmentAmount: string;
+  balanceRemaining: string;
+}

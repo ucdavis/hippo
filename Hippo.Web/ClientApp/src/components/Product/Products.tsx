@@ -41,7 +41,7 @@ export const Products = () => {
         const data = await response.json();
         setProducts(data);
       } else {
-        alert("Error fetching groups");
+        alert("Error fetching products");
       }
     };
 

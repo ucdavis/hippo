@@ -41,9 +41,11 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var orders = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
             
-            return Ok(orders);
+            return Ok(model);
+
+            //TODO: Need to create a page for this.
         }
 
         [HttpGet]

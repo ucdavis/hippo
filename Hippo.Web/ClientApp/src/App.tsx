@@ -21,6 +21,7 @@ import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
 import { FinancialDetail } from "./components/Financial/FinancialDetail";
 import { Products } from "./components/Product/Products";
+import { Orders } from "./components/Order/Orders";
 
 declare var Hippo: AppContextShape;
 
@@ -103,6 +104,7 @@ const App = () => {
               }
             />
             <Route path="/:cluster/product/index" element={<Products />} />
+            <Route path="/:cluster/order/myorders" element={<Orders />} />
           </Routes>
         </div>
       </ModalProvider>
