@@ -2,6 +2,7 @@ using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
 using Hippo.Core.Services;
+using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,8 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var orders = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).ToListAsync(); //Filters out inactive orders
+            var orders = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            
             return Ok(orders);
         }
 
