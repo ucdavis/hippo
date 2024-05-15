@@ -270,6 +270,5 @@ export interface OrderListModel {
   createdOn: string;
   status: string;
   total: string;
-  installmentAmount: string;
   balanceRemaining: string;
 }

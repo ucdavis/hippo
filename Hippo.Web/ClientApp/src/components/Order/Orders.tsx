@@ -30,16 +30,12 @@ export const Orders = () => {
   const columns = useMemo<Column<OrderListModel>[]>(
     () => [
       {
-        Header: "Order Status",
+        Header: "Status",
         accessor: "status",
       },
       {
         Header: "Order Name",
         accessor: "name",
-      },
-      {
-        Header: "Description",
-        accessor: "description",
       },
       {
         Header: "Units",
@@ -54,15 +50,11 @@ export const Orders = () => {
         accessor: "total",
       },
       {
-        Header: "Installment Amount",
-        accessor: "installmentAmount",
-      },
-      {
-        Header: "Balance Remaining",
+        Header: "Balance",
         accessor: "balanceRemaining",
       },
       {
-        Header: "Order Created",
+        Header: "Created On",
         accessor: "createdOn",
       },
       {
@@ -70,11 +62,8 @@ export const Orders = () => {
         sortable: false,
         Cell: ({ row }) => (
           <div>
-            <button className="btn btn-primary">Order</button>{" "}
-            <ShowFor roles={["ClusterAdmin"]}>
-              <button className="btn btn-primary">Edit</button>{" "}
-              <button className="btn btn-danger">Delete</button>
-            </ShowFor>
+            <button className="btn btn-primary">Details</button>{" "}
+            <button className="btn btn-primary">Edit</button>{" "}
           </div>
         ),
       },

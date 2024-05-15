@@ -11,11 +11,10 @@ namespace Hippo.Web.Models.OrderModels
         public string Description { get; set; }
         public string Units { get; set; }
         public decimal Quantity { get; set; }
-        public DateTime CreatedOn { get; set; }
+        public string CreatedOn { get; set; }
         public string Status { get; set; }
-        public decimal Total { get; set; }
-        public decimal InstallmentAmount { get; set; }
-        public decimal BalanceRemaining { get; set; }
+        public string Total { get; set; }
+        public string BalanceRemaining { get; set; }
 
         public static Expression<Func<Core.Domain.Order, OrderListModel>> Projection()
         {
@@ -26,11 +25,10 @@ namespace Hippo.Web.Models.OrderModels
                 Description = order.Description,
                 Units = order.Units,
                 Quantity = order.Quantity,
-                CreatedOn = order.CreatedOn.ToPacificTime(),
+                CreatedOn = order.CreatedOn.ToPacificTime().ToShortDateString(),
                 Status = order.Status,
-                Total = order.Total,
-                InstallmentAmount = order.InstallmentAmount,
-                BalanceRemaining = order.BalanceRemaining
+                Total = order.Total.ToString("C"),
+                BalanceRemaining = order.BalanceRemaining.ToString("C")
             };
         }
     }
