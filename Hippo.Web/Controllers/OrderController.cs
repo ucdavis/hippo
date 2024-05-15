@@ -110,18 +110,9 @@ namespace Hippo.Web.Controllers
                 order.AddMetaData(metaData.Name, metaData.Value);
             }
 
-            //var history = new History
-            //{
-            //    Order = order,
-            //    ClusterId = cluster.Id,
-            //    Status = History.OrderActions.Created,
-            //    ActedBy = currentUser,
-            //    AdminAction = currentUser != principalInvestigator,
-            //    Action = History.OrderActions.Created,
-            //    Details = $"Order created by {currentUser.Email}" //Dump in json of the order? //Write if it is an adhoc order?
-            //};
-            //_dbContext.Histories.Add(history); //Add it here or call history service?
+
             await _historyService.OrderCreated(order, currentUser);
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
 
             _dbContext.Orders.Add(order);
             await _dbContext.SaveChangesAsync();
