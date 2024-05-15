@@ -354,7 +354,7 @@ export const Products = () => {
       },
     ],
 
-    [cluster, handleEdit],
+    [handleDelete, handleEdit],
   );
 
   if (products === undefined) {

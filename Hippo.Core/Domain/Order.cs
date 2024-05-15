@@ -48,6 +48,7 @@ namespace Hippo.Core.Domain
 
         [Required]
         public int ClusterId { get; set; }
+        [JsonIgnore]
         public Cluster Cluster { get; set; }
 
 
@@ -65,7 +66,7 @@ namespace Hippo.Core.Domain
         {
             MetaData.Add(new OrderMetaData { Name = key, Value = value, Order = this });
         }
-
+        [JsonIgnore]
         public List<Payment> Payments { get; set; } = new();
 
         [JsonIgnore]

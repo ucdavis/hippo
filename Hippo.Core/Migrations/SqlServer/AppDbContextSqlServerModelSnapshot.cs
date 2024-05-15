@@ -338,6 +338,10 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ActedById");
@@ -349,6 +353,8 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("Type");
 
                     b.ToTable("Histories");
                 });

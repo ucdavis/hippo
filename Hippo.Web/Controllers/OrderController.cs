@@ -60,7 +60,42 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] Order model)
         {
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
+           
             User principalInvestigator = null;
+
+            //Just for testing, will remove
+            //model = new Order
+            //{
+            //    Category = "Cat 123",
+            //    Name = "The name of the order",
+            //    Description = "The desc",
+            //    ExternalReference = "This would be a link",
+            //    Units = "TeraByte",
+            //    UnitPrice = 0.51m,
+            //    Installments = 60,
+            //    Quantity = 400,
+                
+            //    Notes = "A note worthy test",
+            //    AdminNotes = "Wouldn't have an admin note here",
+            //    Status = Order.Statuses.Created,
+            //    Cluster = cluster,
+            //    ClusterId = cluster.Id,
+            //    CreatedOn = DateTime.UtcNow
+            //};
+
+            //model.AddMetaData("key", "value");
+            //model.AddMetaData("key2", "value2");
+
+            //model.Billings.Add(new Billing
+            //{
+            //    ChartString = "123456",
+            //    Percentage = 10               
+            //});
+            //model.Billings.Add(new Billing
+            //{
+            //    ChartString = "123xxx456",
+            //    Percentage = 90
+            //});
 
 
 
@@ -90,6 +125,7 @@ namespace Hippo.Web.Controllers
                 UnitPrice = model.UnitPrice,
                 Installments = model.Installments,
                 Quantity = model.Quantity,
+                Billings = model.Billings,
                 
                 //Adjustment = model.Adjustment,
                 //AdjustmentReason = model.AdjustmentReason,
@@ -110,21 +146,13 @@ namespace Hippo.Web.Controllers
                 order.AddMetaData(metaData.Name, metaData.Value);
             }
 
-            //var history = new History
-            //{
-            //    Order = order,
-            //    ClusterId = cluster.Id,
-            //    Status = History.OrderActions.Created,
-            //    ActedBy = currentUser,
-            //    AdminAction = currentUser != principalInvestigator,
-            //    Action = History.OrderActions.Created,
-            //    Details = $"Order created by {currentUser.Email}" //Dump in json of the order? //Write if it is an adhoc order?
-            //};
-            //_dbContext.Histories.Add(history); //Add it here or call history service?
-            await _historyService.OrderCreated(order, currentUser);
+            await _dbContext.Orders.AddAsync(order);
 
-            _dbContext.Orders.Add(order);
+            await _historyService.OrderCreated(order, currentUser);
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
+
             await _dbContext.SaveChangesAsync();
+
 
             return Ok(order);
         }

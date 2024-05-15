@@ -38,12 +38,16 @@ namespace Hippo.Core.Domain
         [MaxLength(50)]
         public string Status { get; set; }
 
+        [MaxLength(50)]
+        public string Type { get; set; } = HistoryTypes.Detail;
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<History>().HasQueryFilter(h => h.Cluster.IsActive);
             modelBuilder.Entity<History>().HasIndex(h => h.ActedDate);
             modelBuilder.Entity<History>().HasIndex(h => h.Action);
             modelBuilder.Entity<History>().HasIndex(h => h.ClusterId);
+            modelBuilder.Entity<History>().HasIndex(h => h.Type);
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
         }
@@ -103,6 +107,18 @@ namespace Hippo.Core.Domain
                 Completed,
                 AdhocPayment,
                 ChartStringUpdated
+            }.ToList();
+        }
+
+        public class HistoryTypes
+        {
+            public const string Primary = "Primary";
+            public const string Detail = "Detail";
+
+            public static List<string> TypeList = new List<string>
+            {
+                Primary,
+                Detail
             }.ToList();
         }
     }
