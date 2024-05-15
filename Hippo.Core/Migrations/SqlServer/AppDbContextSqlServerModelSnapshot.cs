@@ -334,9 +334,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -352,8 +349,6 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
 
                     b.ToTable("Histories");
                 });
@@ -914,13 +909,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Hippo.Core.Domain.Order", null)
                         .WithMany("History")
-                        .HasForeignKey("OrderId1");
+                        .HasForeignKey("OrderId");
 
                     b.Navigation("ActedBy");
 
