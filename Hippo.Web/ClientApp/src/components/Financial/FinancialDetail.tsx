@@ -10,7 +10,7 @@ declare const window: Window &
     Finjector: any;
   };
 
-const FinancialDetail: React.FC = () => {
+export const FinancialDetail = () => {
   const [financialDetail, setFinancialDetail] =
     useState<FinancialDetailModel | null>(null);
   const { cluster: clusterName } = useParams();
@@ -237,5 +237,3 @@ const FinancialDetail: React.FC = () => {
     </div>
   );
 };
-
-export default FinancialDetail;
