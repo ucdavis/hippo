@@ -48,6 +48,7 @@ namespace Hippo.Core.Domain
 
         [Required]
         public int ClusterId { get; set; }
+        [JsonIgnore]
         public Cluster Cluster { get; set; }
 
 
