@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { OrderListModel } from "../../types";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { authenticatedFetch } from "../../util/api";
 import { Column } from "react-table";
 import { ShowFor } from "../../Shared/ShowFor";
@@ -62,7 +62,12 @@ export const Orders = () => {
         sortable: false,
         Cell: ({ row }) => (
           <div>
-            <button className="btn btn-primary">Details</button>{" "}
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/details/${row.original.id}`}
+            >
+              Details
+            </Link>{" "}
             <button className="btn btn-primary">Edit</button>{" "}
           </div>
         ),

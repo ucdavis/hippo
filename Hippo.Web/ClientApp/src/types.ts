@@ -252,13 +252,36 @@ export interface OrderBillingModel {
   chartStringValidation: ChartStringValidationModel;
 }
 
+export interface PaymentModel {
+  id: number;
+  amount: string;
+  status: string;
+  createdOn: string;
+  //Possibly have the chart string(s) and percent here
+}
+export interface HistoryModel {
+  id: number;
+  actedBy: User;
+  action: string;
+  status: string;
+  details: string;
+  actedDate: string;
+}
+
 export interface OrderModel {
   id: number;
-  product: ProductModel;
+  category: string;
+  name: string;
+  description: string;
+  units: string;
+  unitPrice: string;
+  installments: number;
   quantity: number;
   status: string;
   metadata: OrderMetadataModel[];
   billing: OrderBillingModel[];
+  payments: PaymentModel[];
+  history: HistoryModel[];
 }
 
 export interface OrderListModel {
