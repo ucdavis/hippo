@@ -85,6 +85,12 @@ export const parseRawAccountModel = (rawAccount: RawAccountModel) => {
     return {
       ...rawAccount,
       data: rawAccount.data && JSON.parse(rawAccount.data),
+      memberOfGroups: (
+        rawAccount.memberOfGroups as unknown as RawGroupModel[]
+      ).map(parseRawGroupModel),
+      adminOfGroups: (
+        rawAccount.adminOfGroups as unknown as RawGroupModel[]
+      ).map(parseRawGroupModel),
     } as AccountModel;
   } catch (error) {
     console.log(error);

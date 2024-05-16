@@ -122,6 +122,7 @@ namespace Hippo.Core.Services
                         Id = g.Id,
                         DisplayName = g.DisplayName,
                         Name = g.Name,
+                        Data = g.Data,
                         Admins = g.AdminAccounts
                             .Select(a => new GroupAccountModel
                             {
@@ -135,6 +136,7 @@ namespace Hippo.Core.Services
                         Id = g.Id,
                         DisplayName = g.DisplayName,
                         Name = g.Name,
+                        Data = g.Data,
                         Admins = g.AdminAccounts
                             .Select(a => new GroupAccountModel
                             {
