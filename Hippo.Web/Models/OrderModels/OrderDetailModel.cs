@@ -37,7 +37,7 @@ namespace Hippo.Web.Models.OrderModels
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,
                 MetaData = order.MetaData,
-                History = order.History,
+                History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
                 Billings = order.Billings,
                 Payments = order.Payments
             };

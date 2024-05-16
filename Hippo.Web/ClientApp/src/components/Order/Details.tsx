@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { OrderModel } from "../../types";
+import { HistoryModel, OrderModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
+import { Column } from "react-table";
+import { ReactTable } from "../../Shared/ReactTable";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -24,6 +26,33 @@ export const Details = () => {
     fetchOrder();
   }, [cluster, orderId]);
 
+  const historyColumns = useMemo<Column<HistoryModel>[]>(
+    () => [
+      {
+        Header: "Date",
+        accessor: "actedDate",
+      },
+      {
+        Header: "Actor",
+        accessor: "actedBy",
+        Cell: ({ value }) => (
+          <span>
+            {value.firstName} {value.lastName} ({value.email})
+          </span>
+        ),
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+      },
+      {
+        Header: "Details",
+        accessor: "details",
+      },
+    ],
+    [],
+  );
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -36,9 +65,15 @@ export const Details = () => {
       <p>Order ID: {order.id}</p>
 
       <p>Order Name: {order.name}</p>
-      <p>History 1 : {order.history[0].details}</p>
-      <p>History 2 : {order.history[0].actedBy.email}</p>
-      {/* Add more details as needed */}
+
+      <h2>History</h2>
+      <ReactTable
+        columns={historyColumns}
+        data={order.history}
+        initialState={{
+          sortBy: [{ id: "Date" }],
+        }}
+      />
     </div>
   );
 };
