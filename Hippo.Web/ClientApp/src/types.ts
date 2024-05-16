@@ -241,14 +241,14 @@ export interface ProductModel {
 
 export interface OrderMetadataModel {
   id: number;
-  key: string;
+  name: string;
   value: string;
 }
 
 export interface OrderBillingModel {
   id: number;
   chartString: string;
-  percent: string;
+  percentage: string;
   chartStringValidation: ChartStringValidationModel;
 }
 
@@ -278,7 +278,9 @@ export interface OrderModel {
   installments: number;
   quantity: number;
   status: string;
-  metadata: OrderMetadataModel[];
+  createdOn: string;
+  externalReference: string;
+  metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];
   history: HistoryModel[];
