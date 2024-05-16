@@ -28,12 +28,16 @@ export const Details = () => {
     return <div>Loading...</div>;
   }
 
+  console.log(order);
+
   return (
     <div>
       <h1>Order Details</h1>
       <p>Order ID: {order.id}</p>
 
       <p>Order Name: {order.name}</p>
+      <p>History 1 : {order.history[0].details}</p>
+      <p>History 2 : {order.history[0].actedBy.email}</p>
       {/* Add more details as needed */}
     </div>
   );

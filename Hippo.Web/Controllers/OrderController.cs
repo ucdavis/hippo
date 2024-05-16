@@ -51,12 +51,16 @@ namespace Hippo.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
-            var order = await _dbContext.Orders.Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).Include(a => a.History).SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.Id == id); 
-            if (order == null)
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync(); 
+            if (model == null)
             {
                 return NotFound();
             }
-            return Ok(order);
+            return Ok(model);
         }
 
 

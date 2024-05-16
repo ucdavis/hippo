@@ -279,7 +279,7 @@ export interface OrderModel {
   quantity: number;
   status: string;
   metadata: OrderMetadataModel[];
-  billing: OrderBillingModel[];
+  billings: OrderBillingModel[];
   payments: PaymentModel[];
   history: HistoryModel[];
 }
