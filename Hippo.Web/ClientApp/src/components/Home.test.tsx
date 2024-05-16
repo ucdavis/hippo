@@ -82,11 +82,7 @@ describe("Home Redirect when GroupAdmin", () => {
         <App />
       </MemoryRouter>,
     );
-    expect(
-      await screen.findByText(
-        "Welcome Bob. Your account is registered with the following group(s):",
-      ),
-    ).toBeVisible();
+    expect(await screen.findByText("Welcome Bob")).toBeVisible();
   });
 
   it("Shows pending approvals buton", async () => {
