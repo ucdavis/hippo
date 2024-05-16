@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ListGroup, ListGroupItem, Collapse } from "reactstrap";
+import { isNumber, isObject } from "../util/TypeChecks";
 
 interface ObjectTreeProps {
   obj: Record<string, any>;
@@ -22,7 +23,8 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
     return keys.map((key) => {
       const value = obj[key];
       const id = `${key}-${parentId ?? "top"}`;
-      const isObject = typeof value === "object" && value;
+      const valueIsObject = isObject(value);
+      const keyIsNumber = !Number.isNaN(Number.parseInt(key));
       const item = (
         <React.Fragment key={id}>
           <ListGroupItem
@@ -30,21 +32,29 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
             style={{ paddingRight: 0, paddingTop: 2, paddingBottom: 2 }}
           >
             <div
-              style={isObject ? { cursor: "pointer" } : {}}
+              style={valueIsObject ? { cursor: "pointer" } : {}}
               id={id}
               onClick={toggle}
             >
-              {isObject && (
+              {valueIsObject && (
                 <i
                   className={
                     expanded[id] ? "fas fa-caret-down" : "fas fa-caret-right"
                   }
                 ></i>
               )}{" "}
-              {key}
-              {!isObject && `: ${value}`}
+              {
+                // when array element is a collapsed object with a name property, display the name
+                keyIsNumber &&
+                  valueIsObject &&
+                  value.hasOwnProperty("name") &&
+                  !expanded[id] &&
+                  (value["name"] as string)
+              }
+              {!keyIsNumber && `${key}: `}
+              {!valueIsObject && value}
             </div>
-            {isObject && (
+            {valueIsObject && (
               <Collapse isOpen={expanded[id]}>
                 {renderItems(value, id, level + 1)}
               </Collapse>
