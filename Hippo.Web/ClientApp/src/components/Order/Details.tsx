@@ -31,22 +31,6 @@ export const Details = () => {
     fetchOrder();
   }, [cluster, orderId]);
 
-  const validateChartString = async (chartString: string) => {
-    let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
-      {
-        method: "GET",
-      },
-    );
-    //console.log(response);
-    if (response.ok) {
-      const result = await response.json();
-      console.log(result);
-      //setChartStringValidation(result);
-      return result.isValid;
-    }
-  };
-
   const historyColumns = useMemo<Column<HistoryModel>[]>(
     () => [
       {
@@ -87,9 +71,11 @@ export const Details = () => {
       },
       {
         Header: "Chart String Validation",
-        accessor: async (row) => await validateChartString(row.chartString),
+        accessor: "chartStringValidation",
         Cell: ({ value }) => (
-          <span>{value === true ? "Valid" : "Invalid"}</span>
+          <span>
+            {value.isValid ? "Valid" : "Invalid"}: {value.description}
+          </span>
         ),
       },
     ],

@@ -18,7 +18,8 @@ namespace Hippo.Web.Models.OrderModels
 
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<History> History { get; set; } = new();
-        public List<Billing> Billings { get; set; } = new();
+        public List<Billing> BillingTemp { get; set; } = new();
+        public List<OrderBillingModel> Billings { get; set; } = new();
         public List<Payment> Payments { get; set; } = new();
         //TODO: will need to add more
 
@@ -38,7 +39,7 @@ namespace Hippo.Web.Models.OrderModels
                 ExternalReference = order.ExternalReference,
                 MetaData = order.MetaData,
                 History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
-                Billings = order.Billings,
+                BillingTemp = order.Billings,
                 Payments = order.Payments
             };
         }

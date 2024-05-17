@@ -60,6 +60,26 @@ namespace Hippo.Web.Controllers
             {
                 return NotFound();
             }
+
+            if(model.BillingTemp != null)
+            {
+                foreach (var billing in model.BillingTemp)
+                {
+                    var temp = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+
+                    var temp2 = new OrderBillingModel { ChartString = billing.ChartString, Percentage = billing.Percentage.ToString() };
+                    temp2.ChartStringValidation = new BillingChartStringValidationModel
+                    {
+                        IsValid = temp.IsValid,
+                        Description = temp.Description,
+                        AccountManager = temp.AccountManager,
+                        AccountManagerEmail = temp.AccountManagerEmail,
+                        Message = temp.Message,
+                        Warning = temp.Warning
+                    };
+                    model.Billings.Add(temp2);
+                }
+            }
             return Ok(model);
         }
 
