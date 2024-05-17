@@ -34,7 +34,7 @@ namespace Hippo.Web.Controllers
         public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
         {
             return await _aggieEnterpriseService.IsChartStringValid(chartString);
-            
+
         }
 
         [HttpGet]
@@ -42,7 +42,7 @@ namespace Hippo.Web.Controllers
         {
             var currentUser = await _userService.GetCurrentUser();
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
-            
+
             return Ok(model);
 
             //TODO: Need to create a page for this.
@@ -55,40 +55,44 @@ namespace Hippo.Web.Controllers
                 .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator)
                 .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
-                .SingleOrDefaultAsync(); 
+                .SingleOrDefaultAsync();
             if (model == null)
             {
                 return NotFound();
             }
 
-            if(model.BillingTemp != null)
+            if (model.BillingOriginal != null)
             {
-                foreach (var billing in model.BillingTemp)
-                {
-                    var temp = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
 
-                    var temp2 = new OrderBillingModel { ChartString = billing.ChartString, Percentage = billing.Percentage.ToString() };
-                    temp2.ChartStringValidation = new BillingChartStringValidationModel
+                foreach (var billing in model.BillingOriginal)
+                {
+                    var validation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+
+                    model.Billings.Add(new OrderBillingModel
                     {
-                        IsValid = temp.IsValid,
-                        Description = temp.Description,
-                        AccountManager = temp.AccountManager,
-                        AccountManagerEmail = temp.AccountManagerEmail,
-                        Message = temp.Message,
-                        Warning = temp.Warning
-                    };
-                    model.Billings.Add(temp2);
+                        ChartString = billing.ChartString,
+                        Percentage = billing.Percentage.ToString(),
+                        ChartStringValidation = new BillingChartStringValidationModel
+                        {
+                            IsValid = validation.IsValid,
+                            Description = validation.Description,
+                            AccountManager = validation.AccountManager,
+                            AccountManagerEmail = validation.AccountManagerEmail,
+                            Message = validation.Message,
+                            Warning = validation.Warning
+                        }
+                    });
                 }
             }
             return Ok(model);
         }
 
 
-        [HttpPost]  
+        [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order model)
         {
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
-           
+
             User principalInvestigator = null;
 
             //Just for testing, will remove
@@ -102,7 +106,7 @@ namespace Hippo.Web.Controllers
             //    UnitPrice = 0.51m,
             //    Installments = 60,
             //    Quantity = 400,
-                
+
             //    Notes = "A note worthy test",
             //    AdminNotes = "Wouldn't have an admin note here",
             //    Status = Order.Statuses.Created,
@@ -154,7 +158,7 @@ namespace Hippo.Web.Controllers
                 Installments = model.Installments,
                 Quantity = model.Quantity,
                 Billings = model.Billings,
-                
+
                 //Adjustment = model.Adjustment,
                 //AdjustmentReason = model.AdjustmentReason,
                 SubTotal = model.Quantity * model.UnitPrice,

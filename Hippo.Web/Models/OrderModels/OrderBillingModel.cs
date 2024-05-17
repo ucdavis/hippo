@@ -10,15 +10,6 @@ namespace Hippo.Web.Models.OrderModels
         public string Percentage { get; set; } = string.Empty;
         public BillingChartStringValidationModel? ChartStringValidation { get; set; }
 
-        public static Expression<Func<Billing, OrderBillingModel>> Projection()
-        {
-            return orderBilling => new OrderBillingModel
-            {
-                Id = orderBilling.Id,
-                ChartString = orderBilling.ChartString,
-                Percentage = orderBilling.Percentage.ToString(),
-            };
-        }
     }
 
     public class BillingChartStringValidationModel
