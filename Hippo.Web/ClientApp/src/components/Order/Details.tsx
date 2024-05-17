@@ -31,7 +31,7 @@ export const Details = () => {
     fetchOrder();
   }, [cluster, orderId]);
 
-  let validateChartString = async (chartString: string) => {
+  const validateChartString = async (chartString: string) => {
     let response = await authenticatedFetch(
       `/api/order/validateChartString/${chartString}`,
       {
