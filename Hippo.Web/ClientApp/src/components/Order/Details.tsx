@@ -9,6 +9,7 @@ import {
 import { authenticatedFetch } from "../../util/api";
 import { Column } from "react-table";
 import { ReactTable } from "../../Shared/ReactTable";
+import ChartStringValidation from "./ChartStringValidation";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -30,22 +31,6 @@ export const Details = () => {
 
     fetchOrder();
   }, [cluster, orderId]);
-
-  const validateChartString = async (chartString: string) => {
-    let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
-      {
-        method: "GET",
-      },
-    );
-    //console.log(response);
-    if (response.ok) {
-      const result = await response.json();
-      console.log(result);
-      //setChartStringValidation(result);
-      return result.isValid;
-    }
-  };
 
   const historyColumns = useMemo<Column<HistoryModel>[]>(
     () => [
@@ -70,27 +55,6 @@ export const Details = () => {
       {
         Header: "Details",
         accessor: "details",
-      },
-    ],
-    [],
-  );
-
-  const billingColumns = useMemo<Column<OrderBillingModel>[]>(
-    () => [
-      {
-        Header: "Chart String",
-        accessor: "chartString",
-      },
-      {
-        Header: "Percent",
-        accessor: "percentage",
-      },
-      {
-        Header: "Chart String Validation",
-        accessor: async (row) => await validateChartString(row.chartString),
-        Cell: ({ value }) => (
-          <span>{value === true ? "Valid" : "Invalid"}</span>
-        ),
       },
     ],
     [],
@@ -126,7 +90,24 @@ export const Details = () => {
           <p>Order Name: {order.name}</p>
 
           <h2>Chart Strings</h2>
-          <ReactTable columns={billingColumns} data={order.billings} />
+          <table className="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Chart String</th>
+                <th>Percent</th>
+                <th>Chart String Validation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.billings.map((billing) => (
+                  <tr key={billing.id}>
+                    <td>{billing.chartString}</td>
+                    <td>{billing.percentage}</td>
+                    <td><ChartStringValidation chartString={billing.chartString} /></td>
+                  </tr>
+                ))}
+                </tbody>
+            </table>
 
           <h2>Metadata</h2>
           <ReactTable columns={metadataColumns} data={order.metaData} />
