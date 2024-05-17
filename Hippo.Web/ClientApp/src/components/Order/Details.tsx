@@ -74,7 +74,15 @@ export const Details = () => {
         accessor: "chartStringValidation",
         Cell: ({ value }) => (
           <span>
-            {value.isValid ? "Valid" : "Invalid"}: {value.description}
+            {value.isValid ? (
+              <span style={{ color: "green" }}>
+                <i className="fas fa-check"></i> {value.description}
+              </span>
+            ) : (
+              <span style={{ color: "red" }}>
+                <i className="fas fa-times"></i> {value.message}
+              </span>
+            )}
           </span>
         ),
       },
