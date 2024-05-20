@@ -2,15 +2,13 @@ import {
   AppContextShape,
   User,
   ClusterModel,
-  RawRequestModel,
-  RawGroupModel,
-  RawAccountModel,
+  GroupModel,
+  PuppetGroupRecord,
+  AccountModel,
+  PuppetUserRecord,
+  RequestModel,
+  AccountRequestDataModel,
 } from "../types";
-import {
-  parseRawAccountModel,
-  parseRawGroupModel,
-  parseRawRequestModel,
-} from "../util/api";
 
 const fakeUser: User = {
   id: 1,
@@ -32,26 +30,24 @@ const fakeAdminUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
-export const fakeRawGroups: RawGroupModel[] = [
+export const fakeGroups: GroupModel[] = [
   {
     id: 1,
     name: "group1",
     displayName: "Group 1",
     admins: [],
-    data: "",
+    data: {} as PuppetGroupRecord,
   },
   {
     id: 2,
     name: "group2",
     displayName: "Group 2",
     admins: [],
-    data: "",
+    data: {} as PuppetGroupRecord,
   },
 ];
 
-export const fakeGroups = fakeRawGroups.map(parseRawGroupModel);
-
-export const fakeRawAccounts: RawAccountModel[] = [
+export const fakeAccounts: AccountModel[] = [
   {
     id: 1,
     name: "Account 1",
@@ -63,7 +59,7 @@ export const fakeRawAccounts: RawAccountModel[] = [
     memberOfGroups: [fakeGroups[0]],
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
-    data: "",
+    data: {} as PuppetUserRecord,
   },
   {
     id: 2,
@@ -76,13 +72,11 @@ export const fakeRawAccounts: RawAccountModel[] = [
     memberOfGroups: [fakeGroups[1]],
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
-    data: "",
+    data: {} as PuppetUserRecord,
   },
 ];
 
-export const fakeAccounts = fakeRawAccounts.map(parseRawAccountModel);
-
-export const fakeRawRequests: RawRequestModel[] = [
+export const fakeRequests: RequestModel[] = [
   {
     id: 1,
     requesterEmail: fakeUser.email,
@@ -91,7 +85,10 @@ export const fakeRawRequests: RawRequestModel[] = [
     groupModel: fakeGroups[0],
     status: "PendingApproval",
     cluster: "caesfarm",
-    data: '{ "supervisingPI": "Dr. Bob Dobalina", "accessTypes": ["SshKey"] }',
+    data: {
+      supervisingPI: "Dr. Bob Dobalina",
+      accessTypes: ["SshKey"],
+    } as AccountRequestDataModel,
   },
   {
     id: 2,
@@ -101,11 +98,12 @@ export const fakeRawRequests: RawRequestModel[] = [
     groupModel: fakeGroups[1],
     status: "PendingApproval",
     cluster: "caesfarm",
-    data: '{ "supervisingPI": "Dr. Bob Dobalina", "accessTypes": ["SshKey"] }',
+    data: {
+      supervisingPI: "Dr. Bob Dobalina",
+      accessTypes: ["SshKey"],
+    } as AccountRequestDataModel,
   },
 ];
-
-export const fakeRequests = fakeRawRequests.map((r) => parseRawRequestModel(r));
 
 const fakeCluster: ClusterModel = {
   id: 1,

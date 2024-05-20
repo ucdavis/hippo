@@ -6,15 +6,9 @@ import {
   GroupModel,
   AccountCreateModel,
   AccessType,
-  RawRequestModel,
-  RawGroupModel,
+  RequestModel,
 } from "../../types";
-import {
-  authenticatedFetch,
-  parseBadRequest,
-  parseRawGroupModel,
-  parseRawRequestModel,
-} from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
@@ -42,10 +36,10 @@ export const RequestForm = () => {
         `/api/${clusterName}/group/groups`,
       );
 
-      const groupsResult = (await response.json()) as RawGroupModel[];
+      const groupsResult = (await response.json()) as GroupModel[];
 
       if (response.ok) {
-        setGroups(groupsResult.map(parseRawGroupModel));
+        setGroups(groupsResult);
       }
     };
 
@@ -75,14 +69,11 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const rawRequestModel = (await response.json()) as RawRequestModel;
+      const requestModel = (await response.json()) as RequestModel;
 
       setContext((ctx) => ({
         ...ctx,
-        openRequests: [
-          ...ctx.openRequests,
-          parseRawRequestModel(rawRequestModel),
-        ],
+        openRequests: [...ctx.openRequests, requestModel],
       }));
       navigate(`/${clusterName}/accountstatus`);
     }

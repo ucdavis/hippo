@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Hippo.Core.Models.Settings;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -21,12 +22,12 @@ namespace Hippo.Core.Services
     {
         private readonly PuppetSettings _settings;
         private readonly IMemoryCache _memoryCache;
-        private readonly ISerializer _jsonSerializer;
+        private readonly ISerializer _yamlDotNetJsonSerializer;
         public PuppetService(IOptions<PuppetSettings> settings, IMemoryCache memoryCache)
         {
             _settings = settings.Value;
             _memoryCache = memoryCache;
-            _jsonSerializer = new SerializerBuilder()
+            _yamlDotNetJsonSerializer = new SerializerBuilder()
                 .JsonCompatible()
                 .Build();
         }
@@ -93,7 +94,7 @@ namespace Hippo.Core.Services
                     data.GroupsWithSponsors.Add(new PuppetGroup 
                     {
                         Name = groupName, 
-                        Data = _jsonSerializer.Serialize(groupNode) 
+                        Data = JsonSerializer.Deserialize<JsonElement>(_yamlDotNetJsonSerializer.Serialize(groupNode))
                     });
                     foreach (var user in sponsors)
                     {
@@ -125,7 +126,7 @@ namespace Hippo.Core.Services
                 userNode.Remove("password");
                 userNode.Remove("fullname");
                 userNode.Remove("email");
-                puppetUser.Data = _jsonSerializer.Serialize(userNode);
+                puppetUser.Data = JsonSerializer.Deserialize<JsonElement>(_yamlDotNetJsonSerializer.Serialize(userNode));
 
                 data.Users.Add(puppetUser);
             }
@@ -174,13 +175,13 @@ namespace Hippo.Core.Services
         public string Email { get; set; }
         public string[] Groups { get; set; } = new string[] { };
         public string[] SponsorForGroups { get; set; } = new string[] { };
-        public string Data { get; set; }
+        public JsonElement Data { get; set; }
     }
 
     public class PuppetGroup
     {
         public string Name { get; set; }
-        public string Data { get; set; }
+        public JsonElement Data { get; set; }
 
     }
 

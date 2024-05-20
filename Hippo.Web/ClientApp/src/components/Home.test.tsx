@@ -1,10 +1,10 @@
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
 import {
-  fakeRawAccounts,
+  fakeAccounts,
   fakeGroupAdminAppContext,
   fakeAppContextNoAccount,
-  fakeRawGroups,
+  fakeGroups,
 } from "../test/mockData";
 import { responseMap } from "../test/testHelpers";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -13,7 +13,7 @@ import { act } from "react-dom/test-utils";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-const testCluster = fakeRawAccounts[0].cluster;
+const testCluster = fakeAccounts[0].cluster;
 const myAccountUrl = `/${testCluster}/myaccount`;
 const promise = Promise.resolve(); // void promise for act warning hack
 
@@ -30,11 +30,11 @@ describe("Basic render", () => {
     const groupsResponse = Promise.resolve({
       status: 200,
       ok: true,
-      json: () => Promise.resolve(fakeRawGroups),
+      json: () => Promise.resolve(fakeGroups),
     });
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeRawAccounts[0].cluster}/group/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       }),
     );
     (global as any).Hippo = fakeGroupAdminAppContext;
@@ -55,14 +55,14 @@ describe("Home Redirect when GroupAdmin", () => {
     const groupsResponse = Promise.resolve({
       status: 200,
       ok: true,
-      json: () => Promise.resolve(fakeRawGroups),
+      json: () => Promise.resolve(fakeGroups),
     });
 
     (global as any).Hippo = fakeGroupAdminAppContext;
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeRawAccounts[0].cluster}/group/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       }),
     );
   });
@@ -100,14 +100,14 @@ describe("Home Redirect no account", () => {
     const groupsResponse = Promise.resolve({
       status: 200,
       ok: true,
-      json: () => Promise.resolve(fakeRawGroups),
+      json: () => Promise.resolve(fakeGroups),
     });
 
     (global as any).Hippo = fakeAppContextNoAccount;
 
     global.fetch = jest.fn().mockImplementation((x) =>
       responseMap(x, {
-        [`/api/${fakeRawAccounts[0].cluster}/group/groups`]: groupsResponse,
+        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       }),
     );
   });

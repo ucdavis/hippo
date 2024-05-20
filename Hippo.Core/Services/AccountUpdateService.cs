@@ -48,14 +48,11 @@ namespace Hippo.Core.Services
             if (queuedEvent.Status == QueuedEvent.Statuses.Pending && status == QueuedEvent.Statuses.Complete)
             {
                 // Update account and/or group data based on the completed action
-                var data = JsonSerializer.Deserialize<QueuedEventDataModel>(
-                    queuedEvent.Data, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
                 result = queuedEvent.Action switch
                 {
-                    QueuedEvent.Actions.UpdateSshKey => await CompleteUpdateSshKey(data),
-                    QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(data),
-                    QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(data),
+                    QueuedEvent.Actions.UpdateSshKey => await CompleteUpdateSshKey(queuedEvent.Data),
+                    QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent.Data),
+                    QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent.Data),
                     _ => Result.Error("Unknown action: {Action}", queuedEvent.Action)
                 };
             }
@@ -206,13 +203,11 @@ namespace Hippo.Core.Services
     {
         public static async Task<Result> QueueCreateAccount(this IAccountUpdateService accountUpdateService, Group group, Request request)
         {
-            var data = QueuedEventDataModel.FromRequestAndGroup(request, group);
             var queuedEvent = new QueuedEvent
             {
                 Action = QueuedEvent.Actions.CreateAccount,
                 Status = QueuedEvent.Statuses.Pending,
-                Data = JsonSerializer.Serialize(data,
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                Data = QueuedEventDataModel.FromRequestAndGroup(request, group),
                 Request = request
             };
             var result = await accountUpdateService.QueueEvent(queuedEvent);
@@ -220,13 +215,11 @@ namespace Hippo.Core.Services
         }
         public static async Task<Result> QueueAddAccountToGroup(this IAccountUpdateService accountUpdateService, Account account, Group group, Request request)
         {
-            var data = QueuedEventDataModel.FromAccountAndGroup(account, group);
             var queuedEvent = new QueuedEvent
             {
                 Action = QueuedEvent.Actions.AddAccountToGroup,
                 Status = QueuedEvent.Statuses.Pending,
-                Data = JsonSerializer.Serialize(data,
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                Data = QueuedEventDataModel.FromAccountAndGroup(account, group),
                 Request = request
             };
             var result = await accountUpdateService.QueueEvent(queuedEvent);
@@ -235,14 +228,13 @@ namespace Hippo.Core.Services
 
         public static async Task<Result> QueueUpdateSshKey(this IAccountUpdateService accountUpdateService, Account account, string sshKey)
         {
-            var data = QueuedEventDataModel.FromAccount(account);
-            data.Accounts[0].Key = sshKey;
             var queuedEvent = new QueuedEvent
             {
                 Action = QueuedEvent.Actions.UpdateSshKey,
                 Status = QueuedEvent.Statuses.Pending,
-                Data = JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                Data = QueuedEventDataModel.FromAccount(account)
             };
+            queuedEvent.Data.Accounts[0].Key = sshKey;
 
             var result = await accountUpdateService.QueueEvent(queuedEvent);
             return result;

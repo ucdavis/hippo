@@ -1,23 +1,13 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import {
-  AddToGroupModel,
-  GroupModel,
-  RawGroupModel,
-  RawRequestModel,
-} from "../../types";
+import { AddToGroupModel, GroupModel, RequestModel } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
-import {
-  authenticatedFetch,
-  parseBadRequest,
-  parseRawGroupModel,
-  parseRawRequestModel,
-} from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import GroupDetails from "../Group/GroupDetails";
@@ -49,14 +39,12 @@ export const AccountInfo = () => {
 
       if (response.ok) {
         setAvailableGroups(
-          ((await response.json()) as RawGroupModel[])
-            .filter(
-              (g) =>
-                !memberOfGroups.some((cg) => cg.id === g.id) &&
-                !adminOfGroups.some((cg) => cg.id === g.id) &&
-                !currentOpenRequests.some((r) => r.groupModel.id === g.id),
-            )
-            .map(parseRawGroupModel),
+          ((await response.json()) as GroupModel[]).filter(
+            (g) =>
+              !memberOfGroups.some((cg) => cg.id === g.id) &&
+              !adminOfGroups.some((cg) => cg.id === g.id) &&
+              !currentOpenRequests.some((r) => r.groupModel.id === g.id),
+          ),
         );
       } else {
         alert("Error fetching groups");
@@ -64,7 +52,7 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [clusterName, currentOpenRequests, memberOfGroups]);
+  }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
 
   const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -164,14 +152,11 @@ export const AccountInfo = () => {
 
       const response = await request;
       if (response.ok) {
-        const rawRequestModel = (await response.json()) as RawRequestModel;
+        const requestModel = (await response.json()) as RequestModel;
 
         setContext((c) => ({
           ...c,
-          openRequests: [
-            ...c.openRequests,
-            parseRawRequestModel(rawRequestModel),
-          ],
+          openRequests: [...c.openRequests, requestModel],
         }));
         setAvailableGroups((g) =>
           g.filter((g) => g.id !== addToGroupModel.groupId),

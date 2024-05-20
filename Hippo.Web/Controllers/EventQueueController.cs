@@ -43,7 +43,7 @@ public class EventQueueController : Controller
                 Id = ae.Id,
                 Action = ae.Action,
                 Status = ae.Status,
-                Data = JsonSerializer.Deserialize<QueuedEventDataModel>(ae.Data, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
+                Data = ae.Data,
                 CreatedAt = ae.CreatedAt,
                 UpdatedAt = ae.UpdatedAt
             })

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Text.Json;
 using Hippo.Core.Domain;
 
 namespace Hippo.Core.Models
@@ -8,7 +9,7 @@ namespace Hippo.Core.Models
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public string Data { get; set; } = "";
+        public JsonElement? Data { get; set; }
 
         public List<GroupAccountModel> Admins { get; set; } = new();
 
