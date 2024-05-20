@@ -147,7 +147,7 @@ export const Details = () => {
             <textarea
               className="form-control"
               id="fieldDescription"
-              value={order.description}
+              value={order.description || ""}
               readOnly
             />
           </div>
@@ -174,7 +174,7 @@ export const Details = () => {
             <textarea
               className="form-control"
               id="fieldNotes"
-              value={order.notes}
+              value={order.notes || ""}
               readOnly
             />
           </div>
@@ -228,7 +228,7 @@ export const Details = () => {
             <textarea
               className="form-control"
               id="fieldAdjustmentReason"
-              value={order.adjustmentReason}
+              value={order.adjustmentReason || ""}
               readOnly
             />
           </div>
@@ -237,11 +237,26 @@ export const Details = () => {
             <textarea
               className="form-control"
               id="fieldAdminNotes"
-              value={order.adminNotes}
+              value={order.adminNotes || ""}
               readOnly
             />
           </div>
           <hr />
+          <div className="form-group">
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text">
+                  <i className="fas fa-dollar-sign" />
+                </span>
+              </div>
+              <input
+                type="text"
+                className="form-control"
+                value={order.subTotal}
+                readOnly
+              />
+            </div>
+          </div>
           <div className="form-group">
             <label htmlFor="fieldSubTotal">SubTotal</label>
             <input
