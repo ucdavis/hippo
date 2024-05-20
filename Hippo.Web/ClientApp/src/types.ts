@@ -254,7 +254,7 @@ export interface OrderBillingModel {
 
 export interface PaymentModel {
   id: number;
-  amount: string;
+  amount: number;
   status: string;
   createdOn: string;
   createdBy?: User;

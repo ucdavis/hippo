@@ -87,6 +87,11 @@ export const Details = () => {
       {
         Header: "Amount",
         accessor: "amount",
+        Cell: ({ value }) => (
+          <span>
+            <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
+          </span>
+        ),
       },
       {
         Header: "Status",
@@ -114,8 +119,6 @@ export const Details = () => {
   if (!order) {
     return <div>Loading...</div>;
   }
-
-  console.log(order);
 
   return (
     <div>
