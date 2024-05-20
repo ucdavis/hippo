@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Hippo.Core.Models.Settings;
+using Hippo.Core.Utilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -94,7 +95,7 @@ namespace Hippo.Core.Services
                     data.GroupsWithSponsors.Add(new PuppetGroup 
                     {
                         Name = groupName, 
-                        Data = JsonSerializer.Deserialize<JsonElement>(_yamlDotNetJsonSerializer.Serialize(groupNode))
+                        Data = JsonHelper.DeserializeToJsonElement(_yamlDotNetJsonSerializer.Serialize(groupNode))
                     });
                     foreach (var user in sponsors)
                     {
@@ -126,7 +127,7 @@ namespace Hippo.Core.Services
                 userNode.Remove("password");
                 userNode.Remove("fullname");
                 userNode.Remove("email");
-                puppetUser.Data = JsonSerializer.Deserialize<JsonElement>(_yamlDotNetJsonSerializer.Serialize(userNode));
+                puppetUser.Data = JsonHelper.DeserializeToJsonElement(_yamlDotNetJsonSerializer.Serialize(userNode));
 
                 data.Users.Add(puppetUser);
             }

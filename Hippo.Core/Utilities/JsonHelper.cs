@@ -12,6 +12,11 @@ public static class JsonHelper
         return JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(value, _serializeOptions), _deserializeOptions);
     }
 
+    public static JsonElement DeserializeToJsonElement(string value)
+    {
+        return JsonSerializer.Deserialize<JsonElement>(value, _deserializeOptions);
+    }
+
     public static T ConvertFromJsonElement<T>(JsonElement? value) where T : class
     {
         return value?.Deserialize<T>(_deserializeOptions);
