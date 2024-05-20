@@ -22,6 +22,10 @@ namespace Hippo.Web.Models.OrderModels
         public decimal Adjustment { get; set; }
         public string AdjustmentReason { get; set; } = string.Empty;
 
+        public string SubTotal { get; set; } = string.Empty;
+        public string Total { get; set; } = string.Empty;
+        public string BalanceRemaining { get; set; } = string.Empty;
+
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
@@ -46,6 +50,9 @@ namespace Hippo.Web.Models.OrderModels
                 Adjustment = order.Adjustment,
                 AdjustmentReason = order.AdjustmentReason,
                 AdminNotes = order.AdminNotes,
+                SubTotal = order.SubTotal.ToString("F2"),
+                Total = order.Total.ToString("F2"),
+                BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 MetaData = order.MetaData,
                 History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
                 Billings = order.Billings,

@@ -285,6 +285,9 @@ export interface OrderModel {
   createdOn: string;
   externalReference: string;
   adminNotes: string;
+  subTotal: string;
+  total: string;
+  balanceRemaining: string;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];

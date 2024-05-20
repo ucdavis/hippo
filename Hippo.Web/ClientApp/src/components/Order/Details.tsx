@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   HistoryModel,
-  OrderBillingModel,
   OrderMetadataModel,
   OrderModel,
   PaymentModel,
@@ -15,6 +14,8 @@ import ChartStringValidation from "./ChartStringValidation";
 export const Details = () => {
   const { cluster, orderId } = useParams();
   const [order, setOrder] = useState<OrderModel | null>(null);
+  const [balanceRemaining, setBalanceRemaining] = useState<number>(0);
+  const [balancePending, setBalancePending] = useState<number>(0);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -25,6 +26,12 @@ export const Details = () => {
       if (response.ok) {
         const data = await response.json();
         setOrder(data);
+        const balanceRemaining = parseFloat(data.balanceRemaining);
+        setBalanceRemaining(balanceRemaining);
+        const balancePending = data?.payments
+          .filter((payment) => payment.status !== "Completed")
+          .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
+        setBalancePending(balancePending);
       } else {
         alert("Error fetching order");
       }
@@ -144,7 +151,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldCategory">Category</label>
             <input
@@ -154,7 +160,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldExternalReference">External Reference</label>
             <input
@@ -164,7 +169,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldNotes">Notes</label>
             <textarea
@@ -174,7 +178,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldUnits">Units</label>
             <input
@@ -184,7 +187,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldUnitPrice">Unit Price</label>
             <input
@@ -194,7 +196,6 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldQuantity">Quantity</label>
             <input
@@ -231,13 +232,31 @@ export const Details = () => {
               readOnly
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="fieldAdminNotes">Admin Notes</label>
             <textarea
               className="form-control"
               id="fieldAdminNotes"
               value={order.adminNotes}
+              readOnly
+            />
+          </div>
+          <hr />
+          <div className="form-group">
+            <label htmlFor="fieldSubTotal">SubTotal</label>
+            <input
+              className="form-control"
+              id="fieldSubTotal"
+              value={order.subTotal}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldTotal">Total</label>
+            <input
+              className="form-control"
+              id="fieldTotal"
+              value={order.total}
               readOnly
             />
           </div>
@@ -265,10 +284,8 @@ export const Details = () => {
               ))}
             </tbody>
           </table>
-
           <h2>Metadata</h2>
           <ReactTable columns={metadataColumns} data={order.metaData} />
-
           <h2>History</h2>
           <ReactTable
             columns={historyColumns}
@@ -277,11 +294,28 @@ export const Details = () => {
               sortBy: [{ id: "Date" }],
             }}
           />
-
           <h2>Payments</h2>
-          <span>
-            TODO: Show things like Next payment amount, remaining payments, etc.
-          </span>
+          <div className="form-group">
+            <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
+            <input
+              className="form-control"
+              id="fieldBalanceRemaining"
+              value={order.balanceRemaining}
+              readOnly
+            />
+          </div>
+          {balancePending !== 0 && (
+            <div className="form-group">
+              <label htmlFor="fieldBalancePending">Balance Pending</label>
+              <input
+                className="form-control"
+                id="fieldBalancePending"
+                value={(balanceRemaining - balancePending).toFixed(2)}
+                readOnly
+              />
+            </div>
+          )}
+          <br />
           {order.payments.length !== 0 && (
             <ReactTable columns={paymentColumns} data={order.payments} />
           )}
