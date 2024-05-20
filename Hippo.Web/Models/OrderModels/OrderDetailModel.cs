@@ -16,6 +16,11 @@ namespace Hippo.Web.Models.OrderModels
         public string Status { get; set; } = string.Empty;
         public string ExternalReference { get; set; } = string.Empty;
 
+        public string Notes { get; set; } = string.Empty;
+
+        public decimal Adjustment { get; set; }
+        public string AdjustmentReason { get; set; } = string.Empty;
+
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
@@ -36,6 +41,9 @@ namespace Hippo.Web.Models.OrderModels
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,
+                Notes = order.Notes,
+                Adjustment = order.Adjustment,
+                AdjustmentReason = order.AdjustmentReason,
                 MetaData = order.MetaData,
                 History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
                 Billings = order.Billings,

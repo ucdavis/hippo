@@ -84,10 +84,94 @@ export const Details = () => {
     <div>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <h1>Order Details</h1>
-          <p>Order ID: {order.id}</p>
+          <h1>Order Details: Id {order.id}</h1>
+          <div className="form-group">
+            <label htmlFor="fieldName">Name</label>
+            <input
+              className="form-control"
+              id="fieldName"
+              required
+              value={order.name}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldDescription">Description</label>
+            <textarea
+              className="form-control"
+              id="fieldDescription"
+              value={order.description}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldStatus">Status</label>
+            <input
+              className="form-control"
+              id="fieldStatus"
+              value={order.status}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldCategory">Category</label>
+            <input
+              className="form-control"
+              id="fieldCategory"
+              value={order.category}
+              readOnly
+            />
+          </div>
 
-          <p>Order Name: {order.name}</p>
+          <div className="form-group">
+            <label htmlFor="fieldExternalReference">External Reference</label>
+            <input
+              className="form-control"
+              id="fieldExternalReference"
+              value={order.externalReference}
+              readOnly
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="fieldNotes">Notes</label>
+            <textarea
+              className="form-control"
+              id="fieldNotes"
+              value={order.notes}
+              readOnly
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="fieldUnits">Units</label>
+            <input
+              className="form-control"
+              id="fieldUnits"
+              value={order.units}
+              readOnly
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="fieldUnitPrice">Unit Price</label>
+            <input
+              className="form-control"
+              id="fieldUnitPrice"
+              value={order.unitPrice}
+              readOnly
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="fieldInstallments">Installments</label>
+            <input
+              className="form-control"
+              id="fieldInstallments"
+              value={order.installments}
+              readOnly
+            />
+          </div>
 
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
@@ -96,18 +180,20 @@ export const Details = () => {
                 <th>Chart String</th>
                 <th>Percent</th>
                 <th>Chart String Validation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.billings.map((billing) => (
+                <tr key={billing.id}>
+                  <td>{billing.chartString}</td>
+                  <td>{billing.percentage}</td>
+                  <td>
+                    <ChartStringValidation chartString={billing.chartString} />
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {order.billings.map((billing) => (
-                  <tr key={billing.id}>
-                    <td>{billing.chartString}</td>
-                    <td>{billing.percentage}</td>
-                    <td><ChartStringValidation chartString={billing.chartString} /></td>
-                  </tr>
-                ))}
-                </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
 
           <h2>Metadata</h2>
           <ReactTable columns={metadataColumns} data={order.metaData} />

@@ -273,10 +273,13 @@ export interface OrderModel {
   category: string;
   name: string;
   description: string;
+  notes: string;
   units: string;
   unitPrice: string;
   installments: number;
   quantity: number;
+  adjustment: number;
+  adjustmentReason: string;
   status: string;
   createdOn: string;
   externalReference: string;
