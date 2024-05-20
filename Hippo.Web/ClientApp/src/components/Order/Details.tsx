@@ -189,12 +189,19 @@ export const Details = () => {
           </div>
           <div className="form-group">
             <label htmlFor="fieldUnitPrice">Unit Price</label>
-            <input
-              className="form-control"
-              id="fieldUnitPrice"
-              value={order.unitPrice}
-              readOnly
-            />
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text" style={{ height: "38px" }}>
+                  <i className="fas fa-dollar-sign" />
+                </span>
+              </div>
+              <input
+                className="form-control"
+                id="fieldUnitPrice"
+                value={order.unitPrice}
+                readOnly
+              />
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="fieldQuantity">Quantity</label>
@@ -216,12 +223,19 @@ export const Details = () => {
           </div>
           <div className="form-group">
             <label htmlFor="fieldAdjustment">Adjustment</label>
-            <input
-              className="form-control"
-              id="fieldAdjustment"
-              value={order.adjustment}
-              readOnly
-            />
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text" style={{ height: "38px" }}>
+                  <i className="fas fa-dollar-sign" />
+                </span>
+              </div>
+              <input
+                className="form-control"
+                id="fieldAdjustment"
+                value={order.adjustment}
+                readOnly
+              />
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="fieldAdjustmentReason">Adjustment Reason</label>
@@ -243,38 +257,40 @@ export const Details = () => {
           </div>
           <hr />
           <div className="form-group">
+            <label htmlFor="fieldSubTotal">SubTotal</label>
             <div className="input-group">
               <div className="input-group-prepend">
-                <span className="input-group-text">
+                <span className="input-group-text" style={{ height: "38px" }}>
+                  <i className="fas fa-dollar-sign" />
+                </span>
+              </div>
+              <div className="form-group">
+                <input
+                  className="form-control"
+                  id="fieldSubTotal"
+                  value={order.subTotal}
+                  readOnly
+                />
+              </div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldTotal">Total</label>
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text" style={{ height: "38px" }}>
                   <i className="fas fa-dollar-sign" />
                 </span>
               </div>
               <input
-                type="text"
                 className="form-control"
-                value={order.subTotal}
+                id="fieldTotal"
+                value={order.total}
                 readOnly
               />
             </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="fieldSubTotal">SubTotal</label>
-            <input
-              className="form-control"
-              id="fieldSubTotal"
-              value={order.subTotal}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldTotal">Total</label>
-            <input
-              className="form-control"
-              id="fieldTotal"
-              value={order.total}
-              readOnly
-            />
-          </div>
+
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
             <thead>
@@ -312,22 +328,36 @@ export const Details = () => {
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
-            <input
-              className="form-control"
-              id="fieldBalanceRemaining"
-              value={order.balanceRemaining}
-              readOnly
-            />
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text" style={{ height: "38px" }}>
+                  <i className="fas fa-dollar-sign" />
+                </span>
+              </div>
+              <input
+                className="form-control"
+                id="fieldBalanceRemaining"
+                value={order.balanceRemaining}
+                readOnly
+              />
+            </div>
           </div>
           {balancePending !== 0 && (
             <div className="form-group">
               <label htmlFor="fieldBalancePending">Balance Pending</label>
-              <input
-                className="form-control"
-                id="fieldBalancePending"
-                value={(balanceRemaining - balancePending).toFixed(2)}
-                readOnly
-              />
+              <div className="input-group">
+                <div className="input-group-prepend">
+                  <span className="input-group-text" style={{ height: "38px" }}>
+                    <i className="fas fa-dollar-sign" />
+                  </span>
+                </div>
+                <input
+                  className="form-control"
+                  id="fieldBalancePending"
+                  value={(balanceRemaining - balancePending).toFixed(2)}
+                  readOnly
+                />
+              </div>
             </div>
           )}
           <br />
