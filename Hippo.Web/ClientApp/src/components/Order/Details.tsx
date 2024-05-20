@@ -5,6 +5,7 @@ import {
   OrderBillingModel,
   OrderMetadataModel,
   OrderModel,
+  PaymentModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { Column } from "react-table";
@@ -74,6 +75,35 @@ export const Details = () => {
     [],
   );
 
+  const paymentColumns = useMemo<Column<PaymentModel>[]>(
+    () => [
+      {
+        Header: "Amount",
+        accessor: "amount",
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+      },
+      {
+        Header: "Created On",
+        accessor: "createdOn",
+        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
+      },
+      {
+        Header: "Created By",
+        accessor: "createdBy",
+        Cell: ({ value }) =>
+          (value && (
+            <span>
+              {value?.firstName} {value?.lastName} ({value?.email})
+            </span>
+          )) || <span>System</span>,
+      },
+    ],
+    [],
+  );
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -85,6 +115,16 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
+          <div className="form-group">
+            <label htmlFor="fieldStatus">Status</label>
+            <input
+              className="form-control"
+              id="fieldStatus"
+              value={order.status}
+              readOnly
+            />
+          </div>
+          <hr />
           <div className="form-group">
             <label htmlFor="fieldName">Name</label>
             <input
@@ -104,15 +144,7 @@ export const Details = () => {
               readOnly
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="fieldStatus">Status</label>
-            <input
-              className="form-control"
-              id="fieldStatus"
-              value={order.status}
-              readOnly
-            />
-          </div>
+
           <div className="form-group">
             <label htmlFor="fieldCategory">Category</label>
             <input
@@ -164,6 +196,15 @@ export const Details = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="fieldQuantity">Quantity</label>
+            <input
+              className="form-control"
+              id="fieldQuantity"
+              value={order.quantity}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="fieldInstallments">Installments</label>
             <input
               className="form-control"
@@ -172,7 +213,34 @@ export const Details = () => {
               readOnly
             />
           </div>
+          <div className="form-group">
+            <label htmlFor="fieldAdjustment">Adjustment</label>
+            <input
+              className="form-control"
+              id="fieldAdjustment"
+              value={order.adjustment}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldAdjustmentReason">Adjustment Reason</label>
+            <textarea
+              className="form-control"
+              id="fieldAdjustmentReason"
+              value={order.adjustmentReason}
+              readOnly
+            />
+          </div>
 
+          <div className="form-group">
+            <label htmlFor="fieldAdminNotes">Admin Notes</label>
+            <textarea
+              className="form-control"
+              id="fieldAdminNotes"
+              value={order.adminNotes}
+              readOnly
+            />
+          </div>
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
             <thead>
@@ -188,7 +256,10 @@ export const Details = () => {
                   <td>{billing.chartString}</td>
                   <td>{billing.percentage}</td>
                   <td>
-                    <ChartStringValidation chartString={billing.chartString} />
+                    <ChartStringValidation
+                      chartString={billing.chartString}
+                      key={billing.chartString}
+                    />
                   </td>
                 </tr>
               ))}
@@ -206,6 +277,14 @@ export const Details = () => {
               sortBy: [{ id: "Date" }],
             }}
           />
+
+          <h2>Payments</h2>
+          <span>
+            TODO: Show things like Next payment amount, remaining payments, etc.
+          </span>
+          {order.payments.length !== 0 && (
+            <ReactTable columns={paymentColumns} data={order.payments} />
+          )}
         </div>
       </div>
     </div>

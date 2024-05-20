@@ -257,6 +257,7 @@ export interface PaymentModel {
   amount: string;
   status: string;
   createdOn: string;
+  createdBy?: User;
   //Possibly have the chart string(s) and percent here
 }
 export interface HistoryModel {
@@ -283,6 +284,7 @@ export interface OrderModel {
   status: string;
   createdOn: string;
   externalReference: string;
+  adminNotes: string;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];
