@@ -1,9 +1,7 @@
-import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { ShowFor } from "../../Shared/ShowFor";
 import { UsePermissions } from "../../Shared/UsePermissions";
 import { GroupModel } from "../../types";
 import { Button, CardSubtitle, CardText } from "reactstrap";
-import GroupDetails from "./GroupDetails";
 import { MouseEvent } from "react";
 
 export interface GroupInfoProps {

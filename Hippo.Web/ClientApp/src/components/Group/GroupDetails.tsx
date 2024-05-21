@@ -1,6 +1,7 @@
 import React from "react";
 import ObjectTree from "../../Shared/ObjectTree";
 import { GroupModel } from "../../types";
+import { filterCommonProperties } from "../../util/ObjectHelpers";
 
 interface GroupDetailsProps {
   group: GroupModel;
@@ -14,7 +15,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
     ...group.data,
   };
 
-  return <ObjectTree obj={details} />;
+  return <ObjectTree obj={filterCommonProperties(details)} />;
 };
 
 export default GroupDetails;

@@ -22,6 +22,7 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import GroupDetails from "../Group/GroupDetails";
 import ObjectTree from "../../Shared/ObjectTree";
+import { filterCommonProperties } from "../../util/ObjectHelpers";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -65,7 +66,7 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [clusterName, currentOpenRequests, memberOfGroups]);
+  }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
 
   const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -213,7 +214,8 @@ export const AccountInfo = () => {
     {
       title: "Account Details",
       message: () => {
-        return <ObjectTree obj={account} />;
+        const obj = filterCommonProperties(account);
+        return <ObjectTree obj={obj} />;
       },
       buttons: ["OK"],
     },
@@ -240,7 +242,7 @@ export const AccountInfo = () => {
 
   const [showGroupDetails] = useConfirmationDialog(
     {
-      title: "View Group Details",
+      title: "Group Details",
       message: () => {
         return <GroupDetails group={showingGroup} />;
       },
@@ -272,6 +274,7 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
 
@@ -288,6 +291,7 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
 
@@ -305,9 +309,9 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
-          <br />
 
           <div>
             <button

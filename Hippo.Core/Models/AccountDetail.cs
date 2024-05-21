@@ -8,6 +8,7 @@ namespace Hippo.Core.Models
         public string Name { get; set; }
         public string Owner { get; set; }
         public string Cluster { get; set; }
+        public string Data { get; set; }
         public List<GroupModel> MemberOfGroups { get; set; } = new();
         public List<GroupModel> AdminOfGroups { get; set; } = new();
     }
