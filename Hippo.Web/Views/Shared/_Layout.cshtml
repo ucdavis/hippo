@@ -56,7 +56,7 @@
         Hippo.accounts = (@Html.Raw(await UserService.GetCurrentAccountsJsonAsync())).map(a => ({
           ...a,
           @* ensure data property of each group is deserialized *@
-          memberOfGroups: a.memberOfGroups.map(mg => ({ ...mg, data: ag.data ? JSON.parse(ag.data) : ag.data})),
+          memberOfGroups: a.memberOfGroups.map(mg => ({ ...mg, data: mg.data ? JSON.parse(mg.data) : mg.data})),
           adminOfGroups: a.adminOfGroups.map(ag => ({ ...ag, data: ag.data ? JSON.parse(ag.data) : ag.data})),
         }));
         Hippo.openRequests = @Html.Raw(await UserService.GetCurrentOpenRequestsAsync());
