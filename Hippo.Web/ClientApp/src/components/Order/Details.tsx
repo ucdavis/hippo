@@ -119,7 +119,6 @@ export const Details = () => {
 
   const handleChanges = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setOrder((prevOrder) => ({ ...prevOrder, [name]: value }));
   };
 

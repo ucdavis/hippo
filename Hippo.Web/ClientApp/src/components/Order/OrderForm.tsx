@@ -14,15 +14,20 @@ const OrderForm: React.FC<OrderFormProps> = ({
   readonly,
   handleChanges,
 }) => {
-  const [order, setOrder] = useState<OrderModel>(null);
+  const [order, setOrder] = useState<OrderModel>(orderProp);
   const [isReadOnly, setIsReadOnly] = useState<boolean>(readonly);
 
-  if (!order) {
-    setOrder(orderProp);
-  }
   if (!isReadOnly) {
     setIsReadOnly(readonly);
   }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setOrder((prevOrder) => ({ ...prevOrder, [name]: value }));
+    handleChanges(e);
+  };
 
   if (!order) {
     return <div>Loading...</div>;
@@ -38,7 +43,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           value={order.status}
           //readOnly
           name="status"
-          onChange={handleChanges}
+          onChange={handleChange}
         />
       </div>
       <hr />
@@ -50,7 +55,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           required
           value={order.name}
           name="name"
-          onChange={handleChanges}
+          onChange={handleChange}
         />
       </div>
       <div className="form-group">
@@ -60,7 +65,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           id="fieldDescription"
           value={order.description || ""}
           name="description"
-          onChange={handleChanges}
+          onChange={handleChange}
         />
       </div>
       <div className="form-group">
