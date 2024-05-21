@@ -26,7 +26,7 @@ export const GroupInfo = ({ group, showDetails }: GroupInfoProps) => {
       {group.admins?.length > 0 && (
         <>
           <CardSubtitle>Group Sponsors/Admins:</CardSubtitle>
-          <CardText>
+          <CardText className="mb-0">
             {group.admins?.map((a, i) => (
               <span key={i}>
                 {a.name} ({a.email})<br />
@@ -36,7 +36,7 @@ export const GroupInfo = ({ group, showDetails }: GroupInfoProps) => {
         </>
       )}
       <ShowFor condition={() => canViewGroup(group.name)}>
-        <Button size="sm" onClick={handleShowDetails}>
+        <Button size="sm" color="link" onClick={handleShowDetails}>
           Details
         </Button>
       </ShowFor>
