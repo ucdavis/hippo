@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { OrderModel } from "../../types";
+import FormField from "../../Shared/Form/FormField";
+import { Form, Input } from "reactstrap";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -14,28 +17,48 @@ const OrderForm: React.FC<OrderFormProps> = ({
   readonly,
   handleChanges,
 }) => {
-  const [order, setOrder] = useState<OrderModel>(orderProp);
-  const [isReadOnly, setIsReadOnly] = useState<boolean>(readonly);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OrderModel>();
 
-  if (!isReadOnly) {
-    setIsReadOnly(readonly);
-  }
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setOrder((prevOrder) => ({ ...prevOrder, [name]: value }));
-    handleChanges(e);
+  const onSubmit = (data: OrderModel, e: React.SyntheticEvent) => {
+    e.preventDefault();
+    console.log(data);
+    console.log(errors);
   };
 
-  if (!order) {
-    return <div>Loading...</div>;
-  }
+  // const [order, setOrder] = useState<OrderModel>(orderProp);
+  // const [isReadOnly, setIsReadOnly] = useState<boolean>(readonly);
+
+  // if (!isReadOnly) {
+  //   setIsReadOnly(readonly);
+  // }
+
+  // const handleChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  // ) => {
+  //   const { name, value } = e.target;
+  //   setOrder((prevOrder) => ({ ...prevOrder, [name]: value }));
+  //   handleChanges(e);
+  // };
+
+  // if (!order) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
-    <div>
-      <div className="form-group">
+    <Form onSubmit={handleSubmit(onSubmit)}>
+      <FormField
+        register={register}
+        errors={errors}
+        name="status"
+        label="Status"
+        required={true}
+        // readOnly={readonly}
+      />
+      {/* <div className="form-group">
         <label htmlFor="fieldStatus">Status</label>
         <input
           className="form-control"
@@ -45,9 +68,17 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="status"
           onChange={handleChange}
         />
-      </div>
+      </div> */}
       <hr />
-      <div className="form-group">
+      <FormField
+        register={register}
+        errors={errors}
+        name="name"
+        label="Name"
+        required={true}
+        // readOnly={readonly}
+      />
+      {/* <div className="form-group">
         <label htmlFor="fieldName">Name</label>
         <input
           className="form-control"
@@ -57,8 +88,17 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="name"
           onChange={handleChange}
         />
-      </div>
-      <div className="form-group">
+      </div> */}
+
+      <FormField
+        register={register}
+        errors={errors}
+        name="description"
+        label="Description"
+        required={true}
+        // readOnly={readonly}
+      />
+      {/* <div className="form-group">
         <label htmlFor="fieldDescription">Description</label>
         <textarea
           className="form-control"
@@ -67,8 +107,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="description"
           onChange={handleChange}
         />
-      </div>
-      <div className="form-group">
+      </div> */}
+      {/* <div className="form-group">
         <label htmlFor="fieldCategory">Category</label>
         <input
           className="form-control"
@@ -207,8 +247,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
             readOnly
           />
         </div>
-      </div>
-    </div>
+      </div> */}
+      <Input type="submit" value="Save" />
+    </Form>
   );
 };
 
