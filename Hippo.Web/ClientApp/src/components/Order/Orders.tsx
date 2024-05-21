@@ -73,7 +73,7 @@ export const Orders = () => {
         ),
       },
     ],
-    [],
+    [cluster],
   );
 
   if (orders === undefined) {
