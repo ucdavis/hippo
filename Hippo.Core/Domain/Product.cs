@@ -21,12 +21,23 @@ namespace Hippo.Core.Domain
         public decimal UnitPrice { get; set; }
         //Not sure if we want to do this, but it lets a default number of payment installments to be specified
         public int Installments { get; set; }
+        [Required]
+        [MaxLength(10)]
+        public string InstallmentType { get; set; } = "Monthly"; //Monthly, Yearly
 
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         [Required]
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
+
+        public class Types
+        {
+            public const string Monthly = "Monthly";
+            public const string Yearly = "Yearly";
+            public static List<string> InstallmentTypes = new List<string> { Monthly, Yearly };
+        }
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().Property(a => a.IsActive).HasDefaultValue(true);
