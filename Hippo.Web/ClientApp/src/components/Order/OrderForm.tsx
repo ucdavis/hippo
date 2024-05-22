@@ -32,7 +32,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         name="status"
         label="Status"
         required={true}
-        readOnly={readOnly}
+        readOnly={true}
       />
       <hr />
       <FormField
