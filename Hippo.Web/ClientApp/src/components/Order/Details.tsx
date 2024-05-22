@@ -117,9 +117,9 @@ export const Details = () => {
     [],
   );
 
-  const submitOrder = (updatedOrder: OrderModel) => {
+  // async function so the form can manage the loading state
+  const submitOrder = async (updatedOrder: OrderModel) => {
     const editableFields: Partial<OrderModel> = {
-      status: updatedOrder.status,
       name: updatedOrder.name,
       description: updatedOrder.description,
       category: updatedOrder.category,
@@ -133,6 +133,9 @@ export const Details = () => {
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
     };
+
+    // TODO: await API call
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setOrder((prevOrder) => ({
       ...prevOrder,

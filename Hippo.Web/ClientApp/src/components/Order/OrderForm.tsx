@@ -2,14 +2,15 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { OrderModel } from "../../types";
 import FormField from "../../Shared/Form/FormField";
-import { Button, Form } from "reactstrap";
+import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import FormSubmitButton from "../../Shared/Form/FormSubmitButton";
 
 interface OrderFormProps {
   orderProp: OrderModel;
   readOnly: boolean;
-  onSubmit: (order: OrderModel) => void;
+  onSubmit: (order: OrderModel) => Promise<void>;
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({
@@ -20,7 +21,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<OrderModel>({ defaultValues: orderProp });
 
   // TODO: rest of input validation?
@@ -153,9 +154,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
         prepend={<FontAwesomeIcon icon={faDollarSign} />}
       />
       {!readOnly && (
-        <Button type="submit" block={true} outline={true}>
-          Submit
-        </Button>
+        <FormSubmitButton
+          isSubmitting={isSubmitting}
+          isSubmitSuccessful={isSubmitSuccessful}
+        />
       )}
     </Form>
   );
