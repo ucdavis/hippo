@@ -117,10 +117,27 @@ export const Details = () => {
     [],
   );
 
-  const submitOrder = (order: OrderModel) => {
-    // select out the fields we allow a user to update
-    const { name, description, status } = order;
-    setOrder((prevOrder) => ({ name, description, status, ...prevOrder }));
+  const submitOrder = (updatedOrder: OrderModel) => {
+    const editableFields: Partial<OrderModel> = {
+      status: updatedOrder.status,
+      name: updatedOrder.name,
+      description: updatedOrder.description,
+      category: updatedOrder.category,
+      externalReference: updatedOrder.externalReference,
+      notes: updatedOrder.notes,
+      units: updatedOrder.units,
+      unitPrice: updatedOrder.unitPrice,
+      quantity: updatedOrder.quantity,
+      installments: updatedOrder.installments,
+      adjustment: updatedOrder.adjustment,
+      adjustmentReason: updatedOrder.adjustmentReason,
+      adminNotes: updatedOrder.adminNotes,
+    };
+
+    setOrder((prevOrder) => ({
+      ...prevOrder,
+      ...editableFields,
+    }));
   };
 
   if (!order) {
@@ -132,7 +149,11 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
-          <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
+          <OrderForm
+            orderProp={order}
+            readOnly={false}
+            onSubmit={submitOrder}
+          />
 
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">

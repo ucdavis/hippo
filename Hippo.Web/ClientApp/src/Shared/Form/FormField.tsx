@@ -15,6 +15,7 @@ type FormFieldProps<T = OrderModel> = RegisterOptions & {
   register: UseFormRegister<T>;
   errors: FieldErrors<T>;
   required?: boolean; // overwriting RegisterOptions required
+  maxLength?: number;
   readOnly?: boolean;
 };
 
@@ -27,6 +28,7 @@ const FormField: React.FC<FormFieldProps> = ({
   register,
   errors,
   required = false,
+  maxLength,
   readOnly = false,
   ...options
 }) => {
@@ -34,6 +36,10 @@ const FormField: React.FC<FormFieldProps> = ({
     required: {
       value: required,
       message: `${label} is required`,
+    },
+    maxLength: {
+      value: maxLength,
+      message: `${label} must be less than ${maxLength} characters`,
     },
     ...options,
   });

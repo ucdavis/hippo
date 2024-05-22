@@ -23,6 +23,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     formState: { errors },
   } = useForm<OrderModel>({ defaultValues: orderProp });
 
+  // TODO: rest of input validation?
   return (
     <Form onSubmit={handleSubmit(onSubmit)} className="mb-3">
       <FormField
@@ -41,6 +42,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         label="Name"
         required={true}
         readOnly={readOnly}
+        maxLength={50}
       />
       <FormField
         register={register}
@@ -50,6 +52,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         type="textarea"
         required={true}
         readOnly={readOnly}
+        maxLength={250}
       />
       <FormField
         register={register}
@@ -64,6 +67,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         name="externalReference"
         label="External Reference"
         readOnly={readOnly}
+        maxLength={150}
       />
       <FormField
         register={register}
