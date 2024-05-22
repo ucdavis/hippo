@@ -18,6 +18,7 @@ const defaultProduct: ProductModel = {
   unitPrice: "0.00",
   units: "",
   installments: 60,
+  installmentType: "Monthly",
 };
 
 export const Products = () => {
@@ -158,6 +159,26 @@ export const Products = () => {
                 setReturn(model);
               }}
             />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldInstallmentType">Installment Type</label>
+            <select
+              className="form-control"
+              id="fieldInstallmentType"
+              required
+              value={editProductModel.installmentType}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  installmentType: e.target.value,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
           </div>
         </>
       ),
@@ -328,6 +349,10 @@ export const Products = () => {
       {
         Header: "Installments",
         accessor: "installments",
+      },
+      {
+        Header: "Type",
+        accessor: "installmentType",
       },
       {
         Header: "Actions",

@@ -43,7 +43,8 @@ namespace Hippo.Web.Controllers
                 UnitPrice = model.UnitPrice,
                 Units = model.Units,
                 Cluster = cluster,
-                Installments = model.Installments
+                Installments = model.Installments,
+                InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly
             };
             _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync();
@@ -67,6 +68,7 @@ namespace Hippo.Web.Controllers
             product.UnitPrice = model.UnitPrice;
             product.Units = model.Units;
             product.Installments = model.Installments;
+            product.InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly;
 
             await _dbContext.SaveChangesAsync();
 

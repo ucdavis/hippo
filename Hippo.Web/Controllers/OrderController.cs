@@ -126,12 +126,14 @@ namespace Hippo.Web.Controllers
             var order = new Order
             {
                 Category = model.Category,
-                Name = model.Name,
+                Name = model.Name ?? model.ProductName,
+                ProductName = model.ProductName,
                 Description = model.Description,
                 ExternalReference = model.ExternalReference,
                 Units = model.Units,
                 UnitPrice = model.UnitPrice,
                 Installments = model.Installments,
+                InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
                 Quantity = model.Quantity,
                 Billings = model.Billings,
                 
