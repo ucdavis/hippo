@@ -2,33 +2,14 @@ import { useState } from "react";
 import { Typeahead, Menu, MenuItem } from "react-bootstrap-typeahead";
 import { GroupModel } from "../../types";
 import { GroupInfo } from "./GroupInfo";
-import GroupDetails from "./GroupDetails";
-import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 
 interface Props {
-  setSelection: (selection: GroupModel) => void;
+  setSelection: (selection?: GroupModel) => void;
   options: GroupModel[];
 }
 
 export const GroupLookup = ({ setSelection, options }: Props) => {
   const [groupSelection, setGroupSelection] = useState<GroupModel[]>([]);
-  const [showingGroup, setShowingGroup] = useState<GroupModel>();
-
-  const [showGroupDetails] = useConfirmationDialog(
-    {
-      title: "View Group Details",
-      message: () => {
-        return <GroupDetails group={showingGroup} />;
-      },
-      buttons: ["OK"],
-    },
-    [showingGroup],
-  );
-
-  const handleShowGroup = (group: GroupModel) => {
-    setShowingGroup(group);
-    showGroupDetails();
-  };
 
   return (
     <Typeahead
@@ -66,11 +47,7 @@ export const GroupLookup = ({ setSelection, options }: Props) => {
           <Menu {...rest}>
             {results.map((result, index) => (
               <MenuItem option={result} position={index} key={index}>
-                <GroupInfo
-                  group={result as GroupModel}
-                  key={index}
-                  showDetails={() => handleShowGroup(result as GroupModel)}
-                />
+                <GroupInfo group={result as GroupModel} key={index} />
               </MenuItem>
             ))}
           </Menu>

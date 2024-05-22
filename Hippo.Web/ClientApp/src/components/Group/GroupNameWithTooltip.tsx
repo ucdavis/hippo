@@ -18,7 +18,7 @@ export const GroupNameWithTooltip = ({
   const target = `groupName_${group.id}_${id ?? ""}`;
   const [showDetails] = useConfirmationDialog(
     {
-      title: "View Group Details",
+      title: "Group Details",
       message: () => {
         return <GroupDetails group={group} />;
       },

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ListGroup, ListGroupItem, Collapse } from "reactstrap";
-import { isNumber, isObject } from "../util/TypeChecks";
+import { isObject } from "../util/TypeChecks";
+import { filterCommonProperties } from "../util/ObjectHelpers";
 
 interface ObjectTreeProps {
   obj: Record<string, any>;
@@ -67,7 +68,9 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
     });
   };
 
-  return <ListGroup flush>{renderItems(obj)}</ListGroup>;
+  return (
+    <ListGroup flush>{renderItems(filterCommonProperties(obj))}</ListGroup>
+  );
 };
 
 export default ObjectTree;

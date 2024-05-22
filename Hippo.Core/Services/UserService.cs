@@ -117,6 +117,7 @@ namespace Hippo.Core.Services
                     Name = a.Name,
                     Owner = a.Owner.Name,
                     Cluster = a.Cluster.Name,
+                    Data = a.Data,
                     MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
                     {
                         Id = g.Id,

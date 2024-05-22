@@ -11,6 +11,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import GroupDetails from "../Group/GroupDetails";
+import ObjectTree from "../../Shared/ObjectTree";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -193,6 +194,21 @@ export const AccountInfo = () => {
     }
   }, [account?.id, clusterName, getSshKeyConfirmation, setNotification]);
 
+  const [showDetails] = useConfirmationDialog(
+    {
+      title: "Account Details",
+      message: () => {
+        return <ObjectTree obj={account} />;
+      },
+      buttons: ["OK"],
+    },
+    [account],
+  );
+
+  const handleViewDetails = async () => {
+    await showDetails();
+  };
+
   useEffect(() => {
     if (!account) {
       const request = currentOpenRequests.find(
@@ -209,7 +225,7 @@ export const AccountInfo = () => {
 
   const [showGroupDetails] = useConfirmationDialog(
     {
-      title: "View Group Details",
+      title: "Group Details",
       message: () => {
         return <GroupDetails group={showingGroup} />;
       },
@@ -241,6 +257,7 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
 
@@ -257,6 +274,7 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
 
@@ -274,11 +292,17 @@ export const AccountInfo = () => {
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
-          <br />
 
           <div>
+            <button
+              onClick={() => handleViewDetails()}
+              className="btn btn-primary btn-sm"
+            >
+              View Account Details
+            </button>{" "}
             <button
               disabled={notification.pending || availableGroups.length === 0}
               onClick={() => handleRequestAccess()}

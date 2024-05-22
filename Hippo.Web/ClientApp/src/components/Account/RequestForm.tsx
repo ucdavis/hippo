@@ -105,9 +105,11 @@ export const RequestForm = () => {
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
           <GroupLookup
-            setSelection={(group) =>
-              setRequest((r) => ({ ...r, groupId: group.id }))
-            }
+            setSelection={(group) => {
+              if (group) {
+                setRequest((r) => ({ ...r, groupId: group.id }));
+              }
+            }}
             options={groups}
           />
           <p className="form-helper">

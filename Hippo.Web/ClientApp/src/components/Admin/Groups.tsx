@@ -56,7 +56,7 @@ export const Groups = () => {
 
   const [showDetails] = useConfirmationDialog(
     {
-      title: "View Group Details",
+      title: "Group Details",
       message: () => {
         const viewingIndex = groups.findIndex((g) => g.id === viewing);
         return <GroupDetails group={groups[viewingIndex]} />;
