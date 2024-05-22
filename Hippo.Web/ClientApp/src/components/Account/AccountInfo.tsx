@@ -22,7 +22,6 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import GroupDetails from "../Group/GroupDetails";
 import ObjectTree from "../../Shared/ObjectTree";
-import { filterCommonProperties } from "../../util/ObjectHelpers";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -214,8 +213,7 @@ export const AccountInfo = () => {
     {
       title: "Account Details",
       message: () => {
-        const obj = filterCommonProperties(account);
-        return <ObjectTree obj={obj} />;
+        return <ObjectTree obj={account} />;
       },
       buttons: ["OK"],
     },
