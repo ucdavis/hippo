@@ -1,19 +1,15 @@
 import React from "react";
 import { Button } from "reactstrap";
+import { OrderModel } from "../../types";
+import { useFormContext } from "react-hook-form";
 
-interface FormSubmitButtonProps {
-  isDirty: boolean;
-  isSubmitting: boolean;
-  isSubmitSuccessful: boolean;
-  submitError?: string;
-}
+interface FormSubmitButtonProps {}
 
-const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
-  isDirty,
-  isSubmitting,
-  isSubmitSuccessful,
-  submitError,
-}) => {
+const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({}) => {
+  const {
+    formState: { isDirty, isSubmitting, isSubmitSuccessful, errors },
+  } = useFormContext<OrderModel>();
+
   const shouldDisable = !isDirty || isSubmitting || isSubmitSuccessful;
 
   return (
@@ -31,7 +27,9 @@ const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
             ? "Submitted!"
             : "Submit"}
       </Button>
-      {submitError && <span className="text-danger">{submitError}</span>}
+      {errors.root && (
+        <span className="text-danger">{errors.root?.message}</span>
+      )}
     </>
   );
 };

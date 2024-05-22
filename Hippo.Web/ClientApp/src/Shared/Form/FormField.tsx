@@ -5,21 +5,25 @@ import { OrderModel } from "../../types";
 import { InputType } from "reactstrap/types/lib/Input";
 import InputGroupWrapper from "./InputGroupWrapper";
 
-type FormFieldProps<T = OrderModel> = RegisterOptions & {
-  // if you want to use this component for other models, add type to T
+export type FormFieldProps<T> = {
   type?: InputType;
   name: keyof T;
   label: string;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
-  register: UseFormRegister<T>;
-  errors: FieldErrors<T>;
   required?: boolean; // overwriting RegisterOptions required
   maxLength?: number;
   readOnly?: boolean;
 };
 
-const FormField: React.FC<FormFieldProps> = ({
+type FormFieldFullProps<T> = RegisterOptions &
+  FormFieldProps<T> & {
+    register: UseFormRegister<T>;
+    errors: FieldErrors<T>;
+  };
+
+// if you want to use this component for other models, add type next to OrderModel
+const FormField: React.FC<FormFieldFullProps<OrderModel>> = ({
   type = "text",
   name,
   label,
