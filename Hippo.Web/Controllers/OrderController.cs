@@ -132,6 +132,7 @@ namespace Hippo.Web.Controllers
                 Units = model.Units,
                 UnitPrice = model.UnitPrice,
                 Installments = model.Installments,
+                InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
                 Quantity = model.Quantity,
                 Billings = model.Billings,
                 

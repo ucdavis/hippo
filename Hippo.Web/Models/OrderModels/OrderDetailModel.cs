@@ -12,6 +12,7 @@ namespace Hippo.Web.Models.OrderModels
         public string Units { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public int Installments { get; set; }
+        public string InstallmentType { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
         public string ExternalReference { get; set; } = string.Empty;
@@ -43,6 +44,7 @@ namespace Hippo.Web.Models.OrderModels
                 Units = order.Units,
                 UnitPrice = order.UnitPrice,
                 Installments = order.Installments,
+                InstallmentType = order.InstallmentType,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,

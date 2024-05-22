@@ -279,6 +279,7 @@ export interface OrderModel {
   units: string;
   unitPrice: string;
   installments: number;
+  installmentType: string;
   quantity: number;
   adjustment: number;
   adjustmentReason: string;
