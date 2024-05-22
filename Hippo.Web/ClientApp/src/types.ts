@@ -274,6 +274,7 @@ export interface OrderModel {
   id: number;
   category: string;
   name: string;
+  productName: string;
   description: string;
   notes: string;
   units: string;

@@ -126,7 +126,8 @@ namespace Hippo.Web.Controllers
             var order = new Order
             {
                 Category = model.Category,
-                Name = model.Name,
+                Name = model.Name ?? model.ProductName,
+                ProductName = model.ProductName,
                 Description = model.Description,
                 ExternalReference = model.ExternalReference,
                 Units = model.Units,
