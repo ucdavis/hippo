@@ -237,6 +237,7 @@ export interface ProductModel {
   units: string;
   unitPrice: string;
   installments: number;
+  installmentType: string;
 }
 
 export interface OrderMetadataModel {

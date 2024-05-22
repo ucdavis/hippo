@@ -18,6 +18,7 @@ const defaultProduct: ProductModel = {
   unitPrice: "0.00",
   units: "",
   installments: 60,
+  installmentType: "Monthly",
 };
 
 export const Products = () => {
@@ -328,6 +329,10 @@ export const Products = () => {
       {
         Header: "Installments",
         accessor: "installments",
+      },
+      {
+        Header: "Type",
+        accessor: "installmentType",
       },
       {
         Header: "Actions",
