@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { OrderModel } from "../../types";
 import FormField from "../../Shared/Form/FormField";
-import { Form, Input } from "reactstrap";
+import { Button, Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 
@@ -148,7 +148,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
         readOnly={true}
         prepend={<FontAwesomeIcon icon={faDollarSign} />}
       />
-      {!readOnly && <Input type="submit" value="Save" />}
+      {!readOnly && (
+        <Button type="submit" block={true} outline={true}>
+          Submit
+        </Button>
+      )}
     </Form>
   );
 };
