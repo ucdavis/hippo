@@ -23,7 +23,7 @@ namespace Hippo.Core.Domain
         public int Installments { get; set; }
         [Required]
         [MaxLength(10)]
-        public string InstallmentType { get; set; } = "Monthly"; //Monthly, Yearly
+        public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly
 
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
