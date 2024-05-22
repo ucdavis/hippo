@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using Hippo.Core.Data;
+using Hippo.Core.Extensions;
+using Hippo.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain;
@@ -10,14 +13,14 @@ public class QueuedEvent
     public string Action { get; set; } = "";
     [MaxLength(50)]
     public string Status { get; set; } = "";
-    public string Data { get; set; } = "";
+    public QueuedEventDataModel Data { get; set; }
     public string ErrorMessage { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public int? RequestId { get; set; }
     public Request Request { get; set; }
 
-    internal static void OnModelCreating(ModelBuilder modelBuilder)
+    internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
     {
         modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.Action);
         modelBuilder.Entity<QueuedEvent>().HasIndex(qe => qe.Status);
@@ -27,6 +30,7 @@ public class QueuedEvent
             .WithMany(r => r.QueuedEvents)
             .HasForeignKey(qe => qe.RequestId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<QueuedEvent>().Property(g => g.Data).HasJsonConversion(dbContext);
     }
 
     public static class Actions
@@ -35,8 +39,8 @@ public class QueuedEvent
         public const string UpdateSshKey = "UpdateSshKey";
         public const string AddAccountToGroup = "AddAccountToGroup";
 
-        public const string RegexPattern = CreateAccount 
-            + "|" + UpdateSshKey 
+        public const string RegexPattern = CreateAccount
+            + "|" + UpdateSshKey
             + "|" + AddAccountToGroup;
     }
 
@@ -47,17 +51,17 @@ public class QueuedEvent
         public const string Failed = "Failed";
         public const string Canceled = "Canceled";
 
-        public const string RegexPattern = Pending 
-            + "|" + Complete 
-            + "|" + Failed 
+        public const string RegexPattern = Pending
+            + "|" + Complete
+            + "|" + Failed
             + "|" + Canceled;
 
-        public static List<string> AllStatuses = new() 
-        { 
-            Pending, 
-            Complete, 
-            Failed, 
-            Canceled 
+        public static List<string> AllStatuses = new()
+        {
+            Pending,
+            Complete,
+            Failed,
+            Canceled
         };
     }
 }

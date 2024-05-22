@@ -53,13 +53,7 @@
 
         Hippo.user.detail = @Html.Raw(await UserService.GetCurrentUserJsonAsync());
         Hippo.user.permissions = @Html.Raw(await UserService.GetCurrentPermissionsJsonAsync());
-        Hippo.accounts = (@Html.Raw(await UserService.GetCurrentAccountsJsonAsync())).map(a => ({
-          ...a,
-          @* ensure data property of each group is deserialized *@
-          data: a.data ? JSON.parse(a.data) : a.data,
-          memberOfGroups: a.memberOfGroups.map(mg => ({ ...mg, data: mg.data ? JSON.parse(mg.data) : mg.data})),
-          adminOfGroups: a.adminOfGroups.map(ag => ({ ...ag, data: ag.data ? JSON.parse(ag.data) : ag.data})),
-        }));
+        Hippo.accounts = (@Html.Raw(await UserService.GetCurrentAccountsJsonAsync()));
         Hippo.openRequests = @Html.Raw(await UserService.GetCurrentOpenRequestsAsync());
         Hippo.clusters = @Html.Raw(await UserService.GetAvailableClustersJsonAsync());
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";

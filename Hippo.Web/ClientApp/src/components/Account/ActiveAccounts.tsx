@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { AccountModel, RawAccountModel } from "../../types";
-import { authenticatedFetch, parseRawAccountModel } from "../../util/api";
+import { AccountModel } from "../../types";
+import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
@@ -148,11 +148,7 @@ export const ActiveAccounts = () => {
       );
 
       if (response.ok) {
-        setAccounts(
-          ((await response.json()) as RawAccountModel[]).map(
-            parseRawAccountModel,
-          ),
-        );
+        setAccounts((await response.json()) as AccountModel[]);
       }
     };
 

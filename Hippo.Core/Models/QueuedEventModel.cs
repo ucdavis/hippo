@@ -28,7 +28,7 @@ public class QueuedEventModel
             Id = queuedEvent.Id,
             Action = queuedEvent.Action,
             Status = queuedEvent.Status,
-            Data = JsonSerializer.Deserialize<QueuedEventDataModel>(queuedEvent.Data, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
+            Data = queuedEvent.Data,
             CreatedAt = queuedEvent.CreatedAt,
             UpdatedAt = queuedEvent.UpdatedAt
         };
