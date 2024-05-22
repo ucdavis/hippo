@@ -160,6 +160,26 @@ export const Products = () => {
               }}
             />
           </div>
+          <div className="form-group">
+            <label htmlFor="fieldInstallmentType">Installment Type</label>
+            <select
+              className="form-control"
+              id="fieldInstallmentType"
+              required
+              value={editProductModel.installmentType}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  installmentType: e.target.value,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
         </>
       ),
       canConfirm:

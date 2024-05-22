@@ -31,11 +31,11 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
-        public class Types
+        public class InstallmentTypes
         {
             public const string Monthly = "Monthly";
             public const string Yearly = "Yearly";
-            public static List<string> InstallmentTypes = new List<string> { Monthly, Yearly };
+            public static List<string> Types = new List<string> { Monthly, Yearly };
         }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
