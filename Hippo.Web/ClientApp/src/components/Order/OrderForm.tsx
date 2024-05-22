@@ -24,7 +24,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   } = useForm<OrderModel>({ defaultValues: orderProp });
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmit)} className="mb-3">
       <FormField
         register={register}
         errors={errors}
