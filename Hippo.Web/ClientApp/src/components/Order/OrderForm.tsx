@@ -21,12 +21,30 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    setError,
+    formState: { errors, isDirty, isSubmitting, isSubmitSuccessful },
   } = useForm<OrderModel>({ defaultValues: orderProp });
+
+  const submitForm = async (data: OrderModel) => {
+    if (!isDirty || isSubmitting) {
+      // if they've made no changes or we're already submitting, don't submit again
+      // the button disables itself in this case, but just to be sure
+      return;
+    }
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      // displayed inside FormSubmitButton
+      setError("root", {
+        type: "custom",
+        message: "An error occurred submitting your order, please try again.",
+      });
+    }
+  };
 
   // TODO: rest of input validation?
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} className="mb-3">
+    <Form onSubmit={handleSubmit(submitForm)} className="mb-3">
       <FormField
         register={register}
         errors={errors}
@@ -155,8 +173,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
       />
       {!readOnly && (
         <FormSubmitButton
+          isDirty={isDirty} // disables submit button if no changes
           isSubmitting={isSubmitting}
           isSubmitSuccessful={isSubmitSuccessful}
+          submitError={errors.root?.message}
         />
       )}
     </Form>
