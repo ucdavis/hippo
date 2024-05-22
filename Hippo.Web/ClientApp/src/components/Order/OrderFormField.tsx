@@ -5,13 +5,15 @@ import { useFormContext } from "react-hook-form";
 
 type OrderFormFieldProps = FormFieldProps<OrderModel>;
 
-const OrderFormField: React.FC<OrderFormFieldProps> = ({ ...deferred }) => {
+const OrderFormField: React.FC<OrderFormFieldProps> = ({ ...props }) => {
   const {
     register,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
-  return <FormField register={register} errors={errors} {...deferred} />;
+  return (
+    <FormField register={register} error={errors[props.name]} {...props} />
+  );
 };
 
 export default OrderFormField;

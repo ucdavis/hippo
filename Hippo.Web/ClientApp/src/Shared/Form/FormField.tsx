@@ -1,13 +1,12 @@
 import React from "react";
-import { FieldErrors, RegisterOptions, UseFormRegister } from "react-hook-form";
+import { RegisterOptions, UseFormRegister, FieldPath } from "react-hook-form";
 import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
-import { OrderModel } from "../../types";
 import { InputType } from "reactstrap/types/lib/Input";
 import InputGroupWrapper from "./InputGroupWrapper";
 
 export type FormFieldProps<T> = {
   type?: InputType;
-  name: keyof T;
+  name: FieldPath<T>;
   label: string;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
@@ -19,23 +18,22 @@ export type FormFieldProps<T> = {
 type FormFieldFullProps<T> = RegisterOptions &
   FormFieldProps<T> & {
     register: UseFormRegister<T>;
-    errors: FieldErrors<T>;
+    error: string;
   };
 
-// if you want to use this component for other models, add type next to OrderModel
-const FormField: React.FC<FormFieldFullProps<OrderModel>> = ({
+const FormField = <T extends Record<string, any>>({
   type = "text",
   name,
   label,
   prepend,
   append,
   register,
-  errors,
+  error,
   required = false,
   maxLength,
   readOnly = false,
   ...options
-}) => {
+}: FormFieldFullProps<T>) => {
   const { ref, ...rest } = register(name, {
     required: {
       value: required,
@@ -56,12 +54,12 @@ const FormField: React.FC<FormFieldFullProps<OrderModel>> = ({
           innerRef={ref}
           id={`field-${name}`}
           type={type}
-          invalid={!!errors[name]}
+          invalid={!!error}
           readOnly={readOnly}
           {...rest}
         />
       </InputGroupWrapper>
-      {errors[name] && <FormFeedback>{errors[name].message}</FormFeedback>}
+      {!!error && <FormFeedback>{error}</FormFeedback>}
     </FormGroup>
   );
 };
