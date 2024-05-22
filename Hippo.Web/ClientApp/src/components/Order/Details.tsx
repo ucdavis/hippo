@@ -117,9 +117,10 @@ export const Details = () => {
     [],
   );
 
-  const handleChanges = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setOrder((prevOrder) => ({ ...prevOrder, [name]: value }));
+  const submitOrder = (order: OrderModel) => {
+    // select out the fields we allow a user to update
+    const { name, description, status } = order;
+    setOrder((prevOrder) => ({ name, description, status, ...prevOrder }));
   };
 
   if (!order) {
@@ -131,11 +132,7 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
-          <OrderForm
-            orderProp={order}
-            readonly={true}
-            handleChanges={handleChanges}
-          />
+          <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
 
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
