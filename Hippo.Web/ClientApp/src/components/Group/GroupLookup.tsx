@@ -4,7 +4,7 @@ import { GroupModel } from "../../types";
 import { GroupInfo } from "./GroupInfo";
 
 interface Props {
-  setSelection: (selection: GroupModel) => void;
+  setSelection: (selection?: GroupModel) => void;
   options: GroupModel[];
 }
 

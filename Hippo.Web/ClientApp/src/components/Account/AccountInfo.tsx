@@ -20,6 +20,8 @@ import {
 } from "../../util/api";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
+import GroupDetails from "../Group/GroupDetails";
+import ObjectTree from "../../Shared/ObjectTree";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -29,13 +31,17 @@ export const AccountInfo = () => {
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const navigate = useNavigate();
 
-  const currentGroups = useMemo(() => account?.memberOfGroups ?? [], [account]);
+  const memberOfGroups = useMemo(
+    () => account?.memberOfGroups ?? [],
+    [account],
+  );
+  const adminOfGroups = useMemo(() => account?.adminOfGroups ?? [], [account]);
   const currentOpenRequests = useMemo(
     () => context.openRequests.filter((r) => r.cluster === clusterName),
     [context.openRequests, clusterName],
   );
 
-  const [groups, setGroups] = useState<GroupModel[]>([]);
+  const [availableGroups, setAvailableGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
     const fetchGroups = async () => {
       const response = await authenticatedFetch(
@@ -43,11 +49,12 @@ export const AccountInfo = () => {
       );
 
       if (response.ok) {
-        setGroups(
+        setAvailableGroups(
           ((await response.json()) as RawGroupModel[])
             .filter(
               (g) =>
-                !currentGroups.some((cg) => cg.id === g.id) &&
+                !memberOfGroups.some((cg) => cg.id === g.id) &&
+                !adminOfGroups.some((cg) => cg.id === g.id) &&
                 !currentOpenRequests.some((r) => r.groupModel.id === g.id),
             )
             .map(parseRawGroupModel),
@@ -58,7 +65,7 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [clusterName, currentOpenRequests, currentGroups]);
+  }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
 
   const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -72,7 +79,7 @@ export const AccountInfo = () => {
                   setSelection={(selection) =>
                     setReturn((model) => ({ ...model, groupId: selection?.id }))
                   }
-                  options={groups}
+                  options={availableGroups}
                 />
               </div>
               <div className="form-group">
@@ -102,7 +109,7 @@ export const AccountInfo = () => {
       },
       canConfirm: (returnValue) => returnValue !== undefined,
     },
-    [groups],
+    [availableGroups],
   );
 
   const [getSshKeyConfirmation] = useConfirmationDialog<string>(
@@ -167,7 +174,9 @@ export const AccountInfo = () => {
             parseRawRequestModel(rawRequestModel),
           ],
         }));
-        setGroups((g) => g.filter((g) => g.id !== addToGroupModel.groupId));
+        setAvailableGroups((g) =>
+          g.filter((g) => g.id !== addToGroupModel.groupId),
+        );
       }
     }
   }, [clusterName, getGroupConfirmation, setNotification, setContext]);
@@ -200,6 +209,21 @@ export const AccountInfo = () => {
     }
   }, [account?.id, clusterName, getSshKeyConfirmation, setNotification]);
 
+  const [showDetails] = useConfirmationDialog(
+    {
+      title: "Account Details",
+      message: () => {
+        return <ObjectTree obj={account} />;
+      },
+      buttons: ["OK"],
+    },
+    [account],
+  );
+
+  const handleViewDetails = async () => {
+    await showDetails();
+  };
+
   useEffect(() => {
     if (!account) {
       const request = currentOpenRequests.find(
@@ -212,29 +236,62 @@ export const AccountInfo = () => {
     }
   }, [account, clusterName, currentOpenRequests, navigate]);
 
+  const [showingGroup, setShowingGroup] = useState<GroupModel>();
+
+  const [showGroupDetails] = useConfirmationDialog(
+    {
+      title: "Group Details",
+      message: () => {
+        return <GroupDetails group={showingGroup} />;
+      },
+      buttons: ["OK"],
+    },
+    [showingGroup],
+  );
+
+  const handleShowGroup = (group: GroupModel) => {
+    setShowingGroup(group);
+    showGroupDetails();
+  };
+
   return (
     <>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          {currentGroups.length ? (
-            <p>
-              Welcome {context.user.detail.firstName}. Your account is
-              registered with the following group(s):
-            </p>
-          ) : (
-            <p>
-              Welcome {context.user.detail.firstName}. Your account is not
-              associated with any groups.
-            </p>
+          <p>Welcome {context.user.detail.firstName}</p>
+          {!!memberOfGroups.length && (
+            <>
+              <p>Your account is registered with the following group(s):</p>
+              <CardColumns>
+                {memberOfGroups.map((g, i) => (
+                  <div className="group-card-admin" key={i}>
+                    <GroupInfo
+                      group={g}
+                      showDetails={() => handleShowGroup(g)}
+                    />
+                  </div>
+                ))}
+              </CardColumns>
+              <br />
+            </>
           )}
 
-          <CardColumns>
-            {currentGroups.map((g, i) => (
-              <div className="group-card-admin" key={i}>
-                <GroupInfo group={g} />
-              </div>
-            ))}
-          </CardColumns>
+          {!!adminOfGroups.length && (
+            <>
+              <p>You are an admin for the following group(s):</p>
+              <CardColumns>
+                {adminOfGroups.map((g, i) => (
+                  <div className="group-card-admin" key={i}>
+                    <GroupInfo
+                      group={g}
+                      showDetails={() => handleShowGroup(g)}
+                    />
+                  </div>
+                ))}
+              </CardColumns>
+              <br />
+            </>
+          )}
 
           {Boolean(currentOpenRequests.length) && (
             <>
@@ -243,17 +300,26 @@ export const AccountInfo = () => {
               <CardColumns>
                 {currentOpenRequests.map((r, i) => (
                   <div className="group-card-admin" key={i}>
-                    <GroupInfo group={r.groupModel} />
+                    <GroupInfo
+                      group={r.groupModel}
+                      showDetails={() => handleShowGroup(r.groupModel)}
+                    />
                   </div>
                 ))}
               </CardColumns>
+              <br />
             </>
           )}
-          <br />
 
           <div>
             <button
-              disabled={notification.pending || groups.length === 0}
+              onClick={() => handleViewDetails()}
+              className="btn btn-primary btn-sm"
+            >
+              View Account Details
+            </button>{" "}
+            <button
+              disabled={notification.pending || availableGroups.length === 0}
               onClick={() => handleRequestAccess()}
               className="btn btn-primary btn-sm"
             >
@@ -261,7 +327,7 @@ export const AccountInfo = () => {
             </button>{" "}
             {cluster.accessTypes.includes("SshKey") && (
               <button
-                disabled={notification.pending || groups.length === 0}
+                disabled={notification.pending || availableGroups.length === 0}
                 onClick={() => handleUpdateSshKey()}
                 className="btn btn-primary btn-sm"
               >

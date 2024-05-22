@@ -13,6 +13,7 @@ import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import ObjectTree from "../../Shared/ObjectTree";
+import GroupDetails from "../Group/GroupDetails";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -59,37 +60,10 @@ export const Groups = () => {
 
   const [showDetails] = useConfirmationDialog(
     {
-      title: "View Group Details",
+      title: "Group Details",
       message: () => {
         const viewingIndex = groups.findIndex((g) => g.id === viewing);
-        return (
-          <div className="row justify-content-center">
-            <div className="col-md-8">
-              <div className="form-group">
-                <label className="form-label">Name</label>
-                <input
-                  className="form-control"
-                  id="viewDetailsName"
-                  value={groups[viewingIndex].name}
-                  readOnly
-                ></input>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Display Name</label>
-                <input
-                  className="form-control"
-                  id="viewDetailsDisplayName"
-                  value={groups[viewingIndex].displayName}
-                  readOnly
-                ></input>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Details</label>
-                <ObjectTree obj={groups[viewingIndex].data} />
-              </div>
-            </div>
-          </div>
-        );
+        return <GroupDetails group={groups[viewingIndex]} />;
       },
       buttons: ["OK"],
     },
