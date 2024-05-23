@@ -1,7 +1,8 @@
 import React from "react";
 import { OrderModel } from "../../types";
-import FormField, { FormFieldProps } from "../../Shared/Form/FormField";
+import FormField from "../../Shared/Form/FormField";
 import { useFormContext } from "react-hook-form";
+import { FormFieldProps } from "../../Shared/Form/formTypes";
 
 type OrderFormFieldProps = FormFieldProps<OrderModel>;
 
