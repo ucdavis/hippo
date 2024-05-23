@@ -119,7 +119,19 @@ export const Details = () => {
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
-    const editableFields: Partial<OrderModel> = {
+    const editedOrder: OrderModel = {
+      // uneditable fields
+      id: updatedOrder.id,
+      status: updatedOrder.status,
+      createdOn: updatedOrder.createdOn,
+      total: updatedOrder.total,
+      subTotal: updatedOrder.subTotal,
+      balanceRemaining: updatedOrder.balanceRemaining,
+      billings: updatedOrder.billings,
+      payments: updatedOrder.payments,
+      history: updatedOrder.history,
+
+      // editable fields
       name: updatedOrder.name,
       productName: updatedOrder.productName,
       description: updatedOrder.description,
@@ -134,15 +146,13 @@ export const Details = () => {
       adjustment: updatedOrder.adjustment,
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
+      metaData: updatedOrder.metaData,
     };
 
     // TODO: await API call
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setOrder((prevOrder) => ({
-      ...prevOrder,
-      ...editableFields,
-    }));
+    setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
   if (!order) {
