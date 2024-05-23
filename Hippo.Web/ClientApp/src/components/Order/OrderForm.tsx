@@ -1,12 +1,11 @@
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { OrderModel } from "../../types";
-import FormField from "../../Shared/Form/FormField";
 import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import FormSubmitButton from "../../Shared/Form/FormSubmitButton";
-import OrderFormMetadata from "./OrderFormMetadata";
+import OrderFormFieldArray from "./OrderFormFieldArray";
 import OrderFormField from "./OrderFormField";
 
 interface OrderFormProps {
@@ -94,7 +93,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="Unit Price"
           required={true}
           readOnly={readOnly}
-          prepend={<FontAwesomeIcon icon={faDollarSign} />}
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
           name="quantity"
@@ -111,7 +110,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="adjustment"
           label="Adjustment"
           readOnly={readOnly}
-          prepend={<FontAwesomeIcon icon={faDollarSign} />}
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
           name="adjustmentReason"
@@ -131,16 +130,16 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="SubTotal"
           required={true}
           readOnly={true}
-          prepend={<FontAwesomeIcon icon={faDollarSign} />}
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
           name="total"
           label="Total"
           required={true}
           readOnly={true}
-          prepend={<FontAwesomeIcon icon={faDollarSign} />}
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
-        <OrderFormMetadata />
+        <OrderFormFieldArray name="metaData" />
         {!readOnly && <FormSubmitButton />}
       </Form>
     </FormProvider>

@@ -1,7 +1,7 @@
 import React from "react";
 import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
 import InputGroupWrapper from "./InputGroupWrapper";
-import { FormFieldFullProps } from "./formTypes";
+import { FormFieldProps } from "./formTypes";
 
 const FormField = <T extends Record<string, any>>({
   register,
@@ -9,13 +9,13 @@ const FormField = <T extends Record<string, any>>({
   type = "text",
   name,
   label,
-  prepend,
-  append,
+  inputPrepend,
+  inputAppend,
   required = false,
   maxLength,
   readOnly = false,
   ...options
-}: FormFieldFullProps<T>) => {
+}: FormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
     required: {
       value: required,
@@ -31,7 +31,7 @@ const FormField = <T extends Record<string, any>>({
   return (
     <FormGroup>
       <Label for={`field-${name}`}>{label}</Label>
-      <InputGroupWrapper prepend={prepend} append={append}>
+      <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
         <Input
           innerRef={ref}
           id={`field-${name}`}

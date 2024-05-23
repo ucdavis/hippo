@@ -1,30 +1,28 @@
-import React from "react";
-import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
-import InputGroupWrapper from "./InputGroupWrapper";
-import { FormFieldFullProps, FormFieldHookProps } from "./formTypes";
-import { Control, FieldArrayWithId } from "react-hook-form";
-
-type FormFieldArrayFullProps<T> = FormFieldFullProps<T> & {
-  control: Control<T>;
-  fields: FieldArrayWithId<T>[];
-};
+import { FormFieldArrayProps } from "./formTypes";
+import { useFieldArray } from "react-hook-form";
 
 const FormFieldArray = <T extends Record<string, any>>({
-  register,
-  error,
-  type = "text",
+  control,
   name,
-  label,
-  prepend,
-  append,
-  required = false,
-  maxLength,
-  readOnly = false,
-  ...options
-}: FormFieldArrayFullProps<T>) => {
+}: FormFieldArrayProps<T>) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name,
+  });
 
+  console.log(fields);
   return (
-
+    <>
+      {/* {fields.map((field, index) => (
+        <FormField
+          key={field.id}
+          register={register}
+          error={error}
+          name={`${fields}.${index}` as FieldPath<T>}
+          {...options}
+        />
+      ))} */}
+    </>
   );
 };
 
