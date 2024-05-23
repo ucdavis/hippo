@@ -139,7 +139,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
-        <OrderFormFieldArray arrayName="metaData" />
+        <OrderFormFieldArray />
         {!readOnly && <FormSubmitButton />}
       </Form>
     </FormProvider>

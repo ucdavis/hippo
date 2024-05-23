@@ -2,44 +2,50 @@ import React from "react";
 import { ArrayPath, useFieldArray, useFormContext } from "react-hook-form";
 import { OrderMetadataModel, OrderModel } from "../../types";
 
-import FormFieldArray from "../../Shared/Form/FormFieldArray";
 import FormField from "../../Shared/Form/FormField";
+import { Row, Col } from "reactstrap";
 
-type OrderFormFieldArrayProps = {
-  arrayName: any; //ArrayPath<OrderMetadataModel>;
-};
+type OrderFormFieldArrayProps = {};
 
-const OrderFormFieldArray: React.FC<OrderFormFieldArrayProps> = ({
-  arrayName,
-}) => {
+const OrderFormFieldArray: React.FC<OrderFormFieldArrayProps> = ({}) => {
   const {
     control,
     register,
     formState: { errors },
   } = useFormContext<OrderModel>();
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "metaData",
   });
 
-  const keys = Object.keys(fields);
-  console.log(keys);
-
   return (
     <>
       {fields.map((field, index) => {
         return (
-          <>
-            <FormField
-              key={field.id}
-              register={register}
-              label="Metadata Name"
-              error={errors.metaData?.[index]?.name}
-              name={`metaData.${index}.name` as const}
-              required={true}
-              // {...options}
-            />
-          </>
+          <Row key={field.id}>
+            <Col md={6}>
+              <FormField
+                key={`name-${field.id}`}
+                register={register}
+                label="Name"
+                required={true}
+                error={errors.metaData?.[index]?.name}
+                name={`metaData.${index}.name` as const}
+                // {...options}
+              />
+            </Col>
+            <Col md={6}>
+              <FormField
+                key={`value-${field.id}`}
+                register={register}
+                label="Value"
+                error={errors.metaData?.[index]?.value}
+                name={`metaData.${index}.value` as const}
+                // {...options}
+              />
+            </Col>
+          </Row>
         );
       })}
     </>
