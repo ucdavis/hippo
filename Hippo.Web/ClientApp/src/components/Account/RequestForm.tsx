@@ -81,14 +81,17 @@ export const RequestForm = () => {
 
   useEffect(() => {
     if (
-      context.openRequests.find(
+      context.openRequests.some(
         (r) => r.cluster === clusterName && r.action === "CreateAccount",
       )
     ) {
       // there's already a request for this cluster, redirect to pending page
       navigate(`/${clusterName}/accountstatus`);
+    } else if (context.accounts.some((a) => a.cluster === clusterName)) {
+      // user already has an account on this cluster, redirect to account info page
+      navigate(`/${clusterName}/myaccount`);
     }
-  }, [clusterName, context.openRequests, navigate]);
+  }, [clusterName, context.accounts, context.openRequests, navigate]);
 
   return (
     <div className="row justify-content-center">
