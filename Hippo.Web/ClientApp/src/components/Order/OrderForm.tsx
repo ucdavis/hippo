@@ -48,6 +48,15 @@ const OrderForm: React.FC<OrderFormProps> = ({
       <FormField
         register={register}
         errors={errors}
+        name="productName"
+        label="Product Name"
+        required={true}
+        readOnly={readOnly}
+        maxLength={50}
+      />
+      <FormField
+        register={register}
+        errors={errors}
         name="description"
         label="Description"
         type="textarea"
