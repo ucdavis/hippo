@@ -127,11 +127,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
         readOnly={readOnly}
         disabled={readOnly}
         type="select"
-        selectOptions={[
-          { label: "Monthly", value: "Monthly" },
-          { label: "Yearly", value: "Yearly" },
-        ]}
-      />
+      >
+        <option value="Monthly">Monthly</option>
+        <option value="Weekly">Weekly</option>
+      </FormField>
       <FormField
         register={register}
         errors={errors}
