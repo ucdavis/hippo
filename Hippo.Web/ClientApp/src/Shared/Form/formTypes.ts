@@ -1,16 +1,14 @@
 import {
   ArrayPath,
   Control,
+  FieldErrors,
   FieldPath,
   RegisterOptions,
   UseFormRegister,
 } from "react-hook-form";
 import { InputType } from "reactstrap/types/lib/Input";
 
-/**
- * Props that control the look of the input itself
- */
-export type ReactstrapFieldProps = {
+export type FormFieldInputProps = {
   type?: InputType;
   label: string;
   inputPrepend?: React.ReactNode;
@@ -21,13 +19,15 @@ export type ReactstrapFieldProps = {
 };
 
 export type FormFieldProps<T> = RegisterOptions &
-  ReactstrapFieldProps & {
+  FormFieldInputProps & {
     register: UseFormRegister<T>;
     error: string;
     name: FieldPath<T>;
   };
 
 export type FormFieldArrayProps<T> = {
-  name: ArrayPath<T>;
+  arrayName: ArrayPath<T>;
+  errors: FieldErrors<T>;
+  register: UseFormRegister<T>;
   control: Control<T>;
 };

@@ -1,27 +1,43 @@
+import { OrderMetadataModel, OrderModel } from "../../types";
+import FormField from "./FormField";
 import { FormFieldArrayProps } from "./formTypes";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 const FormFieldArray = <T extends Record<string, any>>({
   control,
-  name,
-}: FormFieldArrayProps<T>) => {
+  register,
+  errors,
+  arrayName = "metaData",
+}: FormFieldArrayProps<OrderModel>) => {
+  const arrayName2 = "metaData";
+  // const { control, register } = useFormContext<OrderModel>();
   const { fields, append, remove } = useFieldArray({
     control,
-    name,
+    name: "metaData",
   });
 
-  console.log(fields);
+  const keys = Object.keys(fields);
+  console.log(keys);
+
+  console.log(arrayName);
   return (
     <>
-      {/* {fields.map((field, index) => (
-        <FormField
-          key={field.id}
-          register={register}
-          error={error}
-          name={`${fields}.${index}` as FieldPath<T>}
-          {...options}
-        />
-      ))} */}
+      {fields.map((field, index) => {
+        console.log("field", field);
+        console.log(`[arrayName][${index}]`, [arrayName]);
+        return (
+          <>
+            <FormField
+              key={field.id}
+              register={register}
+              label="Name"
+              error={`i will figure this out later`}
+              name={`${arrayName2}.${index}.name` as const}
+              // {...options}
+            />
+          </>
+        );
+      })}
     </>
   );
 };

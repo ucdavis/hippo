@@ -1,19 +1,30 @@
 import React from "react";
 import { ArrayPath, useFormContext } from "react-hook-form";
-import { OrderModel } from "../../types";
+import { OrderMetadataModel, OrderModel } from "../../types";
 
 import FormFieldArray from "../../Shared/Form/FormFieldArray";
 
 type OrderFormFieldArrayProps = {
-  name: ArrayPath<OrderModel>;
+  arrayName: any; //ArrayPath<OrderMetadataModel>;
 };
 
-const OrderFormFieldArray: React.FC<OrderFormFieldArrayProps> = ({ name }) => {
-  const { control } = useFormContext<OrderModel>();
+const OrderFormFieldArray: React.FC<OrderFormFieldArrayProps> = ({
+  arrayName,
+}) => {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<OrderModel>();
 
   return (
     <>
-      <FormFieldArray control={control} name={name} />
+      <FormFieldArray
+        register={register}
+        control={control}
+        errors={errors}
+        arrayName={arrayName}
+      />
     </>
   );
 };
