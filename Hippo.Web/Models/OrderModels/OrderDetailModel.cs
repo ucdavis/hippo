@@ -8,10 +8,12 @@ namespace Hippo.Web.Models.OrderModels
         public int Id { get; set; }
         public string Category { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Units { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public int Installments { get; set; }
+        public string InstallmentType { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
         public string ExternalReference { get; set; } = string.Empty;
@@ -39,10 +41,12 @@ namespace Hippo.Web.Models.OrderModels
                 Id = order.Id,
                 Category = order.Category,
                 Name = order.Name,
+                ProductName = order.ProductName,
                 Description = order.Description,
                 Units = order.Units,
                 UnitPrice = order.UnitPrice,
                 Installments = order.Installments,
+                InstallmentType = order.InstallmentType,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,

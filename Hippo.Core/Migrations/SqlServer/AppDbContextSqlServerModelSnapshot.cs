@@ -397,6 +397,11 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("InstallmentType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<int>("Installments")
                         .HasColumnType("int");
 
@@ -410,6 +415,11 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<int>("PrincipalInvestigatorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
@@ -555,6 +565,11 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<string>("Description")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("InstallmentType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("Installments")
                         .HasColumnType("int");

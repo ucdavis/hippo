@@ -237,6 +237,7 @@ export interface ProductModel {
   units: string;
   unitPrice: string;
   installments: number;
+  installmentType: string;
 }
 
 export interface OrderMetadataModel {
@@ -273,11 +274,13 @@ export interface OrderModel {
   id: number;
   category: string;
   name: string;
+  productName: string;
   description: string;
   notes: string;
   units: string;
   unitPrice: string;
   installments: number;
+  installmentType: string;
   quantity: number;
   adjustment: number;
   adjustmentReason: string;

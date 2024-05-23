@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static Hippo.Core.Domain.Product;
 
 namespace Hippo.Core.Domain
 {
@@ -19,6 +20,9 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(50)]
         public string Name { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string ProductName { get; set; }
         [MaxLength(250)]
         public string Description { get; set; }
         [MaxLength(150)]
@@ -33,6 +37,11 @@ namespace Hippo.Core.Domain
         [Required]
         [Range(1, int.MaxValue)]
         public int Installments { get; set; }
+
+        [Required]
+        [MaxLength(10)]
+        public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly
+
 
 
         public decimal Adjustment { get; set; }
