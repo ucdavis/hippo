@@ -122,6 +122,19 @@ const OrderForm: React.FC<OrderFormProps> = ({
       <FormField
         register={register}
         errors={errors}
+        name="installmentType"
+        label="Installment Type"
+        readOnly={readOnly}
+        disabled={readOnly}
+        type="select"
+        selectOptions={[
+          { label: "Monthly", value: "Monthly" },
+          { label: "Yearly", value: "Yearly" },
+        ]}
+      />
+      <FormField
+        register={register}
+        errors={errors}
         name="adjustment"
         label="Adjustment"
         readOnly={readOnly}

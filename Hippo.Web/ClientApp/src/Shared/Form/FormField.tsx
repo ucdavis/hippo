@@ -17,6 +17,7 @@ type FormFieldProps<T = OrderModel> = RegisterOptions & {
   required?: boolean; // overwriting RegisterOptions required
   maxLength?: number;
   readOnly?: boolean;
+  selectOptions?: { label: string; value: string }[];
 };
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -30,6 +31,7 @@ const FormField: React.FC<FormFieldProps> = ({
   required = false,
   maxLength,
   readOnly = false,
+  selectOptions,
   ...options
 }) => {
   const { ref, ...rest } = register(name, {
@@ -54,6 +56,11 @@ const FormField: React.FC<FormFieldProps> = ({
           type={type}
           invalid={!!errors[name]}
           readOnly={readOnly}
+          children={selectOptions?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
           {...rest}
         />
       </InputGroupWrapper>

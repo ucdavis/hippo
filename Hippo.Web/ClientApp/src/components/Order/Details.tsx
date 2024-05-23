@@ -130,6 +130,7 @@ export const Details = () => {
       unitPrice: updatedOrder.unitPrice,
       quantity: updatedOrder.quantity,
       installments: updatedOrder.installments,
+      installmentType: updatedOrder.installmentType,
       adjustment: updatedOrder.adjustment,
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
@@ -153,6 +154,7 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
+
           <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
 
           <h2>Chart Strings</h2>
