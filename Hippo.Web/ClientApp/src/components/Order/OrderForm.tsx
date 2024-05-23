@@ -140,7 +140,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormFieldArray />
-        {!readOnly && <FormSubmitButton />}
+        {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
       </Form>
     </FormProvider>
   );

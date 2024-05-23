@@ -1,3 +1,4 @@
+import { InputProps } from "react-bootstrap-typeahead/types/types";
 import {
   ArrayPath,
   Control,
@@ -19,7 +20,8 @@ export type FormFieldInputProps = {
   readOnly?: boolean;
 };
 
-export type FormFieldProps<T> = RegisterOptions &
+export type FormFieldProps<T> = InputProps &
+  RegisterOptions &
   FormFieldInputProps & {
     register: UseFormRegister<T>;
     error: FieldError;
