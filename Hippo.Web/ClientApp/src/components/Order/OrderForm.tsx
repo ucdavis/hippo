@@ -5,7 +5,7 @@ import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import FormSubmitButton from "../../Shared/Form/FormSubmitButton";
-import OrderFormFieldArray from "./OrderFormFieldArray";
+import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 
 interface OrderFormProps {
@@ -139,7 +139,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
-        <OrderFormFieldArray />
+        <MetaDataFields />
         {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
       </Form>
     </FormProvider>

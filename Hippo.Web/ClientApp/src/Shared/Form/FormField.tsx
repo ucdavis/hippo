@@ -14,6 +14,7 @@ const FormField = <T extends Record<string, any>>({
   required = false,
   maxLength,
   readOnly = false,
+  autoComplete,
   ...options
 }: FormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
@@ -35,9 +36,11 @@ const FormField = <T extends Record<string, any>>({
         <Input
           innerRef={ref}
           id={`field-${name}`}
+          name={autoComplete ? name : `field-${name}`} // less likely to autofill
           type={type}
           invalid={!!error}
           readOnly={readOnly}
+          autoComplete={autoComplete ?? "new-password"}
           {...rest}
         />
       </InputGroupWrapper>

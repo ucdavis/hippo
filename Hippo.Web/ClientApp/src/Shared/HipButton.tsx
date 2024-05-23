@@ -5,18 +5,13 @@ interface HipButtonProps extends ButtonProps {}
 
 const HipButton: React.FC<HipButtonProps> = ({
   disabled = false,
+  type = "button",
   color = "primary",
-  outline = false,
   children,
   ...props
 }) => {
   return (
-    <Button
-      outline={!disabled} // for styling
-      disabled={disabled}
-      color={color}
-      {...props}
-    >
+    <Button disabled={disabled} color={color} {...props}>
       {children}
     </Button>
   );
