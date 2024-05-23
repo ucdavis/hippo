@@ -1,37 +1,22 @@
 import React from "react";
-import { FieldErrors, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
-import { OrderModel } from "../../types";
-import { InputType } from "reactstrap/types/lib/Input";
 import InputGroupWrapper from "./InputGroupWrapper";
+import { FormFieldProps } from "./formTypes";
 
-type FormFieldProps<T = OrderModel> = RegisterOptions & {
-  // if you want to use this component for other models, add type to T
-  type?: InputType;
-  name: keyof T;
-  label: string;
-  prepend?: React.ReactNode;
-  append?: React.ReactNode;
-  register: UseFormRegister<T>;
-  errors: FieldErrors<T>;
-  required?: boolean; // overwriting RegisterOptions required
-  maxLength?: number;
-  readOnly?: boolean;
-};
-
-const FormField: React.FC<FormFieldProps> = ({
+const FormField = <T extends Record<string, any>>({
+  register,
+  error,
   type = "text",
   name,
   label,
-  prepend,
-  append,
-  register,
-  errors,
+  inputPrepend,
+  inputAppend,
   required = false,
   maxLength,
   readOnly = false,
+  autoComplete,
   ...options
-}) => {
+}: FormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
     required: {
       value: required,
@@ -47,17 +32,19 @@ const FormField: React.FC<FormFieldProps> = ({
   return (
     <FormGroup>
       <Label for={`field-${name}`}>{label}</Label>
-      <InputGroupWrapper prepend={prepend} append={append}>
+      <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
         <Input
           innerRef={ref}
           id={`field-${name}`}
+          name={autoComplete ? name : `field-${name}`} // less likely to autofill
           type={type}
-          invalid={!!errors[name]}
+          invalid={!!error}
           readOnly={readOnly}
+          autoComplete={autoComplete ?? "new-password"}
           {...rest}
         />
       </InputGroupWrapper>
-      {errors[name] && <FormFeedback>{errors[name].message}</FormFeedback>}
+      {!!error && <FormFeedback>{error.message}</FormFeedback>}
     </FormGroup>
   );
 };
