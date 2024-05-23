@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -359,7 +359,12 @@ export const Products = () => {
         sortable: false,
         Cell: ({ row }) => (
           <div>
-            <button className="btn btn-primary">Order</button>{" "}
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/create/${row.original.id}`}
+            >
+              Order It
+            </Link>{" "}
             <ShowFor roles={["ClusterAdmin"]}>
               <button
                 onClick={() => handleEdit(row.original.id)}

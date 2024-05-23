@@ -23,6 +23,7 @@ import { FinancialDetail } from "./components/Financial/FinancialDetail";
 import { Products } from "./components/Product/Products";
 import { Orders } from "./components/Order/Orders";
 import { Details } from "./components/Order/Details";
+import CreateOrder from "./components/Order/CreateOrder";
 
 declare var Hippo: AppContextShape;
 
@@ -109,6 +110,10 @@ const App = () => {
             <Route
               path="/:cluster/order/details/:orderId"
               element={<Details />}
+            />
+            <Route
+              path="/:cluster/order/create/:productId?"
+              element={<CreateOrder />}
             />
           </Routes>
         </div>
