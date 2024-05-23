@@ -31,7 +31,7 @@ namespace Hippo.Core.Services
         private readonly IUserService _userService;
         private readonly IMjmlRenderer _mjmlRenderer;
 
-        public NotificationService(AppDbContext dbContext, IEmailService emailService, 
+        public NotificationService(AppDbContext dbContext, IEmailService emailService,
             IOptions<EmailSettings> emailSettings, IUserService userService, IMjmlRenderer mjmlRenderer)
         {
             _dbContext = dbContext;
@@ -41,7 +41,7 @@ namespace Hippo.Core.Services
             _mjmlRenderer = mjmlRenderer;
         }
 
-        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string reason = null)
+        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string details = "")
         {
 
             try
@@ -62,6 +62,10 @@ namespace Hippo.Core.Services
                 var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
                 var requestData = request.GetAccountRequestData();
 
+                var message = string.IsNullOrWhiteSpace(details) && !isApproved
+                    ? "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first."
+                    : details;
+
                 var model = new DecisionModel()
                 {
                     RequestedAction = request.Action.SplitCamelCase(),
@@ -73,20 +77,15 @@ namespace Hippo.Core.Services
                     Decision = isApproved ? "Approved" : "Rejected",
                     AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                    Reason = reason,
+                    DecisionDetails = message,
                     ClusterName = request.Cluster.Name,
                     AccessTypes = requestData.AccessTypes,
                     SupervisingPI = requestData.SupervisingPI
                 };
 
-                if (!isApproved)
-                {
-                    model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
-                }
-
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
+                await _emailService.SendEmail(new[] { emailTo }, null, emailBody, message);
 
                 return true;
             }
@@ -131,7 +130,7 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null)
+        public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string details = "")
         {
             try
             {
@@ -148,9 +147,8 @@ namespace Hippo.Core.Services
                     //RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                    Reason = reason,
+                    DecisionDetails = $"${details} (An admin has acted on an account request on your behalf where you were listed as the sponsor.)",
                     AdminName = adminUser.Name,
-                    Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
                     ClusterName = request.Cluster.Name,
                     RequestedAction = request.Action.SplitCamelCase(),
                 };
