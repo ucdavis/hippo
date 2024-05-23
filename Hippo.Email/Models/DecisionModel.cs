@@ -16,7 +16,7 @@ namespace Hippo.Email.Models
         public string RequestDate { get; set; } = String.Empty;
         public string DecisionDate { get; set; } = String.Empty;
         public string RequestUrl { get; set; } = String.Empty;
-        public string ButtonText { get; set; } = "View Account";
+        public string ButtonText { get; set; } = "Visit Hippo";
 
         public string Decision { get; set; } = String.Empty;
         public string DecisionColor { get; set; } = Colors.Approved;

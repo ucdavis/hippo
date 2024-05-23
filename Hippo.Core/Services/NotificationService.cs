@@ -85,7 +85,12 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(new[] { emailTo }, null, emailBody, message);
+                await _emailService.SendEmail(
+                    new[] { emailTo },
+                    null,
+                    emailBody,
+                    message,
+                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
 
                 return true;
             }
@@ -119,7 +124,12 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
-                await _emailService.SendEmail(emails, null, emailBody, "A new account request is ready for your approval");
+                await _emailService.SendEmail(
+                    emails,
+                    null,
+                    emailBody,
+                    $"A new request ({model.Action}) is ready for your approval",
+                    $"Hippo Request ({model.Action}) Submitted");
 
                 return true;
             }
@@ -138,6 +148,10 @@ namespace Hippo.Core.Services
                 var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
                 var emails = await GetGroupAdminEmails(group);
 
+                var message = string.IsNullOrWhiteSpace(details)
+                    ? "An admin has acted on an account request on your behalf where you were listed as the sponsor."
+                    : $"{details} (An admin has acted on an account request on your behalf where you were listed as the sponsor.)";
+
                 var model = new DecisionModel()
                 {
                     GroupName = group.DisplayName,
@@ -147,7 +161,7 @@ namespace Hippo.Core.Services
                     //RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                    DecisionDetails = $"${details} (An admin has acted on an account request on your behalf where you were listed as the sponsor.)",
+                    DecisionDetails = message,
                     AdminName = adminUser.Name,
                     ClusterName = request.Cluster.Name,
                     RequestedAction = request.Action.SplitCamelCase(),
@@ -156,7 +170,12 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(emails, ccEmails: new[] { adminUser.Email }, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
+                await _emailService.SendEmail(
+                    emails,
+                    ccEmails: new[] { adminUser.Email },
+                    emailBody,
+                    message,
+                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
 
                 return true;
             }

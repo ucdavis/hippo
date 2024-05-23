@@ -22,10 +22,10 @@
 @await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel(@Model!.ButtonText, @Model!.RequestUrl))
 
 <mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
-    padding-bottom="10px" padding-top="5px">
-    <mj-column width="90%" vertical-align="top" border-bottom="1px solid #c7c8cc">
-        <mj-text padding-top="20px" padding-left="0px" padding-bottom="0px">
-            <h4>Notification Details</h4>
+    padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>@Model?.Action</h2>
         </mj-text>
     </mj-column>
 </mj-section>
