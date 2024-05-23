@@ -121,6 +121,7 @@ export const Details = () => {
   const submitOrder = async (updatedOrder: OrderModel) => {
     const editableFields: Partial<OrderModel> = {
       name: updatedOrder.name,
+      productName: updatedOrder.productName,
       description: updatedOrder.description,
       category: updatedOrder.category,
       externalReference: updatedOrder.externalReference,
