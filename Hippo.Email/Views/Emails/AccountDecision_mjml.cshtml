@@ -47,36 +47,6 @@
     padding-bottom="0px" padding-top="20px">
     <mj-column width="90%" vertical-align="top">
         <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
-            <h2>Request Details</h2>
-        </mj-text>
-    </mj-column>
-</mj-section>
-<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
-    padding-bottom="20px" padding-top="0px">
-    <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
-                 @Model?.RequesterName ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
-                 @Model?.RequestDate ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
-                 @Model?.AdminName ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
-                 @Model?.DecisionDate ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
-                 @Model?.ClusterName ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
-                 @Model?.GroupName ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Supervising PI",
-                 string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified" : @Model.SupervisingPI))"));
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Access Types",
-                 string.Join(", ", @Model?.AccessTypes ?? new())))"));
-    </mj-column>
-</mj-section>
-
-<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
-    padding-bottom="0px" padding-top="20px">
-    <mj-column width="90%" vertical-align="top">
-        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
             <h2>Additional Information</h2>
         </mj-text>
     </mj-column>
@@ -104,5 +74,35 @@
                 </a>
             </p>
         </mj-text>
+    </mj-column>
+</mj-section>
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>Request Details</h2>
+        </mj-text>
+    </mj-column>
+</mj-section>
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="20px" padding-top="0px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
+                 @Model?.RequesterName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
+                 @Model?.RequestDate ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
+                 @Model?.AdminName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
+                 @Model?.DecisionDate ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
+                 @Model?.ClusterName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
+                 @Model?.GroupName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Supervising PI",
+                 string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified" : @Model.SupervisingPI))"));
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Access Types",
+                 string.Join(", ", @Model?.AccessTypes ?? new())))"));
     </mj-column>
 </mj-section>
