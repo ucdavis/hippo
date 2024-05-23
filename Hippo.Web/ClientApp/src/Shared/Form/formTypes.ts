@@ -1,6 +1,7 @@
 import {
   ArrayPath,
   Control,
+  FieldError,
   FieldErrors,
   FieldPath,
   RegisterOptions,
@@ -21,7 +22,7 @@ export type FormFieldInputProps = {
 export type FormFieldProps<T> = RegisterOptions &
   FormFieldInputProps & {
     register: UseFormRegister<T>;
-    error: string;
+    error: FieldError;
     name: FieldPath<T>;
   };
 

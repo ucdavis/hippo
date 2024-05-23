@@ -16,10 +16,6 @@ const FormFieldArray = <T extends Record<string, any>>({
     name: "metaData",
   });
 
-  const keys = Object.keys(fields);
-  console.log(keys);
-
-  console.log(arrayName);
   return (
     <>
       {fields.map((field, index) => {
@@ -31,7 +27,7 @@ const FormFieldArray = <T extends Record<string, any>>({
               key={field.id}
               register={register}
               label="Name"
-              error={`i will figure this out later`}
+              error={errors.metaData?.[index]?.name}
               name={`${arrayName2}.${index}.name` as const}
               // {...options}
             />
