@@ -129,7 +129,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         type="select"
       >
         <option value="Monthly">Monthly</option>
-        <option value="Weekly">Weekly</option>
+        <option value="Yearly">Yearly</option>
       </FormField>
       <FormField
         register={register}
