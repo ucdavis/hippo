@@ -31,7 +31,7 @@ namespace Hippo.Core.Services
         private readonly IUserService _userService;
         private readonly IMjmlRenderer _mjmlRenderer;
 
-        public NotificationService(AppDbContext dbContext, IEmailService emailService, 
+        public NotificationService(AppDbContext dbContext, IEmailService emailService,
             IOptions<EmailSettings> emailSettings, IUserService userService, IMjmlRenderer mjmlRenderer)
         {
             _dbContext = dbContext;
@@ -41,7 +41,7 @@ namespace Hippo.Core.Services
             _mjmlRenderer = mjmlRenderer;
         }
 
-        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string reason = null)
+        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string details = "")
         {
 
             try
@@ -61,6 +61,10 @@ namespace Hippo.Core.Services
 
                 var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
                 var requestData = request.GetAccountRequestData();
+                var message = details;
+                if (!isApproved && string.IsNullOrWhiteSpace(message))
+                    message = "Your account request has been rejected. If you believe this was done in error, please contact " +
+                              "your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
 
                 var model = new DecisionModel()
                 {
@@ -73,20 +77,20 @@ namespace Hippo.Core.Services
                     Decision = isApproved ? "Approved" : "Rejected",
                     AdminName = decidedBy,
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                    Reason = reason,
+                    DecisionDetails = message,
                     ClusterName = request.Cluster.Name,
                     AccessTypes = requestData.AccessTypes,
                     SupervisingPI = requestData.SupervisingPI
                 };
 
-                if (!isApproved)
-                {
-                    model.Instructions = "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
-                }
-
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(new[] { emailTo }, null, emailBody, $"Your account request has been {model.Decision}. {model.Instructions}");
+                await _emailService.SendEmail(
+                    new[] { emailTo },
+                    null,
+                    emailBody,
+                    message,
+                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
 
                 return true;
             }
@@ -120,7 +124,12 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
-                await _emailService.SendEmail(emails, null, emailBody, "A new account request is ready for your approval");
+                await _emailService.SendEmail(
+                    emails,
+                    null,
+                    emailBody,
+                    $"A new request ({model.Action}) is ready for your approval",
+                    $"Hippo Request ({model.Action}) Submitted");
 
                 return true;
             }
@@ -131,13 +140,17 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null)
+        public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string details = "")
         {
             try
             {
                 //var requestUrl = $"{_emailSettings.BaseUrl}"; //TODO: Only have button if approved?
                 var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
                 var emails = await GetGroupAdminEmails(group);
+
+                var message = string.IsNullOrWhiteSpace(details)
+                    ? "An admin has acted on an account request on your behalf where you were listed as the sponsor."
+                    : $"{details} (An admin has acted on an account request on your behalf where you were listed as the sponsor.)";
 
                 var model = new DecisionModel()
                 {
@@ -148,9 +161,8 @@ namespace Hippo.Core.Services
                     //RequestUrl = requestUrl,
                     Decision = isApproved ? "Approved" : "Rejected",
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
-                    Reason = reason,
+                    DecisionDetails = message,
                     AdminName = adminUser.Name,
-                    Instructions = "An admin has acted on an account request on your behalf where you were listed as the sponsor.",
                     ClusterName = request.Cluster.Name,
                     RequestedAction = request.Action.SplitCamelCase(),
                 };
@@ -158,7 +170,12 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(emails, ccEmails: new[] { adminUser.Email }, emailBody, "An admin has acted on an account request on your behalf where you were listed as the sponsor.");
+                await _emailService.SendEmail(
+                    emails,
+                    ccEmails: new[] { adminUser.Email },
+                    emailBody,
+                    message,
+                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
 
                 return true;
             }
