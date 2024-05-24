@@ -10,6 +10,7 @@ import { authenticatedFetch } from "../../util/api";
 import { Column } from "react-table";
 import { ReactTable } from "../../Shared/ReactTable";
 import ChartStringValidation from "./ChartStringValidation";
+import OrderForm from "./OrderForm";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -116,6 +117,44 @@ export const Details = () => {
     [],
   );
 
+  // async function so the form can manage the loading state
+  const submitOrder = async (updatedOrder: OrderModel) => {
+    const editedOrder: OrderModel = {
+      // uneditable fields
+      id: updatedOrder.id,
+      status: updatedOrder.status,
+      createdOn: updatedOrder.createdOn,
+      total: updatedOrder.total,
+      subTotal: updatedOrder.subTotal,
+      balanceRemaining: updatedOrder.balanceRemaining,
+      billings: updatedOrder.billings,
+      payments: updatedOrder.payments,
+      history: updatedOrder.history,
+
+      // editable fields
+      name: updatedOrder.name,
+      productName: updatedOrder.productName,
+      description: updatedOrder.description,
+      category: updatedOrder.category,
+      externalReference: updatedOrder.externalReference,
+      notes: updatedOrder.notes,
+      units: updatedOrder.units,
+      unitPrice: updatedOrder.unitPrice,
+      quantity: updatedOrder.quantity,
+      installments: updatedOrder.installments,
+      installmentType: updatedOrder.installmentType,
+      adjustment: updatedOrder.adjustment,
+      adjustmentReason: updatedOrder.adjustmentReason,
+      adminNotes: updatedOrder.adminNotes,
+      metaData: updatedOrder.metaData,
+    };
+
+    // TODO: await API call
+    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    setOrder(editedOrder); // should be newOrder once it's pulling from the API
+  };
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -125,174 +164,8 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
-          <div className="form-group">
-            <label htmlFor="fieldStatus">Status</label>
-            <input
-              className="form-control"
-              id="fieldStatus"
-              value={order.status}
-              readOnly
-            />
-          </div>
-          <hr />
-          <div className="form-group">
-            <label htmlFor="fieldName">Name</label>
-            <input
-              className="form-control"
-              id="fieldName"
-              required
-              value={order.name}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldDescription">Description</label>
-            <textarea
-              className="form-control"
-              id="fieldDescription"
-              value={order.description || ""}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldCategory">Category</label>
-            <input
-              className="form-control"
-              id="fieldCategory"
-              value={order.category}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldExternalReference">External Reference</label>
-            <input
-              className="form-control"
-              id="fieldExternalReference"
-              value={order.externalReference}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldNotes">Notes</label>
-            <textarea
-              className="form-control"
-              id="fieldNotes"
-              value={order.notes || ""}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldUnits">Units</label>
-            <input
-              className="form-control"
-              id="fieldUnits"
-              value={order.units}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldUnitPrice">Unit Price</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
-                </span>
-              </div>
-              <input
-                className="form-control"
-                id="fieldUnitPrice"
-                value={order.unitPrice}
-                readOnly
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldQuantity">Quantity</label>
-            <input
-              className="form-control"
-              id="fieldQuantity"
-              value={order.quantity}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldInstallments">Installments</label>
-            <input
-              className="form-control"
-              id="fieldInstallments"
-              value={order.installments}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldAdjustment">Adjustment</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
-                </span>
-              </div>
-              <input
-                className="form-control"
-                id="fieldAdjustment"
-                value={order.adjustment}
-                readOnly
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldAdjustmentReason">Adjustment Reason</label>
-            <textarea
-              className="form-control"
-              id="fieldAdjustmentReason"
-              value={order.adjustmentReason || ""}
-              readOnly
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldAdminNotes">Admin Notes</label>
-            <textarea
-              className="form-control"
-              id="fieldAdminNotes"
-              value={order.adminNotes || ""}
-              readOnly
-            />
-          </div>
-          <hr />
-          <div className="form-group">
-            <label htmlFor="fieldSubTotal">SubTotal</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
-                </span>
-              </div>
-              <div className="form-group">
-                <input
-                  className="form-control"
-                  id="fieldSubTotal"
-                  value={order.subTotal}
-                  readOnly
-                />
-              </div>
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="fieldTotal">Total</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
-                </span>
-              </div>
-              <input
-                className="form-control"
-                id="fieldTotal"
-                value={order.total}
-                readOnly
-              />
-            </div>
-          </div>
+
+          <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
 
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
