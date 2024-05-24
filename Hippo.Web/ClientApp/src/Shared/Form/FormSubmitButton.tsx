@@ -1,29 +1,31 @@
 import React from "react";
-import { Button } from "reactstrap";
+import { ButtonProps } from "reactstrap";
+import { OrderModel } from "../../types";
+import { useFormContext } from "react-hook-form";
+import HipButton from "../HipButton";
 
-interface FormSubmitButtonProps {
-  isSubmitting: boolean;
-  isSubmitSuccessful: boolean;
-}
+interface FormSubmitButtonProps extends ButtonProps {}
 
-const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
-  isSubmitting,
-  isSubmitSuccessful,
-}) => {
+const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ ...props }) => {
+  const {
+    formState: { isDirty, isSubmitting, isSubmitSuccessful, errors },
+  } = useFormContext<OrderModel>();
+
+  const shouldDisable = !isDirty || isSubmitting || isSubmitSuccessful;
+
   return (
-    <Button
-      type="submit"
-      block={true}
-      outline={!isSubmitSuccessful}
-      color="primary"
-      disabled={isSubmitSuccessful}
-    >
-      {isSubmitting
-        ? "Submitting..."
-        : isSubmitSuccessful
-          ? "Submitted!"
-          : "Submit"}
-    </Button>
+    <>
+      <HipButton type="submit" disabled={shouldDisable} {...props} block={true}>
+        {isSubmitting
+          ? "Submitting..."
+          : isSubmitSuccessful
+            ? "Submitted!"
+            : "Submit"}
+      </HipButton>
+      {errors.root && (
+        <span className="text-danger">{errors.root?.message}</span>
+      )}
+    </>
   );
 };
 
