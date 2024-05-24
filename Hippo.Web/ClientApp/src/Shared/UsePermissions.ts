@@ -21,5 +21,9 @@ export const usePermissions = () => {
     return false;
   };
 
-  return { canViewGroup };
+  const isClusterAdminForCluster = () => {
+    return isClusterAdmin;
+  };
+
+  return { canViewGroup, isClusterAdminForCluster };
 };
