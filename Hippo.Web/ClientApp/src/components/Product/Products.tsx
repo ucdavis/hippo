@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { ReactTable } from "../../Shared/ReactTable";
 import { Column } from "react-table";
@@ -18,6 +18,7 @@ const defaultProduct: ProductModel = {
   unitPrice: "0.00",
   units: "",
   installments: 60,
+  installmentType: "Monthly",
 };
 
 export const Products = () => {
@@ -41,7 +42,7 @@ export const Products = () => {
         const data = await response.json();
         setProducts(data);
       } else {
-        alert("Error fetching groups");
+        alert("Error fetching products");
       }
     };
 
@@ -158,6 +159,26 @@ export const Products = () => {
                 setReturn(model);
               }}
             />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldInstallmentType">Installment Type</label>
+            <select
+              className="form-control"
+              id="fieldInstallmentType"
+              required
+              value={editProductModel.installmentType}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  installmentType: e.target.value,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
           </div>
         </>
       ),
@@ -330,11 +351,20 @@ export const Products = () => {
         accessor: "installments",
       },
       {
+        Header: "Type",
+        accessor: "installmentType",
+      },
+      {
         Header: "Actions",
         sortable: false,
         Cell: ({ row }) => (
           <div>
-            <button className="btn btn-primary">Order</button>{" "}
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/create/${row.original.id}`}
+            >
+              Order It
+            </Link>{" "}
             <ShowFor roles={["ClusterAdmin"]}>
               <button
                 onClick={() => handleEdit(row.original.id)}
@@ -354,7 +384,7 @@ export const Products = () => {
       },
     ],
 
-    [cluster, handleEdit],
+    [handleDelete, handleEdit],
   );
 
   if (products === undefined) {

@@ -237,4 +237,74 @@ export interface ProductModel {
   units: string;
   unitPrice: string;
   installments: number;
+  installmentType: string;
+}
+
+export interface OrderMetadataModel {
+  id: number;
+  name: string;
+  value: string;
+}
+
+export interface OrderBillingModel {
+  id: number;
+  chartString: string;
+  percentage: string;
+  chartStringValidation: ChartStringValidationModel;
+}
+
+export interface PaymentModel {
+  id: number;
+  amount: number;
+  status: string;
+  createdOn: string;
+  createdBy?: User;
+  //Possibly have the chart string(s) and percent here
+}
+export interface HistoryModel {
+  id: number;
+  actedBy: User;
+  action: string;
+  status: string;
+  details: string;
+  actedDate: string;
+}
+
+export interface OrderModel {
+  id: number;
+  category: string;
+  name: string;
+  productName: string;
+  description: string;
+  notes: string;
+  units: string;
+  unitPrice: string;
+  installments: number;
+  installmentType: string;
+  quantity: number;
+  adjustment: number;
+  adjustmentReason: string;
+  status: string;
+  createdOn: string;
+  externalReference: string;
+  adminNotes: string;
+  subTotal: string;
+  total: string;
+  balanceRemaining: string;
+  metaData: OrderMetadataModel[];
+  billings: OrderBillingModel[];
+  payments: PaymentModel[];
+  history: HistoryModel[];
+}
+
+export interface OrderListModel {
+  id: number;
+  name: string;
+  description: string;
+  units: string;
+  quantity: number;
+  createdOn: string;
+  status: string;
+  total: string;
+  balanceRemaining: string;
 }

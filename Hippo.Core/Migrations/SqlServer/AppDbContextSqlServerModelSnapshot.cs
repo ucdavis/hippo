@@ -334,10 +334,11 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -353,7 +354,7 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("OrderId1");
+                    b.HasIndex("Type");
 
                     b.ToTable("Histories");
                 });
@@ -396,6 +397,11 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("InstallmentType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<int>("Installments")
                         .HasColumnType("int");
 
@@ -409,6 +415,11 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<int>("PrincipalInvestigatorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
@@ -554,6 +565,11 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<string>("Description")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("InstallmentType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("Installments")
                         .HasColumnType("int");
@@ -914,13 +930,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .IsRequired();
 
                     b.HasOne("Hippo.Core.Domain.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Hippo.Core.Domain.Order", null)
                         .WithMany("History")
-                        .HasForeignKey("OrderId1");
+                        .HasForeignKey("OrderId");
 
                     b.Navigation("ActedBy");
 

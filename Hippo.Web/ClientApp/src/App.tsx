@@ -19,8 +19,11 @@ import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
-import FinancialDetail from "./components/Financial/FinancialDetail";
+import { FinancialDetail } from "./components/Financial/FinancialDetail";
 import { Products } from "./components/Product/Products";
+import { Orders } from "./components/Order/Orders";
+import { Details } from "./components/Order/Details";
+import CreateOrder from "./components/Order/CreateOrder";
 
 declare var Hippo: AppContextShape;
 
@@ -103,6 +106,15 @@ const App = () => {
               }
             />
             <Route path="/:cluster/product/index" element={<Products />} />
+            <Route path="/:cluster/order/myorders" element={<Orders />} />
+            <Route
+              path="/:cluster/order/details/:orderId"
+              element={<Details />}
+            />
+            <Route
+              path="/:cluster/order/create/:productId?"
+              element={<CreateOrder />}
+            />
           </Routes>
         </div>
       </ModalProvider>

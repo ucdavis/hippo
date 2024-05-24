@@ -50,9 +50,10 @@
     <mj-column width="90%" vertical-align="top" border-left="4px solid @Model?.DecisionColor" padding-left="10px">
         <mj-text padding-top="0px" padding-left="0px" padding-bottom="5px">
             <h1>@Model?.Decision</h1>
-            @if(!string.IsNullOrWhiteSpace(Model?.Reason))
+            @if (!string.IsNullOrWhiteSpace(Model?.Reason))
             {
-              @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Reject Reason", Model!.Reason))
+                @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Reject Reason",
+                         Model!.Reason))
             }
         </mj-text>
     </mj-column>
@@ -70,21 +71,21 @@
     padding-bottom="20px" padding-top="0px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
-        @Model?.RequesterName ?? ""))
+                 @Model?.RequesterName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
-        @Model?.RequestDate ?? ""))
+                 @Model?.RequestDate ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
-        @Model?.AdminName ?? ""))
+                 @Model?.AdminName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
-        @Model?.DecisionDate ?? ""))
+                 @Model?.DecisionDate ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
-        @Model?.ClusterName ?? ""))
+                 @Model?.ClusterName ?? ""))
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
-        @Model?.GroupName ?? ""))
-        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Superivising PI",
-        string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified": @Model.SupervisingPI))"));
+                 @Model?.GroupName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Supervising PI",
+                 string.IsNullOrWhiteSpace(@Model?.SupervisingPI) ? "Unspecified" : @Model.SupervisingPI))"));
         @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Access Types",
-        string.Join(", ", @Model?.AccessTypes ?? new())))"));
+                 string.Join(", ", @Model?.AccessTypes ?? new())))"));
     </mj-column>
 </mj-section>
 
@@ -100,24 +101,24 @@
     padding-bottom="0px" padding-top="10px">
     <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
         <mj-text line-height="1.5" padding-top="0px" padding-left="0px" padding-bottom="5px">
-          <p>
-            For common issues and questions, visit the link:<br/>
-            <a href="https://hpc.ucdavis.edu/faq">
-              https://hpc.ucdavis.edu/faq
-            </a>
-          </p>
-          <p>
-            To learn about Linux commands and scripts, see this link:<br/>
-            <a href="https://hpc.ucdavis.edu/helpdocs">
-              https://hpc.ucdavis.edu/helpdocs
-            </a>
-          </p>
-          <p>
-            Data Science Training tutorials:<br/>
-            <a href="https://ngs-docs.github.io/2021-august-remote-computing/index.html">
-              https://ngs-docs.github.io/2021-august-remote-computing/index.html
-            </a>  
-          </p>
+            <p>
+                For common issues and questions, visit the link:<br />
+                <a href="https://hpc.ucdavis.edu/faq">
+                    https://hpc.ucdavis.edu/faq
+                </a>
+            </p>
+            <p>
+                To learn about Linux commands and scripts, see this link:<br />
+                <a href="https://hpc.ucdavis.edu/helpdocs">
+                    https://hpc.ucdavis.edu/helpdocs
+                </a>
+            </p>
+            <p>
+                Data Science Training tutorials:<br />
+                <a href="https://ngs-docs.github.io/2021-august-remote-computing/index.html">
+                    https://ngs-docs.github.io/2021-august-remote-computing/index.html
+                </a>
+            </p>
         </mj-text>
     </mj-column>
 </mj-section>

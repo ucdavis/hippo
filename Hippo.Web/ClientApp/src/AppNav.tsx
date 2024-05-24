@@ -127,6 +127,16 @@ export const AppNav = () => {
               >
                 Products
               </NavLink>
+              <NavLink
+                id="myorders"
+                to={`/${cluster.name}/order/myorders`}
+                className="nav-item nav-link"
+                style={({ isActive }) =>
+                  isActive ? { fontWeight: "bold" } : {}
+                }
+              >
+                My Orders
+              </NavLink>
             </nav>
           </div>
         </div>

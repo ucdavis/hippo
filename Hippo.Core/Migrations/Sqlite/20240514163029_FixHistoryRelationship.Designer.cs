@@ -3,6 +3,7 @@ using System;
 using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hippo.Core.Migrations.Sqlite
 {
     [DbContext(typeof(AppDbContextSqlite))]
-    partial class AppDbContextSqliteModelSnapshot : ModelSnapshot
+    [Migration("20240514163029_FixHistoryRelationship")]
+    partial class FixHistoryRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.19");
@@ -319,10 +321,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Type")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActedById");
@@ -334,8 +332,6 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("ClusterId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("Type");
 
                     b.ToTable("Histories");
                 });
@@ -376,11 +372,6 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("InstallmentType")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Installments")
                         .HasColumnType("INTEGER");
 
@@ -394,11 +385,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<int>("PrincipalInvestigatorId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("TEXT");
@@ -535,11 +521,6 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<string>("Description")
                         .HasMaxLength(250)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("InstallmentType")
-                        .IsRequired()
-                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Installments")
