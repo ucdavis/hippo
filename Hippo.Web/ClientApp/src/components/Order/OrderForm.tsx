@@ -62,6 +62,13 @@ const OrderForm: React.FC<OrderFormProps> = ({
           maxLength={50}
         />
         <OrderFormField
+          name="productName"
+          label="Product Name"
+          required={true}
+          readOnly={readOnly}
+          maxLength={50}
+        />
+        <OrderFormField
           name="description"
           label="Description"
           type="textarea"
@@ -119,6 +126,16 @@ const OrderForm: React.FC<OrderFormProps> = ({
         </OrderFormField>
 
         <OrderFormField
+          name="installmentType"
+          label="Installment Type"
+          readOnly={readOnly}
+          disabled={readOnly}
+          type="select"
+        >
+          <option value="Monthly">Monthly</option>
+          <option value="Yearly">Yearly</option>
+        </OrderFormField>
+        <OrderFormField
           name="adjustment"
           label="Adjustment"
           readOnly={readOnly}
@@ -151,7 +168,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
-        <MetaDataFields />
+        <MetaDataFields readOnly={readOnly} />
         {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
       </Form>
     </FormProvider>
