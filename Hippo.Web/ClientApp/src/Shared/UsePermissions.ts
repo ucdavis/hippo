@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AppContext from "./AppContext";
 import { useParams } from "react-router-dom";
 
-export const UsePermissions = () => {
+export const usePermissions = () => {
   const [{ user, accounts }] = useContext(AppContext);
   const { cluster: clusterName } = useParams();
 
