@@ -6,15 +6,9 @@ import {
   GroupModel,
   AccountCreateModel,
   AccessType,
-  RawRequestModel,
-  RawGroupModel,
+  RequestModel,
 } from "../../types";
-import {
-  authenticatedFetch,
-  parseBadRequest,
-  parseRawGroupModel,
-  parseRawRequestModel,
-} from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
@@ -42,10 +36,10 @@ export const RequestForm = () => {
         `/api/${clusterName}/group/groups`,
       );
 
-      const groupsResult = (await response.json()) as RawGroupModel[];
+      const groupsResult = (await response.json()) as GroupModel[];
 
       if (response.ok) {
-        setGroups(groupsResult.map(parseRawGroupModel));
+        setGroups(groupsResult);
       }
     };
 
@@ -75,14 +69,11 @@ export const RequestForm = () => {
     const response = await req;
 
     if (response.ok) {
-      const rawRequestModel = (await response.json()) as RawRequestModel;
+      const requestModel = (await response.json()) as RequestModel;
 
       setContext((ctx) => ({
         ...ctx,
-        openRequests: [
-          ...ctx.openRequests,
-          parseRawRequestModel(rawRequestModel),
-        ],
+        openRequests: [...ctx.openRequests, requestModel],
       }));
       navigate(`/${clusterName}/accountstatus`);
     }
@@ -90,14 +81,17 @@ export const RequestForm = () => {
 
   useEffect(() => {
     if (
-      context.openRequests.find(
+      context.openRequests.some(
         (r) => r.cluster === clusterName && r.action === "CreateAccount",
       )
     ) {
       // there's already a request for this cluster, redirect to pending page
       navigate(`/${clusterName}/accountstatus`);
+    } else if (context.accounts.some((a) => a.cluster === clusterName)) {
+      // user already has an account on this cluster, redirect to account info page
+      navigate(`/${clusterName}/myaccount`);
     }
-  }, [clusterName, context.openRequests, navigate]);
+  }, [clusterName, context.accounts, context.openRequests, navigate]);
 
   return (
     <div className="row justify-content-center">
@@ -114,9 +108,11 @@ export const RequestForm = () => {
         <div className="form-group">
           <label>Who is sponsoring your account?</label>
           <GroupLookup
-            setSelection={(group) =>
-              setRequest((r) => ({ ...r, groupId: group.id }))
-            }
+            setSelection={(group) => {
+              if (group) {
+                setRequest((r) => ({ ...r, groupId: group.id }));
+              }
+            }}
             options={groups}
           />
           <p className="form-helper">

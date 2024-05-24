@@ -1,10 +1,10 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import {
-  fakeRawAccounts,
+  fakeAccounts,
   fakeGroupAdminAppContext,
-  fakeRawGroups,
-  fakeRawRequests,
+  fakeGroups,
+  fakeRequests,
 } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
@@ -17,14 +17,14 @@ import userEvent from "@testing-library/user-event";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-const testCluster = fakeRawAccounts[0].cluster;
+const testCluster = fakeAccounts[0].cluster;
 const approveUrl = `/${testCluster}/approve`;
 
 beforeEach(() => {
   const requestResponse = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve(fakeRawRequests),
+    json: () => Promise.resolve(fakeRequests),
   });
   const approveResponse = Promise.resolve({
     status: 200,
@@ -33,7 +33,7 @@ beforeEach(() => {
   const groupsResponse = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve(fakeRawGroups),
+    json: () => Promise.resolve(fakeGroups),
   });
 
   (global as any).Hippo = fakeGroupAdminAppContext;

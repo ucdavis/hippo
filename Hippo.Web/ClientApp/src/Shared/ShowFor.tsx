@@ -7,7 +7,7 @@ import { useMatch } from "react-router-dom";
 
 interface Props {
   children: any;
-  roles: RoleName[];
+  roles?: RoleName[];
   condition?: boolean | (() => boolean);
   alternative?: JSX.Element;
 }
@@ -22,11 +22,16 @@ export const ShowFor = (props: Props) => {
   const conditionSatisfied = isBoolean(props.condition)
     ? props.condition
     : isFunction(props.condition)
-    ? props.condition()
-    : true;
+      ? props.condition()
+      : true;
 
   if (!conditionSatisfied) {
     return alternative ?? null;
+  }
+
+  // rely on just condition when no roles are specified
+  if (props.condition && !roles) {
+    return <>{children}</>;
   }
 
   // system admins can access anything
@@ -47,7 +52,7 @@ export const ShowFor = (props: Props) => {
   // cluster admins can access anything in their cluster
   if (
     context.user.permissions.some(
-      (p) => p.cluster === cluster && p.role === "ClusterAdmin"
+      (p) => p.cluster === cluster && p.role === "ClusterAdmin",
     )
   ) {
     return <>{children}</>;
@@ -69,7 +74,7 @@ export const ShowFor = (props: Props) => {
   // check if user has any other cluster-specific role
   if (
     context.user.permissions.some(
-      (p) => p.cluster === cluster && roles.includes(p.role)
+      (p) => p.cluster === cluster && roles.includes(p.role),
     )
   ) {
     return <>{children}</>;

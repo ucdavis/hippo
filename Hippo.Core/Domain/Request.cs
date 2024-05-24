@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +34,8 @@ namespace Hippo.Core.Domain
         [Required]
         [MaxLength(50)]
         public string Status { get; set; } = "";
-        public string Data { get; set; } = "";
+        // TODO: When C# gets type unions, update this to something more strongly typed
+        public JsonElement? Data { get; set; }
         [Obsolete($"Use {nameof(AccountRequestDataModel)}.{nameof(AccountRequestDataModel.SshKey)}")]
         public string SshKey { get; set; } = "";
         [MaxLength(100)]
@@ -41,7 +45,7 @@ namespace Hippo.Core.Domain
         public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
         public List<QueuedEvent> QueuedEvents { get; set; } = new();
 
-        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
         {
             modelBuilder.Entity<Request>().HasQueryFilter(r => r.Cluster.IsActive);
             modelBuilder.Entity<Request>().HasIndex(r => r.Action);
@@ -63,6 +67,8 @@ namespace Hippo.Core.Domain
                 .WithMany()
                 .HasForeignKey(r => r.ClusterId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Request>().Property(r => r.Data).HasJsonConversion(dbContext);
         }
 
         public static class Actions

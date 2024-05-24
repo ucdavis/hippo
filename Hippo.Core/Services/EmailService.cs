@@ -14,7 +14,7 @@ namespace Hippo.Core.Services
     public interface IEmailService
     {
         Task SendSampleEmailMessage(string email, string body);
-        Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject = "Hippo Notification");
+        Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject);
     } 
 
     public class EmailService : IEmailService
@@ -28,7 +28,7 @@ namespace Hippo.Core.Services
             _client = new SmtpClient(_emailSettings.Host, _emailSettings.Port) { Credentials = new NetworkCredential(_emailSettings.UserName, _emailSettings.Password), EnableSsl = true };
         }
 
-        public async Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject = "Hippo Notification")
+        public async Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject)
         {
             if (_emailSettings.DisableSend.Equals("Yes", StringComparison.OrdinalIgnoreCase))
             {

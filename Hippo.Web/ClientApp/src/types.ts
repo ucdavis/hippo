@@ -18,30 +18,22 @@ export interface GroupAccountModel {
   email: string;
 }
 
-export interface RawGroupModel {
+export interface GroupModel {
   id: number;
   name: string;
   displayName: string;
   admins: GroupAccountModel[];
-  data: string;
+  data: PuppetGroupRecord;
 }
 
-export type GroupModel = Omit<RawGroupModel, "data"> & {
-  data: PuppetGroupRecord;
-};
-
-export interface RawRequestModel {
+export interface RequestModelCommon {
   id: number;
   requesterEmail: string;
   requesterName: string;
   groupModel: GroupModel;
   status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
   cluster: string;
-  action: string;
-  data: string;
 }
-
-type RequestModelCommon = Omit<RawRequestModel, "action" | "data">;
 
 // action-specific RequestModel fields defined here...
 export interface AccountRequestDataModel {
@@ -57,7 +49,7 @@ export type AccountRequestModel = RequestModelCommon & {
 // make RequestMode a union of all possible action-specific RequestModels (currently only one)
 export type RequestModel = AccountRequestModel;
 
-export interface RawAccountModel {
+export interface AccountModel {
   id: number;
   name: string;
   email: string;
@@ -69,12 +61,8 @@ export interface RawAccountModel {
   adminOfGroups: GroupModel[];
   updatedOn: string;
   accessTypes: AccessType[];
-  data: string;
-}
-
-export type AccountModel = Omit<RawAccountModel, "data"> & {
   data: PuppetUserRecord;
-};
+}
 
 export interface AccountCreateModel {
   groupId: number;

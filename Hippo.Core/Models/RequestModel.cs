@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Text.Json;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Validation;
@@ -17,7 +18,7 @@ namespace Hippo.Core.Models
 
         public GroupModel GroupModel { get; set; } = new();
 
-        public string Data { get; set; }
+        public JsonElement? Data { get; set; }
     }
 
     public class AccountRequestDataModel

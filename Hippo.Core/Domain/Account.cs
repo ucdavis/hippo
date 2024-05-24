@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
@@ -39,7 +42,8 @@ namespace Hippo.Core.Domain
 
         public string SshKey { get; set; }
 
-        public string Data { get; set; }
+        // TODO: When C# gets type unions, update this to something more strongly typed
+        public JsonElement? Data { get; set; }
 
         public int? OwnerId { get; set; }
         public User Owner { get; set; }
@@ -57,7 +61,7 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<AccessType> AccessTypes { get; set; } = new();
         
-        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
         {
             modelBuilder.Entity<Account>().HasQueryFilter(a => a.Cluster.IsActive);
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
@@ -66,6 +70,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Account>().HasIndex(a => a.Name);
             modelBuilder.Entity<Account>().HasIndex(a => a.Email);
             modelBuilder.Entity<Account>().HasIndex(a => a.Kerberos);
+            modelBuilder.Entity<Account>().Property(g => g.Data).HasJsonConversion(dbContext);
         }
     }
 }

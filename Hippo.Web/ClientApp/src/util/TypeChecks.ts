@@ -15,3 +15,7 @@ export const isAccountRequest = (
 ): value is AccountRequestModel =>
   value &&
   (value.action === "CreateAccount" || value.action === "AddAccountToGroup");
+export const isNumber = (value: any): value is number =>
+  typeof value === "number";
+export const isObject = (value: any): value is object =>
+  typeof value === "object" && Boolean(value);

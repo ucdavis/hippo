@@ -128,7 +128,10 @@ public class RequestController : SuperController
         request.Status = AccountRequest.Statuses.Processing;
         request.UpdatedOn = DateTime.UtcNow;
 
-        var success = await _notificationService.AccountDecision(request, true);
+        var success = await _notificationService.AccountDecision(request, true, 
+            reason: "Your account request has been approved. You will receive another email with more details once your " +
+            $"account is created on {Cluster}. You can check the \"My Account\" tab of Hippo to see what " +
+            "resources you have access to.");
         if (!success)
         {
             Log.Error("Error creating Account Decision email");

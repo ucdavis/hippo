@@ -51,17 +51,17 @@ namespace Hippo.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            Account.OnModelCreating(builder);
+            Account.OnModelCreating(builder, this);
             User.OnModelCreating(builder);
             History.OnModelCreating(builder);
             Cluster.OnModelCreating(builder);
-            Group.OnModelCreating(builder);
+            Group.OnModelCreating(builder, this);
             Role.OnModelCreating(builder);
             Permission.OnModelCreating(builder);
-            Request.OnModelCreating(builder);
+            Request.OnModelCreating(builder, this);
             Domain.GroupAdminAccount.OnModelCreating(builder);
             Domain.GroupMemberAccount.OnModelCreating(builder);
-            QueuedEvent.OnModelCreating(builder);
+            QueuedEvent.OnModelCreating(builder, this);
             AccessType.OnModelCreating(builder);
             FinancialDetail.OnModelCreating(builder);
             Product.OnModelCreating(builder);
