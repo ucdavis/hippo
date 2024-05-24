@@ -10,7 +10,7 @@ import {
 } from "react-hook-form";
 import { InputType } from "reactstrap/types/lib/Input";
 
-export type FormFieldInputProps = {
+export type FormFieldInputProps = Omit<InputProps, "pattern"> & {
   type?: InputType;
   label: string;
   inputPrepend?: React.ReactNode;

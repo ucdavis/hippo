@@ -119,8 +119,21 @@ export const Details = () => {
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
-    const editableFields: Partial<OrderModel> = {
+    const editedOrder: OrderModel = {
+      // uneditable fields
+      id: updatedOrder.id,
+      status: updatedOrder.status,
+      createdOn: updatedOrder.createdOn,
+      total: updatedOrder.total,
+      subTotal: updatedOrder.subTotal,
+      balanceRemaining: updatedOrder.balanceRemaining,
+      billings: updatedOrder.billings,
+      payments: updatedOrder.payments,
+      history: updatedOrder.history,
+
+      // editable fields
       name: updatedOrder.name,
+      productName: updatedOrder.productName,
       description: updatedOrder.description,
       category: updatedOrder.category,
       externalReference: updatedOrder.externalReference,
@@ -129,18 +142,17 @@ export const Details = () => {
       unitPrice: updatedOrder.unitPrice,
       quantity: updatedOrder.quantity,
       installments: updatedOrder.installments,
+      installmentType: updatedOrder.installmentType,
       adjustment: updatedOrder.adjustment,
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
+      metaData: updatedOrder.metaData,
     };
 
     // TODO: await API call
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setOrder((prevOrder) => ({
-      ...prevOrder,
-      ...editableFields,
-    }));
+    setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
   if (!order) {
@@ -152,6 +164,7 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
+
           <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
 
           <h2>Chart Strings</h2>

@@ -8,9 +8,11 @@ import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-type MetaDataFieldsProps = {};
+type MetaDataFieldsProps = {
+  readOnly: boolean;
+};
 
-const MetaDataFields: React.FC<MetaDataFieldsProps> = ({}) => {
+const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
   const {
     control,
     register,
@@ -32,7 +34,6 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({}) => {
 
   return (
     <>
-      <hr />
       <h2>Metadata</h2>
       {fields.map((field, index) => {
         return (
@@ -46,6 +47,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({}) => {
                 name={`metaData.${index}.name`}
                 required={true}
                 autoComplete="nope"
+                readOnly={readOnly}
               />
             </Col>
             <Col>
@@ -56,26 +58,31 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({}) => {
                 error={errors.metaData?.[index]?.value}
                 name={`metaData.${index}.value`}
                 required={true}
+                readOnly={readOnly}
               />
             </Col>
-            <Col md={3}>
-              <HipButton
-                title="Remove Metadata"
-                aria-label="Remove Metadata"
-                color="danger"
-                outline={true}
-                size="sm"
-                onClick={() => removeMetaData(index)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </HipButton>
-            </Col>
+            {!readOnly && (
+              <Col md={3}>
+                <HipButton
+                  title="Remove Metadata"
+                  aria-label="Remove Metadata"
+                  color="danger"
+                  outline={true}
+                  size="sm"
+                  onClick={() => removeMetaData(index)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </HipButton>
+              </Col>
+            )}
           </Row>
         );
       })}
-      <HipButton outline={true} color="secondary" onClick={addMetaData}>
-        <FontAwesomeIcon icon={faPlus} size="sm" /> Add Metadata
-      </HipButton>
+      {!readOnly && (
+        <HipButton outline={true} color="secondary" onClick={addMetaData}>
+          <FontAwesomeIcon icon={faPlus} size="sm" /> Add Metadata
+        </HipButton>
+      )}
     </>
   );
 };
