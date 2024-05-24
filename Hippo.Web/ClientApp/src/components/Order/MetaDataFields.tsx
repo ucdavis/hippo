@@ -7,7 +7,6 @@ import { Row, Col } from "reactstrap";
 import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FormFieldInputProps } from "../../Shared/Form/formTypes";
 
 type MetaDataFieldsProps = {
   readOnly: boolean;

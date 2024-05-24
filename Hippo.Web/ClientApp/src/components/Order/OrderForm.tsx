@@ -113,18 +113,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="Installments"
           readOnly={readOnly}
         />
-
-        <OrderFormField
-          name="installmentType"
-          label="Installment Type"
-          type="select"
-          readOnly={readOnly}
-          disabled={readOnly}
-        >
-          <option value="Monthly">Monthly</option>
-          <option value="Yearly">Weekly</option>
-        </OrderFormField>
-
         <OrderFormField
           name="installmentType"
           label="Installment Type"
