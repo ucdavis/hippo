@@ -15,6 +15,7 @@ const FormField = <T extends Record<string, any>>({
   maxLength,
   readOnly = false,
   autoComplete,
+  children,
   ...options
 }: FormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
