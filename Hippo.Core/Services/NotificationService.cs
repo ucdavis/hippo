@@ -61,10 +61,10 @@ namespace Hippo.Core.Services
 
                 var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
                 var requestData = request.GetAccountRequestData();
-
-                var message = string.IsNullOrWhiteSpace(details) && !isApproved
-                    ? "Your account request has been rejected. If you believe this was done in error, please contact your sponsor directly. You will need to submit a new request, but contact your sponsor first."
-                    : details;
+                var message = details;
+                if (!isApproved && string.IsNullOrWhiteSpace(message))
+                    message = "Your account request has been rejected. If you believe this was done in error, please contact " +
+                              "your sponsor directly. You will need to submit a new request, but contact your sponsor first.";
 
                 var model = new DecisionModel()
                 {
