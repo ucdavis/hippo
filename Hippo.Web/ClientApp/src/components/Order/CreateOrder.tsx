@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
+import { authenticatedFetch } from "../../util/api";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -41,7 +42,26 @@ const CreateOrder: React.FC = () => {
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
     if (productId) {
-      setOrder((order) => ({ ...order, name: productId }));
+      const fetchProductOrder = async () => {
+        const response = await authenticatedFetch(
+          `/api/${cluster}/order/GetProduct/${productId}`,
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setOrder(data);
+          // const balanceRemaining = parseFloat(data.balanceRemaining);
+          // setBalanceRemaining(balanceRemaining);
+          // const balancePending = data?.payments
+          //   .filter((payment) => payment.status !== "Completed")
+          //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
+          // setBalancePending(balancePending);
+        } else {
+          alert("Error fetching product for order");
+        }
+      };
+
+      fetchProductOrder();
     } else {
       if (!isClusterAdmin) {
         setOrder(null);

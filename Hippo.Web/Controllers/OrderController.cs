@@ -63,6 +63,20 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetProduct(int id)
+        {
+            var model = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+
+                .Select(OrderDetailModel.ProductProjection())
+                .SingleOrDefaultAsync();
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return Ok(model);
+        }
+
 
         [HttpPost]  
         public async Task<IActionResult> CreateOrder([FromBody] Order model)
