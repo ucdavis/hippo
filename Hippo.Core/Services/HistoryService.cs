@@ -224,6 +224,23 @@ namespace Hippo.Core.Services
             await historyService.AddHistory(history);
         }
 
+        public static async Task OrderUpdated(this IHistoryService historyService, Order order, User actedBy)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator,
+                Action = History.OrderActions.Updated,
+                Type = HistoryTypes.Primary,
+                Details = $"Order total: {order.Total}"
+            };
+
+            await historyService.AddHistory(history);
+        }
+
         public static async Task OrderSnapshot(this IHistoryService historyService, Order order, User actedBy, string action)
         {
             var history = new History
@@ -234,7 +251,7 @@ namespace Hippo.Core.Services
                 ActedBy = actedBy,
                 AdminAction = actedBy != order.PrincipalInvestigator,
                 Action = action,
-                Type = HistoryTypes.Detail,
+                Type = HistoryTypes.Primary,
                 Details = Serialize(order)
             };
 

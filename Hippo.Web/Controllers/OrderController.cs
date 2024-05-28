@@ -77,6 +77,142 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Save([FromBody] Order model)
+        {
+            //Pass the product id too? 
+            var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
+
+            User principalInvestigator = null;
+
+
+            var currentUser = await _userService.GetCurrentUser();
+            //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
+            if (User.IsInRole(AccessCodes.ClusterAdminAccess))
+            {
+                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Id == model.PrincipalInvestigatorId);
+                if(principalInvestigator == null)
+                {
+                    principalInvestigator = currentUser;
+                }
+            }
+            else
+            {
+                principalInvestigator = currentUser;
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid");
+            }
+
+            if(model.Id == 0)
+            {
+                //Ok, this is a new order that we have to create
+                var order = new Order
+                {
+                    Category = model.Category,
+                    Name = model.Name ?? model.ProductName,
+                    ProductName = model.ProductName,
+                    Description = model.Description,
+                    ExternalReference = model.ExternalReference,
+                    Units = model.Units,
+                    UnitPrice = model.UnitPrice,
+                    Installments = model.Installments,
+                    InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
+                    Quantity = model.Quantity,
+                    Billings = model.Billings,
+
+                    //Adjustment = model.Adjustment,
+                    //AdjustmentReason = model.AdjustmentReason,
+                    SubTotal = model.Quantity * model.UnitPrice,
+                    Total = model.Quantity * model.UnitPrice,
+                    BalanceRemaining = model.Quantity * model.UnitPrice,
+                    Notes = model.Notes,
+                    AdminNotes = model.AdminNotes,
+                    Status = Order.Statuses.Created,
+                    Cluster = cluster,
+                    ClusterId = cluster.Id,
+                    PrincipalInvestigator = principalInvestigator,
+                    CreatedOn = DateTime.UtcNow
+                };
+                // Deal with OrderMeta data
+                foreach (var metaData in model.MetaData)
+                {
+                    order.AddMetaData(metaData.Name, metaData.Value);
+                }
+
+                await _dbContext.Orders.AddAsync(order);
+
+                await _historyService.OrderCreated(order, currentUser);
+                await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
+
+            }
+            else
+            {
+                //Updating an existing order without changing the status.
+                var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
+                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
+                if(User.IsInRole(AccessCodes.ClusterAdminAccess))
+                {
+                    //TODO: Check the status to limit what can be changed
+                    existingOrder.Category = model.Category;
+                    existingOrder.ProductName = model.ProductName;
+                    existingOrder.Description = model.Description;
+                    existingOrder.Adjustment = model.Adjustment;
+                    existingOrder.AdjustmentReason = model.AdjustmentReason;
+                    existingOrder.AdminNotes = model.AdminNotes;
+                    existingOrder.InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly;
+                    existingOrder.Installments = model.Installments;
+                    existingOrder.UnitPrice = model.UnitPrice;
+                    existingOrder.Units = model.Units;
+                    existingOrder.ExternalReference = model.ExternalReference;
+                }
+                existingOrder.Description = model.Description;
+                existingOrder.Name = model.Name;
+                existingOrder.Notes = model.Notes;
+                if(existingOrder.Status == Order.Statuses.Created)
+                {
+                    existingOrder.Quantity = model.Quantity;
+                }
+                
+                //Deal with OrderMeta data (Test this)
+                foreach (var metaData in existingOrder.MetaData)
+                {
+                    if(metaData != null && model.MetaData.Any(a => a.Name == metaData.Name) && model.MetaData.Any(a => a.Value == metaData.Value))
+                    {
+                        //Keep it
+                    }
+                    else
+                    {
+                        existingOrder.MetaData.Remove(metaData);
+                    }
+                }
+                foreach (var metaData in model.MetaData)
+                {
+                    if (existingOrder.MetaData.Any(a => a.Name == metaData.Name) && existingOrder.MetaData.Any(a => a.Value == metaData.Value))
+                    {
+                        //Nothing to do, it is already there
+                    }
+                    else
+                    {
+                        existingOrder.AddMetaData(metaData.Name, metaData.Value);
+                    }
+                }
+
+                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
+                await _historyService.OrderUpdated(existingOrder, currentUser);
+
+            }            
+
+
+
+            await _dbContext.SaveChangesAsync();
+
+
+            return Ok();
+        }
+
 
         [HttpPost]  
         public async Task<IActionResult> CreateOrder([FromBody] Order model)
