@@ -41,6 +41,9 @@ const CreateOrder: React.FC = () => {
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
+  }, [isClusterAdminForCluster]);
+
+  useEffect(() => {
     if (productId) {
       const fetchProductOrder = async () => {
         const response = await authenticatedFetch(
@@ -73,7 +76,7 @@ const CreateOrder: React.FC = () => {
         setOrder(defaultOrder);
       }
     }
-  }, [cluster, isClusterAdmin, isClusterAdminForCluster, productId, setOrder]);
+  }, [cluster, isClusterAdmin, productId]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
