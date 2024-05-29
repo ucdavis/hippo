@@ -150,6 +150,7 @@ const CreateOrder: React.FC = () => {
             readOnly={false}
             onSubmit={submitOrder}
           />
+          {notification.pending && <div>Saving...</div>}
         </div>
       )}
     </div>
