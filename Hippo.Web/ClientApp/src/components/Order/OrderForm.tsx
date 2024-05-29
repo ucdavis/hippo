@@ -62,20 +62,15 @@ const OrderForm: React.FC<OrderFormProps> = ({
     //const balanceRemaining = total;
     //Possibly show a Installment payment amount
 
-    data.subTotal = subTotal.toString();
-    data.total = total.toString();
-
     try {
       setValue("subTotal", subTotal.toFixed(2));
     } catch (error) {
-      data.subTotal = "0";
       setValue("subTotal", "0");
     }
 
     try {
       setValue("total", total.toFixed(2));
     } catch (error) {
-      data.total = "0";
       setValue("total", "0");
     }
     clearErrors("total");
