@@ -74,26 +74,6 @@ const CreateOrder: React.FC = () => {
     }
   }, [cluster, isClusterAdmin, productId]);
 
-  //When order quantity is changed, update the total
-
-  const updateTotals = () => {
-    if (order) {
-      const quantity = order.quantity;
-      const unitPrice = parseFloat(order.unitPrice);
-      const adjustment = order.adjustment;
-      const subTotal = quantity * unitPrice;
-      const total = subTotal + adjustment;
-      const balanceRemaining = total;
-      //Possibly show a Installment payment amount
-      debugger;
-      setOrder({
-        ...order,
-        subTotal: subTotal.toString(),
-        total: total.toString(),
-        balanceRemaining: balanceRemaining.toString(),
-      });
-    }
-  };
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
     const editedOrder: OrderModel = {

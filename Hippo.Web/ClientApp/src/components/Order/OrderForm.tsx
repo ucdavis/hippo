@@ -43,6 +43,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
+  // const updateTotals = (data: OrderModel) => {
+  //   if (data) {
+  //     const quantity = data.quantity;
+  //     const unitPrice = parseFloat(data.unitPrice);
+  //     const adjustment = data.adjustment;
+  //     const subTotal = quantity * unitPrice;
+  //     const total = subTotal + adjustment;
+  //     //const balanceRemaining = total;
+  //     //Possibly show a Installment payment amount
+  //     debugger;
+
+  //     data.subTotal = subTotal.toString();
+  //     data.total = total.toString();
+  //   }
+  // };
+
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
