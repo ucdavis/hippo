@@ -1,5 +1,5 @@
 import { ShowFor } from "../../Shared/ShowFor";
-import { usePermissions } from "../../Shared/usePermissions1";
+import { usePermissions } from "../../Shared/usePermissions";
 import { GroupModel } from "../../types";
 import { Button, CardSubtitle, CardText } from "reactstrap";
 import { MouseEvent } from "react";

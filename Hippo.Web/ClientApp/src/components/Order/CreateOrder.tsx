@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { OrderModel } from "../../types";
 import { useParams } from "react-router-dom";
-import { usePermissions } from "../../Shared/usePermissions1";
+import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
