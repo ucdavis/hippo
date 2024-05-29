@@ -25,6 +25,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     setError,
     getValues,
     setValue,
+    clearErrors,
     formState: { isDirty, isSubmitting },
   } = methods;
 
@@ -54,7 +55,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
     const quantity = field === "quantity" ? value : data.quantity;
     const unitPrice =
       field === "unitPrice" ? value : parseFloat(data.unitPrice);
-    const adjustment = field === "adjustment" ? value : data.adjustment;
+    const adjustment =
+      field === "adjustment" ? value : parseFloat(data.adjustment.toString()); // Don't know why, but depending on the order of values changed, this can show up as a string
     const subTotal = quantity * unitPrice;
     const total = subTotal + adjustment;
     //const balanceRemaining = total;
@@ -63,13 +65,26 @@ const OrderForm: React.FC<OrderFormProps> = ({
     data.subTotal = subTotal.toString();
     data.total = total.toString();
 
-    setValue("subTotal", subTotal.toFixed(2));
-    setValue("total", total.toFixed(2));
+    try {
+      setValue("subTotal", subTotal.toFixed(2));
+    } catch (error) {
+      data.subTotal = "0";
+      setValue("subTotal", "0");
+    }
 
-    //setValue("quantity", quantity);
-    // setValue("unitPrice", unitPrice);
-    // setValue("adjustment", adjustment);
-    // etc
+    try {
+      setValue("total", total.toFixed(2));
+    } catch (error) {
+      data.total = "0";
+      setValue("total", "0");
+    }
+    clearErrors("total");
+    if (total < 0) {
+      setError("total", {
+        type: "custom",
+        message: "Total must be a positive number",
+      });
+    }
   };
 
   // TODO: rest of input validation?
@@ -140,7 +155,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="Quantity"
           required={true}
           readOnly={readOnly}
-          onChange={(e) => updateTotals("quantity", parseInt(e.target.value))}
+          onChange={(e) => updateTotals("quantity", parseFloat(e.target.value))}
         />
         <OrderFormField
           name="installments"
