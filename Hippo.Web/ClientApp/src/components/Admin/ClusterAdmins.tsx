@@ -5,7 +5,7 @@ import { User } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 
 export const ClusterAdmins = () => {
   // get all accounts that need approval and list them
@@ -103,38 +103,30 @@ export const ClusterAdmins = () => {
     }
   };
 
-  const columns: Column<User>[] = useMemo(
-    () => [
-      {
-        Header: "Name",
-        accessor: (user) => user.name,
-        sortable: true,
-      },
-      {
-        Header: "Email",
-        accessor: (user) => user.email,
-        sortable: true,
-      },
-      {
-        Header: "Action",
-        sortable: false,
-        Cell: (props) => (
-          <>
-            <button
-              disabled={notification.pending}
-              onClick={() => handleRemove(props.row.original)}
-              className="btn btn-danger"
-            >
-              {adminRemoving === props.row.original.id
-                ? "Removing..."
-                : "Remove"}
-            </button>
-          </>
-        ),
-      },
-    ],
-    [adminRemoving, handleRemove, notification.pending],
-  );
+  const columnHelper = createColumnHelper<User>();
+
+  const columns = [
+    columnHelper.accessor("name", {
+      header: "Name",
+      id: "Name", // id required for only this column for some reason
+    }),
+    columnHelper.accessor("email", {
+      header: "Email",
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Action",
+      cell: (props) => (
+        <button
+          disabled={notification.pending}
+          onClick={() => handleRemove(props.row.original)}
+          className="btn btn-danger"
+        >
+          {adminRemoving === props.row.original.id ? "Removing..." : "Remove"}
+        </button>
+      ),
+    }),
+  ];
 
   const usersData = useMemo(() => users ?? [], [users]);
 
@@ -176,7 +168,7 @@ export const ClusterAdmins = () => {
             columns={columns}
             data={usersData}
             initialState={{
-              sortBy: [{ id: "Name" }],
+              sorting: [{ id: "Name", desc: false }],
             }}
           />
         </div>
