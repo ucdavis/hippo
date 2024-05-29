@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
-import { authenticatedFetch } from "../../util/api";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -70,10 +70,10 @@ const CreateOrder: React.FC = () => {
 
         window.location.href = `/${cluster}/product/index`;
       } else {
-        setOrder((order) => ({ ...order, name: "No Product ID" }));
+        setOrder(defaultOrder);
       }
     }
-  }, [cluster, isClusterAdmin, isClusterAdminForCluster, productId]);
+  }, [cluster, isClusterAdmin, isClusterAdminForCluster, productId, setOrder]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -107,8 +107,28 @@ const CreateOrder: React.FC = () => {
       metaData: updatedOrder.metaData,
     };
 
-    // TODO: await API call
-    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
+    const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
+      method: "POST",
+      body: JSON.stringify(editedOrder),
+    });
+
+    setNotification(req, "Saving", "Order Saved", async (r) => {
+      if (r.status === 400) {
+        const errors = await parseBadRequest(response);
+        return errors;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      debugger;
+      //TODO: set window.location.href to the order details page (but then I need the id)
+      window.location.href = `/${cluster}/order/details/${data.id}`;
+    }
 
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };

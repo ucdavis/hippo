@@ -78,12 +78,14 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save([FromBody] Order model)
+        public async Task<IActionResult> Save([FromBody] Order model) //TODO: Might need to change this to a post model....
         {
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
 
             User principalInvestigator = null;
+
+            var orderToReturn = new Order();
 
 
             var currentUser = await _userService.GetCurrentUser();
@@ -147,6 +149,8 @@ namespace Hippo.Web.Controllers
                 await _historyService.OrderCreated(order, currentUser);
                 await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
 
+                orderToReturn = order;
+
             }
             else
             {
@@ -203,6 +207,8 @@ namespace Hippo.Web.Controllers
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
                 await _historyService.OrderUpdated(existingOrder, currentUser);
 
+                orderToReturn = existingOrder;
+
             }            
 
 
@@ -210,7 +216,7 @@ namespace Hippo.Web.Controllers
             await _dbContext.SaveChangesAsync();
 
 
-            return Ok();
+            return Ok(orderToReturn);
         }
 
 
