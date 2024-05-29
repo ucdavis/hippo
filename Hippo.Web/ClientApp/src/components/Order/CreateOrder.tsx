@@ -128,8 +128,7 @@ const CreateOrder: React.FC = () => {
 
     if (response.ok) {
       const data = await response.json();
-      debugger;
-      //TODO: set window.location.href to the order details page (but then I need the id)
+
       window.location.href = `/${cluster}/order/details/${data.id}`;
     }
 

@@ -251,7 +251,7 @@ namespace Hippo.Core.Services
                 ActedBy = actedBy,
                 AdminAction = actedBy != order.PrincipalInvestigator,
                 Action = action,
-                Type = HistoryTypes.Primary,
+                Type = HistoryTypes.Detail,
                 Details = Serialize(order)
             };
 
