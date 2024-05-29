@@ -384,7 +384,7 @@ export const Products = () => {
       },
     ],
 
-    [handleDelete, handleEdit],
+    [cluster, handleDelete, handleEdit],
   );
 
   if (products === undefined) {
@@ -403,7 +403,10 @@ export const Products = () => {
                 {" "}
                 Add Product{" "}
               </button>{" "}
-              <button className="btn btn-primary"> Adhoc Order </button>
+              <Link className="btn btn-primary" to={`/${cluster}/order/create`}>
+                {" "}
+                Adhoc Order{" "}
+              </Link>{" "}
             </div>
           </div>
         </ShowFor>

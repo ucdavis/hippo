@@ -36,12 +36,12 @@ const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
-  const [isClusterAdmin, setIsClusterAdmin] = useState(false);
+  const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
-  }, [isClusterAdminForCluster]);
+  }, [isClusterAdmin, isClusterAdminForCluster]);
 
   useEffect(() => {
     if (productId) {
@@ -66,11 +66,7 @@ const CreateOrder: React.FC = () => {
 
       fetchProductOrder();
     } else {
-      if (!isClusterAdmin) {
-        setOrder(null);
-
-        alert("Product ID not found"); //TODO: replace with toast
-
+      if (isClusterAdmin === false) {
         window.location.href = `/${cluster}/product/index`;
       } else {
         setOrder(defaultOrder);
@@ -134,6 +130,10 @@ const CreateOrder: React.FC = () => {
 
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
+
+  if (isClusterAdmin === null) {
+    return <div>Loading...</div>;
+  }
 
   if (!order) {
     return <div>Loading... {productId}</div>;

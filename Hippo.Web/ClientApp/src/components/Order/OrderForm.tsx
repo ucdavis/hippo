@@ -86,6 +86,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         <OrderFormField
           name="notes"
           label="Notes"
+          type="textarea"
           required={false}
           readOnly={readOnly}
         />
@@ -145,14 +146,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
         <OrderFormField
           name="subTotal"
           label="SubTotal"
-          required={true}
           readOnly={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
           name="total"
           label="Total"
-          required={true}
           readOnly={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />

@@ -22,7 +22,9 @@ export const usePermissions = () => {
   };
 
   const isClusterAdminForCluster = () => {
-    return isClusterAdmin;
+    if (!clusterName) return false;
+    if (isSystemAdmin || isClusterAdmin) return true;
+    return false;
   };
 
   return { canViewGroup, isClusterAdminForCluster };
