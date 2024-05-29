@@ -57,7 +57,7 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
             </div>
             {valueIsObject && (
               <Collapse isOpen={expanded[id]}>
-                {renderItems(value, id, level + 1)}
+                <ListGroup>{renderItems(value, id, level + 1)}</ListGroup>
               </Collapse>
             )}
           </ListGroupItem>
