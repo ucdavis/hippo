@@ -1,6 +1,6 @@
 import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { OrderModel } from "../../types";
+import { FormProvider, set, useForm } from "react-hook-form";
+import { OrderModel, OrderTotalCalculationModel } from "../../types";
 import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
@@ -23,6 +23,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const {
     handleSubmit,
     setError,
+    getValues,
+    setValue,
     formState: { isDirty, isSubmitting },
   } = methods;
 
@@ -43,21 +45,32 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
-  // const updateTotals = (data: OrderModel) => {
-  //   if (data) {
-  //     const quantity = data.quantity;
-  //     const unitPrice = parseFloat(data.unitPrice);
-  //     const adjustment = data.adjustment;
-  //     const subTotal = quantity * unitPrice;
-  //     const total = subTotal + adjustment;
-  //     //const balanceRemaining = total;
-  //     //Possibly show a Installment payment amount
-  //     debugger;
+  const updateTotals = (
+    field: keyof OrderTotalCalculationModel,
+    value: number,
+  ) => {
+    const data = getValues();
 
-  //     data.subTotal = subTotal.toString();
-  //     data.total = total.toString();
-  //   }
-  // };
+    const quantity = field === "quantity" ? value : data.quantity;
+    const unitPrice =
+      field === "unitPrice" ? value : parseFloat(data.unitPrice);
+    const adjustment = field === "adjustment" ? value : data.adjustment;
+    const subTotal = quantity * unitPrice;
+    const total = subTotal + adjustment;
+    //const balanceRemaining = total;
+    //Possibly show a Installment payment amount
+
+    data.subTotal = subTotal.toString();
+    data.total = total.toString();
+
+    setValue("subTotal", subTotal.toFixed(2));
+    setValue("total", total.toFixed(2));
+
+    //setValue("quantity", quantity);
+    // setValue("unitPrice", unitPrice);
+    // setValue("adjustment", adjustment);
+    // etc
+  };
 
   // TODO: rest of input validation?
   return (
@@ -117,6 +130,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="Unit Price"
           required={true}
           readOnly={readOnly}
+          onChange={(e) =>
+            updateTotals("unitPrice", parseFloat(e.target.value))
+          }
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
@@ -124,6 +140,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           label="Quantity"
           required={true}
           readOnly={readOnly}
+          onChange={(e) => updateTotals("quantity", parseInt(e.target.value))}
         />
         <OrderFormField
           name="installments"
@@ -144,6 +161,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="adjustment"
           label="Adjustment"
           readOnly={readOnly}
+          onChange={(e) =>
+            updateTotals("adjustment", parseFloat(e.target.value))
+          }
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
