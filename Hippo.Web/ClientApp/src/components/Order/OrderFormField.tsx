@@ -1,12 +1,10 @@
 import React from "react";
 import { OrderModel } from "../../types";
 import FormField from "../../Shared/Form/FormField";
-import { FieldPath, useFormContext } from "react-hook-form";
-import { FormFieldInputProps } from "../../Shared/Form/formTypes";
+import { useFormContext } from "react-hook-form";
+import { FormFieldProps } from "../../Shared/Form/formTypes";
 
-type OrderFormFieldProps = FormFieldInputProps & {
-  name: FieldPath<OrderModel>;
-};
+type OrderFormFieldProps = FormFieldProps<OrderModel> & {};
 
 const OrderFormField: React.FC<OrderFormFieldProps> = ({ ...props }) => {
   const {

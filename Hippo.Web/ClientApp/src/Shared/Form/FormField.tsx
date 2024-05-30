@@ -13,6 +13,8 @@ const FormField = <T extends Record<string, any>>({
   inputAppend,
   required = false,
   maxLength,
+  minLength,
+  max,
   min,
   readOnly = false,
   autoComplete,
@@ -28,9 +30,17 @@ const FormField = <T extends Record<string, any>>({
       value: maxLength,
       message: `${label} must be less than ${maxLength} characters`,
     },
+    minLength: {
+      value: minLength,
+      message: `${label} must be at least ${minLength} characters`,
+    },
+    max: {
+      value: max,
+      message: `${label} must be less than ${max}`,
+    },
     min: {
       value: min,
-      message: `${label} must be ${min} or more`,
+      message: `${label} must be greater than ${min}`,
     },
     ...options,
   });

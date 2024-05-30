@@ -1,7 +1,7 @@
 import React from "react";
-import { InputGroup, InputGroupText } from "reactstrap";
+import { InputGroup, InputGroupProps, InputGroupText } from "reactstrap";
 
-interface InputGroupWrapperProps {
+interface InputGroupWrapperProps extends InputGroupProps {
   children: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;

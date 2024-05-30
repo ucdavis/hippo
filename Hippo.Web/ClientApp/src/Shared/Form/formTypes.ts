@@ -10,25 +10,21 @@ import {
 } from "react-hook-form";
 import { InputType } from "reactstrap/types/lib/Input";
 
-export type FormFieldInputProps = Omit<InputProps, "pattern"> & {
-  type?: InputType;
-  label: string;
-  inputPrepend?: React.ReactNode;
-  inputAppend?: React.ReactNode;
-  required?: boolean; // overwriting RegisterOptions required tp be bool
-  maxLength?: number; // overwriting RegisterOptions maxLength tp be number
-  readOnly?: boolean;
-};
-
-export type FormFieldProps<T> = InputProps &
-  RegisterOptions &
-  FormFieldInputProps & {
-    register: UseFormRegister<T>;
-    error: FieldError;
-    name: FieldPath<T>;
+type FormFieldCommonProps<T> = Omit<InputProps, "pattern"> &
+  RegisterOptions & {
+    type?: InputType;
+    label: string;
+    inputPrepend?: React.ReactNode;
+    inputAppend?: React.ReactNode;
+    register?: UseFormRegister<T>;
   };
 
-export type FormFieldArrayProps<T> = {
+export type FormFieldProps<T> = FormFieldCommonProps<T> & {
+  error?: FieldError;
+  name: FieldPath<T>;
+};
+
+export type FormFieldArrayProps<T> = FormFieldCommonProps<T> & {
   arrayName: ArrayPath<T>;
   errors: FieldErrors<T>;
   register: UseFormRegister<T>;
