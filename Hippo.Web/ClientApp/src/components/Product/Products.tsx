@@ -184,6 +184,8 @@ export const Products = () => {
       ),
       canConfirm:
         notEmptyOrFalsey(editProductModel.name) &&
+        notEmptyOrFalsey(editProductModel.category) &&
+        notEmptyOrFalsey(editProductModel.units) &&
         !notification.pending &&
         parseFloat(editProductModel.unitPrice) > 0 &&
         editProductModel.installments > 0,
