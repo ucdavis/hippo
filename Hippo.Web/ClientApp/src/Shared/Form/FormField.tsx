@@ -46,8 +46,8 @@ const FormField = <T extends Record<string, any>>({
         >
           {children}
         </Input>
+        {!!error && <FormFeedback>{error.message}</FormFeedback>}
       </InputGroupWrapper>
-      {!!error && <FormFeedback>{error.message}</FormFeedback>}
     </FormGroup>
   );
 };

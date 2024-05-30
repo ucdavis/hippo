@@ -89,8 +89,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
         <OrderFormField
           name="status"
           label="Status"
-          required={true}
+          required={false}
           readOnly={true}
+          disabled={true}
         />
         <hr />
         <OrderFormField
@@ -193,12 +194,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
           name="subTotal"
           label="SubTotal"
           readOnly={true}
+          disabled={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <OrderFormField
           name="total"
           label="Total"
           readOnly={true}
+          disabled={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
         <MetaDataFields readOnly={readOnly} />
