@@ -11,12 +11,14 @@ import OrderFormField from "./OrderFormField";
 interface OrderFormProps {
   orderProp: OrderModel;
   readOnly: boolean;
+  isAdmin: boolean;
   onSubmit: (order: OrderModel) => Promise<void>;
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({
   orderProp,
   readOnly,
+  isAdmin,
   onSubmit,
 }) => {
   const methods = useForm<OrderModel>({ defaultValues: orderProp });
@@ -51,12 +53,19 @@ const OrderForm: React.FC<OrderFormProps> = ({
     value: number,
   ) => {
     const data = getValues();
+    console.log(data);
 
+    let adjustment = 0.0;
+    try {
+      adjustment =
+        field === "adjustment" ? value : parseFloat(data.adjustment.toString()); // Don't know why, but depending on the order of values changed, this can show up as a string
+    } catch (error) {
+      adjustment = 0.0;
+    }
     const quantity = field === "quantity" ? value : data.quantity;
     const unitPrice =
       field === "unitPrice" ? value : parseFloat(data.unitPrice);
-    const adjustment =
-      field === "adjustment" ? value : parseFloat(data.adjustment.toString()); // Don't know why, but depending on the order of values changed, this can show up as a string
+
     const subTotal = quantity * unitPrice;
     const total = subTotal + adjustment;
     //const balanceRemaining = total;
@@ -86,109 +95,127 @@ const OrderForm: React.FC<OrderFormProps> = ({
   return (
     <FormProvider {...methods}>
       <Form onSubmit={handleSubmit(submitForm)} className="mb-3">
-        <OrderFormField
-          name="status"
-          label="Status"
-          required={false}
-          readOnly={true}
-          disabled={true}
-        />
+        <fieldset disabled>
+          <OrderFormField
+            name="status"
+            label="Status"
+            required={false}
+            readOnly={true}
+          />
+        </fieldset>
         <hr />
-        <OrderFormField
-          name="name"
-          label="Name"
-          required={true}
-          readOnly={readOnly}
-          maxLength={50}
-        />
-        <OrderFormField
-          name="productName"
-          label="Product Name"
-          required={true}
-          readOnly={readOnly}
-          maxLength={50}
-        />
-        <OrderFormField
-          name="description"
-          label="Description"
-          type="textarea"
-          required={true}
-          readOnly={readOnly}
-          maxLength={250}
-        />
-        <OrderFormField name="category" label="Category" readOnly={readOnly} />
-        <OrderFormField
-          name="externalReference"
-          label="External Reference"
-          readOnly={readOnly}
-          maxLength={150}
-        />
-        <OrderFormField
-          name="notes"
-          label="Notes"
-          type="textarea"
-          required={false}
-          readOnly={readOnly}
-        />
-        <OrderFormField
-          name="units"
-          label="Units"
-          required={true}
-          readOnly={readOnly}
-        />
-        <OrderFormField
-          name="unitPrice"
-          label="Unit Price"
-          required={true}
-          readOnly={readOnly}
-          onChange={(e) =>
-            updateTotals("unitPrice", parseFloat(e.target.value))
-          }
-          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-        />
-        <OrderFormField
-          name="quantity"
-          label="Quantity"
-          required={true}
-          readOnly={readOnly}
-          onChange={(e) => updateTotals("quantity", parseFloat(e.target.value))}
-        />
-        <OrderFormField
-          name="installments"
-          label="Installments"
-          readOnly={readOnly}
-        />
-        <OrderFormField
-          name="installmentType"
-          label="Installment Type"
-          readOnly={readOnly}
-          disabled={readOnly}
-          type="select"
-        >
-          <option value="Monthly">Monthly</option>
-          <option value="Yearly">Yearly</option>
-        </OrderFormField>
-        <OrderFormField
-          name="adjustment"
-          label="Adjustment"
-          readOnly={readOnly}
-          onChange={(e) =>
-            updateTotals("adjustment", parseFloat(e.target.value))
-          }
-          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-        />
-        <OrderFormField
-          name="adjustmentReason"
-          label="Adjustment Reason"
-          readOnly={readOnly}
-          type="textarea"
-        />
-        <OrderFormField
-          name="adminNotes"
-          label="Admin Notes"
-          readOnly={readOnly}
-          type="textarea"
-        />
+        <fieldset disabled={readOnly}>
+          <fieldset disabled={!isAdmin}>
+            <OrderFormField
+              name="productName"
+              label="Product Name"
+              required={true}
+              readOnly={readOnly || !isAdmin}
+              maxLength={50}
+            />
+            <OrderFormField
+              name="description"
+              label="Description"
+              type="textarea"
+              required={true}
+              readOnly={readOnly || !isAdmin}
+              maxLength={250}
+            />
+            <OrderFormField
+              name="category"
+              label="Category"
+              readOnly={readOnly || !isAdmin}
+            />
+            <OrderFormField
+              name="units"
+              label="Units"
+              required={true}
+              readOnly={readOnly || !isAdmin}
+            />
+
+            <OrderFormField
+              name="unitPrice"
+              label="Unit Price"
+              required={true}
+              readOnly={readOnly || !isAdmin}
+              onChange={(e) =>
+                updateTotals("unitPrice", parseFloat(e.target.value))
+              }
+              inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+            />
+            <OrderFormField
+              name="installments"
+              label="Installments"
+              readOnly={readOnly || !isAdmin}
+            />
+            <OrderFormField
+              name="installmentType"
+              label="Installment Type"
+              readOnly={readOnly || !isAdmin}
+              type="select"
+            >
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </OrderFormField>
+          </fieldset>
+          <OrderFormField
+            name="name"
+            label="Name"
+            required={true}
+            readOnly={readOnly}
+            maxLength={50}
+          />
+
+          <OrderFormField
+            name="notes"
+            label="Notes"
+            type="textarea"
+            required={false}
+            readOnly={readOnly}
+          />
+
+          <OrderFormField
+            name="quantity"
+            label="Quantity"
+            required={true}
+            readOnly={readOnly}
+            onChange={(e) =>
+              updateTotals("quantity", parseFloat(e.target.value))
+            }
+          />
+          <fieldset disabled={!isAdmin}>
+            <OrderFormField
+              name="externalReference"
+              label="External Reference"
+              readOnly={readOnly || !isAdmin}
+              maxLength={150}
+            />
+            <OrderFormField
+              name="adjustment"
+              label="Adjustment"
+              readOnly={readOnly || !isAdmin}
+              onChange={(e) =>
+                updateTotals("adjustment", parseFloat(e.target.value))
+              }
+              inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+            />
+            <OrderFormField
+              name="adjustmentReason"
+              label="Adjustment Reason"
+              readOnly={readOnly || !isAdmin}
+              type="textarea"
+            />
+          </fieldset>
+          {isAdmin && (
+            <OrderFormField
+              name="adminNotes"
+              label="Admin Notes"
+              readOnly={readOnly}
+              type="textarea"
+            />
+          )}
+          <MetaDataFields readOnly={readOnly} />
+        </fieldset>
         <hr />
         <OrderFormField
           name="subTotal"
@@ -204,7 +231,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           disabled={true}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
         />
-        <MetaDataFields readOnly={readOnly} />
+
         {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
       </Form>
     </FormProvider>

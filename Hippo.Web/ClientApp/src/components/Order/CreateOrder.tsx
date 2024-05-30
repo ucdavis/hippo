@@ -148,6 +148,7 @@ const CreateOrder: React.FC = () => {
           <OrderForm
             orderProp={order}
             readOnly={false}
+            isAdmin={isClusterAdmin}
             onSubmit={submitOrder}
           />
           {notification.pending && <div>Saving...</div>}

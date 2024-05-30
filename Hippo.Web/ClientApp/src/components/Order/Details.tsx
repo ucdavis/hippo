@@ -11,12 +11,19 @@ import { Column } from "react-table";
 import { ReactTable } from "../../Shared/ReactTable";
 import ChartStringValidation from "./ChartStringValidation";
 import OrderForm from "./OrderForm";
+import { usePermissions } from "../../Shared/usePermissions";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
   const [order, setOrder] = useState<OrderModel | null>(null);
   const [balanceRemaining, setBalanceRemaining] = useState<number>(0);
   const [balancePending, setBalancePending] = useState<number>(0);
+  const { isClusterAdminForCluster } = usePermissions();
+  const [isClusterAdmin, setIsClusterAdmin] = useState(null);
+
+  useEffect(() => {
+    setIsClusterAdmin(isClusterAdminForCluster());
+  }, [isClusterAdmin, isClusterAdminForCluster]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -165,7 +172,12 @@ export const Details = () => {
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
 
-          <OrderForm orderProp={order} readOnly={true} onSubmit={submitOrder} />
+          <OrderForm
+            orderProp={order}
+            readOnly={true}
+            isAdmin={isClusterAdmin}
+            onSubmit={submitOrder}
+          />
 
           <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
