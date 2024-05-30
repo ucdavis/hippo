@@ -76,20 +76,6 @@ export const Details = () => {
     [],
   );
 
-  const metadataColumns = useMemo<Column<OrderMetadataModel>[]>(
-    () => [
-      {
-        Header: "Name",
-        accessor: "name",
-      },
-      {
-        Header: "Value",
-        accessor: "value",
-      },
-    ],
-    [],
-  );
-
   const paymentColumns = useMemo<Column<PaymentModel>[]>(
     () => [
       {
@@ -203,8 +189,6 @@ export const Details = () => {
               ))}
             </tbody>
           </table>
-          <h2>Metadata</h2>
-          <ReactTable columns={metadataColumns} data={order.metaData} />
           <h2>History</h2>
           <ReactTable
             columns={historyColumns}
