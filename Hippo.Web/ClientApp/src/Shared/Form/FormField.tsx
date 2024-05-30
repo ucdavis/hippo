@@ -32,7 +32,7 @@ const FormField = <T extends Record<string, any>>({
     },
     minLength: {
       value: minLength,
-      message: `${label} must be at least 2 characters`,
+      message: `${label} must be at least ${minLength} characters`,
     },
     max: {
       value: max,
