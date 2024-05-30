@@ -13,6 +13,9 @@ const FormField = <T extends Record<string, any>>({
   inputAppend,
   required = false,
   maxLength,
+  minLength,
+  max,
+  min,
   readOnly = false,
   autoComplete,
   children,
@@ -27,28 +30,43 @@ const FormField = <T extends Record<string, any>>({
       value: maxLength,
       message: `${label} must be less than ${maxLength} characters`,
     },
+    minLength: {
+      value: minLength,
+      message: `${label} must be at least 2 characters`,
+    },
+    max: {
+      value: max,
+      message: `${label} must be less than ${max}`,
+    },
+    min: {
+      value: min,
+      message: `${label} must be greater than ${min}`,
+    },
     ...options,
   });
 
   return (
-    <FormGroup>
-      <Label for={`field-${name}`}>{label}</Label>
-      <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
-        <Input
-          innerRef={ref}
-          id={`field-${name}`}
-          name={autoComplete ? name : `field-${name}`} // less likely to autofill
-          type={type}
-          invalid={!!error}
-          readOnly={readOnly}
-          autoComplete={autoComplete ?? "new-password"}
-          {...rest}
-        >
-          {children}
-        </Input>
-      </InputGroupWrapper>
-      {!!error && <FormFeedback>{error.message}</FormFeedback>}
-    </FormGroup>
+    <>
+      <FormGroup>
+        <Label for={`field-${name}`}>{label}</Label>
+        <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
+          <Input
+            innerRef={ref}
+            id={`field-${name}`}
+            name={autoComplete ? name : `field-${name}`} // less likely to autofill
+            type={type}
+            invalid={!!error}
+            readOnly={readOnly}
+            aria-invalid={!!error}
+            autoComplete={autoComplete ?? "new-password"}
+            {...rest}
+          >
+            {children}
+          </Input>
+          <FormFeedback valid={!error}>{error?.message}</FormFeedback>
+        </InputGroupWrapper>
+      </FormGroup>
+    </>
   );
 };
 
