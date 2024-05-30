@@ -100,6 +100,10 @@ export const ActiveAccounts = () => {
           ))}
         </>
       ),
+      meta: {
+        exportFn: (account) =>
+          account.memberOfGroups.map((g) => g.displayName).join(", "),
+      },
     }),
     columnHelper.accessor("name", {
       header: "Name",

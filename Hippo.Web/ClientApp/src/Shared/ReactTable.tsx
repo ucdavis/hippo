@@ -17,16 +17,22 @@ import type {
   TableState,
   RowData,
   ColumnFiltersState,
+  Cell,
+  Header,
 } from "@tanstack/react-table";
 // import { ColumnFilterHeaders, DefaultColumnFilter } from "./Filtering";
-import { PaginationItem, PaginationLink } from "reactstrap";
+import { Button, PaginationItem, PaginationLink } from "reactstrap";
 import { DebouncedInput } from "./DebouncedInput";
+import innerText from "react-innertext";
+import { arrayToCsv, startDownload } from "../util/ExportHelpers";
+import { isStringArray } from "../util/TypeChecks";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     filterVariant?: "text" | "range" | "select";
+    exportFn?: (data: TData) => string;
   }
 }
 
@@ -89,8 +95,76 @@ export const ReactTable = <T extends object>({
 
   const page = table.getPaginationRowModel();
 
+  const getHeaderExport = (header: Header<T, unknown>) => {
+    if (typeof header.column.columnDef.header === "function") {
+      const content = header.column.columnDef.header(header.getContext());
+      if (typeof content === "string") {
+        return content;
+      }
+      return innerText(content);
+    } else {
+      return header.column.columnDef.header ?? header.id;
+    }
+  };
+
+  const getCellExport = (cell: Cell<T, unknown>) => {
+    const { exportFn } = cell.column.columnDef.meta ?? {};
+    if (exportFn) {
+      return exportFn(cell.row.original);
+    }
+    const value = cell.getValue();
+    if (value === null || value === undefined) return "";
+    if (value instanceof Date) return value.toLocaleDateString();
+    if (typeof value === "number") return value.toLocaleString();
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (isStringArray(value)) return value.join(", ");
+    if (typeof value === "object") return JSON.stringify(value);
+    return value.toString();
+  };
+
+  const handleExportCsv = (filter: boolean) => {
+    const headers = table
+      .getHeaderGroups()
+      .map((x) => x.headers)
+      .flat();
+    const headerNames = headers
+      .filter((header) => !!header.column.accessorFn) // exclude group/display columns
+      .map(getHeaderExport);
+    const rowModel = filter
+      ? table.getFilteredRowModel()
+      : table.getPreFilteredRowModel();
+    const rowData = rowModel.rows.map((row) =>
+      row
+        .getAllCells()
+        .filter((cell) => !!cell.column.accessorFn) // exclude group/display columns
+        .map(getCellExport),
+    );
+
+    const csvString = arrayToCsv([headerNames, ...rowData]);
+
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    startDownload(blob, "exported-data.csv");
+  };
+
+  const columnFilterApplied = table
+    .getAllColumns()
+    .some((c) => c.getIsFiltered());
+
   return (
     <>
+      <div className="data-table-prolog float-end">
+        {columnFilterApplied && (
+          <>
+            <Button color="link" onClick={() => handleExportCsv(true)}>
+              Export Filtered CSV
+            </Button>{" "}
+            {" | "}
+          </>
+        )}
+        <Button color="link" onClick={() => handleExportCsv(false)}>
+          Export CSV
+        </Button>
+      </div>
       <table className="table table-bordered table-striped">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

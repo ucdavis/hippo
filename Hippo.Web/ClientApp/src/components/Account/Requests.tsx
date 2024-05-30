@@ -94,6 +94,9 @@ export const Requests = () => {
           showDisplayName={false}
         />
       ),
+      meta: {
+        exportFn: (request) => request.groupModel.displayName,
+      },
     }),
     columnHelper.accessor(
       (request) => isAccountRequest(request) && request.data.supervisingPI,

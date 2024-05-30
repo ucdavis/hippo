@@ -153,6 +153,9 @@ export const Groups = () => {
           showDisplayName={false}
         />
       ),
+      meta: {
+        exportFn: (group) => group.name,
+      },
     }),
     columnHelper.accessor("displayName", {
       header: "Display Name",
