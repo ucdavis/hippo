@@ -99,7 +99,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-          type={"number"}
+          valueAsNumber={true}
           deps={"total"}
         />
         <OrderFormField
@@ -140,7 +140,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           required={true}
           readOnly={readOnly}
           min={0.000001}
-          type="number"
+          valueAsNumber={true}
           deps={"total"}
         />
 
@@ -157,7 +157,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-          type="number"
+          valueAsNumber={true}
           deps={"total"}
         />
         <OrderFormField

@@ -27,8 +27,8 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = () => {
   const subTotal = quantity * parseFloat(unitPrice);
   const total = subTotal + Number(adjustment);
 
-  setValue("subTotal", subTotal.toString());
-  setValue("total", total.toString());
+  setValue("subTotal", subTotal.toFixed(2));
+  setValue("total", total.toFixed(2));
 
   return (
     <>
@@ -44,7 +44,7 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = () => {
         type="number"
         name="total"
         label="Total"
-        min={0}
+        min={0.01}
         readOnly={true}
         disabled={true}
         inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
