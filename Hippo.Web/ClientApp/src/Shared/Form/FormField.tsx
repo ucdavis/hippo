@@ -46,27 +46,24 @@ const FormField = <T extends Record<string, any>>({
   });
 
   return (
-    <>
-      <FormGroup>
-        <Label for={`field-${name}`}>{label}</Label>
-        <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
-          <Input
-            innerRef={ref}
-            id={`field-${name}`}
-            name={autoComplete ? name : `field-${name}`} // less likely to autofill
-            type={type}
-            invalid={!!error}
-            readOnly={readOnly}
-            aria-invalid={!!error}
-            autoComplete={autoComplete ?? "new-password"}
-            {...rest}
-          >
-            {children}
-          </Input>
-          <FormFeedback valid={!error}>{error?.message}</FormFeedback>
-        </InputGroupWrapper>
-      </FormGroup>
-    </>
+    <FormGroup>
+      <Label for={`field-${name}`}>{label}</Label>
+      <InputGroupWrapper prepend={inputPrepend} append={inputAppend}>
+        <Input
+          innerRef={ref}
+          id={`field-${name}`}
+          name={autoComplete ? name : `field-${name}`} // less likely to autofill
+          type={type}
+          invalid={!!error}
+          readOnly={readOnly}
+          autoComplete={autoComplete ?? "new-password"}
+          {...rest}
+        >
+          {children}
+        </Input>
+        {!!error && <FormFeedback>{error.message}</FormFeedback>}
+      </InputGroupWrapper>
+    </FormGroup>
   );
 };
 
