@@ -411,13 +411,7 @@ export const Products = () => {
         <hr />
         <div className="row justify-content-center">
           <div className="col-md-8">
-            <ReactTable
-              columns={columns}
-              data={products}
-              initialState={{
-                sortBy: [{ id: "Name" }],
-              }}
-            />
+            <ReactTable columns={columns} data={products} />
           </div>
         </div>
       </div>

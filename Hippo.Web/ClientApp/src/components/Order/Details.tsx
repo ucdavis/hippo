@@ -7,11 +7,12 @@ import {
   PaymentModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { Column } from "react-table";
 import { ReactTable } from "../../Shared/ReactTable";
+import { createColumnHelper } from "@tanstack/react-table";
 import ChartStringValidation from "./ChartStringValidation";
 import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
+import { Row } from "reactstrap";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -48,67 +49,79 @@ export const Details = () => {
     fetchOrder();
   }, [cluster, orderId]);
 
-  const historyColumns = useMemo<Column<HistoryModel>[]>(
-    () => [
-      {
-        Header: "Date",
-        accessor: "actedDate",
-        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
-      },
-      {
-        Header: "Actor",
-        accessor: "actedBy",
-        Cell: ({ value }) => (
-          <span>
-            {value.firstName} {value.lastName} ({value.email})
-          </span>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-      },
-      {
-        Header: "Details",
-        accessor: "details",
-      },
-    ],
-    [],
-  );
+  const historyColumnHelper = createColumnHelper<HistoryModel>();
 
-  const paymentColumns = useMemo<Column<PaymentModel>[]>(
-    () => [
-      {
-        Header: "Amount",
-        accessor: "amount",
-        Cell: ({ value }) => (
-          <span>
-            <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
-          </span>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-      },
-      {
-        Header: "Created On",
-        accessor: "createdOn",
-        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
-      },
-      {
-        Header: "Created By",
-        accessor: "createdBy",
-        Cell: ({ value }) =>
-          (value && (
-            <span>
-              {value?.firstName} {value?.lastName} ({value?.email})
-            </span>
-          )) || <span>System</span>,
-      },
-    ],
-    [],
-  );
+  const historyColumns = [
+    historyColumnHelper.accessor("actedDate", {
+      header: "Date",
+      id: "actedDate",
+      cell: (value) => (
+        <span>{new Date(value.row.original.actedDate).toLocaleString()}</span>
+      ),
+    }),
+  ];
+
+  // const historyColumns = useMemo<Column<HistoryModel>[]>(
+  //   () => [
+  //     {
+  //       Header: "Date",
+  //       accessor: "actedDate",
+  //       Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
+  //     },
+  //     {
+  //       Header: "Actor",
+  //       accessor: "actedBy",
+  //       Cell: ({ value }) => (
+  //         <span>
+  //           {value.firstName} {value.lastName} ({value.email})
+  //         </span>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Status",
+  //       accessor: "status",
+  //     },
+  //     {
+  //       Header: "Details",
+  //       accessor: "details",
+  //     },
+  //   ],
+  //   [],
+  // );
+
+  // const paymentColumns = useMemo<Column<PaymentModel>[]>(
+  //   () => [
+  //     {
+  //       Header: "Amount",
+  //       accessor: "amount",
+  //       Cell: ({ value }) => (
+  //         <span>
+  //           <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
+  //         </span>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Status",
+  //       accessor: "status",
+  //     },
+  //     {
+  //       Header: "Created On",
+  //       accessor: "createdOn",
+  //       Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
+  //     },
+  //     {
+  //       Header: "Created By",
+  //       accessor: "createdBy",
+  //       Cell: ({ value }) =>
+  //         (value && (
+  //           <span>
+  //             {value?.firstName} {value?.lastName} ({value?.email})
+  //           </span>
+  //         )) || <span>System</span>,
+  //     },
+  //   ],
+  //   [],
+  // );
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -190,13 +203,7 @@ export const Details = () => {
             </tbody>
           </table>
           <h2>History</h2>
-          <ReactTable
-            columns={historyColumns}
-            data={order.history}
-            initialState={{
-              sortBy: [{ id: "Date" }],
-            }}
-          />
+          <ReactTable columns={historyColumns} data={order.history} />
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
@@ -233,9 +240,9 @@ export const Details = () => {
             </div>
           )}
           <br />
-          {order.payments.length !== 0 && (
+          {/* {order.payments.length !== 0 && (
             <ReactTable columns={paymentColumns} data={order.payments} />
-          )}
+          )} */}
         </div>
       </div>
     </div>
