@@ -10,6 +10,7 @@ import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 import { AccessTypes } from "../../constants";
 import AppContext from "../../Shared/AppContext";
 import { createColumnHelper } from "@tanstack/react-table";
+import { Button } from "reactstrap";
 
 const defaultCluster: ClusterModel = {
   id: 0,
@@ -452,10 +453,10 @@ export const Clusters = () => {
     <>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <div className="float-end">
-            <button onClick={handleCreate} className="btn btn-primary">
-              Create
-            </button>
+          <div className="data-table-prolog float-end">
+            <Button color="link" onClick={handleCreate}>
+              Create New Cluster
+            </Button>
           </div>
         </div>
         <div className="col-md-8">
@@ -465,6 +466,7 @@ export const Clusters = () => {
             initialState={{
               sorting: [{ id: "Name", desc: false }],
             }}
+            disableExport
           />
         </div>
       </div>

@@ -13,16 +13,13 @@ import {
 import type {
   Column,
   ColumnDef,
-  FilterFns,
   TableState,
   RowData,
   ColumnFiltersState,
   Cell,
   Header,
 } from "@tanstack/react-table";
-// import { ColumnFilterHeaders, DefaultColumnFilter } from "./Filtering";
 import { Button, PaginationItem, PaginationLink } from "reactstrap";
-import { DebouncedInput } from "./DebouncedInput";
 import innerText from "react-innertext";
 import { arrayToCsv, startDownload } from "../util/ExportHelpers";
 import { isStringArray } from "../util/TypeChecks";
@@ -48,14 +45,14 @@ interface Props<T extends object> {
   columns: ColumnDef<T, any>[];
   data: T[];
   initialState?: Partial<TableState>;
-  filterFns?: FilterFns;
+  disableExport?: boolean;
 }
 
 export const ReactTable = <T extends object>({
   columns,
   data,
   initialState,
-  filterFns: filterTypes,
+  disableExport = false,
 }: Props<T>) => {
   const defaultColumn = React.useMemo(() => ({}) as Partial<Column<T>>, []);
 
@@ -152,19 +149,21 @@ export const ReactTable = <T extends object>({
 
   return (
     <>
-      <div className="data-table-prolog float-end">
-        {columnFilterApplied && (
-          <>
-            <Button color="link" onClick={() => handleExportCsv(true)}>
-              Export Filtered CSV
-            </Button>{" "}
-            {" | "}
-          </>
-        )}
-        <Button color="link" onClick={() => handleExportCsv(false)}>
-          Export CSV
-        </Button>
-      </div>
+      {!disableExport && (
+        <div className="data-table-prolog float-end">
+          {columnFilterApplied && (
+            <>
+              <Button color="link" onClick={() => handleExportCsv(true)}>
+                Export Filtered CSV
+              </Button>{" "}
+              {" | "}
+            </>
+          )}
+          <Button color="link" onClick={() => handleExportCsv(false)}>
+            Export CSV
+          </Button>
+        </div>
+      )}
       <table className="table table-bordered table-striped">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -334,7 +333,8 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
 
   return filterVariant === "range" ? (
     <div>
-      <DebouncedInput
+      <input
+        className="form-control"
         type="number"
         min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
         max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
@@ -348,7 +348,8 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
             : ""
         }
       />
-      <DebouncedInput
+      <input
+        className="form-control"
         type="number"
         min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
         max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
@@ -385,10 +386,11 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
           <option value={value} key={value} />
         ))}
       </datalist>
-      <DebouncedInput
+      <input
+        className="form-control"
         type="text"
         value={(columnFilterValue ?? "") as string}
-        onChange={(value) => column.setFilterValue(value)}
+        onChange={(e) => column.setFilterValue(e.target.value)}
         placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
         list={column.id + "list"}
       />
