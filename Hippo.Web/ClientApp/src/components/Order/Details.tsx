@@ -89,39 +89,39 @@ export const Details = () => {
   //   [],
   // );
 
-  // const paymentColumns = useMemo<Column<PaymentModel>[]>(
-  //   () => [
-  //     {
-  //       Header: "Amount",
-  //       accessor: "amount",
-  //       Cell: ({ value }) => (
-  //         <span>
-  //           <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
-  //         </span>
-  //       ),
-  //     },
-  //     {
-  //       Header: "Status",
-  //       accessor: "status",
-  //     },
-  //     {
-  //       Header: "Created On",
-  //       accessor: "createdOn",
-  //       Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
-  //     },
-  //     {
-  //       Header: "Created By",
-  //       accessor: "createdBy",
-  //       Cell: ({ value }) =>
-  //         (value && (
-  //           <span>
-  //             {value?.firstName} {value?.lastName} ({value?.email})
-  //           </span>
-  //         )) || <span>System</span>,
-  //     },
-  //   ],
-  //   [],
-  // );
+  const paymentColumns = useMemo<Column<PaymentModel>[]>(
+    () => [
+      {
+        Header: "Amount",
+        accessor: "amount",
+        Cell: ({ value }) => (
+          <span>
+            <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
+          </span>
+        ),
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+      },
+      {
+        Header: "Created On",
+        accessor: "createdOn",
+        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
+      },
+      {
+        Header: "Created By",
+        accessor: "createdBy",
+        Cell: ({ value }) =>
+          (value && (
+            <span>
+              {value?.firstName} {value?.lastName} ({value?.email})
+            </span>
+          )) || <span>System</span>,
+      },
+    ],
+    [],
+  );
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -240,9 +240,9 @@ export const Details = () => {
             </div>
           )}
           <br />
-          {/* {order.payments.length !== 0 && (
+          {order.payments.length !== 0 && (
             <ReactTable columns={paymentColumns} data={order.payments} />
-          )} */}
+          )}
         </div>
       </div>
     </div>
