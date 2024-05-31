@@ -380,19 +380,12 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
     </select>
   ) : (
     <>
-      {/* Autocomplete suggestions from faceted values feature */}
-      <datalist id={column.id + "list"}>
-        {sortedUniqueValues.map((value: any) => (
-          <option value={value} key={value} />
-        ))}
-      </datalist>
       <input
         className="form-control"
         type="text"
         value={(columnFilterValue ?? "") as string}
         onChange={(e) => column.setFilterValue(e.target.value)}
-        placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
-        list={column.id + "list"}
+        placeholder={"Search..."}
       />
     </>
   );
