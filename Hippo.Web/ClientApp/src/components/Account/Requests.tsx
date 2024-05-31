@@ -5,10 +5,10 @@ import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
 import { SplitCamelCase, getGroupModelString } from "../../util/StringHelpers";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { isAccountRequest } from "../../util/TypeChecks";
+import { createColumnHelper } from "@tanstack/react-table";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -70,82 +70,78 @@ export const Requests = () => {
     [requests],
   );
 
-  const columns: Column<RequestModel>[] = useMemo(
-    () => [
-      {
-        Header: "Request",
-        accessor: (request) => SplitCamelCase(request.action),
-        sortable: true,
+  const columnHelper = createColumnHelper<RequestModel>();
+
+  const columns = [
+    columnHelper.accessor((request) => SplitCamelCase(request.action), {
+      header: "Request",
+      meta: {
+        filterVariant: "select",
       },
-      {
-        Header: "Name",
-        accessor: (request) => request.requesterName,
-        sortable: true,
+    }),
+    columnHelper.accessor("requesterName", {
+      header: "Name",
+      id: "Name", // id required for only this column for some reason
+    }),
+    columnHelper.accessor("requesterEmail", {
+      header: "Email",
+    }),
+    columnHelper.accessor((row) => getGroupModelString(row.groupModel), {
+      header: "Group",
+      cell: (props) => (
+        <GroupNameWithTooltip
+          group={props.row.original.groupModel}
+          showDisplayName={false}
+        />
+      ),
+      meta: {
+        exportFn: (request) => request.groupModel.displayName,
       },
+    }),
+    columnHelper.accessor(
+      (request) => isAccountRequest(request) && request.data.supervisingPI,
       {
-        Header: "Email",
-        accessor: (request) => request.requesterEmail,
-        sortable: true,
+        header: "Supervising PI",
       },
+    ),
+    columnHelper.accessor(
+      (request) =>
+        isAccountRequest(request) && request.data.accessTypes.join(", "),
       {
-        Header: "Group",
-        accessor: (row) => getGroupModelString(row.groupModel),
-        Cell: (props) => (
-          <GroupNameWithTooltip
-            group={props.row.original.groupModel}
-            showDisplayName={false}
-          />
-        ),
-        sortable: true,
+        header: "Access Types",
+        meta: {
+          filterVariant: "select",
+        },
       },
-      {
-        Header: "Supervising PI",
-        accessor: (request) =>
-          isAccountRequest(request) && request.data.supervisingPI,
-        sortable: true,
-      },
-      {
-        Header: "Access Types",
-        accessor: (request) =>
-          isAccountRequest(request) && request.data.accessTypes.join(", "),
-        sortable: true,
-      },
-      {
-        Header: "Action",
-        sortable: false,
-        Cell: (props) => (
-          <>
-            <button
-              id="approveButton"
+    ),
+    columnHelper.display({
+      id: "actions",
+      header: "Action",
+      cell: (props) => (
+        <>
+          <button
+            id="approveButton"
+            disabled={notification.pending}
+            onClick={() => handleApprove(props.row.original)}
+            className="btn btn-primary"
+          >
+            {requestApproving === props.row.original.id
+              ? "Approving..."
+              : "Approve"}
+          </button>
+          {" | "}
+          {requestApproving !== props.row.original.id && (
+            <RejectRequest
+              request={props.row.original}
+              removeAccount={() => handleReject(props.row.original)}
+              updateUrl={`/api/${cluster}/request/reject/`}
               disabled={notification.pending}
-              onClick={() => handleApprove(props.row.original)}
-              className="btn btn-primary"
-            >
-              {requestApproving === props.row.original.id
-                ? "Approving..."
-                : "Approve"}
-            </button>
-            {" | "}
-            {requestApproving !== props.row.original.id && (
-              <RejectRequest
-                request={props.row.original}
-                removeAccount={() => handleReject(props.row.original)}
-                updateUrl={`/api/${cluster}/request/reject/`}
-                disabled={notification.pending}
-              ></RejectRequest>
-            )}
-          </>
-        ),
-      },
-    ],
-    [
-      requestApproving,
-      cluster,
-      notification.pending,
-      handleApprove,
-      handleReject,
-    ],
-  );
+            ></RejectRequest>
+          )}
+        </>
+      ),
+    }),
+  ];
 
   const accountsData = useMemo(() => requests ?? [], [requests]);
 
@@ -164,7 +160,10 @@ export const Requests = () => {
             columns={columns}
             data={accountsData}
             initialState={{
-              sortBy: [{ id: "Request" }, { id: "Name" }],
+              sorting: [
+                { id: "Request", desc: false },
+                { id: "Name", desc: false },
+              ],
             }}
           />
         </div>

@@ -5,11 +5,11 @@ import { GroupModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import ObjectTree from "../../Shared/ObjectTree";
 import GroupDetails from "../Group/GroupDetails";
+import { createColumnHelper } from "@tanstack/react-table";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -142,46 +142,47 @@ export const Groups = () => {
     [showDetails],
   );
 
-  const columns: Column<GroupModel>[] = useMemo(
-    () => [
-      {
-        Header: "Group",
-        accessor: (row) => getGroupModelString(row),
-        Cell: (props) => (
-          <GroupNameWithTooltip
-            group={props.row.original}
-            showDisplayName={false}
-          />
-        ),
+  const columnHelper = createColumnHelper<GroupModel>();
+
+  const columns = [
+    columnHelper.accessor((row) => getGroupModelString(row), {
+      header: "Group",
+      cell: (props) => (
+        <GroupNameWithTooltip
+          group={props.row.original}
+          showDisplayName={false}
+        />
+      ),
+      meta: {
+        exportFn: (group) => group.name,
       },
-      {
-        Header: "Display Name",
-        accessor: (group) => group.displayName,
-      },
-      {
-        Header: "Action",
-        Cell: (props) => (
-          <>
-            <button
-              disabled={notification.pending}
-              onClick={() => handleEdit(props.row.original)}
-              className="btn btn-primary"
-            >
-              {editing === props.row.original.id ? "Updating..." : "Edit"}
-            </button>{" "}
-            <button
-              disabled={notification.pending}
-              onClick={() => handleDetails(props.row.original)}
-              className="btn btn-primary"
-            >
-              {viewing === props.row.original.id ? "Viewing..." : "Details"}
-            </button>
-          </>
-        ),
-      },
-    ],
-    [editing, handleDetails, handleEdit, notification.pending, viewing],
-  );
+    }),
+    columnHelper.accessor("displayName", {
+      header: "Display Name",
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Action",
+      cell: (props) => (
+        <>
+          <button
+            disabled={notification.pending}
+            onClick={() => handleEdit(props.row.original)}
+            className="btn btn-primary"
+          >
+            {editing === props.row.original.id ? "Updating..." : "Edit"}
+          </button>{" "}
+          <button
+            disabled={notification.pending}
+            onClick={() => handleDetails(props.row.original)}
+            className="btn btn-primary"
+          >
+            {viewing === props.row.original.id ? "Viewing..." : "Details"}
+          </button>
+        </>
+      ),
+    }),
+  ];
 
   const groupsData = useMemo(() => groups ?? [], [groups]);
 
@@ -200,7 +201,7 @@ export const Groups = () => {
             columns={columns}
             data={groupsData}
             initialState={{
-              sortBy: [{ id: "Group" }],
+              sorting: [{ id: "Group", desc: false }],
             }}
           />
         </div>
