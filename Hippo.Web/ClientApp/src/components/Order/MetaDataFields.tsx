@@ -32,6 +32,10 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
     remove(index);
   };
 
+  if (readOnly && fields.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <h2>Metadata</h2>

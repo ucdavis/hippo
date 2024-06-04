@@ -7,11 +7,12 @@ import {
   PaymentModel,
 } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { Column } from "react-table";
 import { ReactTable } from "../../Shared/ReactTable";
+import { createColumnHelper } from "@tanstack/react-table";
 import ChartStringValidation from "./ChartStringValidation";
 import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
+import { Row } from "reactstrap";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -48,81 +49,77 @@ export const Details = () => {
     fetchOrder();
   }, [cluster, orderId]);
 
-  const historyColumns = useMemo<Column<HistoryModel>[]>(
-    () => [
-      {
-        Header: "Date",
-        accessor: "actedDate",
-        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
-      },
-      {
-        Header: "Actor",
-        accessor: "actedBy",
-        Cell: ({ value }) => (
-          <span>
-            {value.firstName} {value.lastName} ({value.email})
-          </span>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-      },
-      {
-        Header: "Details",
-        accessor: "details",
-      },
-    ],
-    [],
-  );
+  const historyColumnHelper = createColumnHelper<HistoryModel>();
 
-  const metadataColumns = useMemo<Column<OrderMetadataModel>[]>(
-    () => [
-      {
-        Header: "Name",
-        accessor: "name",
-      },
-      {
-        Header: "Value",
-        accessor: "value",
-      },
-    ],
-    [],
-  );
+  const historyColumns = [
+    historyColumnHelper.accessor("actedDate", {
+      header: "Date",
+      id: "actedDate",
+      cell: (value) => (
+        <span>{new Date(value.row.original.actedDate).toLocaleString()}</span>
+      ),
+    }),
+    historyColumnHelper.accessor("actedBy", {
+      header: "Actor",
+      id: "actedBy",
+      cell: (value) => (
+        <>
+          {value.row.original.actedBy && (
+            <>
+              {value.row.original.actedBy.firstName}{" "}
+              {value.row.original.actedBy.lastName} (
+              {value.row.original.actedBy.email})
+            </>
+          )}
+          {!value.row.original.actedBy && <>System</>}
+        </>
+      ),
+    }),
+    historyColumnHelper.accessor("status", { header: "Status", id: "status" }),
+    historyColumnHelper.accessor("details", {
+      header: "Details",
+      id: "details",
+    }),
+  ];
 
-  const paymentColumns = useMemo<Column<PaymentModel>[]>(
-    () => [
-      {
-        Header: "Amount",
-        accessor: "amount",
-        Cell: ({ value }) => (
-          <span>
-            <i className="fas fa-dollar-sign" /> {value.toFixed(2)}
-          </span>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-      },
-      {
-        Header: "Created On",
-        accessor: "createdOn",
-        Cell: ({ value }) => <span>{new Date(value).toLocaleString()}</span>,
-      },
-      {
-        Header: "Created By",
-        accessor: "createdBy",
-        Cell: ({ value }) =>
-          (value && (
-            <span>
-              {value?.firstName} {value?.lastName} ({value?.email})
-            </span>
-          )) || <span>System</span>,
-      },
-    ],
-    [],
-  );
+  const paymentColumnHelper = createColumnHelper<PaymentModel>();
+
+  const paymentColumns = [
+    paymentColumnHelper.accessor("amount", {
+      header: "Amount",
+      id: "amount",
+      cell: (value) => (
+        <span>
+          <i className="fas fa-dollar-sign" />{" "}
+          {value.row.original.amount.toFixed(2)}
+        </span>
+      ),
+    }),
+    paymentColumnHelper.accessor("status", { header: "Status", id: "status" }),
+    paymentColumnHelper.accessor("createdOn", {
+      header: "Created On",
+      id: "createdOn",
+      cell: (value) => (
+        <span>{new Date(value.row.original.createdOn).toLocaleString()}</span>
+      ),
+    }),
+    paymentColumnHelper.accessor("createdBy", {
+      header: "Created By",
+      id: "createdBy",
+      cell: (value) => (
+        <>
+          {value.row.original.createdBy && (
+            <>
+              {value.row.original.createdBy.firstName}{" "}
+              {value.row.original.createdBy.lastName} (
+              {value.row.original.createdBy.email})
+            </>
+          )}
+          {!value.row.original.createdBy && <>System</>}
+        </>
+      ),
+    }),
+  ];
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -203,14 +200,17 @@ export const Details = () => {
               ))}
             </tbody>
           </table>
-          <h2>Metadata</h2>
-          <ReactTable columns={metadataColumns} data={order.metaData} />
           <h2>History</h2>
           <ReactTable
             columns={historyColumns}
             data={order.history}
             initialState={{
-              sortBy: [{ id: "Date" }],
+              sorting: [
+                {
+                  id: "actedDate",
+                  desc: true,
+                },
+              ],
             }}
           />
           <h2>Payments</h2>
@@ -250,7 +250,18 @@ export const Details = () => {
           )}
           <br />
           {order.payments.length !== 0 && (
-            <ReactTable columns={paymentColumns} data={order.payments} />
+            <ReactTable
+              columns={paymentColumns}
+              data={order.payments}
+              initialState={{
+                sorting: [
+                  {
+                    id: "createdOn",
+                    desc: true,
+                  },
+                ],
+              }}
+            />
           )}
         </div>
       </div>

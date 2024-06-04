@@ -19,6 +19,7 @@ const FormField = <T extends Record<string, any>>({
   readOnly = false,
   autoComplete,
   children,
+  disabled, // select out disabled and don't pass it to register or it will set the value to undefined
   ...options
 }: FormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
@@ -56,6 +57,7 @@ const FormField = <T extends Record<string, any>>({
           type={type}
           invalid={!!error}
           readOnly={readOnly}
+          disabled={disabled}
           autoComplete={autoComplete ?? "new-password"}
           {...rest}
         >
