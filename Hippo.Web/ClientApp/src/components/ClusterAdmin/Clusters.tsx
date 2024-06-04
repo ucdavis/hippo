@@ -1,15 +1,16 @@
-import { useState, useMemo, useCallback, useContext } from "react";
+import { useState, useCallback, useContext } from "react";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { ClusterModel, AccessType } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 import { AccessTypes } from "../../constants";
 import AppContext from "../../Shared/AppContext";
+import { createColumnHelper } from "@tanstack/react-table";
+import { Button } from "reactstrap";
 
 const defaultCluster: ClusterModel = {
   id: 0,
@@ -399,77 +400,63 @@ export const Clusters = () => {
     [context.clusters, getDetailsConfirmation],
   );
 
-  const columns: Column<ClusterModel>[] = useMemo(
-    () => [
-      {
-        Header: "Name",
-        accessor: (m) => m.name,
-        sortable: true,
-        wrap: true,
-        width: "100px",
-      },
-      {
-        Header: "Description",
-        accessor: (m) => m.description,
-        sortable: true,
-        wrap: true,
-        width: "100px",
-      },
-      {
-        Header: "Domain",
-        accessor: (m) => m.domain,
-        sortable: true,
-        wrap: true,
-      },
-      {
-        Header: "Email",
-        accessor: (m) => m.email,
-        sortable: true,
-        wrap: true,
-      },
-      {
-        Header: "Action",
-        sortable: false,
-        Cell: (m) => (
-          <>
-            <button
-              disabled={notification.pending}
-              onClick={() => handleDetails(m.row.original.id)}
-              className="btn btn-primary"
-            >
-              Details
-            </button>
-            {" | "}
-            <button
-              disabled={notification.pending}
-              onClick={() => handleEdit(m.row.original.id)}
-              className="btn btn-primary"
-            >
-              Edit
-            </button>
-            {" | "}
-            <button
-              disabled={notification.pending}
-              onClick={() => handleRemove(m.row.original.id)}
-              className="btn btn-danger"
-            >
-              Remove
-            </button>
-          </>
-        ),
-      },
-    ],
-    [handleDetails, handleEdit, handleRemove, notification.pending],
-  );
+  const columnHelper = createColumnHelper<ClusterModel>();
+
+  const columns = [
+    columnHelper.accessor("name", {
+      header: "Name",
+      id: "Name", // id required for only this column for some reason
+    }),
+    columnHelper.accessor("description", {
+      header: "Description",
+    }),
+    columnHelper.accessor("domain", {
+      header: "Domain",
+    }),
+    columnHelper.accessor("email", {
+      header: "Email",
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Action",
+      cell: (props) => (
+        <>
+          <button
+            disabled={notification.pending}
+            onClick={() => handleDetails(props.row.original.id)}
+            className="btn btn-primary"
+          >
+            Details
+          </button>
+          {" | "}
+          <button
+            disabled={notification.pending}
+            onClick={() => handleEdit(props.row.original.id)}
+            className="btn btn-primary"
+          >
+            Edit
+          </button>
+          {" | "}
+          <button
+            disabled={notification.pending}
+            onClick={() => handleRemove(props.row.original.id)}
+            className="btn btn-danger"
+          >
+            Remove
+          </button>
+        </>
+      ),
+    }),
+  ];
 
   return (
     <>
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <div className="float-end">
-            <button onClick={handleCreate} className="btn btn-primary">
-              Create
-            </button>
+          <div className="data-table-prolog float-end">
+            <Button color="link" onClick={handleCreate}>
+              Create New Cluster
+            </Button>
           </div>
         </div>
         <div className="col-md-8">
@@ -477,8 +464,9 @@ export const Clusters = () => {
             columns={columns}
             data={context.clusters}
             initialState={{
-              sortBy: [{ id: "Name" }],
+              sorting: [{ id: "Name", desc: false }],
             }}
+            disableExport
           />
         </div>
       </div>

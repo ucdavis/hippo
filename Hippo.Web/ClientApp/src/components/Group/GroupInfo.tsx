@@ -1,5 +1,5 @@
 import { ShowFor } from "../../Shared/ShowFor";
-import { UsePermissions } from "../../Shared/UsePermissions";
+import { usePermissions } from "../../Shared/usePermissions";
 import { GroupModel } from "../../types";
 import { Button, CardSubtitle, CardText } from "reactstrap";
 import { MouseEvent } from "react";
@@ -10,7 +10,7 @@ export interface GroupInfoProps {
 }
 
 export const GroupInfo = ({ group, showDetails }: GroupInfoProps) => {
-  const { canViewGroup } = UsePermissions();
+  const { canViewGroup } = usePermissions();
 
   const handleShowDetails = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

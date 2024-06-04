@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { ProductModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ShowFor } from "../../Shared/ShowFor";
@@ -184,6 +184,8 @@ export const Products = () => {
       ),
       canConfirm:
         notEmptyOrFalsey(editProductModel.name) &&
+        notEmptyOrFalsey(editProductModel.category) &&
+        notEmptyOrFalsey(editProductModel.units) &&
         !notification.pending &&
         parseFloat(editProductModel.unitPrice) > 0 &&
         editProductModel.installments > 0,
@@ -324,68 +326,66 @@ export const Products = () => {
     }
   };
 
-  const columns = useMemo<Column<ProductModel>[]>(
-    () => [
-      {
-        Header: "Name",
-        accessor: "name",
-      },
-      {
-        Header: "Category",
-        accessor: "category",
-      },
-      {
-        Header: "Description",
-        accessor: "description",
-      },
-      {
-        Header: "Unit Price",
-        accessor: "unitPrice",
-      },
-      {
-        Header: "Units",
-        accessor: "units",
-      },
-      {
-        Header: "Installments",
-        accessor: "installments",
-      },
-      {
-        Header: "Type",
-        accessor: "installmentType",
-      },
-      {
-        Header: "Actions",
-        sortable: false,
-        Cell: ({ row }) => (
-          <div>
-            <Link
-              className="btn btn-primary"
-              to={`/${cluster}/order/create/${row.original.id}`}
-            >
-              Order It
-            </Link>{" "}
-            <ShowFor roles={["ClusterAdmin"]}>
-              <button
-                onClick={() => handleEdit(row.original.id)}
-                className="btn btn-primary"
-              >
-                Edit
-              </button>{" "}
-              <button
-                onClick={() => handleDelete(row.original.id)}
-                className="btn btn-danger"
-              >
-                Delete
-              </button>
-            </ShowFor>
-          </div>
-        ),
-      },
-    ],
+  const columnHelper = createColumnHelper<ProductModel>();
 
-    [handleDelete, handleEdit],
-  );
+  const columns = [
+    columnHelper.accessor("name", {
+      header: "Name",
+      id: "name",
+    }),
+    columnHelper.accessor("category", {
+      header: "Category",
+      id: "category",
+    }),
+    columnHelper.accessor("description", {
+      header: "Description",
+      id: "description",
+    }),
+    columnHelper.accessor("unitPrice", {
+      header: "Unit Price",
+      id: "unitPrice",
+    }),
+    columnHelper.accessor("units", {
+      header: "Units",
+      id: "units",
+    }),
+    columnHelper.accessor("installments", {
+      header: "Installments",
+      id: "installments",
+    }),
+    columnHelper.accessor("installmentType", {
+      header: "Type",
+      id: "installmentType",
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div>
+          <Link
+            className="btn btn-primary"
+            to={`/${cluster}/order/create/${row.original.id}`}
+          >
+            Order It
+          </Link>{" "}
+          <ShowFor roles={["ClusterAdmin"]}>
+            <button
+              onClick={() => handleEdit(row.original.id)}
+              className="btn btn-primary"
+            >
+              Edit
+            </button>{" "}
+            <button
+              onClick={() => handleDelete(row.original.id)}
+              className="btn btn-danger"
+            >
+              Delete
+            </button>
+          </ShowFor>
+        </div>
+      ),
+    }),
+  ];
 
   if (products === undefined) {
     return (
@@ -403,20 +403,17 @@ export const Products = () => {
                 {" "}
                 Add Product{" "}
               </button>{" "}
-              <button className="btn btn-primary"> Adhoc Order </button>
+              <Link className="btn btn-primary" to={`/${cluster}/order/create`}>
+                {" "}
+                Adhoc Order{" "}
+              </Link>{" "}
             </div>
           </div>
         </ShowFor>
         <hr />
         <div className="row justify-content-center">
           <div className="col-md-8">
-            <ReactTable
-              columns={columns}
-              data={products}
-              initialState={{
-                sortBy: [{ id: "Name" }],
-              }}
-            />
+            <ReactTable columns={columns} data={products} />
           </div>
         </div>
       </div>

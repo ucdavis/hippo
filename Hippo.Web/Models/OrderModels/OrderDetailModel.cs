@@ -63,5 +63,35 @@ namespace Hippo.Web.Models.OrderModels
                 Payments = order.Payments
             };
         }
+
+        public static Expression<Func<Product, OrderDetailModel>> ProductProjection()
+        {
+            return product => new OrderDetailModel
+            {
+                Id = 0,
+                Category = product.Category,
+                Name = product.Name,
+                ProductName = product.Name,
+                Description = product.Description,
+                Units = product.Units,
+                UnitPrice = product.UnitPrice,
+                Installments = product.Installments,
+                InstallmentType = product.InstallmentType,
+                Quantity = 0,
+                Status = Order.Statuses.Created,
+                ExternalReference = string.Empty,
+                Notes = string.Empty,
+                Adjustment = 0,
+                AdjustmentReason = string.Empty,
+                AdminNotes = string.Empty,
+                SubTotal = "0.00",
+                Total = "0.00",
+                BalanceRemaining = "0.00", //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
+                MetaData = new List<OrderMetaData>(),
+                History = new List<History>(),
+                Billings = new List<Billing>(),
+                Payments = new List<Payment>()
+            };
+        }
     }
 }

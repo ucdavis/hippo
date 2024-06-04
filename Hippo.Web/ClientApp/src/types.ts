@@ -296,3 +296,11 @@ export interface OrderListModel {
   total: string;
   balanceRemaining: string;
 }
+
+export interface OrderTotalCalculationModel extends Partial<OrderModel> {
+  unitPrice: string;
+  quantity: number;
+  adjustment: number;
+  subTotal: string;
+  total: string;
+}

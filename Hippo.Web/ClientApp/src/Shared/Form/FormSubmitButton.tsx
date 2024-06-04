@@ -11,7 +11,10 @@ const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ ...props }) => {
     formState: { isDirty, isSubmitting, isSubmitSuccessful, errors },
   } = useFormContext<OrderModel>();
 
-  const shouldDisable = !isDirty || isSubmitting || isSubmitSuccessful;
+  const isValid = Object.keys(errors).length === 0;
+
+  const shouldDisable =
+    !isDirty || isSubmitting || isSubmitSuccessful || !isValid;
 
   return (
     <>

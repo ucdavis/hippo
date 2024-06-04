@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { AccountModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
-import { Column } from "react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
@@ -81,63 +81,59 @@ export const ActiveAccounts = () => {
     [showDetails],
   );
 
-  const columns: Column<AccountModel>[] = useMemo(
-    () => [
-      {
-        Header: "Groups",
-        accessor: (row) => getGroupModelString(row.memberOfGroups),
-        Cell: (props) => (
-          <>
-            {props.row.original.memberOfGroups.map((g, i) => (
-              <>
-                {i > 0 && ", "}
-                <GroupNameWithTooltip
-                  group={g}
-                  id={props.row.original.id.toString()}
-                  key={i}
-                />
-              </>
-            ))}
-          </>
-        ),
-        sortable: true,
+  const columnHelper = createColumnHelper<AccountModel>();
+
+  const columns = [
+    columnHelper.accessor((row) => getGroupModelString(row.memberOfGroups), {
+      header: "Groups",
+      cell: (props) => (
+        <>
+          {props.row.original.memberOfGroups.map((g, i) => (
+            <>
+              {i > 0 && ", "}
+              <GroupNameWithTooltip
+                group={g}
+                id={props.row.original.id.toString()}
+                key={i}
+              />
+            </>
+          ))}
+        </>
+      ),
+      meta: {
+        exportFn: (account) =>
+          account.memberOfGroups.map((g) => g.displayName).join(", "),
       },
+    }),
+    columnHelper.accessor("name", {
+      header: "Name",
+      id: "Name", // id required for only this column for some reason
+    }),
+    columnHelper.accessor("email", {
+      header: "Email",
+    }),
+    columnHelper.accessor("kerberos", {
+      header: "Kerberos",
+    }),
+    columnHelper.accessor(
+      (row) => new Date(row.updatedOn).toLocaleDateString(),
       {
-        Header: "Name",
-        accessor: (row) => row.name,
-        sortable: true,
+        header: "Updated On",
       },
-      {
-        Header: "Email",
-        accessor: (row) => row.email,
-        sortable: true,
-      },
-      {
-        Header: "Kerberos",
-        accessor: (row) => row.kerberos,
-        sortable: true,
-      },
-      {
-        Header: "Updated On",
-        accessor: (row) => new Date(row.updatedOn).toLocaleDateString(),
-        sortable: true,
-      },
-      {
-        Header: "Action",
-        Cell: (props) => (
-          <>
-            <button
-              onClick={() => handleDetails(props.row.original)}
-              className="btn btn-primary"
-            >
-              {viewing === props.row.original.id ? "Viewing..." : "Details"}
-            </button>
-          </>
-        ),
-      },
-    ],
-    [handleDetails, viewing],
-  );
+    ),
+    columnHelper.display({
+      id: "actions",
+      header: "Action",
+      cell: (props) => (
+        <button
+          onClick={() => handleDetails(props.row.original)}
+          className="btn btn-primary"
+        >
+          {viewing === props.row.original.id ? "Viewing..." : "Details"}
+        </button>
+      ),
+    }),
+  ];
 
   const accountsData = useMemo(() => accounts ?? [], [accounts]);
 
@@ -180,7 +176,10 @@ export const ActiveAccounts = () => {
             columns={columns}
             data={accountsData}
             initialState={{
-              sortBy: [{ id: "Groups" }, { id: "Name" }],
+              sorting: [
+                { id: "Groups", desc: false },
+                { id: "Name", desc: false },
+              ],
             }}
           />
         </div>
