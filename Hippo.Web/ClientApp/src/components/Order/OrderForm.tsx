@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { OrderModel } from "../../types";
 import { Form } from "reactstrap";
@@ -8,11 +8,13 @@ import FormSubmitButton from "../../Shared/Form/FormSubmitButton";
 import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
+import { authenticatedFetch } from "../../util/api";
 
 interface OrderFormProps {
   orderProp: OrderModel;
   readOnly: boolean;
   isAdmin: boolean;
+  cluster: string;
   onSubmit: (order: OrderModel) => Promise<void>;
 }
 
@@ -20,6 +22,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   orderProp,
   readOnly,
   isAdmin,
+  cluster,
   onSubmit,
 }) => {
   const methods = useForm<OrderModel>({
@@ -31,6 +34,30 @@ const OrderForm: React.FC<OrderFormProps> = ({
     setError,
     formState: { isDirty, isSubmitting },
   } = methods;
+
+  const [foundPI, setFoundPI] = useState(null);
+
+  //lookup pi value
+  const lookupPI = async (pi: string) => {
+    if (!pi) {
+      setFoundPI("");
+      return;
+    }
+    const response = await authenticatedFetch(
+      `/api/${cluster}/order/GetClusterUser/${pi}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      if (data?.name) {
+        setFoundPI(`Found User ${data.name} (${data.email})`);
+      } else {
+        setFoundPI(`Not Found ${pi}`);
+      }
+    } else {
+      setFoundPI(`Not Found ${pi}`);
+    }
+  };
 
   const submitForm = async (data: OrderModel) => {
     if (!isDirty || isSubmitting) {
@@ -62,12 +89,19 @@ const OrderForm: React.FC<OrderFormProps> = ({
         />
         <hr />
         {isAdmin && !readOnly && (
-          <OrderFormField
-            name="PILookup"
-            label="PI Lookup"
-            readOnly={readOnly}
-            disabled={readOnly}
-          />
+          <>
+            <OrderFormField
+              name="PILookup"
+              label="PI Lookup"
+              readOnly={readOnly}
+              disabled={readOnly}
+              onBlur={(e) => {
+                console.log("PI Lookup", e.target.value);
+                lookupPI(e.target.value);
+              }}
+            />
+            {foundPI && <span className="text-muted">{foundPI}</span>}
+          </>
         )}
         <OrderFormField
           name="productName"

@@ -174,6 +174,7 @@ export const Details = () => {
             orderProp={order}
             readOnly={true}
             isAdmin={isClusterAdmin}
+            cluster={cluster}
             onSubmit={submitOrder}
           />
 

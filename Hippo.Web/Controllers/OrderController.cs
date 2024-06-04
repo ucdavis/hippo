@@ -78,6 +78,28 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetClusterUser(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Ok(null);
+            }
+
+            id = id.Trim().ToLower();
+
+            var model = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && (a.Kerberos == id || a.Email == id))
+                .Include(a => a.Owner).FirstOrDefaultAsync();
+
+            if(model == null)
+            {
+                return Ok(new Account());
+            }
+
+            return Ok(model);
+                
+        }
+
         [HttpPost]
         public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
         {

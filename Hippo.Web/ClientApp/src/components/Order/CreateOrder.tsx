@@ -151,6 +151,7 @@ const CreateOrder: React.FC = () => {
             orderProp={order}
             readOnly={false}
             isAdmin={isClusterAdmin}
+            cluster={cluster}
             onSubmit={submitOrder}
           />
           {notification.pending && <div>Saving...</div>}
