@@ -260,6 +260,7 @@ export interface HistoryModel {
 
 export interface OrderModel {
   id: number;
+  PILookup: string;
   category: string;
   name: string;
   productName: string;

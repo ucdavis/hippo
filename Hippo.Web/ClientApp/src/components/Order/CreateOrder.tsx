@@ -8,6 +8,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
 const defaultOrder: OrderModel = {
   id: 0,
+  PILookup: "",
   category: "",
   name: "",
   productName: "",
@@ -89,6 +90,7 @@ const CreateOrder: React.FC = () => {
       history: updatedOrder.history,
 
       // editable fields
+      PILookup: updatedOrder.PILookup,
       name: updatedOrder.name,
       productName: updatedOrder.productName,
       description: updatedOrder.description,

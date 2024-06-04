@@ -61,6 +61,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
           disabled={true}
         />
         <hr />
+        {isAdmin && !readOnly && (
+          <OrderFormField
+            name="PILookup"
+            label="PI Lookup"
+            readOnly={readOnly}
+            disabled={readOnly}
+          />
+        )}
         <OrderFormField
           name="productName"
           label="Product Name"

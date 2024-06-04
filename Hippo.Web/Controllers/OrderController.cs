@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
+using Hippo.Core.Models.OrderModels;
 using Hippo.Core.Services;
 using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
@@ -78,7 +79,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save([FromBody] Order model) //TODO: Might need to change this to a post model....
+        public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
         {
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
@@ -89,10 +90,13 @@ namespace Hippo.Web.Controllers
 
 
             var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
-            if (User.IsInRole(AccessCodes.ClusterAdminAccess))
+            if (isClusterOrSystemAdmin)
             {
-                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Id == model.PrincipalInvestigatorId);
+                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Kerberos == model.PILookup || a.Email == model.PILookup);
                 if(principalInvestigator == null)
                 {
                     principalInvestigator = currentUser;
@@ -123,7 +127,7 @@ namespace Hippo.Web.Controllers
                     Installments = model.Installments,
                     InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
                     Quantity = model.Quantity,
-                    Billings = model.Billings,
+                    Billings = new List<Billing>(),
 
                     //Adjustment = model.Adjustment,
                     //AdjustmentReason = model.AdjustmentReason,
