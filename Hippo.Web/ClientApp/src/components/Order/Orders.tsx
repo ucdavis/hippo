@@ -136,7 +136,18 @@ export const Orders = () => {
       <div>
         <div className="row justify-content-center">
           <div className="col-md-8">
-            <ReactTable columns={columns} data={orders} />
+            <ReactTable
+              columns={columns}
+              data={orders}
+              initialState={{
+                sorting: [
+                  {
+                    id: "createdOn",
+                    desc: true,
+                  },
+                ],
+              }}
+            />
           </div>
         </div>
       </div>

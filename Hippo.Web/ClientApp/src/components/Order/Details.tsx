@@ -201,7 +201,18 @@ export const Details = () => {
             </tbody>
           </table>
           <h2>History</h2>
-          <ReactTable columns={historyColumns} data={order.history} />
+          <ReactTable
+            columns={historyColumns}
+            data={order.history}
+            initialState={{
+              sorting: [
+                {
+                  id: "actedDate",
+                  desc: true,
+                },
+              ],
+            }}
+          />
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
@@ -239,7 +250,18 @@ export const Details = () => {
           )}
           <br />
           {order.payments.length !== 0 && (
-            <ReactTable columns={paymentColumns} data={order.payments} />
+            <ReactTable
+              columns={paymentColumns}
+              data={order.payments}
+              initialState={{
+                sorting: [
+                  {
+                    id: "createdOn",
+                    desc: true,
+                  },
+                ],
+              }}
+            />
           )}
         </div>
       </div>
