@@ -59,6 +59,8 @@ namespace Hippo.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
+            //TODO: When accounts has an IsActive flag, we will need to ignore the query filters.
+
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
                 .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
                 .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
@@ -95,10 +97,10 @@ namespace Hippo.Web.Controllers
 
             id = id.Trim().ToLower();
 
-            var model = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && (a.Kerberos == id || a.Email == id))
+            var model = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && (a.Kerberos == id || a.Email == id)).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
                 .Include(a => a.Owner).FirstOrDefaultAsync();
 
-            if(model == null)
+            if(model == null || model.AdminOfGroups == null || !model.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
             {
                 return Ok(new Account());
             }

@@ -92,7 +92,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <>
             <OrderFormField
               name="PILookup"
-              label="PI Lookup"
+              label="Order for PI (email or kerb)"
               readOnly={readOnly}
               disabled={readOnly}
               onBlur={(e) => {
@@ -103,6 +103,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
             {foundPI && <span className="text-muted">{foundPI}</span>}
           </>
         )}
+
         <OrderFormField
           name="productName"
           label="Product Name"
