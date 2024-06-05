@@ -63,7 +63,7 @@ namespace Hippo.Core.Domain
 
         [Required]
         public int PrincipalInvestigatorId { get; set; }
-        public User PrincipalInvestigator { get; set; }
+        public Account PrincipalInvestigator { get; set; }
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
@@ -110,7 +110,11 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OrderMetaData>().HasOne(o => o.Order).WithMany(o => o.MetaData).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Payment>().HasOne(o => o.Order).WithMany(o => o.Payments).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
-
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.PrincipalInvestigator)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.PrincipalInvestigatorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

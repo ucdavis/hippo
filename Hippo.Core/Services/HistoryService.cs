@@ -215,7 +215,7 @@ namespace Hippo.Core.Services
                 ClusterId = order.Cluster.Id,
                 Status = order.Status,
                 ActedBy = actedBy,
-                AdminAction = actedBy != order.PrincipalInvestigator,
+                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
                 Action = History.OrderActions.Created,
                 Type = HistoryTypes.Primary,
                 Details = $"Order total: {order.Total}"
@@ -232,7 +232,7 @@ namespace Hippo.Core.Services
                 ClusterId = order.Cluster.Id,
                 Status = order.Status,
                 ActedBy = actedBy,
-                AdminAction = actedBy != order.PrincipalInvestigator,
+                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
                 Action = History.OrderActions.Updated,
                 Type = HistoryTypes.Primary,
                 Details = $"Order total: {order.Total}"
@@ -249,7 +249,7 @@ namespace Hippo.Core.Services
                 ClusterId = order.Cluster.Id,
                 Status = order.Status,
                 ActedBy = actedBy,
-                AdminAction = actedBy != order.PrincipalInvestigator,
+                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
                 Action = action,
                 Type = HistoryTypes.Detail,
                 Details = Serialize(order)

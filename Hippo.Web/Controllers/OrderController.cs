@@ -42,7 +42,8 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            var currentUserAccount = await _dbContext.Accounts.SingleAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
             
             return Ok(model);
 
@@ -106,7 +107,7 @@ namespace Hippo.Web.Controllers
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
 
-            User principalInvestigator = null;
+            Account principalInvestigator;
 
             var orderToReturn = new Order();
 
@@ -115,18 +116,21 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
+            var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
             if (isClusterOrSystemAdmin)
             {
-                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Kerberos == model.PILookup || a.Email == model.PILookup);
+                //TODO: check if the PI is in the cluster and if they have a PI role (Add that info to GetClusterUser())
+                principalInvestigator = null;//await _dbContext.Users.FirstOrDefaultAsync(a => a.Kerberos == model.PILookup || a.Email == model.PILookup);
                 if(principalInvestigator == null)
                 {
-                    principalInvestigator = currentUser;
+                    principalInvestigator = currentAccount;
                 }
             }
             else
             {
-                principalInvestigator = currentUser;
+                principalInvestigator = currentAccount;
             }
 
             if (!ModelState.IsValid)
