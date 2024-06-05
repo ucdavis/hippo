@@ -910,10 +910,10 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Hippo.Core.Domain.User", "PrincipalInvestigator")
+                    b.HasOne("Hippo.Core.Domain.Account", "PrincipalInvestigator")
                         .WithMany("Orders")
                         .HasForeignKey("PrincipalInvestigatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cluster");
@@ -1022,6 +1022,11 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Requester");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
                 {
                     b.Navigation("Accounts");
@@ -1054,8 +1059,6 @@ namespace Hippo.Core.Migrations.Sqlite
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Navigation("Accounts");
-
-                    b.Navigation("Orders");
 
                     b.Navigation("Permissions");
                 });
