@@ -28,6 +28,8 @@ namespace Hippo.Web.Models.OrderModels
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
 
+        public User? PiUser { get; set; }
+
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
@@ -39,6 +41,7 @@ namespace Hippo.Web.Models.OrderModels
             return order => new OrderDetailModel
             {
                 Id = order.Id,
+                PiUser = order.PrincipalInvestigator.Owner != null ? order.PrincipalInvestigator.Owner : new User { Email = order.PrincipalInvestigator.Email},
                 Category = order.Category,
                 Name = order.Name,
                 ProductName = order.ProductName,

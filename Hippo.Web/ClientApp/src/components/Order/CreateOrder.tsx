@@ -88,6 +88,7 @@ const CreateOrder: React.FC = () => {
       billings: updatedOrder.billings,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
+      piUser: updatedOrder.piUser,
 
       // editable fields
       PILookup: updatedOrder.PILookup,

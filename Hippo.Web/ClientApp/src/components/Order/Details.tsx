@@ -134,6 +134,7 @@ export const Details = () => {
       billings: updatedOrder.billings,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
+      piUser: updatedOrder.piUser,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
@@ -169,6 +170,9 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
+          <h2>
+            {order.piUser?.name} ({order.piUser?.email})
+          </h2>
 
           <OrderForm
             orderProp={order}

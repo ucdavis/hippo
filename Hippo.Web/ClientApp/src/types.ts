@@ -280,6 +280,7 @@ export interface OrderModel {
   subTotal: string;
   total: string;
   balanceRemaining: string;
+  piUser?: User;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];

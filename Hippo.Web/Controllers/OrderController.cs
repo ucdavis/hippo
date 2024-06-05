@@ -42,7 +42,13 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var currentUserAccount = await _dbContext.Accounts.SingleAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
+            var currentUserAccount = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            if(currentUserAccount == null)
+            {
+                return Ok(new OrderListModel[0]);
+            }
+
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
             
             return Ok(model);
@@ -54,7 +60,7 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
                 .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync(); 
@@ -107,7 +113,7 @@ namespace Hippo.Web.Controllers
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
 
-            Account principalInvestigator;
+            Account? principalInvestigator = null;
 
             var orderToReturn = new Order();
 
@@ -119,11 +125,12 @@ namespace Hippo.Web.Controllers
             var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
 
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
-            if (isClusterOrSystemAdmin)
+            if (isClusterOrSystemAdmin && !string.IsNullOrWhiteSpace(model.PILookup))
             {
                 //TODO: check if the PI is in the cluster and if they have a PI role (Add that info to GetClusterUser())
-                principalInvestigator = null;//await _dbContext.Users.FirstOrDefaultAsync(a => a.Kerberos == model.PILookup || a.Email == model.PILookup);
-                if(principalInvestigator == null)
+
+                principalInvestigator = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && (a.Email == model.PILookup || a.Kerberos == model.PILookup));
+                if (principalInvestigator == null)
                 {
                     principalInvestigator = currentAccount;
                 }
