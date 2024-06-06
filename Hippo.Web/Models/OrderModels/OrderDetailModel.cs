@@ -21,8 +21,8 @@ namespace Hippo.Web.Models.OrderModels
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
 
-        public DateTime? InstallmentDate { get; set; }
-        public DateTime? ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
+        public string InstallmentDate { get; set; }
+        public string ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
 
         public User? PiUser { get; set; }
 
@@ -47,8 +47,8 @@ namespace Hippo.Web.Models.OrderModels
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
                 LifeCycle = order.LifeCycle,
-                InstallmentDate = order.InstallmentDate,
-                ExpirationDate = order.ExpirationDate,
+                InstallmentDate = order.InstallmentDate != null ? order.InstallmentDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+                ExpirationDate = order.ExpirationDate != null ? order.ExpirationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,

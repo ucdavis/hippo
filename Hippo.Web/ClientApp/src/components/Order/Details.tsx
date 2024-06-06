@@ -34,6 +34,7 @@ export const Details = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         setOrder(data);
         const balanceRemaining = parseFloat(data.balanceRemaining);
         setBalanceRemaining(balanceRemaining);
