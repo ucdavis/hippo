@@ -33,7 +33,6 @@ namespace Hippo.Core.Domain
         [MaxLength(10)]
         public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly, OneTime
 
-        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
     }
 }

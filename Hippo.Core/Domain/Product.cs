@@ -8,6 +8,7 @@ namespace Hippo.Core.Domain
         //Other fields in Product Base   
 
         public bool IsActive { get; set; }
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         [Required]
         public int ClusterId { get; set; }
