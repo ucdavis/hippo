@@ -17,8 +17,9 @@ const defaultProduct: ProductModel = {
   description: "",
   unitPrice: "0.00",
   units: "",
-  installments: 60,
-  installmentType: "Monthly",
+  installments: 1,
+  installmentType: "OneTime",
+  lifeCycle: 60,
 };
 
 export const Products = () => {
@@ -144,23 +145,6 @@ export const Products = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="fieldInstallments">Installments</label>
-            <input
-              className="form-control"
-              id="fieldInstallments"
-              required
-              value={editProductModel.installments}
-              onChange={(e) => {
-                const model: ProductModel = {
-                  ...editProductModel,
-                  installments: parseInt(e.target.value),
-                };
-                setEditProductModel(model);
-                setReturn(model);
-              }}
-            />
-          </div>
-          <div className="form-group">
             <label htmlFor="fieldInstallmentType">Installment Type</label>
             <select
               className="form-control"
@@ -172,13 +156,65 @@ export const Products = () => {
                   ...editProductModel,
                   installmentType: e.target.value,
                 };
+                if (model.installmentType === "OneTime") {
+                  model.installments = 1;
+                }
+                if (
+                  model.installmentType === "Monthly" &&
+                  (model.installments === 1 || model.installments === 5)
+                ) {
+                  model.installments = 60;
+                }
+                if (
+                  model.installmentType === "Yearly" &&
+                  (model.installments === 1 || model.installments === 60)
+                ) {
+                  model.installments = 5;
+                }
                 setEditProductModel(model);
                 setReturn(model);
               }}
             >
+              <option value="OneTime">One Time</option>
               <option value="Monthly">Monthly</option>
               <option value="Yearly">Yearly</option>
             </select>
+          </div>
+          {editProductModel.installmentType === "OneTime" ? null : (
+            <div className="form-group">
+              <label htmlFor="fieldInstallments">Installments</label>
+              <input
+                className="form-control"
+                id="fieldInstallments"
+                required
+                value={editProductModel.installments}
+                onChange={(e) => {
+                  const model: ProductModel = {
+                    ...editProductModel,
+                    installments: parseInt(e.target.value),
+                  };
+                  setEditProductModel(model);
+                  setReturn(model);
+                }}
+              />
+            </div>
+          )}
+          <div className="form-group">
+            <label htmlFor="lifeCycle">Life Cycle in Months</label>
+            <input
+              className="form-control"
+              id="lifeCycle"
+              required
+              value={editProductModel.lifeCycle}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  lifeCycle: parseInt(e.target.value),
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            />
           </div>
         </>
       ),
@@ -188,7 +224,8 @@ export const Products = () => {
         notEmptyOrFalsey(editProductModel.units) &&
         !notification.pending &&
         parseFloat(editProductModel.unitPrice) > 0 &&
-        editProductModel.installments > 0,
+        editProductModel.installments > 0 &&
+        editProductModel.lifeCycle > 0,
     },
     [editProductModel, notification.pending],
   );
