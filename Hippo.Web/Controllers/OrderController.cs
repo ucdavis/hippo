@@ -178,6 +178,11 @@ namespace Hippo.Web.Controllers
                     PrincipalInvestigator = principalInvestigator,
                     CreatedOn = DateTime.UtcNow
                 };
+                if (isClusterOrSystemAdmin)
+                {
+                    order.ExpirationDate = model.ExpirationDate;
+                    order.InstallmentDate = model.InstallmentDate;
+                }
                 // Deal with OrderMeta data
                 foreach (var metaData in model.MetaData)
                 {
@@ -197,7 +202,7 @@ namespace Hippo.Web.Controllers
                 //Updating an existing order without changing the status.
                 var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if(User.IsInRole(AccessCodes.ClusterAdminAccess))
+                if(isClusterOrSystemAdmin)
                 {
                     //TODO: Check the status to limit what can be changed
                     existingOrder.Category = model.Category;
