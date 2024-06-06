@@ -74,10 +74,11 @@ export const Products = () => {
           </div>
           <div className="form-group">
             <label htmlFor="fieldDescription">Description</label>
-            <input
+            <textarea
               className="form-control"
               id="fieldDescription"
               value={editProductModel.description}
+              rows={3}
               onChange={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
