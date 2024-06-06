@@ -10,39 +10,19 @@ using static Hippo.Core.Domain.Product;
 
 namespace Hippo.Core.Domain
 {
-    public class Order
+    public class Order :ProductBase
     {
-        [Key]
-        public int Id { get; set; }
 
-        [Required]
-        public string Category { get; set; }
-        [Required]
-        [MaxLength(50)]
-        public string Name { get; set; }
         [Required]
         [MaxLength(50)]
         public string ProductName { get; set; }
-        [MaxLength(250)]
-        public string Description { get; set; }
+
         [MaxLength(150)]
         public string ExternalReference { get; set; }
-        public string Units { get; set; } //Informational like TB, or fairshair points
-        [Required]
-        [Range(0.01, double.MaxValue)]
-        public decimal UnitPrice { get; set; }
+
         [Required]
         [Range(0.0001, double.MaxValue)]
         public decimal Quantity { get; set; }
-        [Required]
-        [Range(1, int.MaxValue)]
-        public int Installments { get; set; }
-
-        [Required]
-        [MaxLength(10)]
-        public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly
-
-
 
         public decimal Adjustment { get; set; }
         public string AdjustmentReason { get; set; }
@@ -52,6 +32,9 @@ namespace Hippo.Core.Domain
         public string Notes { get; set; }
         public string AdminNotes { get; set; }
         public string Status { get; set; }
+        
+        public DateTime? InstallmentDate { get; set; }
+        public DateTime? ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
 
         public decimal InstallmentAmount => Math.Round(Total / Installments, 2);
 
