@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -36,13 +36,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   } = methods;
 
   const [foundPI, setFoundPI] = useState(null);
-  const [localInstallmentType, setLocalInstallmentType] = useState(
-    methods.getValues("installmentType"),
-  );
 
-  const onInstallmentTypeChange = (e: string) => {
-    setLocalInstallmentType(e);
-  };
   //lookup pi value
   const lookupPI = async (pi: string) => {
     if (!pi) {
@@ -81,6 +75,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
       });
     }
   };
+
+  const installmentType = useWatch({
+    control: methods.control,
+    name: "installmentType",
+  });
 
   // TODO: rest of input validation?
   return (
@@ -161,13 +160,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <option value="Monthly">Monthly</option>
           <option value="Yearly">Yearly</option>
         </OrderFormField>
-        {localInstallmentType !== "OneTime" && <h1>It Isn't One Time</h1>}
-        <OrderFormField
-          name="installments"
-          label="Installments"
-          readOnly={readOnly || !isAdmin}
-          disabled={!readOnly && !isAdmin}
-        />
+        {installmentType !== "OneTime" && (
+          <OrderFormField
+            name="installments"
+            label="Installments"
+            readOnly={readOnly || !isAdmin}
+            disabled={!readOnly && !isAdmin}
+          />
+        )}
         <OrderFormField
           name="lifeCycle"
           label="Life Cycle in Months"
