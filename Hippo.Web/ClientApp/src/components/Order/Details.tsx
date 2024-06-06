@@ -153,6 +153,9 @@ export const Details = () => {
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
       metaData: updatedOrder.metaData,
+      lifeCycle: updatedOrder.lifeCycle,
+      expirationDate: updatedOrder.expirationDate,
+      installmentDate: updatedOrder.installmentDate,
     };
 
     // TODO: await API call

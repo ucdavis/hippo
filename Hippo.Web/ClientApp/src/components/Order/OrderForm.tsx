@@ -169,6 +169,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
           disabled={!readOnly && !isAdmin}
         />
         <OrderFormField
+          name="lifeCycle"
+          label="Life Cycle in Months"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+        />
+        <OrderFormField
           name="name"
           label="Name"
           required={true}

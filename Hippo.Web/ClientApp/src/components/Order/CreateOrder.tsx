@@ -107,6 +107,9 @@ const CreateOrder: React.FC = () => {
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
       metaData: updatedOrder.metaData,
+      lifeCycle: updatedOrder.lifeCycle,
+      expirationDate: updatedOrder.expirationDate,
+      installmentDate: updatedOrder.installmentDate,
     };
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {

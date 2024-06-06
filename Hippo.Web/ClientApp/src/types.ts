@@ -279,8 +279,8 @@ export interface OrderModel extends Partial<ProductBase> {
   total: string;
   balanceRemaining: string;
   piUser?: User;
-  installmentDate?: Date;
-  expirationDate?: Date;
+  installmentDate?: string;
+  expirationDate?: string;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];
