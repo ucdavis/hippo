@@ -27,7 +27,7 @@ namespace Hippo.Core.Domain
         //Not sure if we want to do this, but it lets a default number of payment installments to be specified
         public int Installments { get; set; }
 
-        public int LifeCycle { get; set; } //Number of months or years the product is active for
+        public int LifeCycle { get; set; } = 60; //Number of months or years the product is active for
 
         [Required]
         [MaxLength(10)]
