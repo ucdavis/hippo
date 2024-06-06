@@ -81,6 +81,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
     name: "installmentType",
   });
 
+  if (installmentType === "OneTime") {
+    methods.setValue("installments", 1);
+  }
+
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
