@@ -372,8 +372,14 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ExternalReference")
                         .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("InstallmentDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("InstallmentType")
@@ -382,6 +388,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Installments")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LifeCycle")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -552,6 +561,9 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("LifeCycle")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
