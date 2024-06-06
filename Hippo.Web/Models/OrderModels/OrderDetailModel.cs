@@ -3,17 +3,10 @@ using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
 {
-    public class OrderDetailModel
+    public class OrderDetailModel : ProductBase
     {
-        public int Id { get; set; }
-        public string Category { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Units { get; set; } = string.Empty;
-        public decimal UnitPrice { get; set; }
-        public int Installments { get; set; }
-        public string InstallmentType { get; set; } = string.Empty;
+
         public decimal Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
         public string ExternalReference { get; set; } = string.Empty;
@@ -27,6 +20,9 @@ namespace Hippo.Web.Models.OrderModels
         public string SubTotal { get; set; } = string.Empty;
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
+
+        public DateTime? InstallmentDate { get; set; }
+        public DateTime? ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
 
         public User? PiUser { get; set; }
 
@@ -50,6 +46,9 @@ namespace Hippo.Web.Models.OrderModels
                 UnitPrice = order.UnitPrice,
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
+                LifeCycle = order.LifeCycle,
+                InstallmentDate = order.InstallmentDate,
+                ExpirationDate = order.ExpirationDate,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,

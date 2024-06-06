@@ -36,7 +36,13 @@ const OrderForm: React.FC<OrderFormProps> = ({
   } = methods;
 
   const [foundPI, setFoundPI] = useState(null);
+  const [localInstallmentType, setLocalInstallmentType] = useState(
+    methods.getValues("installmentType"),
+  );
 
+  const onInstallmentTypeChange = (e: string) => {
+    setLocalInstallmentType(e);
+  };
   //lookup pi value
   const lookupPI = async (pi: string) => {
     if (!pi) {
@@ -92,11 +98,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <>
             <OrderFormField
               name="PILookup"
-              label="Order for PI (email or kerb)"
+              label="Order for Sponsor (email or kerb)"
               readOnly={readOnly}
               disabled={readOnly}
               onBlur={(e) => {
-                console.log("PI Lookup", e.target.value);
                 lookupPI(e.target.value);
               }}
             />
@@ -146,21 +151,23 @@ const OrderForm: React.FC<OrderFormProps> = ({
           deps={"total"}
         />
         <OrderFormField
-          name="installments"
-          label="Installments"
-          readOnly={readOnly || !isAdmin}
-          disabled={!readOnly && !isAdmin}
-        />
-        <OrderFormField
           name="installmentType"
           label="Installment Type"
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           type="select"
         >
+          <option value="OneTime">One Time</option>
           <option value="Monthly">Monthly</option>
           <option value="Yearly">Yearly</option>
         </OrderFormField>
+        {localInstallmentType !== "OneTime" && <h1>It Isn't One Time</h1>}
+        <OrderFormField
+          name="installments"
+          label="Installments"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+        />
         <OrderFormField
           name="name"
           label="Name"
@@ -193,6 +200,20 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           maxLength={150}
+        />
+        <OrderFormField
+          name="installmentDate"
+          label="Installment Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
+        />
+        <OrderFormField
+          name="expirationDate"
+          label="Expiration Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
         />
         <OrderFormField
           name="adjustment"

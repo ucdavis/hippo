@@ -160,7 +160,8 @@ namespace Hippo.Web.Controllers
                     Units = model.Units,
                     UnitPrice = model.UnitPrice,
                     Installments = model.Installments,
-                    InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
+                    InstallmentType = model.InstallmentType,
+                    LifeCycle = model.LifeCycle,
                     Quantity = model.Quantity,
                     Billings = new List<Billing>(),
 
@@ -210,6 +211,9 @@ namespace Hippo.Web.Controllers
                     existingOrder.UnitPrice = model.UnitPrice;
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
+                    existingOrder.LifeCycle = model.LifeCycle;
+                    existingOrder.ExpirationDate = model.ExpirationDate;
+                    existingOrder.InstallmentDate = model.InstallmentDate;
                 }
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;
