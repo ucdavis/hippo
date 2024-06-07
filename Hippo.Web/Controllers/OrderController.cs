@@ -160,7 +160,8 @@ namespace Hippo.Web.Controllers
                     Units = model.Units,
                     UnitPrice = model.UnitPrice,
                     Installments = model.Installments,
-                    InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
+                    InstallmentType = model.InstallmentType,
+                    LifeCycle = model.LifeCycle,
                     Quantity = model.Quantity,
                     Billings = new List<Billing>(),
 
@@ -177,6 +178,11 @@ namespace Hippo.Web.Controllers
                     PrincipalInvestigator = principalInvestigator,
                     CreatedOn = DateTime.UtcNow
                 };
+                if (isClusterOrSystemAdmin)
+                {
+                    order.ExpirationDate = model.ExpirationDate;
+                    order.InstallmentDate = model.InstallmentDate;
+                }
                 // Deal with OrderMeta data
                 foreach (var metaData in model.MetaData)
                 {
@@ -196,7 +202,7 @@ namespace Hippo.Web.Controllers
                 //Updating an existing order without changing the status.
                 var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if(User.IsInRole(AccessCodes.ClusterAdminAccess))
+                if(isClusterOrSystemAdmin)
                 {
                     //TODO: Check the status to limit what can be changed
                     existingOrder.Category = model.Category;
@@ -210,6 +216,9 @@ namespace Hippo.Web.Controllers
                     existingOrder.UnitPrice = model.UnitPrice;
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
+                    existingOrder.LifeCycle = model.LifeCycle;
+                    existingOrder.ExpirationDate = model.ExpirationDate;
+                    existingOrder.InstallmentDate = model.InstallmentDate;
                 }
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;

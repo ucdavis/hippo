@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -36,6 +36,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
   } = methods;
 
   const [foundPI, setFoundPI] = useState(null);
+  const [localInstallmentType, setLocalInstallmentType] = useState(
+    methods.getValues("installmentType"),
+  );
 
   //lookup pi value
   const lookupPI = async (pi: string) => {
@@ -76,6 +79,33 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
+  const installmentType = useWatch({
+    control: methods.control,
+    name: "installmentType",
+  });
+  const installments = useWatch({
+    control: methods.control,
+    name: "installments",
+  });
+
+  if (installmentType !== localInstallmentType) {
+    setLocalInstallmentType(installmentType);
+    if (installmentType === "OneTime" && installments !== 1) {
+      methods.setValue("installments", 1);
+    }
+    if (
+      installmentType === "Monthly" &&
+      (installments === 1 || installments === 5)
+    ) {
+      methods.setValue("installments", 60);
+    }
+    if (
+      installmentType === "Yearly" &&
+      (installments === 1 || installments === 60)
+    ) {
+      methods.setValue("installments", 5);
+    }
+  }
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
@@ -92,11 +122,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
           <>
             <OrderFormField
               name="PILookup"
-              label="Order for PI (email or kerb)"
+              label="Order for Sponsor (email or kerb)"
               readOnly={readOnly}
               disabled={readOnly}
               onBlur={(e) => {
-                console.log("PI Lookup", e.target.value);
                 lookupPI(e.target.value);
               }}
             />
@@ -146,21 +175,30 @@ const OrderForm: React.FC<OrderFormProps> = ({
           deps={"total"}
         />
         <OrderFormField
-          name="installments"
-          label="Installments"
-          readOnly={readOnly || !isAdmin}
-          disabled={!readOnly && !isAdmin}
-        />
-        <OrderFormField
           name="installmentType"
           label="Installment Type"
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           type="select"
         >
+          <option value="OneTime">One Time</option>
           <option value="Monthly">Monthly</option>
           <option value="Yearly">Yearly</option>
         </OrderFormField>
+        {installmentType !== "OneTime" && (
+          <OrderFormField
+            name="installments"
+            label="Installments"
+            readOnly={readOnly || !isAdmin}
+            disabled={!readOnly && !isAdmin}
+          />
+        )}
+        <OrderFormField
+          name="lifeCycle"
+          label="Life Cycle in Months"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+        />
         <OrderFormField
           name="name"
           label="Name"
@@ -193,6 +231,20 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           maxLength={150}
+        />
+        <OrderFormField
+          name="installmentDate"
+          label="Installment Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
+        />
+        <OrderFormField
+          name="expirationDate"
+          label="Expiration Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
         />
         <OrderFormField
           name="adjustment"

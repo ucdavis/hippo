@@ -217,15 +217,19 @@ export interface ChartStringValidationModel {
   warning: string;
 }
 
-export interface ProductModel {
-  id: number;
+export interface ProductBase {
   category: string;
-  name: string;
   description: string;
   units: string;
   unitPrice: string;
   installments: number;
   installmentType: string;
+  lifeCycle: number;
+}
+
+export interface ProductModel extends Partial<ProductBase> {
+  id: number;
+  name: string;
 }
 
 export interface OrderMetadataModel {
@@ -258,18 +262,12 @@ export interface HistoryModel {
   actedDate: string;
 }
 
-export interface OrderModel {
+export interface OrderModel extends Partial<ProductBase> {
   id: number;
   PILookup: string;
-  category: string;
   name: string;
   productName: string;
-  description: string;
   notes: string;
-  units: string;
-  unitPrice: string;
-  installments: number;
-  installmentType: string;
   quantity: number;
   adjustment: number;
   adjustmentReason: string;
@@ -281,6 +279,8 @@ export interface OrderModel {
   total: string;
   balanceRemaining: string;
   piUser?: User;
+  installmentDate?: string;
+  expirationDate?: string;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
   payments: PaymentModel[];
