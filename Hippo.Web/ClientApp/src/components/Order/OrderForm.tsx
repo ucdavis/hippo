@@ -36,6 +36,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
   } = methods;
 
   const [foundPI, setFoundPI] = useState(null);
+  const [localInstallmentType, setLocalInstallmentType] = useState(
+    methods.getValues("installmentType"),
+  );
 
   //lookup pi value
   const lookupPI = async (pi: string) => {
@@ -80,11 +83,29 @@ const OrderForm: React.FC<OrderFormProps> = ({
     control: methods.control,
     name: "installmentType",
   });
+  const installments = useWatch({
+    control: methods.control,
+    name: "installments",
+  });
 
-  if (installmentType === "OneTime") {
-    methods.setValue("installments", 1);
+  if (installmentType !== localInstallmentType) {
+    setLocalInstallmentType(installmentType);
+    if (installmentType === "OneTime" && installments !== 1) {
+      methods.setValue("installments", 1);
+    }
+    if (
+      installmentType === "Monthly" &&
+      (installments === 1 || installments === 5)
+    ) {
+      methods.setValue("installments", 60);
+    }
+    if (
+      installmentType === "Yearly" &&
+      (installments === 1 || installments === 60)
+    ) {
+      methods.setValue("installments", 5);
+    }
   }
-
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
