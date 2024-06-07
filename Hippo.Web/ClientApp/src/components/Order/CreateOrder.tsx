@@ -8,6 +8,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
 const defaultOrder: OrderModel = {
   id: 0,
+  PILookup: "",
   category: "",
   name: "",
   productName: "",
@@ -87,8 +88,10 @@ const CreateOrder: React.FC = () => {
       billings: updatedOrder.billings,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
+      piUser: updatedOrder.piUser,
 
       // editable fields
+      PILookup: updatedOrder.PILookup,
       name: updatedOrder.name,
       productName: updatedOrder.productName,
       description: updatedOrder.description,
@@ -104,6 +107,9 @@ const CreateOrder: React.FC = () => {
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
       metaData: updatedOrder.metaData,
+      lifeCycle: updatedOrder.lifeCycle,
+      expirationDate: updatedOrder.expirationDate,
+      installmentDate: updatedOrder.installmentDate,
     };
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
@@ -149,6 +155,7 @@ const CreateOrder: React.FC = () => {
             orderProp={order}
             readOnly={false}
             isAdmin={isClusterAdmin}
+            cluster={cluster}
             onSubmit={submitOrder}
           />
           {notification.pending && <div>Saving...</div>}

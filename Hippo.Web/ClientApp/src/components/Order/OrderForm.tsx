@@ -1,5 +1,5 @@
-import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,11 +8,13 @@ import FormSubmitButton from "../../Shared/Form/FormSubmitButton";
 import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
+import { authenticatedFetch } from "../../util/api";
 
 interface OrderFormProps {
   orderProp: OrderModel;
   readOnly: boolean;
   isAdmin: boolean;
+  cluster: string;
   onSubmit: (order: OrderModel) => Promise<void>;
 }
 
@@ -20,6 +22,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   orderProp,
   readOnly,
   isAdmin,
+  cluster,
   onSubmit,
 }) => {
   const methods = useForm<OrderModel>({
@@ -31,6 +34,33 @@ const OrderForm: React.FC<OrderFormProps> = ({
     setError,
     formState: { isDirty, isSubmitting },
   } = methods;
+
+  const [foundPI, setFoundPI] = useState(null);
+  const [localInstallmentType, setLocalInstallmentType] = useState(
+    methods.getValues("installmentType"),
+  );
+
+  //lookup pi value
+  const lookupPI = async (pi: string) => {
+    if (!pi) {
+      setFoundPI("");
+      return;
+    }
+    const response = await authenticatedFetch(
+      `/api/${cluster}/order/GetClusterUser/${pi}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      if (data?.name) {
+        setFoundPI(`Found User ${data.name} (${data.email})`);
+      } else {
+        setFoundPI(`Not Found ${pi}`);
+      }
+    } else {
+      setFoundPI(`Not Found ${pi}`);
+    }
+  };
 
   const submitForm = async (data: OrderModel) => {
     if (!isDirty || isSubmitting) {
@@ -49,6 +79,33 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
+  const installmentType = useWatch({
+    control: methods.control,
+    name: "installmentType",
+  });
+  const installments = useWatch({
+    control: methods.control,
+    name: "installments",
+  });
+
+  if (installmentType !== localInstallmentType) {
+    setLocalInstallmentType(installmentType);
+    if (installmentType === "OneTime" && installments !== 1) {
+      methods.setValue("installments", 1);
+    }
+    if (
+      installmentType === "Monthly" &&
+      (installments === 1 || installments === 5)
+    ) {
+      methods.setValue("installments", 60);
+    }
+    if (
+      installmentType === "Yearly" &&
+      (installments === 1 || installments === 60)
+    ) {
+      methods.setValue("installments", 5);
+    }
+  }
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
@@ -61,6 +118,21 @@ const OrderForm: React.FC<OrderFormProps> = ({
           disabled={true}
         />
         <hr />
+        {isAdmin && !readOnly && (
+          <>
+            <OrderFormField
+              name="PILookup"
+              label="Order for Sponsor (email or kerb)"
+              readOnly={readOnly}
+              disabled={readOnly}
+              onBlur={(e) => {
+                lookupPI(e.target.value);
+              }}
+            />
+            {foundPI && <span className="text-muted">{foundPI}</span>}
+          </>
+        )}
+
         <OrderFormField
           name="productName"
           label="Product Name"
@@ -103,21 +175,30 @@ const OrderForm: React.FC<OrderFormProps> = ({
           deps={"total"}
         />
         <OrderFormField
-          name="installments"
-          label="Installments"
-          readOnly={readOnly || !isAdmin}
-          disabled={!readOnly && !isAdmin}
-        />
-        <OrderFormField
           name="installmentType"
           label="Installment Type"
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           type="select"
         >
+          <option value="OneTime">One Time</option>
           <option value="Monthly">Monthly</option>
           <option value="Yearly">Yearly</option>
         </OrderFormField>
+        {installmentType !== "OneTime" && (
+          <OrderFormField
+            name="installments"
+            label="Installments"
+            readOnly={readOnly || !isAdmin}
+            disabled={!readOnly && !isAdmin}
+          />
+        )}
+        <OrderFormField
+          name="lifeCycle"
+          label="Life Cycle in Months"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+        />
         <OrderFormField
           name="name"
           label="Name"
@@ -150,6 +231,20 @@ const OrderForm: React.FC<OrderFormProps> = ({
           readOnly={readOnly || !isAdmin}
           disabled={!readOnly && !isAdmin}
           maxLength={150}
+        />
+        <OrderFormField
+          name="installmentDate"
+          label="Installment Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
+        />
+        <OrderFormField
+          name="expirationDate"
+          label="Expiration Date"
+          readOnly={readOnly || !isAdmin}
+          disabled={!readOnly && !isAdmin}
+          type="date"
         />
         <OrderFormField
           name="adjustment"

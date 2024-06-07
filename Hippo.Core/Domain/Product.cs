@@ -3,28 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Hippo.Core.Domain
 {
-    public class Product
+    public class Product : ProductBase
     {
-        [Key]
-        public int Id { get; set; }
-        public bool IsActive { get; set; }
-        [Required]
-        public string Category { get; set; }
-        [Required]
-        [MaxLength(50)]
-        public string Name { get; set; }
-        [MaxLength(250)]
-        public string Description { get; set; }
-        public string Units { get; set; } //Informational like TB, or fairshair points
-        [Required]
-        [Range(0.01, double.MaxValue)]
-        public decimal UnitPrice { get; set; }
-        //Not sure if we want to do this, but it lets a default number of payment installments to be specified
-        public int Installments { get; set; }
-        [Required]
-        [MaxLength(10)]
-        public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly
+        //Other fields in Product Base   
 
+        public bool IsActive { get; set; }
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         [Required]
@@ -35,7 +18,8 @@ namespace Hippo.Core.Domain
         {
             public const string Monthly = "Monthly";
             public const string Yearly = "Yearly";
-            public static List<string> Types = new List<string> { Monthly, Yearly };
+            public const string OneTime = "OneTime";
+            public static List<string> Types = new List<string> { Monthly, Yearly, OneTime };
         }
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)

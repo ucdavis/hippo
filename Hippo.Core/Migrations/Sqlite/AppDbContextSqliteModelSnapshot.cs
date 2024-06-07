@@ -372,8 +372,14 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ExternalReference")
                         .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("InstallmentDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("InstallmentType")
@@ -382,6 +388,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Installments")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LifeCycle")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -552,6 +561,9 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("LifeCycle")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -910,10 +922,10 @@ namespace Hippo.Core.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Hippo.Core.Domain.User", "PrincipalInvestigator")
+                    b.HasOne("Hippo.Core.Domain.Account", "PrincipalInvestigator")
                         .WithMany("Orders")
                         .HasForeignKey("PrincipalInvestigatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cluster");
@@ -1022,6 +1034,11 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Requester");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.Cluster", b =>
                 {
                     b.Navigation("Accounts");
@@ -1054,8 +1071,6 @@ namespace Hippo.Core.Migrations.Sqlite
             modelBuilder.Entity("Hippo.Core.Domain.User", b =>
                 {
                     b.Navigation("Accounts");
-
-                    b.Navigation("Orders");
 
                     b.Navigation("Permissions");
                 });

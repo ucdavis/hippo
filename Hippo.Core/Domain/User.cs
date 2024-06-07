@@ -45,9 +45,6 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<Permission> Permissions { get; set; } = new();
 
-        [JsonIgnore]
-        public List<Order> Orders { get; set; } = new();
-
 
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,11 +62,6 @@ namespace Hippo.Core.Domain
                 .HasOne(p => p.User)
                 .WithMany(u => u.Permissions)
                 .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.PrincipalInvestigator)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.PrincipalInvestigatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
         }

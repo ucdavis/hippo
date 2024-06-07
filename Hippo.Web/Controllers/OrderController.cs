@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
+using Hippo.Core.Models.OrderModels;
 using Hippo.Core.Services;
 using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +42,14 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUser.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+
+            var currentUserAccount = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            if(currentUserAccount == null)
+            {
+                return Ok(new OrderListModel[0]);
+            }
+
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
             
             return Ok(model);
 
@@ -51,8 +59,10 @@ namespace Hippo.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
+            //TODO: When accounts has an IsActive flag, we will need to ignore the query filters.
+
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
                 .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync(); 
@@ -77,30 +87,59 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetClusterUser(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Ok(null);
+            }
+
+            id = id.Trim().ToLower();
+
+            var model = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && (a.Kerberos == id || a.Email == id)).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
+                .Include(a => a.Owner).FirstOrDefaultAsync();
+
+            if(model == null || model.AdminOfGroups == null || !model.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
+            {
+                return Ok(new Account());
+            }
+
+            return Ok(model);
+                
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Save([FromBody] Order model) //TODO: Might need to change this to a post model....
+        public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
         {
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
 
-            User principalInvestigator = null;
+            Account? principalInvestigator = null;
 
             var orderToReturn = new Order();
 
 
             var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
-            if (User.IsInRole(AccessCodes.ClusterAdminAccess))
+            if (isClusterOrSystemAdmin && !string.IsNullOrWhiteSpace(model.PILookup))
             {
-                principalInvestigator = await _dbContext.Users.FirstAsync(a => a.Id == model.PrincipalInvestigatorId);
-                if(principalInvestigator == null)
+                //TODO: check if the PI is in the cluster and if they have a PI role (Add that info to GetClusterUser())
+
+                principalInvestigator = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && (a.Email == model.PILookup || a.Kerberos == model.PILookup));
+                if (principalInvestigator == null)
                 {
-                    principalInvestigator = currentUser;
+                    principalInvestigator = currentAccount;
                 }
             }
             else
             {
-                principalInvestigator = currentUser;
+                principalInvestigator = currentAccount;
             }
 
             if (!ModelState.IsValid)
@@ -121,9 +160,10 @@ namespace Hippo.Web.Controllers
                     Units = model.Units,
                     UnitPrice = model.UnitPrice,
                     Installments = model.Installments,
-                    InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly,
+                    InstallmentType = model.InstallmentType,
+                    LifeCycle = model.LifeCycle,
                     Quantity = model.Quantity,
-                    Billings = model.Billings,
+                    Billings = new List<Billing>(),
 
                     //Adjustment = model.Adjustment,
                     //AdjustmentReason = model.AdjustmentReason,
@@ -138,6 +178,11 @@ namespace Hippo.Web.Controllers
                     PrincipalInvestigator = principalInvestigator,
                     CreatedOn = DateTime.UtcNow
                 };
+                if (isClusterOrSystemAdmin)
+                {
+                    order.ExpirationDate = model.ExpirationDate;
+                    order.InstallmentDate = model.InstallmentDate;
+                }
                 // Deal with OrderMeta data
                 foreach (var metaData in model.MetaData)
                 {
@@ -157,7 +202,7 @@ namespace Hippo.Web.Controllers
                 //Updating an existing order without changing the status.
                 var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if(User.IsInRole(AccessCodes.ClusterAdminAccess))
+                if(isClusterOrSystemAdmin)
                 {
                     //TODO: Check the status to limit what can be changed
                     existingOrder.Category = model.Category;
@@ -171,6 +216,9 @@ namespace Hippo.Web.Controllers
                     existingOrder.UnitPrice = model.UnitPrice;
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
+                    existingOrder.LifeCycle = model.LifeCycle;
+                    existingOrder.ExpirationDate = model.ExpirationDate;
+                    existingOrder.InstallmentDate = model.InstallmentDate;
                 }
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;

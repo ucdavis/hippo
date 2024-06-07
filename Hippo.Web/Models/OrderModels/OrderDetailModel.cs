@@ -3,17 +3,10 @@ using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
 {
-    public class OrderDetailModel
+    public class OrderDetailModel : ProductBase
     {
-        public int Id { get; set; }
-        public string Category { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Units { get; set; } = string.Empty;
-        public decimal UnitPrice { get; set; }
-        public int Installments { get; set; }
-        public string InstallmentType { get; set; } = string.Empty;
+
         public decimal Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
         public string ExternalReference { get; set; } = string.Empty;
@@ -28,6 +21,11 @@ namespace Hippo.Web.Models.OrderModels
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
 
+        public string InstallmentDate { get; set; }
+        public string ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
+
+        public User? PiUser { get; set; }
+
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
@@ -39,6 +37,7 @@ namespace Hippo.Web.Models.OrderModels
             return order => new OrderDetailModel
             {
                 Id = order.Id,
+                PiUser = order.PrincipalInvestigator.Owner != null ? order.PrincipalInvestigator.Owner : new User { Email = order.PrincipalInvestigator.Email},
                 Category = order.Category,
                 Name = order.Name,
                 ProductName = order.ProductName,
@@ -47,6 +46,9 @@ namespace Hippo.Web.Models.OrderModels
                 UnitPrice = order.UnitPrice,
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
+                LifeCycle = order.LifeCycle,
+                InstallmentDate = order.InstallmentDate != null ? order.InstallmentDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+                ExpirationDate = order.ExpirationDate != null ? order.ExpirationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,

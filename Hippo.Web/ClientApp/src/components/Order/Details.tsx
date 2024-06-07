@@ -34,6 +34,7 @@ export const Details = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         setOrder(data);
         const balanceRemaining = parseFloat(data.balanceRemaining);
         setBalanceRemaining(balanceRemaining);
@@ -134,8 +135,10 @@ export const Details = () => {
       billings: updatedOrder.billings,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
+      piUser: updatedOrder.piUser,
 
       // editable fields
+      PILookup: updatedOrder.PILookup,
       name: updatedOrder.name,
       productName: updatedOrder.productName,
       description: updatedOrder.description,
@@ -151,6 +154,9 @@ export const Details = () => {
       adjustmentReason: updatedOrder.adjustmentReason,
       adminNotes: updatedOrder.adminNotes,
       metaData: updatedOrder.metaData,
+      lifeCycle: updatedOrder.lifeCycle,
+      expirationDate: updatedOrder.expirationDate,
+      installmentDate: updatedOrder.installmentDate,
     };
 
     // TODO: await API call
@@ -168,11 +174,15 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <h1>Order Details: Id {order.id}</h1>
+          <h2>
+            {order.piUser?.name} ({order.piUser?.email})
+          </h2>
 
           <OrderForm
             orderProp={order}
             readOnly={true}
             isAdmin={isClusterAdmin}
+            cluster={cluster}
             onSubmit={submitOrder}
           />
 

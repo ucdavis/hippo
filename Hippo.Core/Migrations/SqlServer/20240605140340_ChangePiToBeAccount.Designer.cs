@@ -4,6 +4,7 @@ using Hippo.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hippo.Core.Migrations.SqlServer
 {
     [DbContext(typeof(AppDbContextSqlServer))]
-    partial class AppDbContextSqlServerModelSnapshot : ModelSnapshot
+    [Migration("20240605140340_ChangePiToBeAccount")]
+    partial class ChangePiToBeAccount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -393,15 +395,9 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ExternalReference")
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
-
-                    b.Property<DateTime?>("InstallmentDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("InstallmentType")
                         .IsRequired()
@@ -409,9 +405,6 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("Installments")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LifeCycle")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -590,9 +583,6 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("LifeCycle")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
