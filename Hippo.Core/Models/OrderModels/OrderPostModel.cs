@@ -29,7 +29,7 @@ namespace Hippo.Core.Models.OrderModels
         public string PILookup { get; set; }
         public List<OrderMetaData> MetaData { get; set; } = new();
 
-
+        public List<Billing> Billings { get; set; } = new();
 
         public decimal Adjustment { get; set; }
         public string AdjustmentReason { get; set; }

@@ -35,7 +35,7 @@ namespace Hippo.Web.Controllers
         public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
         {
             return await _aggieEnterpriseService.IsChartStringValid(chartString);
-            
+
         }
 
         [HttpGet]
@@ -44,13 +44,13 @@ namespace Hippo.Web.Controllers
             var currentUser = await _userService.GetCurrentUser();
 
             var currentUserAccount = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
-            if(currentUserAccount == null)
+            if (currentUserAccount == null)
             {
                 return Ok(new OrderListModel[0]);
             }
 
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
-            
+
             return Ok(model);
 
             //TODO: Need to create a page for this.
@@ -65,7 +65,7 @@ namespace Hippo.Web.Controllers
                 .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
                 .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
-                .SingleOrDefaultAsync(); 
+                .SingleOrDefaultAsync();
             if (model == null)
             {
                 return NotFound();
@@ -100,13 +100,13 @@ namespace Hippo.Web.Controllers
             var model = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && (a.Kerberos == id || a.Email == id)).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
                 .Include(a => a.Owner).FirstOrDefaultAsync();
 
-            if(model == null || model.AdminOfGroups == null || !model.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
+            if (model == null || model.AdminOfGroups == null || !model.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
             {
                 return Ok(new Account());
             }
 
             return Ok(model);
-                
+
         }
 
         [HttpPost]
@@ -147,7 +147,7 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Invalid");
             }
 
-            if(model.Id == 0)
+            if (model.Id == 0)
             {
                 //Ok, this is a new order that we have to create
                 var order = new Order
@@ -189,6 +189,28 @@ namespace Hippo.Web.Controllers
                     order.AddMetaData(metaData.Name, metaData.Value);
                 }
 
+                if (model.Billings != null && model.Billings.Any(){
+                    foreach (var billing in model.Billings)
+                    {
+                        //Validate the chart string
+                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                        if (chartStringValidation.IsValid == false)
+                        {
+                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
+                        }
+                        order.Billings.Add(new Billing
+                        {
+                            ChartString = billing.ChartString,
+                            Percentage = billing.Percentage,
+                            Order = order,
+                            Updated = DateTime.UtcNow
+                        });
+                    }
+                    if(model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
+                    {
+                        return BadRequest("The sum of the percentages must be 100%.");
+                    }
+                }
                 await _dbContext.Orders.AddAsync(order);
 
                 await _historyService.OrderCreated(order, currentUser);
@@ -202,7 +224,7 @@ namespace Hippo.Web.Controllers
                 //Updating an existing order without changing the status.
                 var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if(isClusterOrSystemAdmin)
+                if (isClusterOrSystemAdmin)
                 {
                     //TODO: Check the status to limit what can be changed
                     existingOrder.Category = model.Category;
@@ -223,15 +245,15 @@ namespace Hippo.Web.Controllers
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;
                 existingOrder.Notes = model.Notes;
-                if(existingOrder.Status == Order.Statuses.Created)
+                if (existingOrder.Status == Order.Statuses.Created)
                 {
                     existingOrder.Quantity = model.Quantity;
                 }
-                
+
                 //Deal with OrderMeta data (Test this)
                 foreach (var metaData in existingOrder.MetaData)
                 {
-                    if(metaData != null && model.MetaData.Any(a => a.Name == metaData.Name) && model.MetaData.Any(a => a.Value == metaData.Value))
+                    if (metaData != null && model.MetaData.Any(a => a.Name == metaData.Name) && model.MetaData.Any(a => a.Value == metaData.Value))
                     {
                         //Keep it
                     }
@@ -252,12 +274,54 @@ namespace Hippo.Web.Controllers
                     }
                 }
 
+                //Make sure there are no duplicate chart strings?
+                //Allow Admin side to save invalid billings?
+                foreach (var billing in existingOrder.Billings)
+                {
+                    if (model.Billings.Any(a => a.ChartString == billing.ChartString))
+                    {
+                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                        if (chartStringValidation.IsValid == false)
+                        {
+                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
+                        }
+                        billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
+                    }
+                    else
+                    {
+                        existingOrder.Billings.Remove(billing);
+                    }
+                }
+                foreach (var billing in model.Billings)
+                {
+                    if (existingOrder.Billings.Any(a => a.ChartString == billing.ChartString))
+                    {
+                        //Nothing to do, it is already there
+                    }
+                    else
+                    {
+                        //Validate the chart string
+                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                        if (chartStringValidation.IsValid == false)
+                        {
+                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
+                        }
+                        existingOrder.Billings.Add(new Billing
+                        {
+                            ChartString = billing.ChartString,
+                            Percentage = billing.Percentage,
+                            Order = existingOrder,
+                            Updated = DateTime.UtcNow
+                        });
+                    }
+                }
+
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
                 await _historyService.OrderUpdated(existingOrder, currentUser);
 
                 orderToReturn = existingOrder;
 
-            }            
+            }
 
 
 
