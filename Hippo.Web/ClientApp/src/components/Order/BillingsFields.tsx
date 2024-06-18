@@ -55,16 +55,20 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         return (
           <Row key={field.id}>
             <Col>
-              <FormField
-                key={`chartString-${field.id}`}
-                register={register}
-                label="ChartString"
-                error={errors.billings?.[index]?.chartString}
-                name={`billings.${index}.chartString`}
-                required={true}
-                autoComplete="nope"
-                readOnly={readOnly}
-              />
+              <div className="input-group">
+                <FormField
+                  key={`chartString-${field.id}`}
+                  register={register}
+                  label="ChartString"
+                  error={errors.billings?.[index]?.chartString}
+                  name={`billings.${index}.chartString`}
+                  autoComplete="nope"
+                  readOnly={readOnly}
+                />
+                <button className="btn btn-primary" type="button">
+                  <i className="fas fa-search"></i>
+                </button>
+              </div>
             </Col>
             <Col>
               <FormField
@@ -73,7 +77,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                 label="Percentage"
                 error={errors.billings?.[index]?.percentage}
                 name={`billings.${index}.percentage`}
-                required={true}
                 readOnly={readOnly}
               />
             </Col>
