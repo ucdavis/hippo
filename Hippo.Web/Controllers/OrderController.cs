@@ -189,7 +189,7 @@ namespace Hippo.Web.Controllers
                     order.AddMetaData(metaData.Name, metaData.Value);
                 }
 
-                if (model.Billings != null && model.Billings.Any(){
+                if (model.Billings != null && model.Billings.Any()){
                     foreach (var billing in model.Billings)
                     {
                         //Validate the chart string
@@ -276,6 +276,7 @@ namespace Hippo.Web.Controllers
 
                 //Make sure there are no duplicate chart strings?
                 //Allow Admin side to save invalid billings?
+                //Probably passing the ID? 
                 foreach (var billing in existingOrder.Billings)
                 {
                     if (model.Billings.Any(a => a.ChartString == billing.ChartString))
