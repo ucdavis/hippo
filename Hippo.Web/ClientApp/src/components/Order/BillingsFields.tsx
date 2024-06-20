@@ -22,6 +22,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   const {
     control,
     register,
+    getValues,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
@@ -51,7 +52,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   };
 
   const lookupChartString = async (index: number) => {
-    console.log(fields);
+    const existingBilling = getValues("billings")[index];
+    //console.log(existingBilling);
 
     const chart = await window.Finjector.findChartSegmentString();
 
@@ -59,13 +61,11 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       //add the chart.data chartString input
 
       const rtValue = await validateChartString(chart.data, index);
-      const existingPercentage = fields[index];
-      console.log("existingPercentage" + existingPercentage);
 
       update(index, {
         chartString: chart.data,
         id: 0,
-        percentage: fields[index].percentage,
+        percentage: existingBilling.percentage,
         chartStringValidation: {
           isValid: rtValue.isValid,
           description: rtValue.description,
