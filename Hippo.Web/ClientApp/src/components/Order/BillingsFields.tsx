@@ -137,14 +137,14 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     readOnly={readOnly}
                   />
                 </td>
-                <td width={"35%"}>
+                <td width={readOnly ? "50%" : "40%"}>
                   <ChartStringValidation
                     chartString={field?.chartString}
                     key={field?.chartString}
                   />
                 </td>
                 {!readOnly && (
-                  <td width={"20%"}>
+                  <td width={"15%"}>
                     <HipButton
                       title="Lookup ChartString"
                       aria-label="Lookup ChartString"
@@ -167,7 +167,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     </HipButton>
                   </td>
                 )}
-                {readOnly && <td width={"20%"}></td>}
+                {readOnly && <td width={"5%"}></td>}
               </tr>
             );
           })}
