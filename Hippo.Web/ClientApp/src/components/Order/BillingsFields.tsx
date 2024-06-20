@@ -7,6 +7,11 @@ import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 
+declare const window: Window &
+  typeof globalThis & {
+    Finjector: any;
+  };
+
 type BillingsFieldsProps = {
   readOnly: boolean;
 };
@@ -18,7 +23,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     formState: { errors },
   } = useFormContext<OrderModel>();
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: "billings",
   });
@@ -41,6 +46,27 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   const removeBilling = (index: number) => {
     remove(index);
+  };
+
+  const lookupChartString = async (index: number) => {
+    const chart = await window.Finjector.findChartSegmentString();
+
+    if (chart.status === "success") {
+      //add the chart.data chartString input
+      fields[index].chartString = chart.data;
+      update(index, fields[index]);
+
+      // financialDetail.chartString = chart.data;
+
+      // setFinancialDetail((prevFinancialDetail) => ({
+      //   ...prevFinancialDetail,
+      //   chartString: chart.data,
+      // }));
+
+      // await validateChartString(chart.data);
+    } else {
+      alert("Failed!");
+    }
   };
 
   if (readOnly && fields.length === 0) {
@@ -94,7 +120,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                       color="primary"
                       outline={true}
                       size="sm"
-                      onClick={() => alert(index)}
+                      onClick={() => lookupChartString(index)}
                     >
                       <FontAwesomeIcon icon={faSearch} />
                     </HipButton>{" "}
