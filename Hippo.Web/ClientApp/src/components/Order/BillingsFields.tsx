@@ -51,13 +51,16 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   };
 
   const lookupChartString = async (index: number) => {
+    console.log(fields);
+
     const chart = await window.Finjector.findChartSegmentString();
 
     if (chart.status === "success") {
       //add the chart.data chartString input
 
       const rtValue = await validateChartString(chart.data, index);
-      console.log(rtValue);
+      const existingPercentage = fields[index];
+      console.log("existingPercentage" + existingPercentage);
 
       update(index, {
         chartString: chart.data,
@@ -113,7 +116,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           {fields.map((field, index) => {
             return (
               <tr key={field.id}>
-                <td>
+                <td width={"40%"}>
                   <FormField
                     key={`chartString-${field.id}`}
                     register={register}
@@ -124,7 +127,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     readOnly={readOnly}
                   />
                 </td>
-                <td width={"40px;"}>
+                <td width={"5%;"}>
                   <FormField
                     key={`percentage-${field.id}`}
                     register={register}
@@ -134,14 +137,14 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     readOnly={readOnly}
                   />
                 </td>
-                <td>
+                <td width={"35%"}>
                   <ChartStringValidation
                     chartString={field?.chartString}
                     key={field?.chartString}
                   />
                 </td>
                 {!readOnly && (
-                  <td width={"160px;"}>
+                  <td width={"20%"}>
                     <HipButton
                       title="Lookup ChartString"
                       aria-label="Lookup ChartString"
@@ -164,7 +167,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     </HipButton>
                   </td>
                 )}
-                {readOnly && <td width={"40px;"}></td>}
+                {readOnly && <td width={"20%"}></td>}
               </tr>
             );
           })}
