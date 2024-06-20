@@ -23,6 +23,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     control,
     register,
     getValues,
+    setValue,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
@@ -64,7 +65,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
       update(index, {
         chartString: chart.data,
-        id: 0,
+        id: existingBilling.id,
         percentage: existingBilling.percentage,
         chartStringValidation: {
           isValid: rtValue.isValid,
