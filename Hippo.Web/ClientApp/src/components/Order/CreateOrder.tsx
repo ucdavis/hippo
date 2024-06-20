@@ -85,7 +85,6 @@ const CreateOrder: React.FC = () => {
       total: updatedOrder.total,
       subTotal: updatedOrder.subTotal,
       balanceRemaining: updatedOrder.balanceRemaining,
-      billings: updatedOrder.billings,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
       piUser: updatedOrder.piUser,
@@ -110,7 +109,11 @@ const CreateOrder: React.FC = () => {
       lifeCycle: updatedOrder.lifeCycle,
       expirationDate: updatedOrder.expirationDate,
       installmentDate: updatedOrder.installmentDate,
+      billings: updatedOrder.billings,
     };
+
+    console.log(editedOrder);
+    console.log(JSON.stringify(editedOrder));
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",

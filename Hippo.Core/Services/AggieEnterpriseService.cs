@@ -191,7 +191,7 @@ namespace Hippo.Core.Services
             {
                 rtValue.AccountManager = data.PpmProjectByNumber.PrimaryProjectManagerName;
                 rtValue.AccountManagerEmail = data.PpmProjectByNumber.PrimaryProjectManagerEmail;
-                rtValue.Description = data.PpmProjectByNumber.Name;
+                rtValue.Description = $"{data.PpmProjectByNumber.Name} - {rtValue.AccountManager}";
             }
             return;
         }

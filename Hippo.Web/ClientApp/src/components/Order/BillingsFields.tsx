@@ -6,6 +6,8 @@ import FormField from "../../Shared/Form/FormField";
 import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { authenticatedFetch } from "../../util/api";
+import ChartStringValidation from "./ChartStringValidation";
 
 declare const window: Window &
   typeof globalThis & {
@@ -53,20 +55,41 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
     if (chart.status === "success") {
       //add the chart.data chartString input
-      fields[index].chartString = chart.data;
-      update(index, fields[index]);
 
-      // financialDetail.chartString = chart.data;
+      const rtValue = await validateChartString(chart.data, index);
+      console.log(rtValue);
 
-      // setFinancialDetail((prevFinancialDetail) => ({
-      //   ...prevFinancialDetail,
-      //   chartString: chart.data,
-      // }));
-
-      // await validateChartString(chart.data);
+      update(index, {
+        chartString: chart.data,
+        id: 0,
+        percentage: fields[index].percentage,
+        chartStringValidation: {
+          isValid: rtValue.isValid,
+          description: rtValue.description,
+          accountManager: rtValue.accountManager,
+          accountManagerEmail: rtValue.accountManagerEmail,
+          message: rtValue.message,
+          warning: rtValue.warning,
+        },
+      });
     } else {
       alert("Failed!");
     }
+  };
+
+  const validateChartString = async (chartString: string, index: number) => {
+    let response = await authenticatedFetch(
+      `/api/order/validateChartString/${chartString}`,
+      {
+        method: "GET",
+      },
+    );
+    //console.log(response);
+    if (response.ok) {
+      const result = await response.json();
+      return result;
+    }
+    return { isValid: false, message: "Failed to validate chart string" };
   };
 
   if (readOnly && fields.length === 0) {
@@ -82,7 +105,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           <tr>
             <th>Chart String</th>
             <th>Percent</th>
-            <th>Chart String Validation</th>
+            <th>Chart String Details</th>
             <th></th>
           </tr>
         </thead>
@@ -111,7 +134,12 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     readOnly={readOnly}
                   />
                 </td>
-                <td></td>
+                <td>
+                  <ChartStringValidation
+                    chartString={field?.chartString}
+                    key={field?.chartString}
+                  />
+                </td>
                 {!readOnly && (
                   <td width={"160px;"}>
                     <HipButton
