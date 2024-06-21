@@ -187,7 +187,7 @@ export const Details = () => {
             onSubmit={submitOrder}
           />
 
-          <h2>Chart Strings</h2>
+          {/* <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
@@ -210,7 +210,7 @@ export const Details = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> */}
           <h2>History</h2>
           <ReactTable
             columns={historyColumns}
