@@ -213,14 +213,21 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
             );
           })}
         </tbody>
+        <tfoot>
+          <tr>
+            <td>Percent Total</td>
+            <td colSpan={3}>
+              <OrderFormField
+                name="percentTotal"
+                label=""
+                readOnly={true}
+                disabled={true}
+                type="number"
+              />
+            </td>
+          </tr>
+        </tfoot>
       </table>
-      <OrderFormField
-        name="percentTotal"
-        label="Percent Total"
-        readOnly={true}
-        disabled={true}
-        type="number"
-      />
 
       {!readOnly && (
         <HipButton outline={true} color="secondary" onClick={addBilling}>
