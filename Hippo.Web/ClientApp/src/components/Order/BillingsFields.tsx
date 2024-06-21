@@ -81,6 +81,30 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     }
   };
 
+  const onChartStringBlur = async (index: number, chartString: string) => {
+    if (!chartString) {
+      return;
+    }
+
+    const existingBilling = getValues("billings")[index];
+
+    const rtValue = await validateChartString(chartString, index);
+
+    update(index, {
+      chartString: chartString,
+      id: existingBilling.id,
+      percentage: existingBilling.percentage,
+      chartStringValidation: {
+        isValid: rtValue.isValid,
+        description: rtValue.description,
+        accountManager: rtValue.accountManager,
+        accountManagerEmail: rtValue.accountManagerEmail,
+        message: rtValue.message,
+        warning: rtValue.warning,
+      },
+    });
+  };
+
   const validateChartString = async (chartString: string, index: number) => {
     let response = await authenticatedFetch(
       `/api/order/validateChartString/${chartString}`,
@@ -125,6 +149,9 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     error={errors.billings?.[index]?.chartString}
                     name={`billings.${index}.chartString`}
                     autoComplete="nope"
+                    onBlur={(e) => {
+                      onChartStringBlur(index, e.target.value);
+                    }}
                     readOnly={readOnly}
                   />
                 </td>

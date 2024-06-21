@@ -189,6 +189,7 @@ namespace Hippo.Web.Controllers
                     order.AddMetaData(metaData.Name, metaData.Value);
                 }
 
+                //TODO: Look at the billing id?
                 if (model.Billings != null && model.Billings.Any()){
                     foreach (var billing in model.Billings)
                     {
