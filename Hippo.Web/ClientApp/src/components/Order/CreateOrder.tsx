@@ -32,6 +32,7 @@ const defaultOrder: OrderModel = {
   billings: [],
   payments: [],
   history: [],
+  percentTotal: 0,
 };
 const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();
@@ -88,6 +89,7 @@ const CreateOrder: React.FC = () => {
       payments: updatedOrder.payments,
       history: updatedOrder.history,
       piUser: updatedOrder.piUser,
+      percentTotal: updatedOrder.percentTotal,
 
       // editable fields
       PILookup: updatedOrder.PILookup,

@@ -1,5 +1,5 @@
 import React from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
 import FormField from "../../Shared/Form/FormField";
@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { authenticatedFetch } from "../../util/api";
 import ChartStringValidation from "./ChartStringValidation";
+import OrderFormField from "./OrderFormField";
 
 declare const window: Window &
   typeof globalThis & {
@@ -23,6 +24,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     control,
     register,
     getValues,
+    setValue,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
@@ -119,6 +121,18 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     return { isValid: false, message: "Failed to validate chart string" };
   };
 
+  const billings = useWatch({
+    control,
+    name: "billings",
+  });
+
+  const percentTotal = billings.reduce((acc, billing) => {
+    const percentage = parseFloat(billing.percentage);
+    return isNaN(percentage) ? acc : acc + percentage;
+  }, 0);
+
+  setValue("percentTotal", percentTotal);
+
   if (readOnly && fields.length === 0) {
     return null;
   }
@@ -200,6 +214,13 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           })}
         </tbody>
       </table>
+      <OrderFormField
+        name="percentTotal"
+        label="Percent Total"
+        readOnly={true}
+        disabled={true}
+        type="number"
+      />
 
       {!readOnly && (
         <HipButton outline={true} color="secondary" onClick={addBilling}>

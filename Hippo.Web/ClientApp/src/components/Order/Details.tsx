@@ -136,6 +136,7 @@ export const Details = () => {
       payments: updatedOrder.payments,
       history: updatedOrder.history,
       piUser: updatedOrder.piUser,
+      percentTotal: updatedOrder.percentTotal,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
