@@ -23,7 +23,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     control,
     register,
     getValues,
-    setValue,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
