@@ -165,8 +165,7 @@ namespace Hippo.Web.Controllers
                     Quantity = model.Quantity,
                     Billings = new List<Billing>(),
 
-                    //Adjustment = model.Adjustment,
-                    //AdjustmentReason = model.AdjustmentReason,
+
                     SubTotal = model.Quantity * model.UnitPrice,
                     Total = model.Quantity * model.UnitPrice,
                     BalanceRemaining = model.Quantity * model.UnitPrice,
@@ -182,6 +181,8 @@ namespace Hippo.Web.Controllers
                 {
                     order.ExpirationDate = model.ExpirationDate;
                     order.InstallmentDate = model.InstallmentDate;
+                    order.Adjustment = model.Adjustment;
+                    order.AdjustmentReason = model.AdjustmentReason;
                 }
                 // Deal with OrderMeta data
                 foreach (var metaData in model.MetaData)
