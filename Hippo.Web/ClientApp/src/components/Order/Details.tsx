@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   HistoryModel,
   OrderMetadataModel,
@@ -178,7 +178,12 @@ export const Details = () => {
           <h2>
             {order.piUser?.name} ({order.piUser?.email})
           </h2>
-          <button className="btn btn-primary"> Edit Order</button>{" "}
+          <Link
+            className="btn btn-primary"
+            to={`/${cluster}/order/edit/${order.id}`}
+          >
+            Edit Order
+          </Link>{" "}
           <button className="btn btn-primary"> Approve Order</button>{" "}
           <button className="btn btn-primary"> Cancel Order</button>{" "}
           <button className="btn btn-primary"> Update Chart Strings</button>{" "}
