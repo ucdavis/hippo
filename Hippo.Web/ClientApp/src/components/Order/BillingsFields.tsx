@@ -34,10 +34,19 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   });
 
   const addBilling = () => {
+    const percentTotal = getValues("percentTotal");
+    let percentToSet = 100 - percentTotal;
+    if (percentToSet < 0) {
+      percentToSet = 0;
+    }
+    if (percentToSet > 100) {
+      percentToSet = 100;
+    }
+
     append({
       id: 0,
       chartString: "",
-      percentage: "",
+      percentage: percentToSet.toString(),
       chartStringValidation: {
         isValid: true,
         description: "",
