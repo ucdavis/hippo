@@ -179,8 +179,18 @@ namespace Hippo.Web.Controllers
                 };
                 if (isClusterOrSystemAdmin)
                 {
-                    order.ExpirationDate = model.ExpirationDate;
-                    order.InstallmentDate = model.InstallmentDate;
+                    //order.ExpirationDate = model.ExpirationDate;
+                    //order.InstallmentDate = model.InstallmentDate;
+                    if(model.ExpirationDate != null)
+                    {
+                        order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                    }
+                    if(model.InstallmentDate != null)
+                    {
+                        order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    }
+
+
                     order.Adjustment = model.Adjustment;
                     order.AdjustmentReason = model.AdjustmentReason;
                 }
@@ -241,8 +251,24 @@ namespace Hippo.Web.Controllers
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
                     existingOrder.LifeCycle = model.LifeCycle;
-                    existingOrder.ExpirationDate = model.ExpirationDate;
-                    existingOrder.InstallmentDate = model.InstallmentDate;
+                    if(!string.IsNullOrWhiteSpace( model.ExpirationDate))
+                    {
+                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                        //existingOrder.ExpirationDate = expirationDate;
+                    }
+                    else
+                                            {
+                        existingOrder.ExpirationDate = null;
+                    }
+                    if(!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                    {
+                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    }
+                    else
+                    {
+                        existingOrder.InstallmentDate = null;
+                    }
                 }
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;
