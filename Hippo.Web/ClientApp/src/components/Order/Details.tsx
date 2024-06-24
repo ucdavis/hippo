@@ -178,7 +178,11 @@ export const Details = () => {
           <h2>
             {order.piUser?.name} ({order.piUser?.email})
           </h2>
-
+          <button className="btn btn-primary"> Edit Order</button>{" "}
+          <button className="btn btn-primary"> Approve Order</button>{" "}
+          <button className="btn btn-primary"> Cancel Order</button>{" "}
+          <button className="btn btn-primary"> Update Chart Strings</button>{" "}
+          <button className="btn btn-primary"> Onetime Payment</button>
           <OrderForm
             orderProp={order}
             readOnly={true}
@@ -186,7 +190,6 @@ export const Details = () => {
             cluster={cluster}
             onSubmit={submitOrder}
           />
-
           {/* <h2>Chart Strings</h2>
           <table className="table table-bordered table-striped">
             <thead>
