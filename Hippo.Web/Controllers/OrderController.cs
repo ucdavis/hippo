@@ -181,11 +181,11 @@ namespace Hippo.Web.Controllers
                 {
                     //order.ExpirationDate = model.ExpirationDate;
                     //order.InstallmentDate = model.InstallmentDate;
-                    if(model.ExpirationDate != null)
+                    if (model.ExpirationDate != null)
                     {
                         order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
                     }
-                    if(model.InstallmentDate != null)
+                    if (model.InstallmentDate != null)
                     {
                         order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
                     }
@@ -201,7 +201,8 @@ namespace Hippo.Web.Controllers
                 }
 
                 //TODO: Look at the billing id?
-                if (model.Billings != null && model.Billings.Any()){
+                if (model.Billings != null && model.Billings.Any())
+                {
                     foreach (var billing in model.Billings)
                     {
                         //Validate the chart string
@@ -218,7 +219,7 @@ namespace Hippo.Web.Controllers
                             Updated = DateTime.UtcNow
                         });
                     }
-                    if(model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
+                    if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
                     {
                         return BadRequest("The sum of the percentages must be 100%.");
                     }
@@ -251,17 +252,17 @@ namespace Hippo.Web.Controllers
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
                     existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
-                    if(!string.IsNullOrWhiteSpace( model.ExpirationDate))
+                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
                     {
                         existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
                         //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
                         //existingOrder.ExpirationDate = expirationDate;
                     }
                     else
-                                            {
+                    {
                         existingOrder.ExpirationDate = null;
                     }
-                    if(!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
                         existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
                     }
@@ -302,47 +303,10 @@ namespace Hippo.Web.Controllers
                     }
                 }
 
-                //Make sure there are no duplicate chart strings?
-                //Allow Admin side to save invalid billings?
-                //Probably passing the ID? 
-                foreach (var billing in existingOrder.Billings)
+                var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
+                if (!updateBilling.Success)
                 {
-                    if (model.Billings.Any(a => a.ChartString == billing.ChartString))
-                    {
-                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
-                        if (chartStringValidation.IsValid == false)
-                        {
-                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
-                        }
-                        billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
-                    }
-                    else
-                    {
-                        existingOrder.Billings.Remove(billing);
-                    }
-                }
-                foreach (var billing in model.Billings)
-                {
-                    if (existingOrder.Billings.Any(a => a.ChartString == billing.ChartString))
-                    {
-                        //Nothing to do, it is already there
-                    }
-                    else
-                    {
-                        //Validate the chart string
-                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
-                        if (chartStringValidation.IsValid == false)
-                        {
-                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
-                        }
-                        existingOrder.Billings.Add(new Billing
-                        {
-                            ChartString = billing.ChartString,
-                            Percentage = billing.Percentage,
-                            Order = existingOrder,
-                            Updated = DateTime.UtcNow
-                        });
-                    }
+                    return BadRequest(updateBilling.Message);
                 }
 
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
@@ -360,6 +324,98 @@ namespace Hippo.Web.Controllers
             return Ok(orderToReturn);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateBilling([FromBody] OrderPostModel model)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
+            //TODO: Validation
+            //Updating an existing order without changing the status.
+            var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
+
+            var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
+            if (!updateBilling.Success)
+            {
+                return BadRequest(updateBilling.Message);
+            }
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
+            await _historyService.OrderUpdated(existingOrder, currentUser, "Billing Information Updated.");
+
+            var orderToReturn = existingOrder;
+
+            await _dbContext.SaveChangesAsync();
+
+
+            return Ok(orderToReturn);
+
+        }
+
+
+        private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
+        {
+            //Make sure there are no duplicate chart strings?
+            //Allow Admin side to save invalid billings?
+            //Probably passing the ID? 
+            foreach (var billing in order.Billings)
+            {
+                if (model.Billings.Any(a => a.ChartString == billing.ChartString))
+                {
+                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                    if (chartStringValidation.IsValid == false)
+                    {
+                        return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
+                    }
+                    billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
+                }
+                else
+                {
+                    order.Billings.Remove(billing);
+                }
+            }
+            foreach (var billing in model.Billings)
+            {
+                if (order.Billings.Any(a => a.ChartString == billing.ChartString))
+                {
+                    //Nothing to do, it is already there
+                }
+                else
+                {
+                    //Validate the chart string
+                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                    if (chartStringValidation.IsValid == false)
+                    {
+                        return new ProcessingResult
+                        {
+                            Success = false,
+                            Message = $"Invalid Chart String: {chartStringValidation.Message}"
+                        };
+                    }
+                    order.Billings.Add(new Billing
+                    {
+                        ChartString = billing.ChartString,
+                        Percentage = billing.Percentage,
+                        Order = order,
+                        Updated = DateTime.UtcNow
+                    });
+                }
+            }
+
+            if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
+            {
+                return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
+            }
+
+            return new ProcessingResult { Success = true };
+        }
+
+        private class ProcessingResult
+        {
+            public bool Success { get; set; }
+            public string? Message { get; set; }
+        }
     }
 }
