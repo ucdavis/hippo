@@ -177,7 +177,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     readOnly={readOnly}
                   />
                 </td>
-                <td width={"5%;"}>
+                <td width={"10%;"}>
                   <FormField
                     key={`percentage-${field.id}`}
                     register={register}
@@ -185,9 +185,11 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     error={errors.billings?.[index]?.percentage}
                     name={`billings.${index}.percentage`}
                     readOnly={readOnly}
+                    max={100}
+                    min={0.01}
                   />
                 </td>
-                <td width={readOnly ? "50%" : "40%"}>
+                <td width={readOnly ? "45%" : "35%"}>
                   <ChartStringValidation
                     chartString={field?.chartString}
                     key={field?.chartString}
