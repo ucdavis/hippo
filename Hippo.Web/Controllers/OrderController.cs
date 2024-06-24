@@ -250,7 +250,7 @@ namespace Hippo.Web.Controllers
                     existingOrder.UnitPrice = model.UnitPrice;
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
-                    existingOrder.LifeCycle = model.LifeCycle;
+                    existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
                     if(!string.IsNullOrWhiteSpace( model.ExpirationDate))
                     {
                         existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
