@@ -332,6 +332,62 @@ namespace Hippo.Web.Controllers
 
         }
 
+        [HttpPost]
+        [Route("api/order/makePaymnet/{id}/{amount}")]
+        public async Task<IActionResult> MakePayment(int id, decimal amount)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            //var permissions = await _userService.GetCurrentPermissionsAsync();
+            //var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+
+            var order = await _dbContext.Orders.FirstAsync(a => a.Id == id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            if(order.PrincipalInvestigatorId != currentUser.Id)
+            {
+                return BadRequest("You do not have permission to make a payment on this order.");
+            }
+
+            if (order.Status != Order.Statuses.Active)
+            {
+                return BadRequest("Order must be in Active status to make a payment.");
+            }
+
+            if (amount <= 0)
+            {
+                return BadRequest("Amount must be greater than 0.");
+            }
+
+            if (amount > order.BalanceRemaining)
+            {
+                return BadRequest("Amount must be less than or equal to the balance remaining.");
+            }
+
+            var payment = new Payment
+            {
+                Amount = amount,
+                Order = order,
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = currentUser
+            };
+
+            order.Payments.Add(payment);
+            order.BalanceRemaining -= amount;
+
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Updated); 
+            await _historyService.OrderUpdated(order, currentUser, $"Manual Payment of ${amount} made.");
+
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(order);
+        }
+
+
+
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
         {
             if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
