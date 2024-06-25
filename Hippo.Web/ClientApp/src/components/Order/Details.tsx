@@ -233,16 +233,8 @@ export const Details = () => {
       console.log(data);
       setOrder(data);
       setEditPaymentModel({ id: 0, amount: 0, status: "", createdOn: "" });
-    } else {
-      alert("Error fetching order");
     }
-  }, [
-    cluster,
-    orderId,
-    makePaymentConfirmation,
-    editPaymentModel,
-    setNotification,
-  ]);
+  }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
   const fakePayment = async () => {
     debugger;
