@@ -203,7 +203,7 @@ export const Details = () => {
   );
 
   const makePayment = useCallback(async () => {
-    const [confirmed] = await makePaymentConfirmation();
+    const [confirmed, editPaymentModel] = await makePaymentConfirmation();
 
     if (!confirmed) {
       return;
