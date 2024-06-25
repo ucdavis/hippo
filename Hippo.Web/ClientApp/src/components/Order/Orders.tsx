@@ -68,8 +68,7 @@ export const Orders = () => {
             to={`/${cluster}/order/details/${value.row.original.id}`}
           >
             Details
-          </Link>{" "}
-          <button className="btn btn-primary">Edit</button>{" "}
+          </Link>
         </div>
       ),
     }),

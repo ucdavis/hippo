@@ -9,6 +9,7 @@ import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
 import { authenticatedFetch } from "../../util/api";
+import BillingsFields from "./BillingsFields";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -272,6 +273,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
           />
         )}
         <MetaDataFields readOnly={readOnly} />
+        <hr />
+        <BillingsFields readOnly={readOnly} />
         <hr />
 
         <OrderFormTotalFields />

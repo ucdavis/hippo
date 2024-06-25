@@ -23,13 +23,13 @@ namespace Hippo.Core.Models.OrderModels
         [Range(0.0001, double.MaxValue)]
         public decimal Quantity { get; set; }
 
-        public DateTime? InstallmentDate { get; set; }
-        public DateTime? ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months    
+        public string? InstallmentDate { get; set; }
+        public string? ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months    
 
         public string PILookup { get; set; }
         public List<OrderMetaData> MetaData { get; set; } = new();
 
-
+        public List<Billing> Billings { get; set; } = new();
 
         public decimal Adjustment { get; set; }
         public string AdjustmentReason { get; set; }

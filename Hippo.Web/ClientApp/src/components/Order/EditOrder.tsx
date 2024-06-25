@@ -6,36 +6,8 @@ import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
-const defaultOrder: OrderModel = {
-  id: 0,
-  PILookup: "",
-  category: "",
-  name: "",
-  productName: "",
-  description: "",
-  notes: "",
-  units: "",
-  unitPrice: "",
-  installments: 5,
-  installmentType: "Yearly",
-  quantity: 0,
-  adjustment: 0,
-  adjustmentReason: "",
-  status: "N/A",
-  createdOn: "",
-  externalReference: "",
-  adminNotes: "",
-  subTotal: "",
-  total: "",
-  balanceRemaining: "",
-  metaData: [],
-  billings: [],
-  payments: [],
-  history: [],
-  percentTotal: 0,
-};
-const CreateOrder: React.FC = () => {
-  const { cluster, productId } = useParams();
+const EditOrder: React.FC = () => {
+  const { cluster, orderId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
@@ -46,35 +18,22 @@ const CreateOrder: React.FC = () => {
   }, [isClusterAdmin, isClusterAdminForCluster]);
 
   useEffect(() => {
-    if (productId) {
-      const fetchProductOrder = async () => {
-        const response = await authenticatedFetch(
-          `/api/${cluster}/order/GetProduct/${productId}`,
-        );
+    const fetchOrder = async () => {
+      const response = await authenticatedFetch(
+        `/api/${cluster}/order/get/${orderId}`,
+      );
 
-        if (response.ok) {
-          const data = await response.json();
-          setOrder(data);
-          // const balanceRemaining = parseFloat(data.balanceRemaining);
-          // setBalanceRemaining(balanceRemaining);
-          // const balancePending = data?.payments
-          //   .filter((payment) => payment.status !== "Completed")
-          //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-          // setBalancePending(balancePending);
-        } else {
-          alert("Error fetching product for order");
-        }
-      };
-
-      fetchProductOrder();
-    } else {
-      if (isClusterAdmin === false) {
-        window.location.href = `/${cluster}/product/index`;
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setOrder(data);
       } else {
-        setOrder(defaultOrder);
+        alert("Error fetching order");
       }
-    }
-  }, [cluster, isClusterAdmin, productId]);
+    };
+
+    fetchOrder();
+  }, [cluster, orderId]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -88,7 +47,7 @@ const CreateOrder: React.FC = () => {
       balanceRemaining: updatedOrder.balanceRemaining,
       payments: updatedOrder.payments,
       history: updatedOrder.history,
-      piUser: updatedOrder.piUser,
+      piUser: null,
       percentTotal: updatedOrder.percentTotal,
 
       // editable fields
@@ -116,6 +75,7 @@ const CreateOrder: React.FC = () => {
 
     console.log(editedOrder);
     console.log(JSON.stringify(editedOrder));
+    debugger;
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",
@@ -147,14 +107,14 @@ const CreateOrder: React.FC = () => {
   }
 
   if (!order) {
-    return <div>Loading... {productId}</div>;
+    return <div>Loading... {orderId}</div>;
   }
 
   return (
     <div>
       {order && (
         <div>
-          <h2>Create Order</h2>
+          <h2>Edit Order</h2>
 
           <OrderForm
             orderProp={order}
@@ -170,4 +130,4 @@ const CreateOrder: React.FC = () => {
   );
 };
 
-export default CreateOrder;
+export default EditOrder;
