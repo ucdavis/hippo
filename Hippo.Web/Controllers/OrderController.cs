@@ -339,6 +339,7 @@ namespace Hippo.Web.Controllers
             //var permissions = await _userService.GetCurrentPermissionsAsync();
             //var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
+            amount = Math.Round(amount, 2);
 
             var order = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Payments).Include(a => a.Cluster).FirstAsync(a => a.Id == id && a.Cluster.Name == Cluster);
             if (order == null)
@@ -356,9 +357,9 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Order must be in Active status to make a payment.");
             }
 
-            if (amount <= 0)
+            if (amount <= 0.01m)
             {
-                return BadRequest("Amount must be greater than 0.");
+                return BadRequest("Amount must be greater than 0.01");
             }
 
             var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
