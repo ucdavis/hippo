@@ -256,7 +256,12 @@ export const Details = () => {
           </Link>{" "}
           <button className="btn btn-primary"> Approve Order</button>{" "}
           <button className="btn btn-primary"> Cancel Order</button>{" "}
-          <button className="btn btn-primary"> Update Chart Strings</button>{" "}
+          <Link
+            className="btn btn-primary"
+            to={`/${cluster}/order/updatechartstrings/${order.id}`}
+          >
+            Update Chart Strings
+          </Link>{" "}
           <button className="btn btn-primary" onClick={() => makePayment()}>
             {" "}
             Onetime Payment
@@ -266,6 +271,7 @@ export const Details = () => {
             readOnly={true}
             isAdmin={isClusterAdmin}
             cluster={cluster}
+            onlyChartStrings={false}
             onSubmit={submitOrder}
           />
           {/* <h2>Chart Strings</h2>

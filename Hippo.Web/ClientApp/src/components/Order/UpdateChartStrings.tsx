@@ -6,7 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
-const EditOrder: React.FC = () => {
+const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
@@ -77,7 +77,7 @@ const EditOrder: React.FC = () => {
     console.log(JSON.stringify(editedOrder));
     debugger;
 
-    const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
+    const req = authenticatedFetch(`/api/${cluster}/order/UpdateBilling`, {
       method: "POST",
       body: JSON.stringify(editedOrder),
     });
@@ -114,14 +114,14 @@ const EditOrder: React.FC = () => {
     <div>
       {order && (
         <div>
-          <h2>Edit Order</h2>
+          <h2>Update Chart Strings</h2>
 
           <OrderForm
             orderProp={order}
             readOnly={false}
             isAdmin={isClusterAdmin}
             cluster={cluster}
-            onlyChartStrings={false}
+            onlyChartStrings={true}
             onSubmit={submitOrder}
           />
           {notification.pending && <div>Saving...</div>}
@@ -131,4 +131,4 @@ const EditOrder: React.FC = () => {
   );
 };
 
-export default EditOrder;
+export default UpdateChartStrings;
