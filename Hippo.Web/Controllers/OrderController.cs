@@ -332,7 +332,7 @@ namespace Hippo.Web.Controllers
 
         }
 
-
+        [HttpPost]
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
         {
             if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
