@@ -236,24 +236,6 @@ export const Details = () => {
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
-  const fakePayment = async () => {
-    debugger;
-    const response = await authenticatedFetch(
-      `/api/${cluster}/order/makepayment/${orderId}?amount=${12.33}`,
-      {
-        method: "POST",
-      },
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      setOrder(data);
-    } else {
-      alert("Error fetching order");
-    }
-  };
-
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -278,10 +260,6 @@ export const Details = () => {
           <button className="btn btn-primary" onClick={() => makePayment()}>
             {" "}
             Onetime Payment
-          </button>
-          <button className="btn btn-primary" onClick={fakePayment}>
-            {" "}
-            Fake Onetime Payment
           </button>
           <OrderForm
             orderProp={order}
