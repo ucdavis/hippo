@@ -200,30 +200,8 @@ namespace Hippo.Web.Controllers
                     order.AddMetaData(metaData.Name, metaData.Value);
                 }
 
-                //TODO: Look at the billing id?
-                if (model.Billings != null && model.Billings.Any())
-                {
-                    foreach (var billing in model.Billings)
-                    {
-                        //Validate the chart string
-                        var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
-                        if (chartStringValidation.IsValid == false)
-                        {
-                            return BadRequest($"Invalid Chart String: {chartStringValidation.Message}");
-                        }
-                        order.Billings.Add(new Billing
-                        {
-                            ChartString = billing.ChartString,
-                            Percentage = billing.Percentage,
-                            Order = order,
-                            Updated = DateTime.UtcNow
-                        });
-                    }
-                    if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
-                    {
-                        return BadRequest("The sum of the percentages must be 100%.");
-                    }
-                }
+                var updateBilling = await UpdateOrderBillingInfo(order, model);
+
                 await _dbContext.Orders.AddAsync(order);
 
                 await _historyService.OrderCreated(order, currentUser);
@@ -357,6 +335,11 @@ namespace Hippo.Web.Controllers
 
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
         {
+            if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
+            {
+                return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
+            }
+
             //Make sure there are no duplicate chart strings?
             //Allow Admin side to save invalid billings?
             //Probably passing the ID? 
@@ -404,10 +387,7 @@ namespace Hippo.Web.Controllers
                 }
             }
 
-            if (model.Billings.Sum(a => a.Percentage) != 100) //Maybe make this dependent on the status? Created we allow bad data, but submitted we don't.
-            {
-                return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
-            }
+
 
             return new ProcessingResult { Success = true };
         }
