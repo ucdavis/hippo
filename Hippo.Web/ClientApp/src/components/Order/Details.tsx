@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  HistoryModel,
-  OrderMetadataModel,
-  OrderModel,
-  PaymentModel,
-} from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { HistoryModel, OrderModel, PaymentModel } from "../../types";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import ChartStringValidation from "./ChartStringValidation";
 import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
-import { Row } from "reactstrap";
+import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -21,6 +16,7 @@ export const Details = () => {
   const [balancePending, setBalancePending] = useState<number>(0);
   const { isClusterAdminForCluster } = usePermissions();
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
+  const [notification, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -166,6 +162,98 @@ export const Details = () => {
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
+  const [editPaymentModel, setEditPaymentModel] = useState<PaymentModel>({
+    id: 0,
+    amount: 0,
+    status: "",
+    createdOn: "",
+  });
+
+  const [makePaymentConfirmation] = useConfirmationDialog<PaymentModel>(
+    {
+      title: "Make One Time Payment",
+      message: (setReturn) => (
+        <>
+          <div className="form-group">
+            <label htmlFor="fieldAmount">Amount</label>
+            <input
+              className="form-control"
+              id="fieldAmount"
+              required
+              value={editPaymentModel.amount}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
+                  // This regex checks for a valid decimal or integer
+                  const model: PaymentModel = {
+                    ...editPaymentModel,
+                    amount: parseFloat(value),
+                  };
+                  setEditPaymentModel(model);
+                  setReturn(model);
+                }
+              }}
+            />
+          </div>
+        </>
+      ),
+      canConfirm: !notification.pending && editPaymentModel.amount > 0,
+    },
+    [editPaymentModel, notification.pending],
+  );
+
+  const makePayment = useCallback(async () => {
+    const [confirmed, editPaymentModel] = await makePaymentConfirmation();
+
+    if (!confirmed) {
+      return;
+    }
+    console.log(editPaymentModel);
+    debugger;
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/makepayment/${orderId}?amount=${editPaymentModel.amount}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(req, "Making Payment", "Payment Made", async (r) => {
+      if (r.status === 400) {
+        const errors = await parseBadRequest(response);
+        return errors;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      setOrder(data);
+      setEditPaymentModel({ id: 0, amount: 0, status: "", createdOn: "" });
+    }
+  }, [cluster, orderId, makePaymentConfirmation, setNotification]);
+
+  const fakePayment = async () => {
+    debugger;
+    const response = await authenticatedFetch(
+      `/api/${cluster}/order/makepayment/${orderId}?amount=${12.33}`,
+      {
+        method: "POST",
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      setOrder(data);
+    } else {
+      alert("Error fetching order");
+    }
+  };
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -187,7 +275,14 @@ export const Details = () => {
           <button className="btn btn-primary"> Approve Order</button>{" "}
           <button className="btn btn-primary"> Cancel Order</button>{" "}
           <button className="btn btn-primary"> Update Chart Strings</button>{" "}
-          <button className="btn btn-primary"> Onetime Payment</button>
+          <button className="btn btn-primary" onClick={() => makePayment()}>
+            {" "}
+            Onetime Payment
+          </button>
+          <button className="btn btn-primary" onClick={fakePayment}>
+            {" "}
+            Fake Onetime Payment
+          </button>
           <OrderForm
             orderProp={order}
             readOnly={true}
