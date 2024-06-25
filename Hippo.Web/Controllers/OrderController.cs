@@ -333,7 +333,6 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        [Route("api/order/makePaymnet/{id}/{amount}")]
         public async Task<IActionResult> MakePayment(int id, decimal amount)
         {
             var currentUser = await _userService.GetCurrentUser();
@@ -341,13 +340,13 @@ namespace Hippo.Web.Controllers
             //var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
 
-            var order = await _dbContext.Orders.FirstAsync(a => a.Id == id);
+            var order = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Payments).Include(a => a.Cluster).FirstAsync(a => a.Id == id && a.Cluster.Name == Cluster);
             if (order == null)
             {
                 return NotFound();
             }
 
-            if(order.PrincipalInvestigatorId != currentUser.Id)
+            if(order.PrincipalInvestigator.Owner.Id != currentUser.Id)
             {
                 return BadRequest("You do not have permission to make a payment on this order.");
             }
@@ -362,15 +361,20 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Amount must be greater than 0.");
             }
 
-            if (amount > order.BalanceRemaining)
+            var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
+            
+            
+            if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments))
             {
-                return BadRequest("Amount must be less than or equal to the balance remaining.");
+                return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
             }
 
             var payment = new Payment
             {
                 Amount = amount,
                 Order = order,
+                Status = Payment.Statuses.Created,
+                CreatedById = currentUser.Id,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = currentUser
             };
@@ -383,7 +387,13 @@ namespace Hippo.Web.Controllers
 
             await _dbContext.SaveChangesAsync();
 
-            return Ok(order);
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+            return Ok(model);
         }
 
 

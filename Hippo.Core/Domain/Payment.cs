@@ -27,5 +27,23 @@ namespace Hippo.Core.Domain
         //Optional createdBy. If not set, was crated by a job
         public int? CreatedById { get; set; }
         public User CreatedBy { get; set; }
+
+        public class Statuses
+        {
+            public const string Created = "Created";
+            public const string Processing = "Processing";
+            public const string Cancelled = "Cancelled";
+            public const string Completed = "Completed";
+
+            public static List<string> StatusTypes = new List<string>
+            {
+                Created,
+                Processing,
+                Cancelled,
+                Completed
+            };
+        }
     }
+
+
 }
