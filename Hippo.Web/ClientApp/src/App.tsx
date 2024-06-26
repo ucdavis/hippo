@@ -25,6 +25,7 @@ import { Orders } from "./components/Order/Orders";
 import { Details } from "./components/Order/Details";
 import CreateOrder from "./components/Order/CreateOrder";
 import EditOrder from "./components/Order/EditOrder";
+import UpdateChartStrings from "./components/Order/UpdateChartStrings";
 
 declare var Hippo: AppContextShape;
 
@@ -115,6 +116,10 @@ const App = () => {
             <Route
               path="/:cluster/order/edit/:orderId"
               element={<EditOrder />}
+            />
+            <Route
+              path="/:cluster/order/updatechartstrings/:orderId"
+              element={<UpdateChartStrings />}
             />
             <Route
               path="/:cluster/order/create/:productId?"

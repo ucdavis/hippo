@@ -311,7 +311,7 @@ namespace Hippo.Web.Controllers
 
             //TODO: Validation
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
 
             var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
@@ -409,6 +409,7 @@ namespace Hippo.Web.Controllers
             //Make sure there are no duplicate chart strings?
             //Allow Admin side to save invalid billings?
             //Probably passing the ID? 
+            var billingsToRemove = new List<Billing>();
             foreach (var billing in order.Billings)
             {
                 if (model.Billings.Any(a => a.ChartString == billing.ChartString))
@@ -422,7 +423,8 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    order.Billings.Remove(billing);
+                    //order.Billings.Remove(billing);
+                    billingsToRemove.Add(billing);
                 }
             }
             foreach (var billing in model.Billings)
@@ -450,6 +452,14 @@ namespace Hippo.Web.Controllers
                         Order = order,
                         Updated = DateTime.UtcNow
                     });
+                }
+            }
+
+            if(billingsToRemove.Any())
+            {
+                foreach (var billing in billingsToRemove)
+                {
+                    order.Billings.Remove(billing);
                 }
             }
 
