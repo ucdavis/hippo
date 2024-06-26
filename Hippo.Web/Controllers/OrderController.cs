@@ -347,7 +347,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangeStatus(int id)
+        public async Task<IActionResult> ChangeStatus(int id, string expectedStatus)
         {
             var currentUser = await _userService.GetCurrentUser();
             var permissions = await _userService.GetCurrentPermissionsAsync();
@@ -369,18 +369,30 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("You must have billing information to submit an order.");
                     }
+                    if(expectedStatus != Order.Statuses.Submitted)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     existingOrder.Status = Order.Statuses.Submitted;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
                 }
                 else if (existingOrder.Status == Order.Statuses.Submitted)
                 {
+                    if (expectedStatus != Order.Statuses.Processing)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     existingOrder.Status = Order.Statuses.Processing;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
                 }
                 else if (existingOrder.Status == Order.Statuses.Processing)
                 {
+                    if (expectedStatus != Order.Statuses.Active)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
@@ -400,6 +412,10 @@ namespace Hippo.Web.Controllers
                 {
                     return BadRequest("You must have billing information to submit an order.");
                 }
+                if(expectedStatus != Order.Statuses.Submitted)
+                {
+                    return BadRequest("Unexpected Status found. May have already been updated.");
+                }
                 existingOrder.Status = Order.Statuses.Submitted;
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                 await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
@@ -412,12 +428,20 @@ namespace Hippo.Web.Controllers
                 }
                 if (existingOrder.Status == Order.Statuses.Submitted)
                 {
+                    if(expectedStatus != Order.Statuses.Processing)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     existingOrder.Status = Order.Statuses.Processing;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
                 }
                 else if (existingOrder.Status == Order.Statuses.Processing)
                 {
+                    if(expectedStatus != Order.Statuses.Active)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
