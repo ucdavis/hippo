@@ -312,6 +312,12 @@ namespace Hippo.Web.Controllers
             //TODO: Validation
             //Updating an existing order without changing the status.
             var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
+            if (existingOrder.PrincipalInvestigator.Owner.Id != currentUser.Id && !isClusterOrSystemAdmin) //Do we want admins to be able to make these chanegs?
+            {
+                return BadRequest("You do not have permission to update the billing information on this order.");
+            }
+
+
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
 
             var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
@@ -327,9 +333,109 @@ namespace Hippo.Web.Controllers
 
             await _dbContext.SaveChangesAsync();
 
+            //To make sure the model has all the info needed to update the UI
+            var rtmodel = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == model.Id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
 
-            return Ok(orderToReturn);
+            return Ok(rtmodel);
 
+
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeStatus(int id)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == id);
+            var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
+
+
+            if (!isPi && !isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to change the status of this order.");
+            }
+            if(isPi && isClusterOrSystemAdmin)
+            {
+                if (existingOrder.Status == Order.Statuses.Created)
+                {
+                    if (existingOrder.Billings.Count == 0)
+                    {
+                        return BadRequest("You must have billing information to submit an order.");
+                    }
+                    existingOrder.Status = Order.Statuses.Submitted;
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
+                }
+                else if (existingOrder.Status == Order.Statuses.Submitted)
+                {
+                    existingOrder.Status = Order.Statuses.Processing;
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
+                }
+                else if (existingOrder.Status == Order.Statuses.Processing)
+                {
+                    existingOrder.Status = Order.Statuses.Active;
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
+                }
+                else
+                {
+                    return BadRequest("You cannot change the status of an order in the current status.");
+                }
+            }
+            else if (isPi) 
+            {
+                if (existingOrder.Status != Order.Statuses.Created)
+                {
+                    return BadRequest("You do not have permission to change the status of this order.");
+                }
+                if (existingOrder.Billings.Count == 0)
+                {
+                    return BadRequest("You must have billing information to submit an order.");
+                }
+                existingOrder.Status = Order.Statuses.Submitted;
+                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
+            }
+            else
+            {
+                if (existingOrder.Status == Order.Statuses.Created)
+                {
+                    return BadRequest("You cannot change the status of an order in the created status. The sponsor has to do this.");
+                }
+                if (existingOrder.Status == Order.Statuses.Submitted)
+                {
+                    existingOrder.Status = Order.Statuses.Processing;
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
+                }
+                else if (existingOrder.Status == Order.Statuses.Processing)
+                {
+                    existingOrder.Status = Order.Statuses.Active;
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
+                }
+                else
+                {
+                    return BadRequest("You cannot change the status of an order in the current status.");
+                }
+            }
+
+            //To make sure the model has all the info needed to update the UI
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+            return Ok(model);
         }
 
         [HttpPost]
@@ -347,7 +453,7 @@ namespace Hippo.Web.Controllers
                 return NotFound();
             }
 
-            if(order.PrincipalInvestigator.Owner.Id != currentUser.Id)
+            if (order.PrincipalInvestigator.Owner.Id != currentUser.Id)
             {
                 return BadRequest("You do not have permission to make a payment on this order.");
             }
@@ -363,8 +469,8 @@ namespace Hippo.Web.Controllers
             }
 
             var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
-            
-            
+
+
             if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments))
             {
                 return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
@@ -383,7 +489,7 @@ namespace Hippo.Web.Controllers
             order.Payments.Add(payment);
             order.BalanceRemaining -= amount;
 
-            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Updated); 
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Updated);
             await _historyService.OrderUpdated(order, currentUser, $"Manual Payment of ${amount} made.");
 
             await _dbContext.SaveChangesAsync();
@@ -455,7 +561,7 @@ namespace Hippo.Web.Controllers
                 }
             }
 
-            if(billingsToRemove.Any())
+            if (billingsToRemove.Any())
             {
                 foreach (var billing in billingsToRemove)
                 {
