@@ -398,8 +398,6 @@ export const Details = () => {
             {" "}
             Onetime Payment
           </button>
-          <h2>Order Information</h2>
-          <div>{order.status}</div>
           <OrderForm
             orderProp={order}
             readOnly={true}

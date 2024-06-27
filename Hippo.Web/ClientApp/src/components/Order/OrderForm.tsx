@@ -43,6 +43,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
     methods.getValues("installmentType"),
   );
 
+  React.useEffect(() => {
+    const newStatus = orderProp.status;
+    methods.setValue("status", newStatus);
+  }, [methods, orderProp.status]);
+
   //lookup pi value
   const lookupPI = async (pi: string) => {
     if (!pi) {
@@ -109,6 +114,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
       methods.setValue("installments", 5);
     }
   }
+
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
