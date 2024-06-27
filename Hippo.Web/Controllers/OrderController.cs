@@ -466,6 +466,43 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            //var permissions = await _userService.GetCurrentPermissionsAsync();
+            //var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).FirstAsync(a => a.Id == id);
+            var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
+
+            if (!isPi)
+            {
+                return BadRequest("You do not have permission to cancel this order.");
+            }
+
+            //TODO: Maybe only allow cancel if it is created? My thought is the admin will click approve to move to the processing status before they do anything else.
+            if (existingOrder.Status != Order.Statuses.Created && existingOrder.Status != Order.Statuses.Submitted)
+            {
+                return BadRequest("You cannot cancel an order that is not in the Created or Submitted status.");
+            }
+
+            existingOrder.Status = Order.Statuses.Cancelled;
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Cancelled);
+            await _historyService.OrderUpdated(existingOrder, currentUser, "Order Cancelled.");
+
+            await _dbContext.SaveChangesAsync();
+
+            //To make sure the model has all the info needed to update the UI
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+            return Ok(model);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> MakePayment(int id, decimal amount)
         {
             var currentUser = await _userService.GetCurrentUser();

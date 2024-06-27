@@ -273,7 +273,7 @@ export const Details = () => {
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
-  const [updateStatusConfirmation] =
+  const [approveOrderConfirmation] =
     useConfirmationDialog<UpdateOrderStatusModel>(
       {
         title: "Update Order Status",
@@ -289,7 +289,7 @@ export const Details = () => {
     );
 
   const updateStatus = useCallback(async () => {
-    const [confirmed] = await updateStatusConfirmation();
+    const [confirmed] = await approveOrderConfirmation();
 
     if (!confirmed) {
       return;
@@ -320,13 +320,46 @@ export const Details = () => {
   }, [
     cluster,
     orderId,
-    updateStatusConfirmation,
+    approveOrderConfirmation,
     setNotification,
     updateStatusModel,
   ]);
 
+  const [cancelOrderConfirmation] = useConfirmationDialog<null>({
+    title: "Cancel Order",
+    message: "Are you sure you want to cancel this order?",
+    canConfirm: !notification.pending,
+  });
+
   const cancelOrder = async () => {
-    alert("Cancel Order");
+    const [confirmed] = await cancelOrderConfirmation();
+
+    if (!confirmed) {
+      return;
+    }
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/CancelOrder/${orderId}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(req, "Cancelling Order", "Order Cancelled", async (r) => {
+      if (r.status === 400) {
+        const errors = await parseBadRequest(response);
+        return errors;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      setOrder(data); //Maybe redirect?
+    }
   };
 
   if (!order) {
@@ -365,6 +398,8 @@ export const Details = () => {
             {" "}
             Onetime Payment
           </button>
+          <h2>Order Information</h2>
+          <div>{order.status}</div>
           <OrderForm
             orderProp={order}
             readOnly={true}
