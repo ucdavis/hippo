@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   HistoryModel,
@@ -13,7 +13,6 @@ import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
-import { set } from "react-hook-form";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -374,30 +373,6 @@ export const Details = () => {
             onlyChartStrings={false}
             onSubmit={submitOrder}
           />
-          {/* <h2>Chart Strings</h2>
-          <table className="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Chart String</th>
-                <th>Percent</th>
-                <th>Chart String Validation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.billings.map((billing) => (
-                <tr key={billing.id}>
-                  <td>{billing.chartString}</td>
-                  <td>{billing.percentage}</td>
-                  <td>
-                    <ChartStringValidation
-                      chartString={billing.chartString}
-                      key={billing.chartString}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table> */}
           <h2>History</h2>
           <ReactTable
             columns={historyColumns}
