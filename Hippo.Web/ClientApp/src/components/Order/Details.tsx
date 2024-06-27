@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { HistoryModel, OrderModel, PaymentModel } from "../../types";
+import {
+  HistoryModel,
+  OrderModel,
+  PaymentModel,
+  UpdateOrderStatusModel,
+} from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -8,6 +13,7 @@ import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
+import { set } from "react-hook-form";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -17,6 +23,8 @@ export const Details = () => {
   const { isClusterAdminForCluster } = usePermissions();
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
+  const [updateStatusModel, setUpdateStatusModel] =
+    useState<UpdateOrderStatusModel | null>(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -45,6 +53,37 @@ export const Details = () => {
 
     fetchOrder();
   }, [cluster, orderId]);
+
+  useEffect(() => {
+    if (order) {
+      // switch statement for data.status
+      switch (order.status) {
+        case "Created":
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: "Submitted",
+          });
+          break;
+        case "Submitted":
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: "Processing",
+          });
+          break;
+        case "Processing":
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: "Active",
+          });
+          break;
+        default:
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: order.status,
+          });
+      }
+    }
+  }, [order]);
 
   const historyColumnHelper = createColumnHelper<HistoryModel>();
 
@@ -208,8 +247,7 @@ export const Details = () => {
     if (!confirmed) {
       return;
     }
-    console.log(editPaymentModel);
-    debugger;
+    //console.log(editPaymentModel);
 
     const req = authenticatedFetch(
       `/api/${cluster}/order/makepayment/${orderId}?amount=${editPaymentModel.amount}`,
@@ -236,6 +274,62 @@ export const Details = () => {
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
+  const [updateStatusConfirmation] =
+    useConfirmationDialog<UpdateOrderStatusModel>(
+      {
+        title: "Update Order Status",
+        message: (setReturn) => (
+          <>
+            <div>Current Status: {updateStatusModel.currentStatus}</div>
+            <div>Set Status to: {updateStatusModel.newStatus}</div>
+          </>
+        ),
+        canConfirm: !notification.pending,
+      },
+      [order, notification.pending, updateStatusModel],
+    );
+
+  const updateStatus = useCallback(async () => {
+    const [confirmed] = await updateStatusConfirmation();
+
+    if (!confirmed) {
+      return;
+    }
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/changeStatus/${orderId}?expectedStatus=${updateStatusModel.newStatus}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(req, "Updating Status", "Status Updated", async (r) => {
+      if (r.status === 400) {
+        const errors = await parseBadRequest(response);
+        return errors;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      setOrder(data);
+    }
+  }, [
+    cluster,
+    orderId,
+    updateStatusConfirmation,
+    setNotification,
+    updateStatusModel,
+  ]);
+
+  const cancelOrder = async () => {
+    alert("Cancel Order");
+  };
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -254,8 +348,14 @@ export const Details = () => {
           >
             Edit Order
           </Link>{" "}
-          <button className="btn btn-primary"> Approve Order</button>{" "}
-          <button className="btn btn-primary"> Cancel Order</button>{" "}
+          <button className="btn btn-primary" onClick={() => updateStatus()}>
+            {" "}
+            Approve Order
+          </button>{" "}
+          <button className="btn btn-primary" onClick={() => cancelOrder()}>
+            {" "}
+            Cancel Order
+          </button>{" "}
           <Link
             className="btn btn-primary"
             to={`/${cluster}/order/updatechartstrings/${order.id}`}

@@ -442,6 +442,7 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
+                    //Set dates if they are null?
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
@@ -451,6 +452,8 @@ namespace Hippo.Web.Controllers
                     return BadRequest("You cannot change the status of an order in the current status.");
                 }
             }
+
+            await _dbContext.SaveChangesAsync();
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)

@@ -307,3 +307,8 @@ export interface OrderTotalCalculationModel extends Partial<OrderModel> {
   subTotal: string;
   total: string;
 }
+
+export interface UpdateOrderStatusModel {
+  currentStatus: string;
+  newStatus: string;
+}
