@@ -38,6 +38,8 @@ namespace Hippo.Core.Domain
                                                       
         public DateTime? NextPaymentDate { get; set; } //When we start payments, this will be set to trigger the auto creation of a payment. Onetime=tomorrow, Monthly=1st of next month, yearly= jan 1st of next year.
 
+        public DateTime? NextNotificationDate { get; set; } //This will be used to send notification to the sponsor once the ExpirationDate is reached. This will be set to ExpirationDate - 30 days?
+
         public decimal InstallmentAmount => Math.Round(Total / Installments, 2);
 
         [Required]
