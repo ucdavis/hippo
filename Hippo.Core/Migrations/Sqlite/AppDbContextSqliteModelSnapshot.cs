@@ -398,6 +398,12 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("NextNotificationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("NextPaymentDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
