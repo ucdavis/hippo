@@ -44,11 +44,15 @@ namespace Hippo.Web.Controllers
             model.SomeText = "This is some replaced text.";
             model.SomeText2 = "Even More replaced text";
 
-            var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/Sample_mjml.cshtml", model);
+            var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/Sample_mjml.cshtml", model);
 
-
-            //await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", emailBody);
-            await _emailService.SendEmail(new string[] { "jsylvestre@ucdavis.edu" }, null, emailBody, "Test", "Test 2");
+            await _emailService.SendEmail(new EmailModel
+            {
+                Emails = new string[] { "jsylvestre@ucdavis.edu" },
+                HtmlBody = htmlBody,
+                TextBody="Test",
+                Subject = "Test 2"
+            });
 
             return Content("Done. Maybe...");
         }

@@ -13,6 +13,7 @@ using Hippo.Email.Models;
 using Hippo.Core.Extensions;
 using Razor.Templating.Core;
 using Mjml.Net;
+using Hippo.Core.Models;
 
 namespace Hippo.Core.Services
 {
@@ -21,6 +22,7 @@ namespace Hippo.Core.Services
         Task<bool> AccountRequest(Request request);
         Task<bool> AccountDecision(Request request, bool isApproved, string overrideSponsor = null, string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
+        Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
     }
 
     public class NotificationService : INotificationService
@@ -85,12 +87,15 @@ namespace Hippo.Core.Services
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(
-                    new[] { emailTo },
-                    null,
-                    emailBody,
-                    message,
-                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
+                var emailModel = new EmailModel
+                {
+                    Emails = new[] { emailTo },
+                    HtmlBody = emailBody,
+                    TextBody = message,
+                    Subject = $"Hippo Request ({model.RequestedAction}) {model.Decision}"
+                };
+
+                await _emailService.SendEmail(emailModel);
 
                 return true;
             }
@@ -122,14 +127,17 @@ namespace Hippo.Core.Services
                     AccessTypes = requestData.AccessTypes
                 };
 
-                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
 
-                await _emailService.SendEmail(
-                    emails,
-                    null,
-                    emailBody,
-                    $"A new request ({model.Action}) is ready for your approval",
-                    $"Hippo Request ({model.Action}) Submitted");
+                var emailModel = new EmailModel
+                {
+                    Emails = emails,
+                    HtmlBody = htmlBody,
+                    TextBody = $"A new request ({model.Action}) is ready for your approval",
+                    Subject = $"Hippo Request ({model.Action}) Submitted"
+                };
+
+                await _emailService.SendEmail(emailModel);
 
                 return true;
             }
@@ -138,6 +146,30 @@ namespace Hippo.Core.Services
                 Log.Error("Error emailing Account Request", ex);
                 return false;
             }
+        }
+
+        public async Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null)
+        {
+            try
+            {
+                var emailModel = new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = ccEmails ?? Array.Empty<string>(),
+                    Subject = "HPC Software Install Request",
+                    TextBody = string.Join($"{Environment.NewLine}{Environment.NewLine}", simpleNotificationModel.Paragraphs),
+                    HtmlBody = await _mjmlRenderer.RenderView("/Views/Emails/SimpleNotification_mjml.cshtml", simpleNotificationModel)
+                };
+
+                await _emailService.SendEmail(emailModel);                    
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error acknowledging software request", ex);
+                return false;
+            }
+
         }
 
         public async Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string details = "")
@@ -168,14 +200,16 @@ namespace Hippo.Core.Services
                 };
 
 
-                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/AdminOverrideDecision_mjml.cshtml", model);
 
-                await _emailService.SendEmail(
-                    emails,
-                    ccEmails: new[] { adminUser.Email },
-                    emailBody,
-                    message,
-                    $"Hippo Request ({model.RequestedAction}) {model.Decision}");
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = new[] { adminUser.Email },
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = $"Hippo Request ({model.RequestedAction}) {model.Decision}"
+                });
 
                 return true;
             }
