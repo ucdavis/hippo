@@ -38,7 +38,15 @@ public class SoftwareController : SuperController
         {
             Emails = new string[] { "hpc-help@ucdavis.edu" },
             Subject = "HPC Software Install Request",
-            TextBody = @$"Cluster Name: {softwareRequestModel.ClusterName}
+            TextBody = @$"Category: Request
+
+Subcategory: New
+
+Caller: {currentUser.Kerberos}
+
+ConfigurationItem: HPC Software
+
+Cluster Name: {softwareRequestModel.ClusterName}
 
 Email: {softwareRequestModel.Email}
 
@@ -53,14 +61,7 @@ Software Home Page: {softwareRequestModel.SoftwareHomePage}
 Benefit Description: {softwareRequestModel.BenefitDescription}
 
 Additional Information: {softwareRequestModel.AdditionalInformation}
-
-Category: Request
-
-Subcategory: New
-
-Caller: {currentUser.Kerberos}
-
-ConfigurationItem: HPC Software"
+"
         };
 
         await _emailService.SendEmail(emailModel);
