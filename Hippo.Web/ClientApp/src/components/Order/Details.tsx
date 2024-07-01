@@ -521,11 +521,18 @@ export const Details = () => {
               Update Chart Strings
             </Link>{" "}
           </ShowFor>
-
-          <button className="btn btn-primary" onClick={() => makePayment()}>
-            {" "}
-            Onetime Payment
-          </button>
+          <ShowFor
+            condition={
+              order.status === "Active" &&
+              order.piUser?.id === user.detail.id &&
+              balanceRemaining > 0
+            }
+          >
+            <button className="btn btn-primary" onClick={() => makePayment()}>
+              {" "}
+              Onetime Payment
+            </button>
+          </ShowFor>
           <OrderForm
             orderProp={order}
             readOnly={true}
@@ -566,7 +573,9 @@ export const Details = () => {
           </div>
           {balancePending !== 0 && (
             <div className="form-group">
-              <label htmlFor="fieldBalancePending">Balance Pending</label>
+              <label htmlFor="fieldBalancePending">
+                Total Pending Payments
+              </label>
               <div className="input-group">
                 <div className="input-group-prepend">
                   <span className="input-group-text" style={{ height: "38px" }}>
@@ -576,7 +585,7 @@ export const Details = () => {
                 <input
                   className="form-control"
                   id="fieldBalancePending"
-                  value={(balanceRemaining - balancePending).toFixed(2)}
+                  value={balancePending.toFixed(2)}
                   readOnly
                 />
               </div>
