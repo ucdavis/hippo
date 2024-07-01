@@ -257,7 +257,7 @@ namespace Hippo.Web
                 endpoints.MapControllerRoute(
                     name: "clusteradminAPI",
                     pattern: "/api/{controller}/{action=Index}/{id?}",
-                    constraints: new { controller = "(clusteradmin|eventqueue)" });
+                    constraints: new { controller = "(clusteradmin|eventqueue|software)" });
 
                 // remaining API routes map to all other controllers and require cluster
                 endpoints.MapControllerRoute(

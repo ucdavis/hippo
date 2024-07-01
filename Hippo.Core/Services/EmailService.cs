@@ -11,11 +11,19 @@ using Microsoft.Extensions.Options;
 
 namespace Hippo.Core.Services
 {
+    public class EmailModel
+    {
+        public string[] Emails { get; set; } = Array.Empty<string>();
+        public string[] CcEmails { get; set; } = Array.Empty<string>();
+        public string TextBody { get; set; } = "";
+        public string HtmlBody { get; set; } = "";
+        public string Subject { get; set; } = "";
+    }
+
     public interface IEmailService
     {
-        Task SendSampleEmailMessage(string email, string body);
-        Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject);
-    } 
+        Task SendEmail(EmailModel emailModel);
+    }
 
     public class EmailService : IEmailService
     {
@@ -28,25 +36,26 @@ namespace Hippo.Core.Services
             _client = new SmtpClient(_emailSettings.Host, _emailSettings.Port) { Credentials = new NetworkCredential(_emailSettings.UserName, _emailSettings.Password), EnableSsl = true };
         }
 
-        public async Task SendEmail(string[] emails, string[] ccEmails, string body, string textVersion, string subject)
+        public async Task SendEmail(EmailModel emailModel)
         {
             if (_emailSettings.DisableSend.Equals("Yes", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
-            using (var message = new MailMessage { From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName), Subject = subject })
+            using (var message = new MailMessage
             {
-                foreach (var email in emails)
+                From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName),
+                Subject = emailModel.Subject
+            })
+            {
+                foreach (var email in emailModel.Emails)
                 {
                     message.To.Add(new MailAddress(email, email));
                 }
 
-                if (ccEmails != null && ccEmails.Length > 0)
+                foreach (var ccEmail in emailModel.CcEmails)
                 {
-                    foreach (var ccEmail in ccEmails)
-                    {
-                        message.CC.Add(new MailAddress(ccEmail));
-                    }
+                    message.CC.Add(new MailAddress(ccEmail));
                 }
 
                 if (!string.IsNullOrWhiteSpace(_emailSettings.BccEmail))
@@ -54,11 +63,13 @@ namespace Hippo.Core.Services
                     message.Bcc.Add(new MailAddress(_emailSettings.BccEmail));
                 }
 
-                // body is our fallback text and we'll add an HTML view as an alternate.
-                message.Body = textVersion;
+                message.Body = emailModel.TextBody;
 
-                var htmlView = AlternateView.CreateAlternateViewFromString(body, new ContentType(MediaTypeNames.Text.Html));
-                message.AlternateViews.Add(htmlView);
+                if (!string.IsNullOrWhiteSpace(emailModel.HtmlBody))
+                {
+                    var htmlView = AlternateView.CreateAlternateViewFromString(emailModel.HtmlBody, new ContentType(MediaTypeNames.Text.Html));
+                    message.AlternateViews.Add(htmlView);
+                }
 
                 await _client.SendMailAsync(message);
             }
@@ -86,4 +97,4 @@ namespace Hippo.Core.Services
         }
     }
 
- }
+}
