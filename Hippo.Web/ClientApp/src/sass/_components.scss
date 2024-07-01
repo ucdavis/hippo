@@ -69,7 +69,7 @@
 .btn-outline-danger {
   background-color: #fff;
   border-color: $merlot;
-  color: $merlot;
+  color: $merlot !important;
   &:hover {
     background-color: #fff;
     border-color: lighten($merlot, 9);

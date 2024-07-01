@@ -19,6 +19,13 @@ import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
+import { FinancialDetail } from "./components/Financial/FinancialDetail";
+import { Products } from "./components/Product/Products";
+import { Orders } from "./components/Order/Orders";
+import { Details } from "./components/Order/Details";
+import CreateOrder from "./components/Order/CreateOrder";
+import EditOrder from "./components/Order/EditOrder";
+import UpdateChartStrings from "./components/Order/UpdateChartStrings";
 
 declare var Hippo: AppContextShape;
 
@@ -91,6 +98,32 @@ const App = () => {
                   <AdminClusters />
                 </ShowFor>
               }
+            />
+            <Route
+              path="/:cluster/admin/financialdetails"
+              element={
+                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                  <FinancialDetail />
+                </ShowFor>
+              }
+            />
+            <Route path="/:cluster/product/index" element={<Products />} />
+            <Route path="/:cluster/order/myorders" element={<Orders />} />
+            <Route
+              path="/:cluster/order/details/:orderId"
+              element={<Details />}
+            />
+            <Route
+              path="/:cluster/order/edit/:orderId"
+              element={<EditOrder />}
+            />
+            <Route
+              path="/:cluster/order/updatechartstrings/:orderId"
+              element={<UpdateChartStrings />}
+            />
+            <Route
+              path="/:cluster/order/create/:productId?"
+              element={<CreateOrder />}
             />
           </Routes>
         </div>

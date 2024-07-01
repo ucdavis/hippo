@@ -16,7 +16,6 @@ namespace Hippo.Core.Models
         public string AccountManagerEmail { get; set; }
         public string Description { get; set; } //Description of COA
 
-        public string DisplayName { get; set; }
 
 
         /// <summary>
@@ -37,5 +36,20 @@ namespace Hippo.Core.Models
             }
         }
         public List<string> Messages { get; set; } = new List<string>();
+
+        public string Warning
+        {
+            get
+            {
+                if (Warnings.Count <= 0)
+                {
+                    return string.Empty;
+                }
+
+                //select the warnings into a string of key - Value and return it
+                return string.Join(" ", Warnings.Select(w => $"{w.Key} - {w.Value}"));
+
+            }
+        }
     }
 }

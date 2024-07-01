@@ -1,6 +1,7 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
+using Hippo.Core.Models.OrderModels;
 using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Models;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Text;
 using static Hippo.Core.Domain.Account;
 
 namespace Hippo.Web.Controllers;
@@ -21,8 +23,10 @@ public class AdminController : SuperController
     private IHistoryService _historyService;
     private ISshService _sshService;
     private INotificationService _notificationService;
+    private ISecretsService _secretsService;
+    private IAggieEnterpriseService _aggieEnterpriseService;
 
-    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService)
+    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService)
     {
         _dbContext = dbContext;
         _userService = userService;
@@ -30,6 +34,8 @@ public class AdminController : SuperController
         _historyService = historyService;
         _sshService = sshService;
         _notificationService = notificationService;
+        _secretsService = secretsService;
+        _aggieEnterpriseService = aggieEnterpriseService;
     }
 
     [HttpGet]
@@ -127,5 +133,89 @@ public class AdminController : SuperController
             .OrderBy(g => g.Name)
             .Select(g => g.Name)
             .ToArrayAsync());
+    }
+
+    [HttpGet]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
+    public async Task<IActionResult> FinancialDetails()
+    {
+        var cluster = await _dbContext.Clusters.AsNoTracking().SingleAsync(c => c.Name == Cluster);
+        var existingFinancialDetail = await _dbContext.FinancialDetails.SingleOrDefaultAsync(fd => fd.ClusterId == cluster.Id);
+        var clusterModel = new FinancialDetailModel
+        {
+            FinancialSystemApiKey = string.Empty,
+            FinancialSystemApiSource = existingFinancialDetail?.FinancialSystemApiSource,
+            ChartString = existingFinancialDetail?.ChartString,
+            AutoApprove = existingFinancialDetail?.AutoApprove ?? false,
+            MaskedApiKey = "NOT SET"
+        };
+
+        if (existingFinancialDetail != null)
+        {
+            var apiKey = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                var sb = new StringBuilder();
+                for (var i = 0; i < apiKey.Length; i++)
+                {
+                    if (i < 4 || i >= apiKey.Length - 4)
+                    {
+                        sb.Append(apiKey[i]);
+                    }
+                    else
+                    {
+                        sb.Append('*');
+                    }
+                }
+
+                clusterModel.MaskedApiKey = sb.ToString();
+            }
+        }
+        
+        return Ok(clusterModel);
+    }
+
+    [HttpPost]
+    [Authorize(Policy = AccessCodes.SystemAccess)]
+    public async Task<IActionResult> UpdateFinancialDetails([FromBody] FinancialDetailModel model)
+    {
+        //Possibly use the secret service to set the FinancialSystemApiKey
+        var cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster);
+        var existingFinancialDetail = await _dbContext.FinancialDetails.SingleOrDefaultAsync(fd => fd.ClusterId == cluster.Id);
+        if (existingFinancialDetail == null)
+        {
+            existingFinancialDetail = new FinancialDetail
+            {
+                ClusterId = cluster.Id,
+                SecretAccessKey = Guid.NewGuid(),
+
+            };
+        }
+        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString);
+        if (!validateChartString.IsValid)
+        {
+            return BadRequest($"Invalid Chart String Errors: {validateChartString.Message}");
+        }
+        if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
+        {
+            await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey.ToString(), model.FinancialSystemApiKey);
+        }
+        //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+        existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
+        existingFinancialDetail.ChartString = model.ChartString;
+        existingFinancialDetail.AutoApprove = model.AutoApprove;
+
+        if (existingFinancialDetail.Id == 0)
+        {
+            await _dbContext.FinancialDetails.AddAsync(existingFinancialDetail);
+        }
+        else
+        {
+            _dbContext.FinancialDetails.Update(existingFinancialDetail);
+        }
+
+        await _dbContext.SaveChangesAsync();
+        return Ok(existingFinancialDetail);
+
     }
 }
