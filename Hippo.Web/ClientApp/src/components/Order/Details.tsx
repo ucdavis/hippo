@@ -476,6 +476,7 @@ export const Details = () => {
               Approve Order
             </button>{" "}
           </ShowFor>
+          {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
           <ShowFor
             condition={
               order.piUser?.id === user.detail.id &&
@@ -488,20 +489,39 @@ export const Details = () => {
               Approve Order
             </button>{" "}
           </ShowFor>
-          <button className="btn btn-primary" onClick={() => cancelOrder()}>
-            {" "}
-            Cancel Order
-          </button>{" "}
-          <button className="btn btn-primary" onClick={() => rejectOrder()}>
-            {" "}
-            Reject Order
-          </button>{" "}
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/updatechartstrings/${order.id}`}
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              ["Created", "Submitted"].includes(order.status)
+            }
           >
-            Update Chart Strings
-          </Link>{" "}
+            <button className="btn btn-primary" onClick={() => cancelOrder()}>
+              {" "}
+              Cancel Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={["Submitted", "Processing"].includes(order.status)}
+          >
+            <button className="btn btn-primary" onClick={() => rejectOrder()}>
+              {" "}
+              Reject Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              !["Cancelled", "Rejected", "Completed"].includes(order.status)
+            }
+          >
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/updatechartstrings/${order.id}`}
+            >
+              Update Chart Strings
+            </Link>{" "}
+          </ShowFor>
+
           <button className="btn btn-primary" onClick={() => makePayment()}>
             {" "}
             Onetime Payment
