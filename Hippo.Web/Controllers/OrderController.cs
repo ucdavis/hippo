@@ -311,7 +311,7 @@ namespace Hippo.Web.Controllers
 
             //TODO: Validation
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
             if (existingOrder.PrincipalInvestigator.Owner.Id != currentUser.Id && !isClusterOrSystemAdmin) //Do we want admins to be able to make these chanegs?
             {
                 return BadRequest("You do not have permission to update the billing information on this order.");
@@ -353,7 +353,7 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == id);
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == id);
             var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
 
 
