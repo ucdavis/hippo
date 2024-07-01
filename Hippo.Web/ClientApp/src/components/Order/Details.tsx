@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   HistoryModel,
@@ -14,9 +14,12 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import { ShowFor } from "../../Shared/ShowFor";
+import AppContext from "../../Shared/AppContext";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
+  const [{ user }] = useContext(AppContext);
   const [order, setOrder] = useState<OrderModel | null>(null);
   const [balanceRemaining, setBalanceRemaining] = useState<number>(0);
   const [balancePending, setBalancePending] = useState<number>(0);
@@ -25,6 +28,8 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
+  const adminEditableStatuses = ["Submitted", "Processing", "Active"];
+  const sponsorEditableStatuses = ["Created"];
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -430,16 +435,59 @@ export const Details = () => {
           <h2>
             {order.piUser?.name} ({order.piUser?.email})
           </h2>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/edit/${order.id}`}
+          {order.piUser?.id === user.detail.id &&
+            order.status === "Created" &&
+            order.billings.length <= 0 && (
+              <h3 style={{ backgroundColor: "#ffcccc" }}>
+                This order needs to have billing information added before it can
+                be submitted (Approve).
+              </h3>
+            )}
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={adminEditableStatuses.includes(order.status)}
           >
-            Edit Order
-          </Link>{" "}
-          <button className="btn btn-primary" onClick={() => updateStatus()}>
-            {" "}
-            Approve Order
-          </button>{" "}
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/edit/${order.id}`}
+            >
+              Edit Order
+            </Link>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              sponsorEditableStatuses.includes(order.status)
+            }
+          >
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/edit/${order.id}`}
+            >
+              Edit Order
+            </Link>{" "}
+          </ShowFor>
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={["Submitted", "Processing"].includes(order.status)}
+          >
+            <button className="btn btn-primary" onClick={() => updateStatus()}>
+              {" "}
+              Approve Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              order.status === "Created" &&
+              order.billings.length > 0
+            }
+          >
+            <button className="btn btn-primary" onClick={() => updateStatus()}>
+              {" "}
+              Approve Order
+            </button>{" "}
+          </ShowFor>
           <button className="btn btn-primary" onClick={() => cancelOrder()}>
             {" "}
             Cancel Order
