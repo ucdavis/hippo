@@ -503,6 +503,44 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Reject(int id, string reason)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if(!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to reject this order.");
+            }
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).FirstOrDefaultAsync(a => a.Id == id);
+            if (existingOrder == null) {
+                return NotFound();
+            }
+            if(existingOrder.Status != Order.Statuses.Submitted && existingOrder.Status != Order.Statuses.Processing ) {
+                return BadRequest("You cannot reject an order that is not in the Submitted or Processing status.");
+            }
+            if(string.IsNullOrWhiteSpace(reason)) {
+                return BadRequest("You must provide a reason for rejecting the order.");
+            }
+
+            existingOrder.Status = Order.Statuses.Rejected;
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Rejected);
+            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rejected: {reason}");
+
+            await _dbContext.SaveChangesAsync();
+
+            //To make sure the model has all the info needed to update the UI
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
+                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+            return Ok(model);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> MakePayment(int id, decimal amount)
         {
             var currentUser = await _userService.GetCurrentUser();

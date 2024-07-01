@@ -13,6 +13,7 @@ import OrderForm from "./OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
+import { notEmptyOrFalsey } from "../../util/ValueChecks";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -362,6 +363,61 @@ export const Details = () => {
     }
   };
 
+  const [rejectOrderConfirmation] = useConfirmationDialog<string>({
+    title: "Reject Order",
+    message: (setReturn) => {
+      return (
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <div className="form-group">
+              <label className="form-label">Reason</label>
+
+              <input
+                className="form-control"
+                id="rejectOrderReason"
+                onChange={(e) => {
+                  setReturn(e.target.value);
+                }}
+              ></input>
+            </div>
+          </div>
+        </div>
+      );
+    },
+    canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
+  });
+
+  const rejectOrder = async () => {
+    const [confirmed, reason] = await rejectOrderConfirmation();
+
+    if (!confirmed) {
+      return;
+    }
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/reject/${orderId}?reason=${reason}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(req, "Rejecting Order", "Order Rejected", async (r) => {
+      if (r.status === 400) {
+        const errors = await parseBadRequest(response);
+        return errors;
+      } else {
+        return "An error happened, please try again.";
+      }
+    });
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      setOrder(data);
+    }
+  };
+
   if (!order) {
     return <div>Loading...</div>;
   }
@@ -387,6 +443,10 @@ export const Details = () => {
           <button className="btn btn-primary" onClick={() => cancelOrder()}>
             {" "}
             Cancel Order
+          </button>{" "}
+          <button className="btn btn-primary" onClick={() => rejectOrder()}>
+            {" "}
+            Reject Order
           </button>{" "}
           <Link
             className="btn btn-primary"
