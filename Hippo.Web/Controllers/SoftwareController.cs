@@ -13,14 +13,16 @@ public class SoftwareController : SuperController
     private readonly IHistoryService _historyService;
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
+    private readonly IIdentityService _identityService;
 
     public SoftwareController(IUserService userService, IHistoryService historyService,
-        IEmailService emailService, INotificationService notificationService)
+        IEmailService emailService, INotificationService notificationService, IIdentityService identityService)
     {
         _userService = userService;
         _historyService = historyService;
         _emailService = emailService;
         _notificationService = notificationService;
+        _identityService = identityService;
     }
 
     [HttpPost]
@@ -32,6 +34,8 @@ public class SoftwareController : SuperController
         }
 
         var currentUser = await _userService.GetCurrentUser();
+        // call into IAM to ensure we have the latest name for user...
+        var currentIdentity = await _identityService.GetByKerberos(currentUser.Kerberos);
 
         // generate plain text email that will be forwarded to ServiceNow
         var emailModel = new EmailModel
@@ -42,7 +46,7 @@ public class SoftwareController : SuperController
 
 Subcategory: New
 
-Caller: {currentUser.Kerberos}
+Caller: {currentIdentity.Name}
 
 ConfigurationItem: HPC Software
 
@@ -51,6 +55,10 @@ Cluster Name: {softwareRequestModel.ClusterName}
 Email: {softwareRequestModel.Email}
 
 Account Name: {softwareRequestModel.AccountName}
+
+Account Kerberos: {softwareRequestModel.AccountKerberos}
+
+Requester Kerberos: {currentUser.Kerberos}
 
 Software Title: {softwareRequestModel.SoftwareTitle}
 

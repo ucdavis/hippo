@@ -5,11 +5,13 @@ import { ClusterName, SoftwareRequestModel } from "../../types";
 import { ClusterNames } from "../../constants";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
+import { SearchPerson } from "../../Shared/SearchPerson";
 
 const defaultSoftwareRequestModel = {
   clusterName: "",
   email: "",
   accountName: "",
+  accountKerberos: "",
   softwareTitle: "",
   softwareLicense: "",
   softwareHomePage: "",
@@ -24,8 +26,11 @@ export const SoftwareRequestForm = () => {
     useState<SoftwareRequestModel>({
       ...defaultSoftwareRequestModel,
       email: context.user.detail.email,
-      accountName: context.user.detail.kerberos,
+      accountName: context.user.detail.name,
+      accountKerberos: context.user.detail.kerberos,
     });
+
+  const [user, setUser] = useState({ ...context.user.detail });
 
   const handleSubmit = async () => {
     const req = authenticatedFetch(`/api/software/requestinstall`, {
@@ -48,7 +53,8 @@ export const SoftwareRequestForm = () => {
       setSoftwareRequestModel({
         ...defaultSoftwareRequestModel,
         email: context.user.detail.email,
-        accountName: context.user.detail.kerberos,
+        accountName: context.user.detail.name,
+        accountKerberos: context.user.detail.kerberos,
       });
     }
   };
@@ -84,10 +90,9 @@ export const SoftwareRequestForm = () => {
               </option>
             ))}
           </select>
-          <p className="form-helper">Select the name of the cluster.</p>
         </div>
         <div className="form-group">
-          <label>Email</label>
+          <label>UC Davis or Affiliate Email</label>
           <input
             type="email"
             className="form-control"
@@ -98,23 +103,22 @@ export const SoftwareRequestForm = () => {
                 email: e.target.value,
               })
             }
+            placeholder="Enter an email address"
           />
-          <p className="form-helper">Enter your email address.</p>
         </div>
         <div className="form-group">
           <label>Account Name</label>
-          <input
-            type="text"
-            className="form-control"
-            value={softwareRequestModel.accountName}
-            onChange={(e) =>
+          <SearchPerson
+            user={user}
+            onChange={(user) => {
               setSoftwareRequestModel({
                 ...softwareRequestModel,
-                accountName: e.target.value,
-              })
-            }
+                accountName: user?.name,
+                accountKerberos: user?.kerberos,
+              });
+              setUser(user);
+            }}
           />
-          <p className="form-helper">Enter the name of the account.</p>
         </div>
         <div className="form-group">
           <label>Software Title</label>
@@ -128,8 +132,8 @@ export const SoftwareRequestForm = () => {
                 softwareTitle: e.target.value,
               })
             }
+            placeholder="Enter the software title"
           />
-          <p className="form-helper">Enter the title of the software.</p>
         </div>
         <div className="form-group">
           <label>Software License</label>
@@ -142,8 +146,8 @@ export const SoftwareRequestForm = () => {
                 softwareLicense: e.target.value,
               })
             }
+            placeholder="Enter the software license"
           />
-          <p className="form-helper">Enter the software license.</p>
         </div>
         <div className="form-group">
           <label>Software Home Page</label>
@@ -157,8 +161,8 @@ export const SoftwareRequestForm = () => {
                 softwareHomePage: e.target.value,
               })
             }
+            placeholder="Enter the software home page"
           />
-          <p className="form-helper">Enter the software home page.</p>
         </div>
         <div className="form-group">
           <label>Benefit Description</label>
@@ -171,8 +175,8 @@ export const SoftwareRequestForm = () => {
                 benefitDescription: e.target.value,
               })
             }
+            placeholder="Enter the benefit description"
           />
-          <p className="form-helper">Enter the benefit description.</p>
         </div>
         <div className="form-group">
           <label>Additional Information</label>
@@ -185,8 +189,8 @@ export const SoftwareRequestForm = () => {
                 additionalInformation: e.target.value,
               })
             }
+            placeholder="Enter any additional information"
           />
-          <p className="form-helper">Enter any additional information.</p>
         </div>
         <br />
         <button

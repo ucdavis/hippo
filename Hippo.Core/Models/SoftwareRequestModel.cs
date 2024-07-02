@@ -11,6 +11,8 @@ public class SoftwareRequestModel
     [Required]
     public string AccountName { get; set; }
     [Required]
+    public string AccountKerberos { get; set; }
+    [Required]
     public string SoftwareTitle { get; set; }
     [Required]
     public string SoftwareLicense { get; set; }

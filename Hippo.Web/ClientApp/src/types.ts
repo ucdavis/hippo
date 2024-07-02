@@ -122,6 +122,7 @@ export interface SoftwareRequestModel {
   clusterName: ClusterName;
   email: string;
   accountName: string;
+  accountKerberos: string;
   softwareTitle: string;
   softwareLicense: string;
   softwareHomePage: string;
