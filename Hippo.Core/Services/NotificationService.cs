@@ -70,6 +70,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
                     RequestedAction = request.Action.SplitCamelCase(),
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
@@ -117,6 +118,7 @@ namespace Hippo.Core.Services
 
                 var model = new NewRequestModel()
                 {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
@@ -150,6 +152,10 @@ namespace Hippo.Core.Services
 
         public async Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null)
         {
+            if (string.IsNullOrWhiteSpace(simpleNotificationModel.UcdLogoUrl))
+            {
+                simpleNotificationModel.UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png";
+            }
             try
             {
                 var emailModel = new EmailModel
@@ -161,7 +167,7 @@ namespace Hippo.Core.Services
                     HtmlBody = await _mjmlRenderer.RenderView("/Views/Emails/SimpleNotification_mjml.cshtml", simpleNotificationModel)
                 };
 
-                await _emailService.SendEmail(emailModel);                    
+                await _emailService.SendEmail(emailModel);
                 return true;
             }
             catch (Exception ex)
@@ -186,6 +192,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),

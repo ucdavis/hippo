@@ -11,6 +11,6 @@ namespace Hippo.Email.Models
         public string Name { get;set; } = String.Empty;
         public string SomeText { get;set; } = String.Empty;
         public string SomeText2 { get; set; } = String.Empty;
-        public string UcdLogoUrl { get; set; } = "https://hippo-test.azurewebsites.net/media/caes-logo-gray.png";        
+        public string UcdLogoUrl { get; set; } = String.Empty;        
     }
 }
