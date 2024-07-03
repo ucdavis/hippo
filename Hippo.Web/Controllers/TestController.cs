@@ -1,12 +1,14 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Extensions;
 using Hippo.Core.Models;
+using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
 using Hippo.Email.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Mjml.Net;
 using Razor.Templating.Core;
 using System.Text;
@@ -22,11 +24,13 @@ namespace Hippo.Web.Controllers
         public AppDbContext _dbContext { get; }
         public ISecretsService _secretsService { get; }
         private readonly IMjmlRenderer _mjmlRenderer;
+        private readonly EmailSettings _emailSettings;
+
 
         public IAggieEnterpriseService _aggieEnterpriseService { get; }
 
         public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext,
-            ISecretsService secretsService, IMjmlRenderer mjmlRenderer, IAggieEnterpriseService aggieEnterpriseService)
+            ISecretsService secretsService, IMjmlRenderer mjmlRenderer, IAggieEnterpriseService aggieEnterpriseService, IOptions<EmailSettings> emailSettings)
         {
             _emailService = emailService;
             _sshService = sshService;
@@ -35,20 +39,28 @@ namespace Hippo.Web.Controllers
             _secretsService = secretsService;
             _mjmlRenderer = mjmlRenderer;
             _aggieEnterpriseService = aggieEnterpriseService;
+            _emailSettings = emailSettings.Value;
         }
 
         public async Task<IActionResult> TestEmail()
         {
-            var model = new SampleModel();
-            model.Name = "Some Name, really.";
-            model.SomeText = "This is some replaced text.";
-            model.SomeText2 = "Even More replaced text";
+            var model = new SampleModel
+            {
+                UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                Name = "Some Name, really.",
+                SomeText = "This is some replaced text.",
+                SomeText2 = "Even More replaced text"
+            };
 
-            var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/Sample_mjml.cshtml", model);
+            var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/Sample_mjml.cshtml", model);
 
-
-            //await _notificationService.SendSampleNotificationMessage("jsylvestre@ucdavis.edu", emailBody);
-            await _emailService.SendEmail(new string[] { "jsylvestre@ucdavis.edu" }, null, emailBody, "Test", "Test 2");
+            await _emailService.SendEmail(new EmailModel
+            {
+                Emails = new string[] { "jsylvestre@ucdavis.edu" },
+                HtmlBody = htmlBody,
+                TextBody="Test",
+                Subject = "Test 2"
+            });
 
             return Content("Done. Maybe...");
         }

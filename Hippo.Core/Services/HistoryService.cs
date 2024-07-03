@@ -206,5 +206,16 @@ namespace Hippo.Core.Services
             };
             await historyService.AddHistory(history);
         }
+
+        public static async Task SoftwareInstallRequested(this IHistoryService historyService, SoftwareRequestModel softwareRequestModel)
+        {
+            var history = new History
+            {
+                Action = Actions.SoftwareInstallRequested,
+                Details = Serialize(softwareRequestModel),
+                ActedDate = DateTime.UtcNow
+            };
+            await historyService.AddHistory(history);
+        }
     }
 }

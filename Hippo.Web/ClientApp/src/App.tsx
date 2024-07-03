@@ -19,6 +19,7 @@ import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
+import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
 
 declare var Hippo: AppContextShape;
 
@@ -92,6 +93,7 @@ const App = () => {
                 </ShowFor>
               }
             />
+            <Route path="/softwarerequest" element={<SoftwareRequestForm />} />
           </Routes>
         </div>
       </ModalProvider>
