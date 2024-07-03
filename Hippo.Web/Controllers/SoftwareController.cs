@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hippo.Core.Models;
 using Hippo.Email.Models;
+using Hippo.Core.Data;
 
 namespace Hippo.Web.Controllers;
 
@@ -14,15 +15,17 @@ public class SoftwareController : SuperController
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
     private readonly IIdentityService _identityService;
+    private readonly AppDbContext _dbContext;
 
-    public SoftwareController(IUserService userService, IHistoryService historyService,
-        IEmailService emailService, INotificationService notificationService, IIdentityService identityService)
+    public SoftwareController(IUserService userService, IHistoryService historyService, IEmailService emailService, 
+        INotificationService notificationService, IIdentityService identityService, AppDbContext dbContext)
     {
         _userService = userService;
         _historyService = historyService;
         _emailService = emailService;
         _notificationService = notificationService;
         _identityService = identityService;
+        _dbContext = dbContext;
     }
 
     [HttpPost]
@@ -87,6 +90,7 @@ Additional Information: {softwareRequestModel.AdditionalInformation}
             }
         }, new string[] { currentUser.Email });
         await _historyService.SoftwareInstallRequested(softwareRequestModel);
+        await _dbContext.SaveChangesAsync(); // persist changes made by _historyService        
 
         return Ok();
     }
