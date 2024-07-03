@@ -58,7 +58,9 @@ Account Name: {softwareRequestModel.AccountName}
 
 Account Kerberos: {softwareRequestModel.AccountKerberos}
 
-Requester Kerberos: {currentUser.Kerberos}
+Requester Name: {currentIdentity.Name}
+
+Requester Kerberos: {currentIdentity.Kerberos}
 
 Software Title: {softwareRequestModel.SoftwareTitle}
 
