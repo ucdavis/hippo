@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hippo.Core.Models;
 using Hippo.Email.Models;
+using Hippo.Core.Data;
 
 namespace Hippo.Web.Controllers;
 
@@ -10,16 +11,14 @@ namespace Hippo.Web.Controllers;
 public class SoftwareController : SuperController
 {
     private readonly IUserService _userService;
-    private readonly IHistoryService _historyService;
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
     private readonly IIdentityService _identityService;
 
-    public SoftwareController(IUserService userService, IHistoryService historyService,
-        IEmailService emailService, INotificationService notificationService, IIdentityService identityService)
+    public SoftwareController(IUserService userService, IEmailService emailService, 
+        INotificationService notificationService, IIdentityService identityService)
     {
         _userService = userService;
-        _historyService = historyService;
         _emailService = emailService;
         _notificationService = notificationService;
         _identityService = identityService;
@@ -86,7 +85,6 @@ Additional Information: {softwareRequestModel.AdditionalInformation}
                 "Thank you for your patience."
             }
         }, new string[] { currentUser.Email });
-        await _historyService.SoftwareInstallRequested(softwareRequestModel);
 
         return Ok();
     }
