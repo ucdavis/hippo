@@ -298,6 +298,7 @@ export interface OrderListModel {
   status: string;
   total: string;
   balanceRemaining: string;
+  sponsorName: string;
 }
 
 export interface OrderTotalCalculationModel extends Partial<OrderModel> {

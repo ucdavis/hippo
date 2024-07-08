@@ -35,6 +35,10 @@ export const Orders = () => {
       header: "Status",
       id: "status",
     }),
+    columnHelper.accessor("sponsorName", {
+      header: "Sponsor",
+      id: "sponsorName",
+    }),
     columnHelper.accessor("name", {
       header: "Order Name",
       id: "name",

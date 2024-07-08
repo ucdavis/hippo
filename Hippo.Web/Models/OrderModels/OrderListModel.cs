@@ -16,6 +16,8 @@ namespace Hippo.Web.Models.OrderModels
         public string Total { get; set; }
         public string BalanceRemaining { get; set; }
 
+        public string SponsorName { get; set; }
+
         public static Expression<Func<Core.Domain.Order, OrderListModel>> Projection()
         {
             return order => new OrderListModel
@@ -28,7 +30,8 @@ namespace Hippo.Web.Models.OrderModels
                 CreatedOn = order.CreatedOn.ToPacificTime().ToShortDateString(),
                 Status = order.Status,
                 Total = order.Total.ToString("C"),
-                BalanceRemaining = order.BalanceRemaining.ToString("C")
+                BalanceRemaining = order.BalanceRemaining.ToString("C"),
+                SponsorName = order.PrincipalInvestigator.Name
             };
         }
     }
