@@ -11,21 +11,17 @@ namespace Hippo.Web.Controllers;
 public class SoftwareController : SuperController
 {
     private readonly IUserService _userService;
-    private readonly IHistoryService _historyService;
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
     private readonly IIdentityService _identityService;
-    private readonly AppDbContext _dbContext;
 
-    public SoftwareController(IUserService userService, IHistoryService historyService, IEmailService emailService, 
-        INotificationService notificationService, IIdentityService identityService, AppDbContext dbContext)
+    public SoftwareController(IUserService userService, IEmailService emailService, 
+        INotificationService notificationService, IIdentityService identityService)
     {
         _userService = userService;
-        _historyService = historyService;
         _emailService = emailService;
         _notificationService = notificationService;
         _identityService = identityService;
-        _dbContext = dbContext;
     }
 
     [HttpPost]
@@ -89,8 +85,6 @@ Additional Information: {softwareRequestModel.AdditionalInformation}
                 "Thank you for your patience."
             }
         }, new string[] { currentUser.Email });
-        await _historyService.SoftwareInstallRequested(softwareRequestModel);
-        await _dbContext.SaveChangesAsync(); // persist changes made by _historyService        
 
         return Ok();
     }
