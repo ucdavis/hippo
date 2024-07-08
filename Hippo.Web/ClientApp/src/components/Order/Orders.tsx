@@ -30,14 +30,10 @@ export const Orders = () => {
 
   const columnHelper = createColumnHelper<OrderListModel>();
 
-  const columns = [
+  let columns = [
     columnHelper.accessor("status", {
       header: "Status",
       id: "status",
-    }),
-    columnHelper.accessor("sponsorName", {
-      header: "Sponsor",
-      id: "sponsorName",
     }),
     columnHelper.accessor("name", {
       header: "Order Name",
@@ -77,6 +73,56 @@ export const Orders = () => {
       ),
     }),
   ];
+
+  if (orderType === "adminorders") {
+    columns = [
+      columnHelper.accessor("status", {
+        header: "Status",
+        id: "status",
+      }),
+      columnHelper.accessor("sponsorName", {
+        header: "Sponsor",
+        id: "sponsorName",
+      }),
+      columnHelper.accessor("name", {
+        header: "Order Name",
+        id: "name",
+      }),
+      columnHelper.accessor("units", {
+        header: "Units",
+        id: "units",
+      }),
+      columnHelper.accessor("quantity", {
+        header: "Quantity",
+        id: "quantity",
+      }),
+      columnHelper.accessor("total", {
+        header: "Total",
+        id: "total",
+      }),
+      columnHelper.accessor("balanceRemaining", {
+        header: "Balance",
+        id: "balanceRemaining",
+      }),
+      columnHelper.accessor("createdOn", {
+        header: "Created On",
+        id: "createdOn",
+      }),
+      columnHelper.display({
+        header: "Actions",
+        cell: (value) => (
+          <div>
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/details/${value.row.original.id}`}
+            >
+              Details
+            </Link>
+          </div>
+        ),
+      }),
+    ];
+  }
 
   //add columns with useMemo
   // const columns = useMemo<Column<OrderListModel>[]>(
