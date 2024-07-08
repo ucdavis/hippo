@@ -186,17 +186,27 @@ const OrderForm: React.FC<OrderFormProps> = ({
               valueAsNumber={true}
               deps={"total"}
             />
-            <OrderFormField
-              name="installmentType"
-              label="Installment Type"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              type="select"
-            >
-              <option value="OneTime">One Time</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Yearly">Yearly</option>
-            </OrderFormField>
+            {readOnly && (
+              <OrderFormField
+                name="installmentType"
+                label="Installment Type"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+              ></OrderFormField>
+            )}
+            {!readOnly && (
+              <OrderFormField
+                name="installmentType"
+                label="Installment Type"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+                type="select"
+              >
+                <option value="OneTime">One Time</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+              </OrderFormField>
+            )}
             {installmentType !== "OneTime" && (
               <OrderFormField
                 name="installments"
