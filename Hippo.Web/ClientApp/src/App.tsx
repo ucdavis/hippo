@@ -108,7 +108,8 @@ const App = () => {
               }
             />
             <Route path="/:cluster/product/index" element={<Products />} />
-            <Route path="/:cluster/order/myorders" element={<Orders />} />
+            <Route path="/:cluster/order/:orderType" element={<Orders />} />
+            <Route path="/:cluster/order/:orderType" element={<Orders />} />
             <Route
               path="/:cluster/order/details/:orderId"
               element={<Details />}

@@ -9,12 +9,12 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
-  const { cluster } = useParams();
+  const { cluster, orderType } = useParams();
 
   useEffect(() => {
     const fetchOrders = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/order/myorders`,
+        `/api/${cluster}/order/${orderType}`,
       );
 
       if (response.ok) {
@@ -26,7 +26,7 @@ export const Orders = () => {
     };
 
     fetchOrders();
-  }, [cluster]);
+  }, [cluster, orderType]);
 
   const columnHelper = createColumnHelper<OrderListModel>();
 

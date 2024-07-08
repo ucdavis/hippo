@@ -52,8 +52,28 @@ namespace Hippo.Web.Controllers
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
 
             return Ok(model);
+        }
 
-            //TODO: Need to create a page for this.
+        [HttpGet]
+        public async Task<IActionResult> AdminOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+            var currentUserAccount = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            if (currentUserAccount == null)
+            {
+                return Ok(new OrderListModel[0]);
+            }
+
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+
+            return Ok(model);
         }
 
         [HttpGet]
