@@ -1,5 +1,6 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Models.OrderModels;
 using Hippo.Core.Services;
@@ -204,10 +205,12 @@ namespace Hippo.Web.Controllers
                     if (model.ExpirationDate != null)
                     {
                         order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        order.ExpirationDate = order.ExpirationDate.FromPacificTime();
                     }
                     if (model.InstallmentDate != null)
                     {
                         order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        order.InstallmentDate = order.InstallmentDate.FromPacificTime();
                     }
 
 
@@ -253,21 +256,23 @@ namespace Hippo.Web.Controllers
                     if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
                     {
                         existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
                         //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
                         //existingOrder.ExpirationDate = expirationDate;
                     }
                     else
                     {
                         //TODO: Can we allow this to be cleared out?
-                        //existingOrder.ExpirationDate = null;
+                        existingOrder.ExpirationDate = null;
                     }
                     if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
                         existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
                     }
                     else
                     {
-                        //existingOrder.InstallmentDate = null;
+                        existingOrder.InstallmentDate = null;
                     }
                 }
                 existingOrder.Description = model.Description;
@@ -416,9 +421,19 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
+
+                    if( existingOrder.InstallmentDate == null)
+                    {
+                        existingOrder.InstallmentDate = DateTime.UtcNow;
+                    }
+                    if( existingOrder.ExpirationDate == null)
+                    {
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
+                    }
+
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
                 }
                 else
                 {
@@ -443,7 +458,7 @@ namespace Hippo.Web.Controllers
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                 await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
             }
-            else
+            else if(isClusterOrSystemAdmin)
             {
                 if (existingOrder.Status == Order.Statuses.Created)
                 {
@@ -465,15 +480,28 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
-                    //Set dates if they are null?
+
+                    //Duplicate code. Fix it.
+                    if (existingOrder.InstallmentDate == null)
+                    {
+                        existingOrder.InstallmentDate = DateTime.UtcNow;
+                    }
+                    if (existingOrder.ExpirationDate == null)
+                    {
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
+                    }
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Deactivated.");
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
                 }
                 else
                 {
                     return BadRequest("You cannot change the status of an order in the current status.");
                 }
+            }
+            else
+            {
+                return BadRequest("Unexpected Error. Please contact support.");
             }
 
             await _dbContext.SaveChangesAsync();

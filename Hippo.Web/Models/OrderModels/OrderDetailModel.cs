@@ -1,4 +1,5 @@
 ﻿using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
@@ -47,8 +48,8 @@ namespace Hippo.Web.Models.OrderModels
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
                 LifeCycle = order.LifeCycle,
-                InstallmentDate = order.InstallmentDate != null ? order.InstallmentDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                ExpirationDate = order.ExpirationDate != null ? order.ExpirationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+                InstallmentDate = order.InstallmentDate != null ? order.InstallmentDate.Value.ToPacificTime().ToString("yyyy-MM-dd") : string.Empty,
+                ExpirationDate = order.ExpirationDate != null ? order.ExpirationDate.Value.ToPacificTime().ToString("yyyy-MM-dd") : string.Empty,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,
