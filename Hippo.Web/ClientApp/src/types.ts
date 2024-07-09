@@ -1,3 +1,5 @@
+import { ClusterNames } from "./constants";
+
 export interface User {
   id: number;
   firstName?: string;
@@ -113,6 +115,20 @@ export interface ClusterModel {
 
 export type ModelState = Record<string, string>;
 export type BadRequest = string | ModelState;
+
+export type ClusterName = (typeof ClusterNames)[number];
+
+export interface SoftwareRequestModel {
+  clusterName: ClusterName;
+  email: string;
+  accountName: string;
+  accountKerberos: string;
+  softwareTitle: string;
+  softwareLicense: string;
+  softwareHomePage: string;
+  benefitDescription: string;
+  additionalInformation: string;
+}
 
 // types used by puppet records...
 export type DataQuota = string;
@@ -298,6 +314,7 @@ export interface OrderListModel {
   status: string;
   total: string;
   balanceRemaining: string;
+  sponsorName: string;
 }
 
 export interface OrderTotalCalculationModel extends Partial<OrderModel> {

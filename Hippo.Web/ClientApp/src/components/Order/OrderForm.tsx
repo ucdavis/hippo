@@ -130,7 +130,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         {onlyChartStrings && <BillingsFields readOnly={readOnly} />}
         {!onlyChartStrings && (
           <>
-            {isAdmin && !readOnly && (
+            {isAdmin && !readOnly && orderProp.id === 0 && (
               <>
                 <OrderFormField
                   name="PILookup"
@@ -186,17 +186,27 @@ const OrderForm: React.FC<OrderFormProps> = ({
               valueAsNumber={true}
               deps={"total"}
             />
-            <OrderFormField
-              name="installmentType"
-              label="Installment Type"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              type="select"
-            >
-              <option value="OneTime">One Time</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Yearly">Yearly</option>
-            </OrderFormField>
+            {readOnly && (
+              <OrderFormField
+                name="installmentType"
+                label="Installment Type"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+              ></OrderFormField>
+            )}
+            {!readOnly && (
+              <OrderFormField
+                name="installmentType"
+                label="Installment Type"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+                type="select"
+              >
+                <option value="OneTime">One Time</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+              </OrderFormField>
+            )}
             {installmentType !== "OneTime" && (
               <OrderFormField
                 name="installments"
@@ -236,14 +246,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
               valueAsNumber={true}
               deps={"total"}
             />
-
-            <OrderFormField
-              name="externalReference"
-              label="External Reference"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              maxLength={150}
-            />
             <OrderFormField
               name="installmentDate"
               label="Installment Date"
@@ -276,12 +278,21 @@ const OrderForm: React.FC<OrderFormProps> = ({
             />
 
             {isAdmin && (
-              <OrderFormField
-                name="adminNotes"
-                label="Admin Notes"
-                readOnly={readOnly}
-                type="textarea"
-              />
+              <>
+                <OrderFormField
+                  name="externalReference"
+                  label="External Reference"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  maxLength={150}
+                />
+                <OrderFormField
+                  name="adminNotes"
+                  label="Admin Notes"
+                  readOnly={readOnly}
+                  type="textarea"
+                />
+              </>
             )}
             <MetaDataFields readOnly={readOnly} />
             <hr />

@@ -137,6 +137,18 @@ export const AppNav = () => {
               >
                 My Orders
               </NavLink>
+              <ShowFor roles={["ClusterAdmin", "System"]}>
+                <NavLink
+                  id="adminorders"
+                  to={`/${cluster.name}/order/adminorders`}
+                  className="nav-item nav-link"
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
+                >
+                  Admin Orders
+                </NavLink>
+              </ShowFor>
             </nav>
           </div>
         </div>

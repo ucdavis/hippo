@@ -26,6 +26,7 @@ import { Details } from "./components/Order/Details";
 import CreateOrder from "./components/Order/CreateOrder";
 import EditOrder from "./components/Order/EditOrder";
 import UpdateChartStrings from "./components/Order/UpdateChartStrings";
+import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
 
 declare var Hippo: AppContextShape;
 
@@ -108,7 +109,8 @@ const App = () => {
               }
             />
             <Route path="/:cluster/product/index" element={<Products />} />
-            <Route path="/:cluster/order/myorders" element={<Orders />} />
+            <Route path="/:cluster/order/:orderType" element={<Orders />} />
+            <Route path="/:cluster/order/:orderType" element={<Orders />} />
             <Route
               path="/:cluster/order/details/:orderId"
               element={<Details />}
@@ -125,6 +127,7 @@ const App = () => {
               path="/:cluster/order/create/:productId?"
               element={<CreateOrder />}
             />
+            <Route path="/softwarerequest" element={<SoftwareRequestForm />} />
           </Routes>
         </div>
       </ModalProvider>

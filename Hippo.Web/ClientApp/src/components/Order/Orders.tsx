@@ -9,12 +9,12 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
-  const { cluster } = useParams();
+  const { cluster, orderType } = useParams();
 
   useEffect(() => {
     const fetchOrders = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/order/myorders`,
+        `/api/${cluster}/order/${orderType}`,
       );
 
       if (response.ok) {
@@ -26,103 +26,77 @@ export const Orders = () => {
     };
 
     fetchOrders();
-  }, [cluster]);
+  }, [cluster, orderType]);
 
   const columnHelper = createColumnHelper<OrderListModel>();
 
-  const columns = [
-    columnHelper.accessor("status", {
-      header: "Status",
-      id: "status",
-    }),
-    columnHelper.accessor("name", {
-      header: "Order Name",
-      id: "name",
-    }),
-    columnHelper.accessor("units", {
-      header: "Units",
-      id: "units",
-    }),
-    columnHelper.accessor("quantity", {
-      header: "Quantity",
-      id: "quantity",
-    }),
-    columnHelper.accessor("total", {
-      header: "Total",
-      id: "total",
-    }),
-    columnHelper.accessor("balanceRemaining", {
-      header: "Balance",
-      id: "balanceRemaining",
-    }),
-    columnHelper.accessor("createdOn", {
-      header: "Created On",
-      id: "createdOn",
-    }),
-    columnHelper.display({
-      header: "Actions",
-      cell: (value) => (
-        <div>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/details/${value.row.original.id}`}
-          >
-            Details
-          </Link>
-        </div>
-      ),
-    }),
-  ];
+  const status = columnHelper.accessor("status", {
+    header: "Status",
+    id: "status",
+  });
 
-  //add columns with useMemo
-  // const columns = useMemo<Column<OrderListModel>[]>(
-  //   () => [
-  //     {
-  //       Header: "Status",
-  //       accessor: "status",
-  //     },
-  //     {
-  //       Header: "Order Name",
-  //       accessor: "name",
-  //     },
-  //     {
-  //       Header: "Units",
-  //       accessor: "units",
-  //     },
-  //     {
-  //       Header: "Quantity",
-  //       accessor: "quantity",
-  //     },
-  //     {
-  //       Header: "Total",
-  //       accessor: "total",
-  //     },
-  //     {
-  //       Header: "Balance",
-  //       accessor: "balanceRemaining",
-  //     },
-  //     {
-  //       Header: "Created On",
-  //       accessor: "createdOn",
-  //     },
-  //     {
-  //       Header: "Actions",
-  //       sortable: false,
-  //       Cell: ({ row }) => (
-  //         <div>
-  //           <Link
-  //             className="btn btn-primary"
-  //             to={`/${cluster}/order/details/${row.original.id}`}
-  //           >
-  //             Details
-  //           </Link>{" "}
-  //           <button className="btn btn-primary">Edit</button>{" "}
-  //         </div>
-  //       ),
-  //     },
-  //   ],
-  //   [cluster],
-  // );
+  const sponsorName = columnHelper.accessor("sponsorName", {
+    header: "Sponsor",
+    id: "sponsorName",
+  });
+
+  const name = columnHelper.accessor("name", {
+    header: "Order Name",
+    id: "name",
+  });
+
+  const units = columnHelper.accessor("units", {
+    header: "Units",
+    id: "units",
+  });
+
+  const quantity = columnHelper.accessor("quantity", {
+    header: "Quantity",
+    id: "quantity",
+  });
+
+  const total = columnHelper.accessor("total", {
+    header: "Total",
+    id: "total",
+  });
+
+  const balanceRemaining = columnHelper.accessor("balanceRemaining", {
+    header: "Balance",
+    id: "balanceRemaining",
+  });
+
+  const createdOn = columnHelper.accessor("createdOn", {
+    header: "Created On",
+    id: "createdOn",
+  });
+
+  const actions = columnHelper.display({
+    header: "Actions",
+    cell: (value) => (
+      <div>
+        <Link
+          className="btn btn-primary"
+          to={`/${cluster}/order/details/${value.row.original.id}`}
+        >
+          Details
+        </Link>
+      </div>
+    ),
+  });
+
+  let columns = [];
+
+  columns.push(status);
+  if (orderType === "adminorders") {
+    columns.push(sponsorName);
+  }
+  columns.push(name);
+  columns.push(units);
+  columns.push(quantity);
+  columns.push(total);
+  columns.push(balanceRemaining);
+  columns.push(createdOn);
+  columns.push(actions);
 
   if (orders === undefined) {
     return (

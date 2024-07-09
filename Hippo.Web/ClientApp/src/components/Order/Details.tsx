@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   HistoryModel,
@@ -14,9 +14,12 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import { ShowFor } from "../../Shared/ShowFor";
+import AppContext from "../../Shared/AppContext";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
+  const [{ user }] = useContext(AppContext);
   const [order, setOrder] = useState<OrderModel | null>(null);
   const [balanceRemaining, setBalanceRemaining] = useState<number>(0);
   const [balancePending, setBalancePending] = useState<number>(0);
@@ -25,6 +28,8 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
+  const adminEditableStatuses = ["Submitted", "Processing", "Active"];
+  const sponsorEditableStatuses = ["Created"];
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -43,7 +48,10 @@ export const Details = () => {
         const balanceRemaining = parseFloat(data.balanceRemaining);
         setBalanceRemaining(balanceRemaining);
         const balancePending = data?.payments
-          .filter((payment) => payment.status !== "Completed")
+          .filter(
+            (payment) =>
+              payment.status !== "Completed" && payment.status !== "Cancelled",
+          )
           .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
         setBalancePending(balancePending);
       } else {
@@ -430,34 +438,104 @@ export const Details = () => {
           <h2>
             {order.piUser?.name} ({order.piUser?.email})
           </h2>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/edit/${order.id}`}
+          {order.piUser?.id === user.detail.id &&
+            order.status === "Created" &&
+            order.billings.length <= 0 && (
+              <h3 style={{ backgroundColor: "#ffcccc" }}>
+                This order needs to have billing information added before it can
+                be submitted (Approve).
+              </h3>
+            )}
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={adminEditableStatuses.includes(order.status)}
           >
-            Edit Order
-          </Link>{" "}
-          <button className="btn btn-primary" onClick={() => updateStatus()}>
-            {" "}
-            Approve Order
-          </button>{" "}
-          <button className="btn btn-primary" onClick={() => cancelOrder()}>
-            {" "}
-            Cancel Order
-          </button>{" "}
-          <button className="btn btn-primary" onClick={() => rejectOrder()}>
-            {" "}
-            Reject Order
-          </button>{" "}
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/updatechartstrings/${order.id}`}
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/edit/${order.id}`}
+            >
+              Edit Order
+            </Link>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              sponsorEditableStatuses.includes(order.status)
+            }
           >
-            Update Chart Strings
-          </Link>{" "}
-          <button className="btn btn-primary" onClick={() => makePayment()}>
-            {" "}
-            Onetime Payment
-          </button>
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/edit/${order.id}`}
+            >
+              Edit Order
+            </Link>{" "}
+          </ShowFor>
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={["Submitted", "Processing"].includes(order.status)}
+          >
+            <button className="btn btn-primary" onClick={() => updateStatus()}>
+              {" "}
+              Approve Order
+            </button>{" "}
+          </ShowFor>
+          {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              order.status === "Created" &&
+              order.billings.length > 0
+            }
+          >
+            <button className="btn btn-primary" onClick={() => updateStatus()}>
+              {" "}
+              Approve Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              order.piUser?.id === user.detail.id &&
+              ["Created", "Submitted"].includes(order.status)
+            }
+          >
+            <button className="btn btn-primary" onClick={() => cancelOrder()}>
+              {" "}
+              Cancel Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            roles={["System", "ClusterAdmin"]}
+            condition={["Submitted", "Processing"].includes(order.status)}
+          >
+            <button className="btn btn-primary" onClick={() => rejectOrder()}>
+              {" "}
+              Reject Order
+            </button>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              !["Cancelled", "Rejected", "Completed"].includes(order.status)
+            }
+          >
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/updatechartstrings/${order.id}`}
+            >
+              Update Chart Strings
+            </Link>{" "}
+          </ShowFor>
+          <ShowFor
+            condition={
+              order.status === "Active" &&
+              order.piUser?.id === user.detail.id &&
+              balanceRemaining > 0
+            }
+          >
+            <button className="btn btn-primary" onClick={() => makePayment()}>
+              {" "}
+              Onetime Payment
+            </button>
+          </ShowFor>
           <OrderForm
             orderProp={order}
             readOnly={true}
@@ -498,7 +576,9 @@ export const Details = () => {
           </div>
           {balancePending !== 0 && (
             <div className="form-group">
-              <label htmlFor="fieldBalancePending">Balance Pending</label>
+              <label htmlFor="fieldBalancePending">
+                Total Pending Payments
+              </label>
               <div className="input-group">
                 <div className="input-group-prepend">
                   <span className="input-group-text" style={{ height: "38px" }}>
@@ -508,7 +588,7 @@ export const Details = () => {
                 <input
                   className="form-control"
                   id="fieldBalancePending"
-                  value={(balanceRemaining - balancePending).toFixed(2)}
+                  value={balancePending.toFixed(2)}
                   readOnly
                 />
               </div>

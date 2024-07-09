@@ -52,8 +52,28 @@ namespace Hippo.Web.Controllers
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
 
             return Ok(model);
+        }
 
-            //TODO: Need to create a page for this.
+        [HttpGet]
+        public async Task<IActionResult> AdminOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+            var currentUserAccount = await _dbContext.Accounts.SingleOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            if (currentUserAccount == null)
+            {
+                return Ok(new OrderListModel[0]);
+            }
+
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+
+            return Ok(model);
         }
 
         [HttpGet]
@@ -311,7 +331,7 @@ namespace Hippo.Web.Controllers
 
             //TODO: Validation
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
             if (existingOrder.PrincipalInvestigator.Owner.Id != currentUser.Id && !isClusterOrSystemAdmin) //Do we want admins to be able to make these chanegs?
             {
                 return BadRequest("You do not have permission to update the billing information on this order.");
@@ -353,7 +373,7 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Billings).FirstAsync(a => a.Id == id);
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == id);
             var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
 
 
