@@ -9,7 +9,7 @@ namespace Hippo.Email.Models
     public class DecisionModel
     {
         public string RequestedAction { get; set; } = String.Empty;
-        public string UcdLogoUrl { get; set; } = "https://hippo-test.azurewebsites.net/media/caes-logo-gray.png";
+        public string UcdLogoUrl { get; set; } = String.Empty;
         public string GroupName { get; set; } = String.Empty;
         public string RequesterName { get; set; } = String.Empty;
         public string ClusterName { get; set; } = "FARM/CAES";

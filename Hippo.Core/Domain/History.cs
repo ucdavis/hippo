@@ -78,8 +78,9 @@ namespace Hippo.Core.Domain
                 RoleRemoved,
                 RoleAdded,
                 QueuedEventCreated,
-                QueuedEventUpdated
+                QueuedEventUpdated,
             }.ToList();
+
         }
 
         public class OrderActions
