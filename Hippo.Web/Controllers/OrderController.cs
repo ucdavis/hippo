@@ -233,7 +233,7 @@ namespace Hippo.Web.Controllers
             else
             {
                 //Updating an existing order without changing the status.
-                var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
+                var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
                 if (isClusterOrSystemAdmin)
                 {
@@ -258,7 +258,8 @@ namespace Hippo.Web.Controllers
                     }
                     else
                     {
-                        existingOrder.ExpirationDate = null;
+                        //TODO: Can we allow this to be cleared out?
+                        //existingOrder.ExpirationDate = null;
                     }
                     if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
@@ -266,7 +267,7 @@ namespace Hippo.Web.Controllers
                     }
                     else
                     {
-                        existingOrder.InstallmentDate = null;
+                        //existingOrder.InstallmentDate = null;
                     }
                 }
                 existingOrder.Description = model.Description;
