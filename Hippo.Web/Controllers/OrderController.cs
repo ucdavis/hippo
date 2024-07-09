@@ -278,28 +278,30 @@ namespace Hippo.Web.Controllers
                     existingOrder.Quantity = model.Quantity;
                 }
 
+                var metaDatasToRemove = new List<OrderMetaData>();
+
                 //Deal with OrderMeta data (Test this)
                 foreach (var metaData in existingOrder.MetaData)
                 {
-                    if (metaData != null && model.MetaData.Any(a => a.Name == metaData.Name) && model.MetaData.Any(a => a.Value == metaData.Value))
+                    if (model.MetaData.Any(a => a.Id == metaData.Id))
                     {
-                        //Keep it
+                        //Possibly update values
+                        metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
+                        metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
                     }
                     else
                     {
-                        existingOrder.MetaData.Remove(metaData);
+                        metaDatasToRemove.Add(metaData);
                     }
                 }
-                foreach (var metaData in model.MetaData)
+                foreach (var metaData in metaDatasToRemove)
                 {
-                    if (existingOrder.MetaData.Any(a => a.Name == metaData.Name) && existingOrder.MetaData.Any(a => a.Value == metaData.Value))
-                    {
-                        //Nothing to do, it is already there
-                    }
-                    else
-                    {
-                        existingOrder.AddMetaData(metaData.Name, metaData.Value);
-                    }
+                    existingOrder.MetaData.Remove(metaData);
+                }
+
+                foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
+                {
+                    existingOrder.AddMetaData(metaData.Name, metaData.Value);
                 }
 
                 var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
