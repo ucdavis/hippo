@@ -10,6 +10,7 @@ import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
 import { authenticatedFetch } from "../../util/api";
 import BillingsFields from "./BillingsFields";
+import { ShowFor } from "../../Shared/ShowFor";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -42,10 +43,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [localInstallmentType, setLocalInstallmentType] = useState(
     methods.getValues("installmentType"),
   );
+  const [limitedEditing, setLimitedEditing] = useState(false);
 
   React.useEffect(() => {
     const newStatus = orderProp.status;
     methods.setValue("status", newStatus);
+
+    if (
+      newStatus === "Active" ||
+      newStatus === "Rejected" ||
+      newStatus === "Cancelled" ||
+      newStatus === "Completed"
+    ) {
+      setLimitedEditing(true);
+    } else {
+      setLimitedEditing(false);
+    }
   }, [methods, orderProp.status]);
 
   //lookup pi value
@@ -144,108 +157,111 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 {foundPI && <span className="text-muted">{foundPI}</span>}
               </>
             )}
+            <ShowFor condition={readOnly || !limitedEditing}>
+              <>
+                <OrderFormField
+                  name="productName"
+                  label="Product Name"
+                  required={true}
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  maxLength={50}
+                />
+                <OrderFormField
+                  name="description"
+                  label="Description"
+                  type="textarea"
+                  required={true}
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  maxLength={250}
+                />
+                <OrderFormField
+                  name="category"
+                  label="Category"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                />
+                <OrderFormField
+                  name="units"
+                  label="Units"
+                  required={true}
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                />
 
-            <OrderFormField
-              name="productName"
-              label="Product Name"
-              required={true}
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              maxLength={50}
-            />
-            <OrderFormField
-              name="description"
-              label="Description"
-              type="textarea"
-              required={true}
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              maxLength={250}
-            />
-            <OrderFormField
-              name="category"
-              label="Category"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-            />
-            <OrderFormField
-              name="units"
-              label="Units"
-              required={true}
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-            />
+                <OrderFormField
+                  name="unitPrice"
+                  label="Unit Price"
+                  required={true}
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                  valueAsNumber={true}
+                  deps={"total"}
+                />
+                {readOnly && (
+                  <OrderFormField
+                    name="installmentType"
+                    label="Installment Type"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                  ></OrderFormField>
+                )}
+                {!readOnly && (
+                  <OrderFormField
+                    name="installmentType"
+                    label="Installment Type"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    type="select"
+                  >
+                    <option value="OneTime">One Time</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Yearly">Yearly</option>
+                  </OrderFormField>
+                )}
+                {installmentType !== "OneTime" && (
+                  <OrderFormField
+                    name="installments"
+                    label="Installments"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                  />
+                )}
+                <OrderFormField
+                  name="lifeCycle"
+                  label="Life Cycle in Months"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                />
+                <OrderFormField
+                  name="name"
+                  label="Name"
+                  required={true}
+                  readOnly={readOnly}
+                  maxLength={50}
+                />
+                <OrderFormField
+                  name="notes"
+                  label="Notes"
+                  type="textarea"
+                  required={false}
+                  readOnly={readOnly}
+                />
 
-            <OrderFormField
-              name="unitPrice"
-              label="Unit Price"
-              required={true}
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-              valueAsNumber={true}
-              deps={"total"}
-            />
-            {readOnly && (
-              <OrderFormField
-                name="installmentType"
-                label="Installment Type"
-                readOnly={readOnly || !isAdmin}
-                disabled={!readOnly && !isAdmin}
-              ></OrderFormField>
-            )}
-            {!readOnly && (
-              <OrderFormField
-                name="installmentType"
-                label="Installment Type"
-                readOnly={readOnly || !isAdmin}
-                disabled={!readOnly && !isAdmin}
-                type="select"
-              >
-                <option value="OneTime">One Time</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Yearly">Yearly</option>
-              </OrderFormField>
-            )}
-            {installmentType !== "OneTime" && (
-              <OrderFormField
-                name="installments"
-                label="Installments"
-                readOnly={readOnly || !isAdmin}
-                disabled={!readOnly && !isAdmin}
-              />
-            )}
-            <OrderFormField
-              name="lifeCycle"
-              label="Life Cycle in Months"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-            />
-            <OrderFormField
-              name="name"
-              label="Name"
-              required={true}
-              readOnly={readOnly}
-              maxLength={50}
-            />
+                <OrderFormField
+                  name="quantity"
+                  label="Quantity"
+                  required={true}
+                  readOnly={readOnly}
+                  min={0.000001}
+                  valueAsNumber={true}
+                  deps={"total"}
+                />
+              </>
+            </ShowFor>
 
-            <OrderFormField
-              name="notes"
-              label="Notes"
-              type="textarea"
-              required={false}
-              readOnly={readOnly}
-            />
-
-            <OrderFormField
-              name="quantity"
-              label="Quantity"
-              required={true}
-              readOnly={readOnly}
-              min={0.000001}
-              valueAsNumber={true}
-              deps={"total"}
-            />
             <OrderFormField
               name="installmentDate"
               label="Installment Date"
@@ -260,22 +276,26 @@ const OrderForm: React.FC<OrderFormProps> = ({
               disabled={!readOnly && !isAdmin}
               type="date"
             />
-            <OrderFormField
-              name="adjustment"
-              label="Adjustment"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-              valueAsNumber={true}
-              deps={"total"}
-            />
-            <OrderFormField
-              name="adjustmentReason"
-              label="Adjustment Reason"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              type="textarea"
-            />
+            <ShowFor condition={readOnly || !limitedEditing}>
+              <>
+                <OrderFormField
+                  name="adjustment"
+                  label="Adjustment"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                  valueAsNumber={true}
+                  deps={"total"}
+                />
+                <OrderFormField
+                  name="adjustmentReason"
+                  label="Adjustment Reason"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  type="textarea"
+                />
+              </>
+            </ShowFor>
 
             {isAdmin && (
               <>
@@ -294,10 +314,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 />
               </>
             )}
-            <MetaDataFields readOnly={readOnly} />
-            <hr />
-            <BillingsFields readOnly={readOnly} />
-            <hr />
+            <ShowFor condition={readOnly || !limitedEditing}>
+              <>
+                <MetaDataFields readOnly={readOnly} />
+                <hr />
+                <BillingsFields readOnly={readOnly} />
+                <hr />
+              </>
+            </ShowFor>
 
             <OrderFormTotalFields />
           </>

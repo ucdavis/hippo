@@ -233,7 +233,7 @@ namespace Hippo.Web.Controllers
             else
             {
                 //Updating an existing order without changing the status.
-                var existingOrder = await _dbContext.Orders.FirstAsync(a => a.Id == model.Id);
+                var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
                 await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
                 if (isClusterOrSystemAdmin)
                 {
@@ -258,7 +258,8 @@ namespace Hippo.Web.Controllers
                     }
                     else
                     {
-                        existingOrder.ExpirationDate = null;
+                        //TODO: Can we allow this to be cleared out?
+                        //existingOrder.ExpirationDate = null;
                     }
                     if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
@@ -266,7 +267,7 @@ namespace Hippo.Web.Controllers
                     }
                     else
                     {
-                        existingOrder.InstallmentDate = null;
+                        //existingOrder.InstallmentDate = null;
                     }
                 }
                 existingOrder.Description = model.Description;
@@ -277,28 +278,30 @@ namespace Hippo.Web.Controllers
                     existingOrder.Quantity = model.Quantity;
                 }
 
+                var metaDatasToRemove = new List<OrderMetaData>();
+
                 //Deal with OrderMeta data (Test this)
                 foreach (var metaData in existingOrder.MetaData)
                 {
-                    if (metaData != null && model.MetaData.Any(a => a.Name == metaData.Name) && model.MetaData.Any(a => a.Value == metaData.Value))
+                    if (model.MetaData.Any(a => a.Id == metaData.Id))
                     {
-                        //Keep it
+                        //Possibly update values
+                        metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
+                        metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
                     }
                     else
                     {
-                        existingOrder.MetaData.Remove(metaData);
+                        metaDatasToRemove.Add(metaData);
                     }
                 }
-                foreach (var metaData in model.MetaData)
+                foreach (var metaData in metaDatasToRemove)
                 {
-                    if (existingOrder.MetaData.Any(a => a.Name == metaData.Name) && existingOrder.MetaData.Any(a => a.Value == metaData.Value))
-                    {
-                        //Nothing to do, it is already there
-                    }
-                    else
-                    {
-                        existingOrder.AddMetaData(metaData.Name, metaData.Value);
-                    }
+                    existingOrder.MetaData.Remove(metaData);
+                }
+
+                foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
+                {
+                    existingOrder.AddMetaData(metaData.Name, metaData.Value);
                 }
 
                 var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
@@ -634,6 +637,14 @@ namespace Hippo.Web.Controllers
                 return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
             }
 
+            //Check for duplicate chart strings
+            var duplicateChartStrings = model.Billings.GroupBy(a => a.ChartString).Where(a => a.Count() > 1).Select(a => a.Key).ToList();
+            if (duplicateChartStrings.Any())
+            {
+                return new ProcessingResult { Success = false, Message = $"Duplicate Chart Strings found: {string.Join(", ", duplicateChartStrings)}" };
+            }
+
+
             //Make sure there are no duplicate chart strings?
             //Allow Admin side to save invalid billings?
             //Probably passing the ID? 
@@ -651,7 +662,6 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    //order.Billings.Remove(billing);
                     billingsToRemove.Add(billing);
                 }
             }
