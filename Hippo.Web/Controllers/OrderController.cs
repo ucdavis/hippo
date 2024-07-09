@@ -662,7 +662,6 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    //order.Billings.Remove(billing);
                     billingsToRemove.Add(billing);
                 }
             }
