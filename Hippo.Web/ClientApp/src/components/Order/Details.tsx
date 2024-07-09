@@ -16,6 +16,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ShowFor } from "../../Shared/ShowFor";
 import AppContext from "../../Shared/AppContext";
+import { convertToPacificTime } from "../../util/DateHelper";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -100,7 +101,7 @@ export const Details = () => {
       header: "Date",
       id: "actedDate",
       cell: (value) => (
-        <span>{new Date(value.row.original.actedDate).toLocaleString()}</span>
+        <span>{convertToPacificTime(value.row.original.actedDate)}</span>
       ),
     }),
     historyColumnHelper.accessor("actedBy", {
@@ -144,7 +145,7 @@ export const Details = () => {
       header: "Created On",
       id: "createdOn",
       cell: (value) => (
-        <span>{new Date(value.row.original.createdOn).toLocaleString()}</span>
+        <span>{convertToPacificTime(value.row.original.createdOn)}</span>
       ),
     }),
     paymentColumnHelper.accessor("createdBy", {
