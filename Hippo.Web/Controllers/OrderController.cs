@@ -637,6 +637,14 @@ namespace Hippo.Web.Controllers
                 return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
             }
 
+            //Check for duplicate chart strings
+            var duplicateChartStrings = model.Billings.GroupBy(a => a.ChartString).Where(a => a.Count() > 1).Select(a => a.Key).ToList();
+            if (duplicateChartStrings.Any())
+            {
+                return new ProcessingResult { Success = false, Message = $"Duplicate Chart Strings found: {string.Join(", ", duplicateChartStrings)}" };
+            }
+
+
             //Make sure there are no duplicate chart strings?
             //Allow Admin side to save invalid billings?
             //Probably passing the ID? 
