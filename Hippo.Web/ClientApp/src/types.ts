@@ -264,6 +264,7 @@ export interface OrderBillingModel {
 export interface PaymentModel {
   id: number;
   amount: number;
+  entryAmount: string;
   status: string;
   createdOn: string;
   createdBy?: User;

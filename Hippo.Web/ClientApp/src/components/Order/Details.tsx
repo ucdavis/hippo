@@ -16,6 +16,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ShowFor } from "../../Shared/ShowFor";
 import AppContext from "../../Shared/AppContext";
+import { convertToPacificTime } from "../../util/DateHelper";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -100,7 +101,7 @@ export const Details = () => {
       header: "Date",
       id: "actedDate",
       cell: (value) => (
-        <span>{new Date(value.row.original.actedDate).toLocaleString()}</span>
+        <span>{convertToPacificTime(value.row.original.actedDate)}</span>
       ),
     }),
     historyColumnHelper.accessor("actedBy", {
@@ -144,7 +145,7 @@ export const Details = () => {
       header: "Created On",
       id: "createdOn",
       cell: (value) => (
-        <span>{new Date(value.row.original.createdOn).toLocaleString()}</span>
+        <span>{convertToPacificTime(value.row.original.createdOn)}</span>
       ),
     }),
     paymentColumnHelper.accessor("createdBy", {
@@ -212,6 +213,7 @@ export const Details = () => {
   const [editPaymentModel, setEditPaymentModel] = useState<PaymentModel>({
     id: 0,
     amount: 0,
+    entryAmount: "",
     status: "",
     createdOn: "",
   });
@@ -227,7 +229,7 @@ export const Details = () => {
               className="form-control"
               id="fieldAmount"
               required
-              value={editPaymentModel.amount}
+              value={editPaymentModel.entryAmount}
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
@@ -235,6 +237,7 @@ export const Details = () => {
                   const model: PaymentModel = {
                     ...editPaymentModel,
                     amount: parseFloat(value),
+                    entryAmount: value,
                   };
                   setEditPaymentModel(model);
                   setReturn(model);
@@ -278,7 +281,13 @@ export const Details = () => {
       const data = await response.json();
       console.log(data);
       setOrder(data);
-      setEditPaymentModel({ id: 0, amount: 0, status: "", createdOn: "" });
+      setEditPaymentModel({
+        id: 0,
+        amount: 0,
+        status: "",
+        createdOn: "",
+        entryAmount: "",
+      });
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
@@ -290,6 +299,24 @@ export const Details = () => {
           <>
             <div>Current Status: {updateStatusModel.currentStatus}</div>
             <div>Set Status to: {updateStatusModel.newStatus}</div>
+            <hr />
+            {updateStatusModel.newStatus === "Submitted" && (
+              <div style={{ backgroundColor: "#90ee90" }}>
+                This will submit the order to the cluster admins for processing.
+              </div>
+            )}
+            {updateStatusModel.newStatus === "Processing" && (
+              <div style={{ backgroundColor: "#90ee90" }}>
+                This will indicate that an admin will start working on the
+                order.
+              </div>
+            )}
+            {updateStatusModel.newStatus === "Active" && (
+              <div style={{ backgroundColor: "#90ee90" }}>
+                This will move the order to active and allow manual billing as
+                well as scheduled billing.
+              </div>
+            )}
           </>
         ),
         canConfirm: !notification.pending,

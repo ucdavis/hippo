@@ -59,7 +59,17 @@ const OrderForm: React.FC<OrderFormProps> = ({
     } else {
       setLimitedEditing(false);
     }
-  }, [methods, orderProp.status]);
+
+    const newInstallmentDate = orderProp.installmentDate;
+    const newExpirationDate = orderProp.expirationDate;
+    methods.setValue("installmentDate", newInstallmentDate);
+    methods.setValue("expirationDate", newExpirationDate);
+  }, [
+    methods,
+    orderProp.expirationDate,
+    orderProp.installmentDate,
+    orderProp.status,
+  ]);
 
   //lookup pi value
   const lookupPI = async (pi: string) => {

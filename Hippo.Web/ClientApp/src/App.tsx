@@ -108,24 +108,71 @@ const App = () => {
                 </ShowFor>
               }
             />
-            <Route path="/:cluster/product/index" element={<Products />} />
-            <Route path="/:cluster/order/:orderType" element={<Orders />} />
-            <Route path="/:cluster/order/:orderType" element={<Orders />} />
+            <Route
+              path="/:cluster/product/index"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Products />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/:orderType"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Orders />
+                </ShowFor>
+              }
+            />
             <Route
               path="/:cluster/order/details/:orderId"
-              element={<Details />}
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Details />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/order/edit/:orderId"
-              element={<EditOrder />}
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <EditOrder />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/order/updatechartstrings/:orderId"
-              element={<UpdateChartStrings />}
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <UpdateChartStrings />
+                </ShowFor>
+              }
             />
             <Route
               path="/:cluster/order/create/:productId?"
-              element={<CreateOrder />}
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <CreateOrder />
+                </ShowFor>
+              }
             />
             <Route path="/softwarerequest" element={<SoftwareRequestForm />} />
           </Routes>
