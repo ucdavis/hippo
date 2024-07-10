@@ -191,90 +191,9 @@ namespace Hippo.Web.Controllers
             }
             else
             {
-                //Updating an existing order without changing the status.
-                var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if (isClusterOrSystemAdmin)
-                {
-                    //TODO: Check the status to limit what can be changed
-                    existingOrder.Category = model.Category;
-                    existingOrder.ProductName = model.ProductName;
-                    existingOrder.Description = model.Description;
-                    existingOrder.Adjustment = model.Adjustment;
-                    existingOrder.AdjustmentReason = model.AdjustmentReason;
-                    existingOrder.AdminNotes = model.AdminNotes;
-                    existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
-                    existingOrder.Installments = model.Installments;
-                    existingOrder.UnitPrice = model.UnitPrice;
-                    existingOrder.Units = model.Units;
-                    existingOrder.ExternalReference = model.ExternalReference;
-                    existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
-                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
-                    {
-                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                        //existingOrder.ExpirationDate = expirationDate;
-                    }
-                    else
-                    {
-                        //TODO: Can we allow this to be cleared out?
-                        existingOrder.ExpirationDate = null;
-                    }
-                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
-                    {
-                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
-                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
-                    }
-                    else
-                    {
-                        existingOrder.InstallmentDate = null;
-                    }
-                }
-                existingOrder.Description = model.Description;
-                existingOrder.Name = model.Name;
-                existingOrder.Notes = model.Notes;
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
-                    existingOrder.Quantity = model.Quantity;
-                }
+                var processingResult = await UpdateExistingOrder(model, isClusterOrSystemAdmin, currentUser);
 
-                var metaDatasToRemove = new List<OrderMetaData>();
-
-                //Deal with OrderMeta data (Test this)
-                foreach (var metaData in existingOrder.MetaData)
-                {
-                    if (model.MetaData.Any(a => a.Id == metaData.Id))
-                    {
-                        //Possibly update values
-                        metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
-                        metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
-                    }
-                    else
-                    {
-                        metaDatasToRemove.Add(metaData);
-                    }
-                }
-                foreach (var metaData in metaDatasToRemove)
-                {
-                    existingOrder.MetaData.Remove(metaData);
-                }
-
-                foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
-                {
-                    existingOrder.AddMetaData(metaData.Name, metaData.Value);
-                }
-
-                var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
-                if (!updateBilling.Success)
-                {
-                    return BadRequest(updateBilling.Message);
-                }
-
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
-                await _historyService.OrderUpdated(existingOrder, currentUser);
-
-                orderToReturn = existingOrder;
+                orderToReturn = processingResult.Order;
 
             }
 
@@ -638,6 +557,99 @@ namespace Hippo.Web.Controllers
             rtValue.Success = true;
             rtValue.Order = order;
             
+            return rtValue;
+        }
+
+        private async Task<ProcessingResult> UpdateExistingOrder(OrderPostModel model, bool isClusterOrSystemAdmin, User currentUser)
+        {
+            var rtValue = new ProcessingResult();
+
+            //Updating an existing order without changing the status.
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
+            if (isClusterOrSystemAdmin)
+            {
+                //TODO: Check the status to limit what can be changed
+                existingOrder.Category = model.Category;
+                existingOrder.ProductName = model.ProductName;
+                existingOrder.Description = model.Description;
+                existingOrder.Adjustment = model.Adjustment;
+                existingOrder.AdjustmentReason = model.AdjustmentReason;
+                existingOrder.AdminNotes = model.AdminNotes;
+                existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
+                existingOrder.Installments = model.Installments;
+                existingOrder.UnitPrice = model.UnitPrice;
+                existingOrder.Units = model.Units;
+                existingOrder.ExternalReference = model.ExternalReference;
+                existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
+                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                {
+                    existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                    existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                    //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                    //existingOrder.ExpirationDate = expirationDate;
+                }
+                else
+                {
+                    //TODO: Can we allow this to be cleared out?
+                    existingOrder.ExpirationDate = null;
+                }
+                if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                {
+                    existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
+                }
+                else
+                {
+                    existingOrder.InstallmentDate = null;
+                }
+            }
+            existingOrder.Description = model.Description;
+            existingOrder.Name = model.Name;
+            existingOrder.Notes = model.Notes;
+            if (existingOrder.Status == Order.Statuses.Created)
+            {
+                existingOrder.Quantity = model.Quantity;
+            }
+
+            var metaDatasToRemove = new List<OrderMetaData>();
+
+            //Deal with OrderMeta data (Test this)
+            foreach (var metaData in existingOrder.MetaData)
+            {
+                if (model.MetaData.Any(a => a.Id == metaData.Id))
+                {
+                    //Possibly update values
+                    metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
+                    metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
+                }
+                else
+                {
+                    metaDatasToRemove.Add(metaData);
+                }
+            }
+            foreach (var metaData in metaDatasToRemove)
+            {
+                existingOrder.MetaData.Remove(metaData);
+            }
+
+            foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
+            {
+                existingOrder.AddMetaData(metaData.Name, metaData.Value);
+            }
+
+            var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
+            if (!updateBilling.Success)
+            {
+                return updateBilling;
+            }
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
+            await _historyService.OrderUpdated(existingOrder, currentUser);
+
+            rtValue.Success = true;
+            rtValue.Order = existingOrder;
+
             return rtValue;
         }
 
