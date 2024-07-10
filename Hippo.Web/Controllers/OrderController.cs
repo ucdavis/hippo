@@ -389,24 +389,32 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("You do not have permission to change the status of this order.");
             }
-            if(isPi && isClusterOrSystemAdmin)
+
+            switch (existingOrder.Status)
             {
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
+                case Order.Statuses.Created:
+                    if (!isPi)
+                    {
+                        return BadRequest("You cannot change the status of an order in the created status. The sponsor/PI has to do this.");
+                    }
+                    if (expectedStatus != Order.Statuses.Submitted)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     if (existingOrder.Billings.Count == 0)
                     {
                         return BadRequest("You must have billing information to submit an order.");
                     }
-                    if(expectedStatus != Order.Statuses.Submitted)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
                     existingOrder.Status = Order.Statuses.Submitted;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Submitted)
-                {
+
+                    break;
+                case Order.Statuses.Submitted:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
                     if (expectedStatus != Order.Statuses.Processing)
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
@@ -414,74 +422,17 @@ namespace Hippo.Web.Controllers
                     existingOrder.Status = Order.Statuses.Processing;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Processing)
-                {
+
+                    break;
+                case Order.Statuses.Processing:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
                     if (expectedStatus != Order.Statuses.Active)
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
-
-                    if( existingOrder.InstallmentDate == null)
-                    {
-                        existingOrder.InstallmentDate = DateTime.UtcNow;
-                    }
-                    if( existingOrder.ExpirationDate == null)
-                    {
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
-                    }
-
-                    existingOrder.Status = Order.Statuses.Active;
-                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
-                }
-                else
-                {
-                    return BadRequest("You cannot change the status of an order in the current status.");
-                }
-            }
-            else if (isPi) 
-            {
-                if (existingOrder.Status != Order.Statuses.Created)
-                {
-                    return BadRequest("You do not have permission to change the status of this order.");
-                }
-                if (existingOrder.Billings.Count == 0)
-                {
-                    return BadRequest("You must have billing information to submit an order.");
-                }
-                if(expectedStatus != Order.Statuses.Submitted)
-                {
-                    return BadRequest("Unexpected Status found. May have already been updated.");
-                }
-                existingOrder.Status = Order.Statuses.Submitted;
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
-            }
-            else if(isClusterOrSystemAdmin)
-            {
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
-                    return BadRequest("You cannot change the status of an order in the created status. The sponsor has to do this.");
-                }
-                if (existingOrder.Status == Order.Statuses.Submitted)
-                {
-                    if(expectedStatus != Order.Statuses.Processing)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
-                    existingOrder.Status = Order.Statuses.Processing;
-                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Processing)
-                {
-                    if(expectedStatus != Order.Statuses.Active)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
-
-                    //Duplicate code. Fix it.
                     if (existingOrder.InstallmentDate == null)
                     {
                         existingOrder.InstallmentDate = DateTime.UtcNow;
@@ -490,19 +441,16 @@ namespace Hippo.Web.Controllers
                     {
                         existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
                     }
+
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
-                }
-                else
-                {
+
+                    break;
+                default:
                     return BadRequest("You cannot change the status of an order in the current status.");
-                }
             }
-            else
-            {
-                return BadRequest("Unexpected Error. Please contact support.");
-            }
+
 
             await _dbContext.SaveChangesAsync();
 
@@ -560,18 +508,21 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            if(!isClusterOrSystemAdmin)
+            if (!isClusterOrSystemAdmin)
             {
                 return BadRequest("You do not have permission to reject this order.");
             }
             var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).FirstOrDefaultAsync(a => a.Id == id);
-            if (existingOrder == null) {
+            if (existingOrder == null)
+            {
                 return NotFound();
             }
-            if(existingOrder.Status != Order.Statuses.Submitted && existingOrder.Status != Order.Statuses.Processing ) {
+            if (existingOrder.Status != Order.Statuses.Submitted && existingOrder.Status != Order.Statuses.Processing)
+            {
                 return BadRequest("You cannot reject an order that is not in the Submitted or Processing status.");
             }
-            if(string.IsNullOrWhiteSpace(reason)) {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
                 return BadRequest("You must provide a reason for rejecting the order.");
             }
 
