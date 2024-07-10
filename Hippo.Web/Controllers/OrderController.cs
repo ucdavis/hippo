@@ -224,6 +224,10 @@ namespace Hippo.Web.Controllers
                 }
 
                 var updateBilling = await UpdateOrderBillingInfo(order, model);
+                if(!updateBilling.Success)
+                {
+                    return BadRequest(updateBilling.Message);
+                }
 
                 await _dbContext.Orders.AddAsync(order);
 
