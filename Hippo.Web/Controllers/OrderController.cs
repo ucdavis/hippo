@@ -247,7 +247,7 @@ namespace Hippo.Web.Controllers
                     existingOrder.Adjustment = model.Adjustment;
                     existingOrder.AdjustmentReason = model.AdjustmentReason;
                     existingOrder.AdminNotes = model.AdminNotes;
-                    existingOrder.InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly;
+                    existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
                     existingOrder.Installments = model.Installments;
                     existingOrder.UnitPrice = model.UnitPrice;
                     existingOrder.Units = model.Units;
