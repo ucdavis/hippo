@@ -72,7 +72,10 @@ namespace Hippo.Web.Controllers
                 return Ok(new OrderListModel[0]);
             }
 
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
+            //Probably will want to filter out old ones that are completed and the expiration date has passed.
+            var adminStatuses = new List<string> { Order.Statuses.Submitted, Order.Statuses.Processing, Order.Statuses.Active, Order.Statuses.Completed };
+
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && adminStatuses.Contains(a.Status)).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
             return Ok(model);
         }
