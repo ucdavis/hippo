@@ -213,6 +213,7 @@ export const Details = () => {
   const [editPaymentModel, setEditPaymentModel] = useState<PaymentModel>({
     id: 0,
     amount: 0,
+    entryAmount: "",
     status: "",
     createdOn: "",
   });
@@ -228,7 +229,7 @@ export const Details = () => {
               className="form-control"
               id="fieldAmount"
               required
-              value={editPaymentModel.amount}
+              value={editPaymentModel.entryAmount}
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
@@ -236,6 +237,7 @@ export const Details = () => {
                   const model: PaymentModel = {
                     ...editPaymentModel,
                     amount: parseFloat(value),
+                    entryAmount: value,
                   };
                   setEditPaymentModel(model);
                   setReturn(model);
@@ -279,7 +281,13 @@ export const Details = () => {
       const data = await response.json();
       console.log(data);
       setOrder(data);
-      setEditPaymentModel({ id: 0, amount: 0, status: "", createdOn: "" });
+      setEditPaymentModel({
+        id: 0,
+        amount: 0,
+        status: "",
+        createdOn: "",
+        entryAmount: "",
+      });
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
