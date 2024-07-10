@@ -3,9 +3,9 @@ import { OrderListModel } from "../../types";
 import { Link, useParams } from "react-router-dom";
 import { authenticatedFetch } from "../../util/api";
 
-import { ShowFor } from "../../Shared/ShowFor";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
+import { convertToPacificDate } from "../../util/DateHelper";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
@@ -68,6 +68,12 @@ export const Orders = () => {
   const createdOn = columnHelper.accessor("createdOn", {
     header: "Created On",
     id: "createdOn",
+    cell: (value) => convertToPacificDate(value.row.original.createdOn),
+    sortingFn: (rowA, rowB) => {
+      const dateA = new Date(rowA.getValue("createdOn"));
+      const dateB = new Date(rowB.getValue("createdOn"));
+      return dateA.getTime() - dateB.getTime();
+    },
   });
 
   const actions = columnHelper.display({

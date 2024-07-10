@@ -50,7 +50,7 @@ namespace Hippo.Web.Controllers
                 return Ok(new OrderListModel[0]);
             }
 
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
             return Ok(model);
         }
@@ -72,7 +72,7 @@ namespace Hippo.Web.Controllers
                 return Ok(new OrderListModel[0]);
             }
 
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
             return Ok(model);
         }

@@ -9,3 +9,15 @@ export const convertToPacificTime = (str: string) => {
     timeZone: "America/Los_Angeles",
   });
 };
+
+export const convertToPacificDate = (str: string) => {
+  if (!str) {
+    return "";
+  }
+  if (!str.endsWith("Z")) {
+    str += "Z";
+  }
+  return new Date(str).toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
+};

@@ -11,7 +11,7 @@ namespace Hippo.Web.Models.OrderModels
         public string Description { get; set; }
         public string Units { get; set; }
         public decimal Quantity { get; set; }
-        public string CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; }
         public string Status { get; set; }
         public string Total { get; set; }
         public string BalanceRemaining { get; set; }
@@ -27,7 +27,7 @@ namespace Hippo.Web.Models.OrderModels
                 Description = order.Description,
                 Units = order.Units,
                 Quantity = order.Quantity,
-                CreatedOn = order.CreatedOn.ToPacificTime().ToShortDateString(),
+                CreatedOn = order.CreatedOn,
                 Status = order.Status,
                 Total = order.Total.ToString("C"),
                 BalanceRemaining = order.BalanceRemaining.ToString("C"),
