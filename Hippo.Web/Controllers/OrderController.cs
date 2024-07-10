@@ -202,12 +202,12 @@ namespace Hippo.Web.Controllers
                 {
                     //order.ExpirationDate = model.ExpirationDate;
                     //order.InstallmentDate = model.InstallmentDate;
-                    if (model.ExpirationDate != null)
+                    if (!string.IsNullOrWhiteSpace( model.ExpirationDate))
                     {
                         order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
                         order.ExpirationDate = order.ExpirationDate.FromPacificTime();
                     }
-                    if (model.InstallmentDate != null)
+                    if (!string.IsNullOrWhiteSpace( model.InstallmentDate ))
                     {
                         order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
                         order.InstallmentDate = order.InstallmentDate.FromPacificTime();
