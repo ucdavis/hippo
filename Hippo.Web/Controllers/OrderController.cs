@@ -134,9 +134,7 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
         {
             //Pass the product id too? 
-            var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
-
-            Account? principalInvestigator = null;
+            var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);            
 
             var orderToReturn = new Order();
 
@@ -145,7 +143,11 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
+
+            var currentAccount = await _dbContext.Accounts.FirstAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
+            Account? principalInvestigator = currentAccount;
 
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
             if (isClusterOrSystemAdmin && !string.IsNullOrWhiteSpace(model.PILookup))
@@ -161,6 +163,16 @@ namespace Hippo.Web.Controllers
             else
             {
                 principalInvestigator = currentAccount;
+                if (!isClusterOrSystemAdmin)
+                {
+                    var isSponsor = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && a.Id == principalInvestigator.Id).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
+                        .Include(a => a.Owner).FirstOrDefaultAsync();
+
+                    if (isSponsor == null || isSponsor.AdminOfGroups == null || !isSponsor.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
+                    {
+                        return BadRequest("User not a Sponsor/PI. Unable to continue");
+                    }
+                }
             }
 
             if (!ModelState.IsValid)
@@ -170,72 +182,12 @@ namespace Hippo.Web.Controllers
 
             if (model.Id == 0)
             {
-                //Ok, this is a new order that we have to create
-                var order = new Order
+                var processingResult = await SaveNewOrder(model, principalInvestigator, cluster, isClusterOrSystemAdmin, currentUser);
+                if (!processingResult.Success)
                 {
-                    Category = model.Category,
-                    Name = model.Name ?? model.ProductName,
-                    ProductName = model.ProductName,
-                    Description = model.Description,
-                    ExternalReference = model.ExternalReference,
-                    Units = model.Units,
-                    UnitPrice = model.UnitPrice,
-                    Installments = model.Installments,
-                    InstallmentType = model.InstallmentType,
-                    LifeCycle = model.LifeCycle,
-                    Quantity = model.Quantity,
-                    Billings = new List<Billing>(),
-
-
-                    SubTotal = model.Quantity * model.UnitPrice,
-                    Total = model.Quantity * model.UnitPrice,
-                    BalanceRemaining = model.Quantity * model.UnitPrice,
-                    Notes = model.Notes,
-                    AdminNotes = model.AdminNotes,
-                    Status = Order.Statuses.Created,
-                    Cluster = cluster,
-                    ClusterId = cluster.Id,
-                    PrincipalInvestigator = principalInvestigator,
-                    CreatedOn = DateTime.UtcNow
-                };
-                if (isClusterOrSystemAdmin)
-                {
-                    //order.ExpirationDate = model.ExpirationDate;
-                    //order.InstallmentDate = model.InstallmentDate;
-                    if (!string.IsNullOrWhiteSpace( model.ExpirationDate))
-                    {
-                        order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        order.ExpirationDate = order.ExpirationDate.FromPacificTime();
-                    }
-                    if (!string.IsNullOrWhiteSpace( model.InstallmentDate ))
-                    {
-                        order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
-                        order.InstallmentDate = order.InstallmentDate.FromPacificTime();
-                    }
-
-
-                    order.Adjustment = model.Adjustment;
-                    order.AdjustmentReason = model.AdjustmentReason;
+                    return BadRequest(processingResult.Message);
                 }
-                // Deal with OrderMeta data
-                foreach (var metaData in model.MetaData)
-                {
-                    order.AddMetaData(metaData.Name, metaData.Value);
-                }
-
-                var updateBilling = await UpdateOrderBillingInfo(order, model);
-                if(!updateBilling.Success)
-                {
-                    return BadRequest(updateBilling.Message);
-                }
-
-                await _dbContext.Orders.AddAsync(order);
-
-                await _historyService.OrderCreated(order, currentUser);
-                await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
-
-                orderToReturn = order;
-
+                orderToReturn = processingResult.Order;
             }
             else
             {
@@ -333,6 +285,8 @@ namespace Hippo.Web.Controllers
 
             return Ok(orderToReturn);
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> UpdateBilling([FromBody] OrderPostModel model)
@@ -611,6 +565,81 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        private async Task<ProcessingResult> SaveNewOrder(OrderPostModel model, Account principalInvestigator, Cluster cluster, bool isClusterOrSystemAdmin, User currentUser)
+        {
+            var rtValue = new ProcessingResult();
+            //Ok, this is a new order that we have to create
+            var order = new Order
+            {
+                Category = model.Category,
+                Name = model.Name ?? model.ProductName,
+                ProductName = model.ProductName,
+                Description = model.Description,
+                ExternalReference = model.ExternalReference,
+                Units = model.Units,
+                UnitPrice = model.UnitPrice,
+                Installments = model.Installments,
+                InstallmentType = model.InstallmentType,
+                LifeCycle = model.LifeCycle,
+                Quantity = model.Quantity,
+                Billings = new List<Billing>(),
+
+
+                SubTotal = model.Quantity * model.UnitPrice,
+                Total = model.Quantity * model.UnitPrice,
+                BalanceRemaining = model.Quantity * model.UnitPrice,
+                Notes = model.Notes,
+                AdminNotes = model.AdminNotes,
+                Status = Order.Statuses.Created,
+                Cluster = cluster,
+                ClusterId = cluster.Id,
+                PrincipalInvestigator = principalInvestigator,
+                CreatedOn = DateTime.UtcNow
+            };
+            if (isClusterOrSystemAdmin)
+            {
+                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                {
+                    order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                    order.ExpirationDate = order.ExpirationDate.FromPacificTime();
+                }
+                if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                {
+                    order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    order.InstallmentDate = order.InstallmentDate.FromPacificTime();
+                }
+
+
+                order.Adjustment = model.Adjustment;
+                order.AdjustmentReason = model.AdjustmentReason;
+            }
+            // Deal with OrderMeta data
+            foreach (var metaData in model.MetaData)
+            {
+                order.AddMetaData(metaData.Name, metaData.Value);
+            }
+
+            //We allow it to be created with this, but must be added and valid when it is submitted
+            if (model.Billings.Any())
+            {
+                var updateBilling = await UpdateOrderBillingInfo(order, model);
+                if (!updateBilling.Success)
+                {
+                    rtValue = updateBilling;
+                    return rtValue;
+                }
+            }
+
+            await _dbContext.Orders.AddAsync(order);
+
+            await _historyService.OrderCreated(order, currentUser);
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
+
+            rtValue.Success = true;
+            rtValue.Order = order;
+            
+            return rtValue;
+        }
 
 
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
@@ -693,6 +722,8 @@ namespace Hippo.Web.Controllers
         {
             public bool Success { get; set; }
             public string? Message { get; set; }
+
+            public Order? Order { get; set; }
         }
     }
 }
