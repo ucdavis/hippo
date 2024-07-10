@@ -22,8 +22,8 @@ namespace Hippo.Web.Models.OrderModels
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
 
-        public string InstallmentDate { get; set; }
-        public string ExpirationDate { get; set; } //This would default to InstallmentDate + LifeCycle Months        
+        public string InstallmentDate { get; set; } = string.Empty;
+        public string ExpirationDate { get; set; } = string.Empty; //This would default to InstallmentDate + LifeCycle Months        
 
         public User? PiUser { get; set; }
 
