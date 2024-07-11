@@ -50,6 +50,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<History>().HasIndex(h => h.Type);
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.Order).WithMany().HasForeignKey(a => a.OrderId).OnDelete(DeleteBehavior.Restrict);
         }
 
         public class Actions
