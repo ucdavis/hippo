@@ -304,11 +304,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   disabled={!readOnly && !isAdmin}
                   type="textarea"
                 />
-              </>
-            </ShowFor>
-
-            {isAdmin && (
-              <>
                 <OrderFormField
                   name="externalReference"
                   label="External Reference"
@@ -316,13 +311,16 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   disabled={!readOnly && !isAdmin}
                   maxLength={150}
                 />
-                <OrderFormField
-                  name="adminNotes"
-                  label="Admin Notes"
-                  readOnly={readOnly}
-                  type="textarea"
-                />
               </>
+            </ShowFor>
+
+            {isAdmin && (
+              <OrderFormField
+                name="adminNotes"
+                label="Admin Notes"
+                readOnly={readOnly}
+                type="textarea"
+              />
             )}
             <ShowFor condition={readOnly || !limitedEditing}>
               <>
