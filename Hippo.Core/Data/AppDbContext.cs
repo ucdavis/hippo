@@ -66,6 +66,8 @@ namespace Hippo.Core.Data
             FinancialDetail.OnModelCreating(builder);
             Product.OnModelCreating(builder);
             OrderMetaData.OnModelCreating(builder);
+            Payment.OnModelCreating(builder);
+            Order.OnModelCreating(builder);
         }
     }
  }
