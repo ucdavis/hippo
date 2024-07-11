@@ -30,6 +30,11 @@ export const Orders = () => {
 
   const columnHelper = createColumnHelper<OrderListModel>();
 
+  const id = columnHelper.accessor("id", {
+    header: "ID",
+    id: "id",
+  });
+
   const status = columnHelper.accessor("status", {
     header: "Status",
     id: "status",
@@ -92,6 +97,7 @@ export const Orders = () => {
 
   let columns = [];
 
+  columns.push(id);
   columns.push(status);
   if (orderType === "adminorders") {
     columns.push(sponsorName);
