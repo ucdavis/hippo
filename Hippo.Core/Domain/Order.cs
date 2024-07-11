@@ -93,6 +93,9 @@ namespace Hippo.Core.Domain
         {
             modelBuilder.Entity<Order>().HasQueryFilter(o => o.Cluster.IsActive);
             modelBuilder.Entity<Order>().HasIndex(o => o.PrincipalInvestigatorId);
+            modelBuilder.Entity<Order>().HasIndex(o => o.ClusterId);
+            modelBuilder.Entity<Order>().HasIndex(o => o.Status);
+            modelBuilder.Entity<Order>().HasIndex(o => o.ExpirationDate);
             modelBuilder.Entity<History>().HasOne(o => o.Order).WithMany().HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OrderMetaData>().HasOne(o => o.Order).WithMany(o => o.MetaData).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);

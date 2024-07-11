@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -43,7 +44,10 @@ namespace Hippo.Core.Domain
                 Completed
             };
         }
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Payment>().HasIndex(p => p.Status);
+            modelBuilder.Entity<Payment>().HasIndex(p => p.OrderId);
+        }
     }
-
-
 }

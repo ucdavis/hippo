@@ -47,6 +47,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<History>().HasIndex(h => h.ActedDate);
             modelBuilder.Entity<History>().HasIndex(h => h.Action);
             modelBuilder.Entity<History>().HasIndex(h => h.ClusterId);
+            modelBuilder.Entity<History>().HasIndex(h => h.OrderId);
             modelBuilder.Entity<History>().HasIndex(h => h.Type);
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
