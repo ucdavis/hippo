@@ -247,7 +247,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<bool>("AdminAction")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ClusterId")
+                    b.Property<int?>("ClusterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Details")
@@ -423,20 +423,26 @@ namespace Hippo.Core.Migrations.Sqlite
 
             modelBuilder.Entity("Hippo.Core.Domain.TempGroup", b =>
                 {
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Group")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Group");
+                    b.HasKey("ClusterId", "Group");
 
                     b.ToTable("TempGroups");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.TempKerberos", b =>
                 {
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Kerberos")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Kerberos");
+                    b.HasKey("ClusterId", "Kerberos");
 
                     b.ToTable("TempKerberos");
                 });
@@ -591,8 +597,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
                         .WithMany()
                         .HasForeignKey("ClusterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ActedBy");
 

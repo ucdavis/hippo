@@ -57,6 +57,8 @@ namespace Hippo.Core.Data
             Domain.GroupMemberAccount.OnModelCreating(builder);
             QueuedEvent.OnModelCreating(builder, this);
             AccessType.OnModelCreating(builder);
+            TempGroup.OnModelCreating(builder);
+            Domain.TempKerberos.OnModelCreating(builder);
         }
     }
- }
+}

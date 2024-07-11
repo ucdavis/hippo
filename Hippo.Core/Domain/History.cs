@@ -29,7 +29,7 @@ namespace Hippo.Core.Domain
 
         public string Details { get; set; } = String.Empty;
 
-        public int ClusterId { get; set; } //When we have a cluster identifier 
+        public int? ClusterId { get; set; } //When we have a cluster identifier 
         public Cluster Cluster { get; set; }
 
         [MaxLength(50)]
