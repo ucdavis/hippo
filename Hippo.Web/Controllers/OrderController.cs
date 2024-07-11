@@ -8,6 +8,7 @@ using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Hippo.Core.Domain.Product;
 
 namespace Hippo.Web.Controllers
 {
@@ -183,6 +184,11 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Invalid");
             }
 
+            if(!InstallmentTypes.Types.Contains(model.InstallmentType))
+            {
+                return BadRequest("Invalid Installment Type Detected.");
+            }
+
             if (model.Id == 0)
             {
                 var processingResult = await SaveNewOrder(model, principalInvestigator, cluster, isClusterOrSystemAdmin, currentUser);
@@ -195,6 +201,10 @@ namespace Hippo.Web.Controllers
             else
             {
                 var processingResult = await UpdateExistingOrder(model, isClusterOrSystemAdmin, currentUser);
+                if (!processingResult.Success)
+                {
+                    return BadRequest(processingResult.Message);
+                }
 
                 orderToReturn = processingResult.Order;
 
@@ -586,8 +596,6 @@ namespace Hippo.Web.Controllers
                     rtValue.Message = "Order may not be edited in the Submitted status.";
                     return rtValue;
 
-
-                    break;
                 case Order.Statuses.Processing:
                     if (!isClusterOrSystemAdmin)
                     {
@@ -683,7 +691,9 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {                   
-                    //existingOrder.ExpirationDate = null;
+                    rtValue.Success = false;
+                    rtValue.Message = "Expiration Date is required for an order in the Active status.";
+                    return rtValue;
                 }
 
                 if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
@@ -693,8 +703,11 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    //existingOrder.InstallmentDate = null;
+                    rtValue.Success = false;
+                    rtValue.Message = "Installment Date is required for an order in the Active status.";
+                    return rtValue;
                 }
+                existingOrder.AdminNotes = model.AdminNotes;
             }
 
 
