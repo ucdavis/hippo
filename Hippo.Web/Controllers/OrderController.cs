@@ -568,23 +568,112 @@ namespace Hippo.Web.Controllers
             var rtValue = new ProcessingResult();
 
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
-            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-            if (isClusterOrSystemAdmin)
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);            
+
+            switch (existingOrder.Status)
             {
-                //TODO: Check the status to limit what can be changed
-                existingOrder.Category = model.Category;
-                existingOrder.ProductName = model.ProductName;
+                case Order.Statuses.Created:
+                    if(existingOrder.PrincipalInvestigator.Owner != currentUser)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only the sponsor/PI can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+
+                    break;
+                case Order.Statuses.Submitted:
+                    rtValue.Success = false;
+                    rtValue.Message = "Order may not be edited in the Submitted status.";
+                    return rtValue;
+
+
+                    break;
+                case Order.Statuses.Processing:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only admins can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+
+                    break;
+
+                case Order.Statuses.Active:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only admins can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+                    //Only allow the dates and maybe the admin notes?
+
+                    break;
+                default:
+                    rtValue.Success = false;
+                    rtValue.Message = "This order is in a status that doesn't support editing";
+                    return rtValue;
+
+            }
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes -- I think this will work?
+
+            if(existingOrder.Status == Order.Statuses.Created || existingOrder.Status == Order.Statuses.Submitted || existingOrder.Status == Order.Statuses.Processing)
+            {
+                if (isClusterOrSystemAdmin)
+                {
+                    existingOrder.Category = model.Category;
+                    existingOrder.ProductName = model.ProductName;
+                    existingOrder.Description = model.Description;
+                    existingOrder.Adjustment = model.Adjustment;
+                    existingOrder.AdjustmentReason = model.AdjustmentReason;
+                    existingOrder.AdminNotes = model.AdminNotes;
+                    existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
+                    existingOrder.Installments = model.Installments;
+                    existingOrder.UnitPrice = model.UnitPrice;
+                    existingOrder.Units = model.Units;
+                    existingOrder.ExternalReference = model.ExternalReference;
+                    existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
+                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    {
+                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                        //existingOrder.ExpirationDate = expirationDate;
+                    }
+                    else
+                    {
+                        //TODO: Can we allow this to be cleared out?
+                        existingOrder.ExpirationDate = null;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                    {
+                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
+                    }
+                    else
+                    {
+                        existingOrder.InstallmentDate = null;
+                    }
+                }
+
                 existingOrder.Description = model.Description;
-                existingOrder.Adjustment = model.Adjustment;
-                existingOrder.AdjustmentReason = model.AdjustmentReason;
-                existingOrder.AdminNotes = model.AdminNotes;
-                existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
-                existingOrder.Installments = model.Installments;
-                existingOrder.UnitPrice = model.UnitPrice;
-                existingOrder.Units = model.Units;
-                existingOrder.ExternalReference = model.ExternalReference;
-                existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
+                existingOrder.Name = model.Name;
+                existingOrder.Notes = model.Notes;
+                existingOrder.Quantity = model.Quantity;
+
+                ProcessMetaData(model, existingOrder);
+
+                var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
+                if (!updateBilling.Success)
+                {
+                    return updateBilling;
+                }
+            }
+
+            if (existingOrder.Status == Order.Statuses.Active)
+            {
+                //We will only allow these to be changed, not cleared out once active (Maybe?...)
                 if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
                 {
                     existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
@@ -593,10 +682,10 @@ namespace Hippo.Web.Controllers
                     //existingOrder.ExpirationDate = expirationDate;
                 }
                 else
-                {
-                    //TODO: Can we allow this to be cleared out?
-                    existingOrder.ExpirationDate = null;
+                {                   
+                    //existingOrder.ExpirationDate = null;
                 }
+
                 if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                 {
                     existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
@@ -604,19 +693,23 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    existingOrder.InstallmentDate = null;
+                    //existingOrder.InstallmentDate = null;
                 }
             }
-            existingOrder.Description = model.Description;
-            existingOrder.Name = model.Name;
-            existingOrder.Notes = model.Notes;
-            if (existingOrder.Status == Order.Statuses.Created)
-            {
-                existingOrder.Quantity = model.Quantity;
-            }
 
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
+            await _historyService.OrderUpdated(existingOrder, currentUser);
+
+            rtValue.Success = true;
+            rtValue.Order = existingOrder;
+
+            return rtValue;
+        }
+
+        private void ProcessMetaData(OrderPostModel model, Order existingOrder)
+        {
             var metaDatasToRemove = new List<OrderMetaData>();
-
             //Deal with OrderMeta data (Test this)
             foreach (var metaData in existingOrder.MetaData)
             {
@@ -640,22 +733,7 @@ namespace Hippo.Web.Controllers
             {
                 existingOrder.AddMetaData(metaData.Name, metaData.Value);
             }
-
-            var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
-            if (!updateBilling.Success)
-            {
-                return updateBilling;
-            }
-
-            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
-            await _historyService.OrderUpdated(existingOrder, currentUser);
-
-            rtValue.Success = true;
-            rtValue.Order = existingOrder;
-
-            return rtValue;
         }
-
 
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
         {
