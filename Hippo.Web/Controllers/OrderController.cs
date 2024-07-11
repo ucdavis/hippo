@@ -8,6 +8,7 @@ using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Hippo.Core.Domain.Product;
 
 namespace Hippo.Web.Controllers
 {
@@ -50,7 +51,7 @@ namespace Hippo.Web.Controllers
                 return Ok(new OrderListModel[0]);
             }
 
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId == currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
             return Ok(model);
         }
@@ -72,7 +73,10 @@ namespace Hippo.Web.Controllers
                 return Ok(new OrderListModel[0]);
             }
 
-            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.PrincipalInvestigatorId != currentUserAccount.Id).Select(OrderListModel.Projection()).ToListAsync(); //Filters out inactive orders
+            //Probably will want to filter out old ones that are completed and the expiration date has passed.
+            var adminStatuses = new List<string> { Order.Statuses.Submitted, Order.Statuses.Processing, Order.Statuses.Active, Order.Statuses.Completed };
+
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && adminStatuses.Contains(a.Status)).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
             return Ok(model);
         }
@@ -134,9 +138,7 @@ namespace Hippo.Web.Controllers
         public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
         {
             //Pass the product id too? 
-            var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
-
-            Account? principalInvestigator = null;
+            var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);            
 
             var orderToReturn = new Order();
 
@@ -145,7 +147,11 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
+
+            var currentAccount = await _dbContext.Accounts.FirstAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+
+            Account? principalInvestigator = currentAccount;
 
             //If this is created by an admin, we will use the passed PrincipalInvestigatorId, otherwise it is who created it.
             if (isClusterOrSystemAdmin && !string.IsNullOrWhiteSpace(model.PILookup))
@@ -161,6 +167,16 @@ namespace Hippo.Web.Controllers
             else
             {
                 principalInvestigator = currentAccount;
+                if (!isClusterOrSystemAdmin)
+                {
+                    var isSponsor = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && a.Id == principalInvestigator.Id).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
+                        .Include(a => a.Owner).FirstOrDefaultAsync();
+
+                    if (isSponsor == null || isSponsor.AdminOfGroups == null || !isSponsor.AdminOfGroups.Where(a => a.Cluster.Name == Cluster).Any())
+                    {
+                        return BadRequest("User not a Sponsor/PI. Unable to continue");
+                    }
+                }
             }
 
             if (!ModelState.IsValid)
@@ -168,157 +184,29 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Invalid");
             }
 
+            if(!InstallmentTypes.Types.Contains(model.InstallmentType))
+            {
+                return BadRequest("Invalid Installment Type Detected.");
+            }
+
             if (model.Id == 0)
             {
-                //Ok, this is a new order that we have to create
-                var order = new Order
+                var processingResult = await SaveNewOrder(model, principalInvestigator, cluster, isClusterOrSystemAdmin, currentUser);
+                if (!processingResult.Success)
                 {
-                    Category = model.Category,
-                    Name = model.Name ?? model.ProductName,
-                    ProductName = model.ProductName,
-                    Description = model.Description,
-                    ExternalReference = model.ExternalReference,
-                    Units = model.Units,
-                    UnitPrice = model.UnitPrice,
-                    Installments = model.Installments,
-                    InstallmentType = model.InstallmentType,
-                    LifeCycle = model.LifeCycle,
-                    Quantity = model.Quantity,
-                    Billings = new List<Billing>(),
-
-
-                    SubTotal = model.Quantity * model.UnitPrice,
-                    Total = model.Quantity * model.UnitPrice,
-                    BalanceRemaining = model.Quantity * model.UnitPrice,
-                    Notes = model.Notes,
-                    AdminNotes = model.AdminNotes,
-                    Status = Order.Statuses.Created,
-                    Cluster = cluster,
-                    ClusterId = cluster.Id,
-                    PrincipalInvestigator = principalInvestigator,
-                    CreatedOn = DateTime.UtcNow
-                };
-                if (isClusterOrSystemAdmin)
-                {
-                    //order.ExpirationDate = model.ExpirationDate;
-                    //order.InstallmentDate = model.InstallmentDate;
-                    if (model.ExpirationDate != null)
-                    {
-                        order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        order.ExpirationDate = order.ExpirationDate.FromPacificTime();
-                    }
-                    if (model.InstallmentDate != null)
-                    {
-                        order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
-                        order.InstallmentDate = order.InstallmentDate.FromPacificTime();
-                    }
-
-
-                    order.Adjustment = model.Adjustment;
-                    order.AdjustmentReason = model.AdjustmentReason;
+                    return BadRequest(processingResult.Message);
                 }
-                // Deal with OrderMeta data
-                foreach (var metaData in model.MetaData)
-                {
-                    order.AddMetaData(metaData.Name, metaData.Value);
-                }
-
-                var updateBilling = await UpdateOrderBillingInfo(order, model);
-
-                await _dbContext.Orders.AddAsync(order);
-
-                await _historyService.OrderCreated(order, currentUser);
-                await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
-
-                orderToReturn = order;
-
+                orderToReturn = processingResult.Order;
             }
             else
             {
-                //Updating an existing order without changing the status.
-                var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes
-                if (isClusterOrSystemAdmin)
+                var processingResult = await UpdateExistingOrder(model, isClusterOrSystemAdmin, currentUser);
+                if (!processingResult.Success)
                 {
-                    //TODO: Check the status to limit what can be changed
-                    existingOrder.Category = model.Category;
-                    existingOrder.ProductName = model.ProductName;
-                    existingOrder.Description = model.Description;
-                    existingOrder.Adjustment = model.Adjustment;
-                    existingOrder.AdjustmentReason = model.AdjustmentReason;
-                    existingOrder.AdminNotes = model.AdminNotes;
-                    existingOrder.InstallmentType = model.InstallmentType == Product.InstallmentTypes.Yearly ? Product.InstallmentTypes.Yearly : Product.InstallmentTypes.Monthly;
-                    existingOrder.Installments = model.Installments;
-                    existingOrder.UnitPrice = model.UnitPrice;
-                    existingOrder.Units = model.Units;
-                    existingOrder.ExternalReference = model.ExternalReference;
-                    existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
-                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
-                    {
-                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                        //existingOrder.ExpirationDate = expirationDate;
-                    }
-                    else
-                    {
-                        //TODO: Can we allow this to be cleared out?
-                        existingOrder.ExpirationDate = null;
-                    }
-                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
-                    {
-                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
-                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
-                    }
-                    else
-                    {
-                        existingOrder.InstallmentDate = null;
-                    }
-                }
-                existingOrder.Description = model.Description;
-                existingOrder.Name = model.Name;
-                existingOrder.Notes = model.Notes;
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
-                    existingOrder.Quantity = model.Quantity;
+                    return BadRequest(processingResult.Message);
                 }
 
-                var metaDatasToRemove = new List<OrderMetaData>();
-
-                //Deal with OrderMeta data (Test this)
-                foreach (var metaData in existingOrder.MetaData)
-                {
-                    if (model.MetaData.Any(a => a.Id == metaData.Id))
-                    {
-                        //Possibly update values
-                        metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
-                        metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
-                    }
-                    else
-                    {
-                        metaDatasToRemove.Add(metaData);
-                    }
-                }
-                foreach (var metaData in metaDatasToRemove)
-                {
-                    existingOrder.MetaData.Remove(metaData);
-                }
-
-                foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
-                {
-                    existingOrder.AddMetaData(metaData.Name, metaData.Value);
-                }
-
-                var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
-                if (!updateBilling.Success)
-                {
-                    return BadRequest(updateBilling.Message);
-                }
-
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
-                await _historyService.OrderUpdated(existingOrder, currentUser);
-
-                orderToReturn = existingOrder;
+                orderToReturn = processingResult.Order;
 
             }
 
@@ -329,6 +217,8 @@ namespace Hippo.Web.Controllers
 
             return Ok(orderToReturn);
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> UpdateBilling([FromBody] OrderPostModel model)
@@ -389,24 +279,32 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("You do not have permission to change the status of this order.");
             }
-            if(isPi && isClusterOrSystemAdmin)
+
+            switch (existingOrder.Status)
             {
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
+                case Order.Statuses.Created:
+                    if (!isPi)
+                    {
+                        return BadRequest("You cannot change the status of an order in the created status. The sponsor/PI has to do this.");
+                    }
+                    if (expectedStatus != Order.Statuses.Submitted)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
                     if (existingOrder.Billings.Count == 0)
                     {
                         return BadRequest("You must have billing information to submit an order.");
                     }
-                    if(expectedStatus != Order.Statuses.Submitted)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
                     existingOrder.Status = Order.Statuses.Submitted;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Submitted)
-                {
+
+                    break;
+                case Order.Statuses.Submitted:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
                     if (expectedStatus != Order.Statuses.Processing)
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
@@ -414,74 +312,17 @@ namespace Hippo.Web.Controllers
                     existingOrder.Status = Order.Statuses.Processing;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Processing)
-                {
+
+                    break;
+                case Order.Statuses.Processing:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
                     if (expectedStatus != Order.Statuses.Active)
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
-
-                    if( existingOrder.InstallmentDate == null)
-                    {
-                        existingOrder.InstallmentDate = DateTime.UtcNow;
-                    }
-                    if( existingOrder.ExpirationDate == null)
-                    {
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
-                    }
-
-                    existingOrder.Status = Order.Statuses.Active;
-                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
-                }
-                else
-                {
-                    return BadRequest("You cannot change the status of an order in the current status.");
-                }
-            }
-            else if (isPi) 
-            {
-                if (existingOrder.Status != Order.Statuses.Created)
-                {
-                    return BadRequest("You do not have permission to change the status of this order.");
-                }
-                if (existingOrder.Billings.Count == 0)
-                {
-                    return BadRequest("You must have billing information to submit an order.");
-                }
-                if(expectedStatus != Order.Statuses.Submitted)
-                {
-                    return BadRequest("Unexpected Status found. May have already been updated.");
-                }
-                existingOrder.Status = Order.Statuses.Submitted;
-                await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
-            }
-            else if(isClusterOrSystemAdmin)
-            {
-                if (existingOrder.Status == Order.Statuses.Created)
-                {
-                    return BadRequest("You cannot change the status of an order in the created status. The sponsor has to do this.");
-                }
-                if (existingOrder.Status == Order.Statuses.Submitted)
-                {
-                    if(expectedStatus != Order.Statuses.Processing)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
-                    existingOrder.Status = Order.Statuses.Processing;
-                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
-                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
-                }
-                else if (existingOrder.Status == Order.Statuses.Processing)
-                {
-                    if(expectedStatus != Order.Statuses.Active)
-                    {
-                        return BadRequest("Unexpected Status found. May have already been updated.");
-                    }
-
-                    //Duplicate code. Fix it.
                     if (existingOrder.InstallmentDate == null)
                     {
                         existingOrder.InstallmentDate = DateTime.UtcNow;
@@ -490,19 +331,16 @@ namespace Hippo.Web.Controllers
                     {
                         existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
                     }
+
                     existingOrder.Status = Order.Statuses.Active;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
-                }
-                else
-                {
+
+                    break;
+                default:
                     return BadRequest("You cannot change the status of an order in the current status.");
-                }
             }
-            else
-            {
-                return BadRequest("Unexpected Error. Please contact support.");
-            }
+
 
             await _dbContext.SaveChangesAsync();
 
@@ -560,18 +398,21 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            if(!isClusterOrSystemAdmin)
+            if (!isClusterOrSystemAdmin)
             {
                 return BadRequest("You do not have permission to reject this order.");
             }
             var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).FirstOrDefaultAsync(a => a.Id == id);
-            if (existingOrder == null) {
+            if (existingOrder == null)
+            {
                 return NotFound();
             }
-            if(existingOrder.Status != Order.Statuses.Submitted && existingOrder.Status != Order.Statuses.Processing ) {
+            if (existingOrder.Status != Order.Statuses.Submitted && existingOrder.Status != Order.Statuses.Processing)
+            {
                 return BadRequest("You cannot reject an order that is not in the Submitted or Processing status.");
             }
-            if(string.IsNullOrWhiteSpace(reason)) {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
                 return BadRequest("You must provide a reason for rejecting the order.");
             }
 
@@ -656,7 +497,256 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        private async Task<ProcessingResult> SaveNewOrder(OrderPostModel model, Account principalInvestigator, Cluster cluster, bool isClusterOrSystemAdmin, User currentUser)
+        {
+            var rtValue = new ProcessingResult();
+            //Ok, this is a new order that we have to create
+            var order = new Order
+            {
+                Category = model.Category,
+                Name = model.Name ?? model.ProductName,
+                ProductName = model.ProductName,
+                Description = model.Description,
+                ExternalReference = model.ExternalReference,
+                Units = model.Units,
+                UnitPrice = model.UnitPrice,
+                Installments = model.Installments,
+                InstallmentType = model.InstallmentType,
+                LifeCycle = model.LifeCycle,
+                Quantity = model.Quantity,
+                Billings = new List<Billing>(),
 
+
+                SubTotal = model.Quantity * model.UnitPrice,
+                Total = model.Quantity * model.UnitPrice,
+                BalanceRemaining = model.Quantity * model.UnitPrice,
+                Notes = model.Notes,
+                AdminNotes = model.AdminNotes,
+                Status = Order.Statuses.Created,
+                Cluster = cluster,
+                ClusterId = cluster.Id,
+                PrincipalInvestigator = principalInvestigator,
+                CreatedOn = DateTime.UtcNow
+            };
+            if (isClusterOrSystemAdmin)
+            {
+                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                {
+                    order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                    order.ExpirationDate = order.ExpirationDate.FromPacificTime();
+                }
+                if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                {
+                    order.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    order.InstallmentDate = order.InstallmentDate.FromPacificTime();
+                }
+
+
+                order.Adjustment = model.Adjustment;
+                order.AdjustmentReason = model.AdjustmentReason;
+            }
+            // Deal with OrderMeta data
+            foreach (var metaData in model.MetaData)
+            {
+                order.AddMetaData(metaData.Name, metaData.Value);
+            }
+
+            //We allow it to be created with this, but must be added and valid when it is submitted
+            if (model.Billings.Any())
+            {
+                var updateBilling = await UpdateOrderBillingInfo(order, model);
+                if (!updateBilling.Success)
+                {
+                    rtValue = updateBilling;
+                    return rtValue;
+                }
+            }
+
+            await _dbContext.Orders.AddAsync(order);
+
+            await _historyService.OrderCreated(order, currentUser);
+            await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
+
+            rtValue.Success = true;
+            rtValue.Order = order;
+            
+            return rtValue;
+        }
+
+        private async Task<ProcessingResult> UpdateExistingOrder(OrderPostModel model, bool isClusterOrSystemAdmin, User currentUser)
+        {
+            var rtValue = new ProcessingResult();
+
+            //Updating an existing order without changing the status.
+            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);            
+
+            switch (existingOrder.Status)
+            {
+                case Order.Statuses.Created:
+                    if(existingOrder.PrincipalInvestigator.Owner != currentUser)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only the sponsor/PI can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+
+                    break;
+                case Order.Statuses.Submitted:
+                    rtValue.Success = false;
+                    rtValue.Message = "Order may not be edited in the Submitted status.";
+                    return rtValue;
+
+                case Order.Statuses.Processing:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only admins can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+
+                    break;
+
+                case Order.Statuses.Active:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = $"Only admins can edit an order in the {existingOrder.Status} status.";
+                        return rtValue;
+                    }
+                    //Only allow the dates and maybe the admin notes?
+
+                    break;
+                default:
+                    rtValue.Success = false;
+                    rtValue.Message = "This order is in a status that doesn't support editing";
+                    return rtValue;
+
+            }
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //Before Changes -- I think this will work?
+
+            if(existingOrder.Status == Order.Statuses.Created || existingOrder.Status == Order.Statuses.Submitted || existingOrder.Status == Order.Statuses.Processing)
+            {
+                if (isClusterOrSystemAdmin)
+                {
+                    existingOrder.Category = model.Category;
+                    existingOrder.ProductName = model.ProductName;
+                    existingOrder.Description = model.Description;
+                    existingOrder.Adjustment = model.Adjustment;
+                    existingOrder.AdjustmentReason = model.AdjustmentReason;
+                    existingOrder.AdminNotes = model.AdminNotes;
+                    existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
+                    existingOrder.Installments = model.Installments;
+                    existingOrder.UnitPrice = model.UnitPrice;
+                    existingOrder.Units = model.Units;
+                    existingOrder.ExternalReference = model.ExternalReference;
+                    existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
+                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    {
+                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                        //existingOrder.ExpirationDate = expirationDate;
+                    }
+                    else
+                    {
+                        //TODO: Can we allow this to be cleared out?
+                        existingOrder.ExpirationDate = null;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                    {
+                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
+                    }
+                    else
+                    {
+                        existingOrder.InstallmentDate = null;
+                    }
+                }
+
+                existingOrder.Description = model.Description;
+                existingOrder.Name = model.Name;
+                existingOrder.Notes = model.Notes;
+                existingOrder.Quantity = model.Quantity;
+
+                ProcessMetaData(model, existingOrder);
+
+                var updateBilling = await UpdateOrderBillingInfo(existingOrder, model);
+                if (!updateBilling.Success)
+                {
+                    return updateBilling;
+                }
+            }
+
+            if (existingOrder.Status == Order.Statuses.Active)
+            {
+                //We will only allow these to be changed, not cleared out once active (Maybe?...)
+                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                {
+                    existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                    existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                    //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                    //existingOrder.ExpirationDate = expirationDate;
+                }
+                else
+                {                   
+                    rtValue.Success = false;
+                    rtValue.Message = "Expiration Date is required for an order in the Active status.";
+                    return rtValue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
+                {
+                    existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                    existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
+                }
+                else
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Installment Date is required for an order in the Active status.";
+                    return rtValue;
+                }
+                existingOrder.AdminNotes = model.AdminNotes;
+            }
+
+
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated); //After Changes
+            await _historyService.OrderUpdated(existingOrder, currentUser);
+
+            rtValue.Success = true;
+            rtValue.Order = existingOrder;
+
+            return rtValue;
+        }
+
+        private void ProcessMetaData(OrderPostModel model, Order existingOrder)
+        {
+            var metaDatasToRemove = new List<OrderMetaData>();
+            //Deal with OrderMeta data (Test this)
+            foreach (var metaData in existingOrder.MetaData)
+            {
+                if (model.MetaData.Any(a => a.Id == metaData.Id))
+                {
+                    //Possibly update values
+                    metaData.Value = model.MetaData.First(a => a.Id == metaData.Id).Value;
+                    metaData.Name = model.MetaData.First(a => a.Id == metaData.Id).Name;
+                }
+                else
+                {
+                    metaDatasToRemove.Add(metaData);
+                }
+            }
+            foreach (var metaData in metaDatasToRemove)
+            {
+                existingOrder.MetaData.Remove(metaData);
+            }
+
+            foreach (var metaData in model.MetaData.Where(a => a.Id == 0)) //New Values -- add them
+            {
+                existingOrder.AddMetaData(metaData.Name, metaData.Value);
+            }
+        }
 
         private async Task<ProcessingResult> UpdateOrderBillingInfo(Order order, OrderPostModel model)
         {
@@ -738,6 +828,8 @@ namespace Hippo.Web.Controllers
         {
             public bool Success { get; set; }
             public string? Message { get; set; }
+
+            public Order? Order { get; set; }
         }
     }
 }

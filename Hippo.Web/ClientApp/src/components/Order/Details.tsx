@@ -29,7 +29,7 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
-  const adminEditableStatuses = ["Submitted", "Processing", "Active"];
+  const adminEditableStatuses = ["Processing", "Active"];
   const sponsorEditableStatuses = ["Created"];
 
   useEffect(() => {
