@@ -196,12 +196,11 @@ namespace Hippo.Core.Services
             await historyService.AddHistory(history);
         }
 
-        public static async Task PuppetDataSynced(this IHistoryService historyService, int clusterId)
+        public static async Task PuppetDataSynced(this IHistoryService historyService)
         {
             var history = new History
             {
                 Action = Actions.PuppetDataSynced,
-                ClusterId = clusterId,
                 ActedDate = DateTime.UtcNow,
             };
             await historyService.AddHistory(history);

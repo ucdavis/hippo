@@ -5,7 +5,12 @@ namespace Hippo.Core.Domain
 {
     public class TempKerberos
     {
-        [Key]
+        public int ClusterId { get; set; }
         public string Kerberos { get; set; } = "";
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TempKerberos>().HasKey(a => new { a.ClusterId, a.Kerberos });
+        }
     }
 }
