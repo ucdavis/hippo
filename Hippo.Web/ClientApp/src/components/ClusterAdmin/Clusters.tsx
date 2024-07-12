@@ -22,6 +22,7 @@ const defaultCluster: ClusterModel = {
   domain: "",
   email: "",
   accessTypes: AccessTypes,
+  allowOrders: false,
 };
 
 export const Clusters = () => {

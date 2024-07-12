@@ -34,6 +34,8 @@ public class ClusterModel
     [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
     public List<string> AccessTypes { get; set; } = new();
 
+    public bool AllowOrders { get; set; } = false;
+
     public ClusterModel()
     {
 
@@ -69,6 +71,7 @@ public class ClusterModel
                 IsActive = c.IsActive,
                 Domain = c.Domain,
                 Email = c.Email,
+                AllowOrders = c.FinancialDetail != null,
                 AccessTypes = c.AccessTypes.Select(at => at.Name).ToList()
             
             };

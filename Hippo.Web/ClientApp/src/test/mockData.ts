@@ -115,6 +115,7 @@ const fakeCluster: ClusterModel = {
   domain: "repo/yaml/path.yml",
   email: "an-email@address.com",
   accessTypes: ["OpenOnDemand", "SshKey"],
+  allowOrders: false,
 };
 
 export const fakeAppContext: AppContextShape = {
