@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
 {
@@ -42,6 +43,14 @@ namespace Hippo.Core.Domain
                 Cancelled,
                 Completed
             };
+        }
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Payment>().HasIndex(p => p.OrderId);
+            modelBuilder.Entity<Payment>().HasIndex(p => p.Status);
+            //DOn't think I need this one
+            //modelBuilder.Entity<Payment>().HasOne(p => p.CreatedBy).WithMany().HasForeignKey(a => a.CreatedById).OnDelete(DeleteBehavior.Restrict);
         }
     }
 
