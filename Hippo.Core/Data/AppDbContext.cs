@@ -67,6 +67,7 @@ namespace Hippo.Core.Data
             Product.OnModelCreating(builder);
             OrderMetaData.OnModelCreating(builder);
             Order.OnModelCreating(builder);
+            Payment.OnModelCreating(builder);
             TempGroup.OnModelCreating(builder);
             Domain.TempKerberos.OnModelCreating(builder);
         }
