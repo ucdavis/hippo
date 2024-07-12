@@ -437,7 +437,13 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("ClusterId");
 
+                    b.HasIndex("ExpirationDate");
+
+                    b.HasIndex("NextNotificationDate");
+
                     b.HasIndex("PrincipalInvestigatorId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Orders");
                 });
@@ -505,6 +511,8 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Payments");
                 });
