@@ -111,6 +111,7 @@ export interface ClusterModel {
   email: string;
   accessTypes: AccessType[];
   sshKey?: string;
+  allowOrders: boolean;
 }
 
 export type ModelState = Record<string, string>;
