@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,6 +67,8 @@ namespace Hippo.Core.Data
             Product.OnModelCreating(builder);
             OrderMetaData.OnModelCreating(builder);
             Order.OnModelCreating(builder);
+            TempGroup.OnModelCreating(builder);
+            Domain.TempKerberos.OnModelCreating(builder);
         }
     }
- }
+}
