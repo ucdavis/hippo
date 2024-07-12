@@ -36,6 +36,18 @@ export const Details = () => {
     setIsClusterAdmin(isClusterAdminForCluster());
   }, [isClusterAdmin, isClusterAdminForCluster]);
 
+  const calculateBalanceRemaining = (data: any) => {
+    const balanceRemaining = parseFloat(data.balanceRemaining);
+    setBalanceRemaining(balanceRemaining);
+    const balancePending = data?.payments
+      .filter(
+        (payment) =>
+          payment.status !== "Completed" && payment.status !== "Cancelled",
+      )
+      .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
+    setBalancePending(balancePending);
+  };
+
   useEffect(() => {
     const fetchOrder = async () => {
       const response = await authenticatedFetch(
@@ -46,15 +58,7 @@ export const Details = () => {
         const data = await response.json();
         console.log(data);
         setOrder(data);
-        const balanceRemaining = parseFloat(data.balanceRemaining);
-        setBalanceRemaining(balanceRemaining);
-        const balancePending = data?.payments
-          .filter(
-            (payment) =>
-              payment.status !== "Completed" && payment.status !== "Cancelled",
-          )
-          .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-        setBalancePending(balancePending);
+        calculateBalanceRemaining(data);
       } else {
         alert("Error fetching order");
       }
@@ -288,6 +292,7 @@ export const Details = () => {
         createdOn: "",
         entryAmount: "",
       });
+      calculateBalanceRemaining(data);
     }
   }, [cluster, orderId, makePaymentConfirmation, setNotification]);
 
