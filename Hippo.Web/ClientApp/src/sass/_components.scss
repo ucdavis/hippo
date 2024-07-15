@@ -274,3 +274,11 @@ hr {
 .dotted-underline {
   border-bottom: 1px dotted $primary-color;
 }
+.card-danger {
+    border: 5px solid $red;
+    text-align: center;  
+}
+.card-center{
+    text-align: center;  
+    border: 5px solid;
+}

@@ -114,9 +114,6 @@ export const FinancialDetail = () => {
   return (
     <div>
       <h1>Financial Detail</h1>
-      {!financialDetail.isSlothValid && (
-        <h2 className="text-danger">The Sloth setting are not valid!</h2>
-      )}
       <form onSubmit={handleSubmit}>
         <div>
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
@@ -193,10 +190,31 @@ export const FinancialDetail = () => {
               <i className="fas fa-search"></i>
             </button>
           </div>
+          {!financialDetail.isSlothValid && (
+            <div>
+              <br />
+              <Card className="card-danger">
+                <CardTitle>
+                  <h2>The Sloth settings are not valid!</h2>
+                </CardTitle>
+                <CardBody>
+                  <div>
+                    The Sloth settings are not valid. This could be the API
+                    Source Name is wrong, or it doesn't match the Financial API
+                    Key's team's settings.
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+          )}
           {chartStringValidation && (
             <div>
               <br />
-              <Card>
+              <Card
+                className={
+                  chartStringValidation.isValid ? "card-center" : "card-danger"
+                }
+              >
                 <CardTitle>
                   <h3>Chart String Details:</h3>
                 </CardTitle>
