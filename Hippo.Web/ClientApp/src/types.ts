@@ -224,6 +224,7 @@ export interface FinancialDetailModel {
   chartString: string;
   autoApprove: boolean;
   maskedApiKey: string;
+  isSlothValid: boolean;
 }
 export interface ChartStringValidationModel {
   isValid: boolean;

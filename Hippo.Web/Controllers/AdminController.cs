@@ -25,8 +25,9 @@ public class AdminController : SuperController
     private INotificationService _notificationService;
     private ISecretsService _secretsService;
     private IAggieEnterpriseService _aggieEnterpriseService;
+    private ISlothService _slothService;
 
-    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService)
+    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService, ISlothService slothService)
     {
         _dbContext = dbContext;
         _userService = userService;
@@ -36,6 +37,7 @@ public class AdminController : SuperController
         _notificationService = notificationService;
         _secretsService = secretsService;
         _aggieEnterpriseService = aggieEnterpriseService;
+        _slothService = slothService;
     }
 
     [HttpGet]
@@ -169,8 +171,12 @@ public class AdminController : SuperController
                 }
 
                 clusterModel.MaskedApiKey = sb.ToString();
+
+                clusterModel.IsSlothValid = await _slothService.TestApiKey(cluster.Id);
             }
         }
+
+       
         
         return Ok(clusterModel);
     }

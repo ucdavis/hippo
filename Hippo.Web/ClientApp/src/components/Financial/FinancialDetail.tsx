@@ -114,6 +114,9 @@ export const FinancialDetail = () => {
   return (
     <div>
       <h1>Financial Detail</h1>
+      {!financialDetail.isSlothValid && (
+        <h2 className="text-danger">The Sloth setting are not valid!</h2>
+      )}
       <form onSubmit={handleSubmit}>
         <div>
           <div>Financial API Key: {financialDetail.maskedApiKey}</div>
