@@ -41,6 +41,7 @@ export const ClusterHome = () => {
 
     if (!validCluster) {
       navigate("/clusters");
+      return;
     }
 
     const accountInCluster = accounts.find((a) => a.cluster === cluster);
