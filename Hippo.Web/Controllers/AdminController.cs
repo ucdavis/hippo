@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text;
 using static Hippo.Core.Domain.Account;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers;
 
@@ -197,7 +198,7 @@ public class AdminController : SuperController
 
             };
         }
-        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString);
+        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString, Directions.Credit);
         if (!validateChartString.IsValid)
         {
             return BadRequest($"Invalid Chart String Errors: {validateChartString.Message}");
@@ -208,7 +209,7 @@ public class AdminController : SuperController
         }
         //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
-        existingFinancialDetail.ChartString = model.ChartString;
+        existingFinancialDetail.ChartString = validateChartString.ChartString;
         existingFinancialDetail.AutoApprove = model.AutoApprove;
 
         if (existingFinancialDetail.Id == 0)

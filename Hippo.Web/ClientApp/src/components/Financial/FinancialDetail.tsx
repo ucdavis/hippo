@@ -94,7 +94,7 @@ export const FinancialDetail = () => {
 
   const validateChartString = async (chartString: string) => {
     let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
+      `/api/order/validateChartString/${chartString}/Credit`,
       {
         method: "GET",
       },
@@ -104,6 +104,12 @@ export const FinancialDetail = () => {
       const result = await response.json();
       console.log(result);
       setChartStringValidation(result);
+      if (result.chartString) {
+        setFinancialDetail((prevFinancialDetail) => ({
+          ...prevFinancialDetail,
+          chartString: result.chartString,
+        }));
+      }
     }
   };
 

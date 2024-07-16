@@ -27,7 +27,7 @@ const ChartStringValidation: React.FC<ChartStringValidationProps> = ({
       setStatus("loading");
       try {
         let response = await authenticatedFetch(
-          `/api/order/validateChartString/${chartString}`,
+          `/api/order/validateChartString/${chartString}/Debit`,
           {
             method: "GET",
           },
@@ -70,6 +70,15 @@ const ChartStringValidation: React.FC<ChartStringValidationProps> = ({
         <span style={{ color: "red" }}>
           <i className="fas fa-times"></i> {chartStringValidation.message}
         </span>
+      )}
+      {chartStringValidation.warning && (
+        <>
+          <br />
+          <span style={{ color: "orange" }}>
+            <i className="fas fa-exclamation-triangle"></i>{" "}
+            {chartStringValidation.warning}
+          </span>
+        </>
       )}
     </span>
   );
