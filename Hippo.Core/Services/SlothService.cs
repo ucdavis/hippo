@@ -89,7 +89,7 @@ namespace Hippo.Core.Services
             }
         }
 
-        async Task<bool> ISlothService.ProcessPayments()
+        public async Task<bool> ProcessPayments()
         {
             //Ok, so I want to loop through all the payments that are created and send them to sloth
             //I need to group them by clusterId because each cluster will have a team and different API key and source
@@ -98,59 +98,69 @@ namespace Hippo.Core.Services
             // if a txn fails continue to the next one, but log it
             // if a txn is successful, update the status in the db, and set the kfs tracking number as well as the id from sloth into the payment.FinancialSystemId
             // if all txns are successful, return true, else return false
-
-
-            var wereThereErrors = false;
-
-            var paymentGroups = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
-            foreach (var group in paymentGroups)
+            try
             {
-                var clusterId = group.Key;
-                var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
-                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
 
-                using var client = _clientFactory.CreateClient();
-                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}");
-                client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
-                foreach (var payment in group)
+                var wereThereErrors = false;
+                var allPayments = await _dbContext.Payments.Include(a => a.Order).ThenInclude(a => a.Cluster).Where(a => a.Status == Payment.Statuses.Created).ToListAsync();
+
+                var paymentGroups = allPayments.GroupBy(a => a.Order.ClusterId);
+
+                //var paymentGroups = await _dbContext.Payments.Include(a => a.Order).ThenInclude(a => a.Cluster).Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
+                foreach (var group in paymentGroups)
                 {
-                    var order = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
+                    var clusterId = group.Key;
+                    var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
+                    var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
 
-                    var slothTransaction = CreateTransaction(financialDetail, order, payment);
-                    Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?
-
-                    var response = await client.PostAsync("Transactions", new StringContent(JsonSerializer.Serialize(slothTransaction, _serializerOptions), Encoding.UTF8, "application/json"));
-                    if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
+                    using var client = _clientFactory.CreateClient();
+                    client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}");
+                    client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
+                    foreach (var payment in group)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
-                        Log.Information("Sloth Success Response", content);
-                        var slothResponse = JsonSerializer.Deserialize<SlothResponseModel>(content, _serializerOptions);
-                        payment.FinancialSystemId = slothResponse.Id;
-                        payment.TrackingNumber = slothResponse.KfsTrackingNumber;
-                        payment.Status = Payment.Statuses.Processing;
+                        var order = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
 
-                        //Do this when the payment has been completed?
-                        //order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Should I update the order here?
+                        var slothTransaction = CreateTransaction(financialDetail, order, payment);
+                        Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?
 
-                        await _historyService.OrderUpdated(order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
-                        
-                        await _dbContext.SaveChangesAsync();
+                        var response = await client.PostAsync("Transactions", new StringContent(JsonSerializer.Serialize(slothTransaction, _serializerOptions), Encoding.UTF8, "application/json"));
+                        if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            Log.Information("Sloth Success Response", content);
+                            var slothResponse = JsonSerializer.Deserialize<SlothResponseModel>(content, _serializerOptions);
+                            payment.FinancialSystemId = slothResponse.Id;
+                            payment.TrackingNumber = slothResponse.KfsTrackingNumber;
+                            payment.Status = Payment.Statuses.Processing;
+
+                            //Do this when the payment has been completed?
+                            //order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Should I update the order here?
+
+                            await _historyService.OrderUpdated(order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
+
+                            await _dbContext.SaveChangesAsync();
 
 
+                        }
+                        else
+                        {
+                            Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                            Log.Error($"Error: {response.ReasonPhrase}");
+                            wereThereErrors = true;
+                        }
                     }
-                    else
-                    {
-                        Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
-                        Log.Error($"Error: {response.ReasonPhrase}");
-                        wereThereErrors = true;
-                    }
+
                 }
 
+
+
+                return !wereThereErrors;
             }
-
-            
-
-            return !wereThereErrors;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error processing payments");
+                return false;
+            }
         }
 
         private TransactionViewModel CreateTransaction(FinancialDetail financialDetail, Order order, Payment payment)
