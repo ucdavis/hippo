@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Hippo.Core.Domain;
 using Serilog;
+using Octokit;
 
 
 namespace Hippo.Core.Services
@@ -97,37 +98,74 @@ namespace Hippo.Core.Services
             // if all txns are successful, return true, else return false
 
 
-            var paymentGroups = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
+            var paymentGroups = await _dbContext.Payments.Include(a => a.Order.Cluster).Include(a => a.Order.Billings).Include(a => a.Order.MetaData).Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
             foreach (var group in paymentGroups)
             {
                 var clusterId = group.Key;
                 var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
                 var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
-                //using var client = _clientFactory.CreateClient();
-                //client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
-                //client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
-                //var paymentModels = group.Select(a => new PaymentModel
-                //{
-                //    Amount = a.Amount,
-                //    Details = a.Details,
-                //    TrackingNumber = a.TrackingNumber,
-                //    FinancialSystemId = a.FinancialSystemId,
-                //    OrderId = a.OrderId
-                //}).ToList();
-                //var json = JsonSerializer.Serialize(paymentModels, _serializerOptions);
-                //var content = new StringContent(json, Encoding.UTF8, "application/json");
-                //var response = await client.PostAsync("", content);
-                //if (response.IsSuccessStatusCode)
-                //{
-                //    var responseContent = await response.Content.ReadAsStringAsync();
-                //    var slothResponse = JsonSerializer.Deserialize<List<SlothResponseModel>>(responseContent, _serializerOptions);
-                //    foreach (var payment in group)
-                //    {
-                //        var slothPayment = slothResponse.Single(a => a.Id == payment.FinancialSystemId);
-                //        payment.Status = slothPayment.Status;
-                //    }
-                //    await _dbContext.SaveChangesAsync();
-                //}
+
+                using var client = _clientFactory.CreateClient();
+                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
+                client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
+                foreach(var payment in group)
+                {
+                    var slothTransaction = new TransactionViewModel
+                    {
+                        AutoApprove = financialDetail.AutoApprove,
+                        MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
+                        MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{payment.Order.Cluster.Name}/order/details/{payment.OrderId}",
+                        Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                        Source = financialDetail.FinancialSystemApiSource,
+                        SourceType = "Recharge",
+                    };
+
+                    slothTransaction.AddMetadata("OrderId", payment.OrderId.ToString());
+                    slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
+                    slothTransaction.AddMetadata("Cluster", payment.Order.Cluster.Name);
+                    if(!string.IsNullOrWhiteSpace(payment.Order.ExternalReference))
+                    {
+                        slothTransaction.AddMetadata("ExternalReference", payment.Order.ExternalReference);
+                    }                    
+                    slothTransaction.AddMetadata("OrderName", payment.Order.Name);
+                    slothTransaction.AddMetadata("Product", payment.Order.ProductName);
+                    slothTransaction.AddMetadata("Category", payment.Order.Category);                    
+                    foreach(var meta in payment.Order.MetaData)
+                    {
+                        slothTransaction.AddMetadata(meta.Name, meta.Value);
+                    }
+
+                    var transfer = new TransferViewModel
+                    {
+                        Amount = Math.Round(payment.Amount, 2),
+                        Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                        FinancialSegmentString = financialDetail.ChartString,
+                        Direction = TransferViewModel.Directions.Credit,
+                    };
+                    slothTransaction.Transfers.Add(transfer);
+
+                    foreach(var billing in payment.Order.Billings)
+                    {
+                        var debitTransfer = new TransferViewModel
+                        {
+                            Amount = Math.Round(payment.Amount * (billing.Percentage/100m), 2),
+                            Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                            FinancialSegmentString = billing.ChartString,
+                            Direction = TransferViewModel.Directions.Debit,
+                        };
+                        slothTransaction.Transfers.Add(debitTransfer);
+                    }
+
+                    var debtitTotal = slothTransaction.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit).Sum(a => a.Amount);
+                    var difference = debtitTotal - Math.Round(payment.Amount, 2);
+                    if(difference != 0)
+                    {
+                        Log.Error($"The total debits do not match the total credit for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                        Log.Error($"Total Debits: {debtitTotal} Total Credit: {Math.Round(payment.Amount, 2)} Difference: {difference}");
+                        
+                    }
+                }
+
             }
 
             throw new NotImplementedException();
