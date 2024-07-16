@@ -12,7 +12,7 @@ namespace Hippo.Core.Domain
     {
         [Key]
         public int Id { get; set; }
-        public string FinancialSystemId { get; set; }
+        public string FinancialSystemId { get; set; } //For sloth, this is the transaction ID (guid)
         public string TrackingNumber { get; set; } // KFS tracking number
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public decimal Amount { get; set; }

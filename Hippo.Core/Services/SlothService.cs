@@ -12,6 +12,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Hippo.Core.Domain;
+using Serilog;
 
 
 namespace Hippo.Core.Services
@@ -22,6 +24,8 @@ namespace Hippo.Core.Services
         //Check Txns
         //Test API key
         Task<bool> TestApiKey(int clusterId);
+        Task<bool> ProcessPayments(); //All clusters?
+        Task<bool> UpdatePayments(); //All clusters?
     }
     public class SlothService : ISlothService
     {
@@ -80,6 +84,58 @@ namespace Hippo.Core.Services
             {
                 return false;
             }
+        }
+
+        async Task<bool> ISlothService.ProcessPayments()
+        {
+            //Ok, so I want to loop through all the payments that are created and send them to sloth
+            //I need to group them by clusterId because each cluster will have a team and different API key and source
+            //If an error happens for a cluster, I want to log it and continue processing the other clusters but I also want to email a notification to the team
+            // so keep track of them and mail after. The actual errors can be logged.
+            // if a txn fails continue to the next one, but log it
+            // if a txn is successful, update the status in the db, and set the kfs tracking number as well as the id from sloth into the payment.FinancialSystemId
+            // if all txns are successful, return true, else return false
+
+
+
+
+            var paymentGroups = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
+            foreach (var group in paymentGroups)
+            {
+                var clusterId = group.Key;
+                var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
+                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
+                //using var client = _clientFactory.CreateClient();
+                //client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
+                //client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
+                //var paymentModels = group.Select(a => new PaymentModel
+                //{
+                //    Amount = a.Amount,
+                //    Details = a.Details,
+                //    TrackingNumber = a.TrackingNumber,
+                //    FinancialSystemId = a.FinancialSystemId,
+                //    OrderId = a.OrderId
+                //}).ToList();
+                //var json = JsonSerializer.Serialize(paymentModels, _serializerOptions);
+                //var content = new StringContent(json, Encoding.UTF8, "application/json");
+                //var response = await client.PostAsync("", content);
+                //if (response.IsSuccessStatusCode)
+                //{
+                //    var responseContent = await response.Content.ReadAsStringAsync();
+                //    var slothResponse = JsonSerializer.Deserialize<List<SlothResponseModel>>(responseContent, _serializerOptions);
+                //    foreach (var payment in group)
+                //    {
+                //        var slothPayment = slothResponse.Single(a => a.Id == payment.FinancialSystemId);
+                //        payment.Status = slothPayment.Status;
+                //    }
+                //    await _dbContext.SaveChangesAsync();
+                //}
+            }
+        }
+
+        Task<bool> ISlothService.UpdatePayments()
+        {
+            throw new NotImplementedException();
         }
     }
 }
