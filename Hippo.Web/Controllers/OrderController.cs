@@ -250,7 +250,12 @@ namespace Hippo.Web.Controllers
 
             var orderToReturn = existingOrder;
 
-            await _dbContext.SaveChangesAsync();
+            try
+            { await _dbContext.SaveChangesAsync(); }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var rtmodel = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == model.Id)
@@ -778,6 +783,7 @@ namespace Hippo.Web.Controllers
                         return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
                     }
                     billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
+                    billing.ChartString = chartStringValidation.ChartString;
                 }
                 else
                 {
@@ -804,7 +810,7 @@ namespace Hippo.Web.Controllers
                     }
                     order.Billings.Add(new Billing
                     {
-                        ChartString = billing.ChartString,
+                        ChartString = chartStringValidation.ChartString,
                         Percentage = billing.Percentage,
                         Order = order,
                         Updated = DateTime.UtcNow

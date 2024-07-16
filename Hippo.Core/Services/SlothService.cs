@@ -97,8 +97,6 @@ namespace Hippo.Core.Services
             // if all txns are successful, return true, else return false
 
 
-            throw new NotImplementedException();
-
             var paymentGroups = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
             foreach (var group in paymentGroups)
             {
@@ -131,6 +129,8 @@ namespace Hippo.Core.Services
                 //    await _dbContext.SaveChangesAsync();
                 //}
             }
+
+            throw new NotImplementedException();
         }
 
         Task<bool> ISlothService.UpdatePayments()
