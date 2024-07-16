@@ -74,7 +74,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       const rtValue = await validateChartString(chart.data, index);
 
       update(index, {
-        chartString: chart.data,
+        chartString: rtValue.chartString,
         id: existingBilling.id,
         percentage: existingBilling.percentage,
         chartStringValidation: {
@@ -101,7 +101,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     const rtValue = await validateChartString(chartString, index);
 
     update(index, {
-      chartString: chartString,
+      chartString: rtValue.chartString,
       id: existingBilling.id,
       percentage: existingBilling.percentage,
       chartStringValidation: {

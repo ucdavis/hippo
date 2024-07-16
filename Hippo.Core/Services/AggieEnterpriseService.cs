@@ -170,7 +170,7 @@ namespace Hippo.Core.Services
                 var segments = FinancialChartValidation.GetGlSegments(chartString);
                 if(segments.Account != naturalAccount)
                 {
-                    model.Warnings.Add(new KeyValuePair<string, string>("Account", $"Natural Account {segments.Account} replaced with {naturalAccount}"));
+                    model.Warnings.Add(new KeyValuePair<string, string>("Account", $"Natural Account {segments.Account} will be replaced with {naturalAccount}"));
                 }
                 segments.Account = naturalAccount;
                 return segments.ToSegmentString();
