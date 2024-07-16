@@ -94,7 +94,7 @@ export const FinancialDetail = () => {
 
   const validateChartString = async (chartString: string) => {
     let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
+      `/api/order/validateChartString/${chartString}/Credit`,
       {
         method: "GET",
       },

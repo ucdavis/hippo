@@ -209,7 +209,7 @@ public class AdminController : SuperController
         }
         //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
-        existingFinancialDetail.ChartString = model.ChartString;
+        existingFinancialDetail.ChartString = validateChartString.ChartString;
         existingFinancialDetail.AutoApprove = model.AutoApprove;
 
         if (existingFinancialDetail.Id == 0)

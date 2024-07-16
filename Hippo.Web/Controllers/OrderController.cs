@@ -34,10 +34,10 @@ namespace Hippo.Web.Controllers
 
 
         [HttpGet]
-        [Route("api/order/validateChartString/{chartString}")]
-        public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
+        [Route("api/order/validateChartString/{chartString}/{direction}")]
+        public async Task<ChartStringValidationModel> ValidateChartString(string chartString, string direction)
         {
-            return await _aggieEnterpriseService.IsChartStringValid(chartString, Directions.Debit);
+            return await _aggieEnterpriseService.IsChartStringValid(chartString, direction);
 
         }
 

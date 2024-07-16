@@ -117,7 +117,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   const validateChartString = async (chartString: string, index: number) => {
     let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
+      `/api/order/validateChartString/${chartString}/Debit`,
       {
         method: "GET",
       },
