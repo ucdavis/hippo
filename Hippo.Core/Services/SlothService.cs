@@ -100,7 +100,9 @@ namespace Hippo.Core.Services
             // if all txns are successful, return true, else return false
 
 
-            var paymentGroups = await _dbContext.Payments.Include(a => a.Order.Cluster).Include(a => a.Order.Billings).Include(a => a.Order.MetaData).Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
+            var wereThereErrors = false;
+
+            var paymentGroups = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created).GroupBy(a => a.Order.ClusterId).ToListAsync();
             foreach (var group in paymentGroups)
             {
                 var clusterId = group.Key;
@@ -112,7 +114,9 @@ namespace Hippo.Core.Services
                 client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
                 foreach (var payment in group)
                 {
-                    var slothTransaction = CreateTransaction(financialDetail, payment);
+                    var order = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
+
+                    var slothTransaction = CreateTransaction(financialDetail, order, payment);
                     Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?
 
                     var response = await client.PostAsync("Transactions", new StringContent(JsonSerializer.Serialize(slothTransaction, _serializerOptions), Encoding.UTF8, "application/json"));
@@ -126,17 +130,19 @@ namespace Hippo.Core.Services
                         payment.Status = Payment.Statuses.Processing;
 
                         //Do this when the payment has been completed?
-                        //payment.Order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Can I update the order here?
+                        //order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Should I update the order here?
 
-                        await _historyService.OrderUpdated(payment.Order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
+                        await _historyService.OrderUpdated(order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
                         
                         await _dbContext.SaveChangesAsync();
+
 
                     }
                     else
                     {
                         Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
                         Log.Error($"Error: {response.ReasonPhrase}");
+                        wereThereErrors = true;
                     }
                 }
 
@@ -144,32 +150,32 @@ namespace Hippo.Core.Services
 
             
 
-            throw new NotImplementedException();
+            return !wereThereErrors;
         }
 
-        private TransactionViewModel CreateTransaction(FinancialDetail financialDetail, Payment payment)
+        private TransactionViewModel CreateTransaction(FinancialDetail financialDetail, Order order, Payment payment)
         {
             var slothTransaction = new TransactionViewModel
             {
                 AutoApprove = financialDetail.AutoApprove,
                 MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
-                MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{payment.Order.Cluster.Name}/order/details/{payment.OrderId}",
-                Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{order.Cluster.Name}/order/details/{payment.OrderId}",
+                Description = $"Order: {payment.OrderId} Name: {order.Name}",
                 Source = financialDetail.FinancialSystemApiSource,
                 SourceType = "Recharge",
             };
 
             slothTransaction.AddMetadata("OrderId", payment.OrderId.ToString());
             slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
-            slothTransaction.AddMetadata("Cluster", payment.Order.Cluster.Name);
-            if (!string.IsNullOrWhiteSpace(payment.Order.ExternalReference))
+            slothTransaction.AddMetadata("Cluster", order.Cluster.Name);
+            if (!string.IsNullOrWhiteSpace(order.ExternalReference))
             {
-                slothTransaction.AddMetadata("ExternalReference", payment.Order.ExternalReference);
+                slothTransaction.AddMetadata("ExternalReference", order.ExternalReference);
             }
-            slothTransaction.AddMetadata("OrderName", payment.Order.Name);
-            slothTransaction.AddMetadata("Product", payment.Order.ProductName);
-            slothTransaction.AddMetadata("Category", payment.Order.Category);
-            foreach (var meta in payment.Order.MetaData)
+            slothTransaction.AddMetadata("OrderName", order.Name);
+            slothTransaction.AddMetadata("Product", order.ProductName);
+            slothTransaction.AddMetadata("Category", order.Category);
+            foreach (var meta in order.MetaData)
             {
                 slothTransaction.AddMetadata(meta.Name, meta.Value);
             }
@@ -177,18 +183,18 @@ namespace Hippo.Core.Services
             var transfer = new TransferViewModel
             {
                 Amount = Math.Round(payment.Amount, 2),
-                Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                Description = $"Order: {payment.OrderId} Name: {order.Name}",
                 FinancialSegmentString = financialDetail.ChartString,
                 Direction = TransferViewModel.Directions.Credit,
             };
             slothTransaction.Transfers.Add(transfer);
 
-            foreach (var billing in payment.Order.Billings)
+            foreach (var billing in order.Billings)
             {
                 var debitTransfer = new TransferViewModel
                 {
                     Amount = Math.Round(payment.Amount * (billing.Percentage / 100m), 2),
-                    Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                    Description = $"Order: {payment.OrderId} Name: {order.Name}",
                     FinancialSegmentString = billing.ChartString,
                     Direction = TransferViewModel.Directions.Debit,
                 };
@@ -202,7 +208,7 @@ namespace Hippo.Core.Services
             if (difference != 0)
             {
                 //TODO: Test this
-                Log.Error($"The total debits do not match the total credit for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                Log.Error($"The total debits do not match the total credit for Order: {payment.OrderId} Name: {order.Name}");
                 Log.Error($"Total Credit: {Math.Round(payment.Amount, 2)} Difference: {difference}");
                 //Adjust the biggest debit
                 var biggestDebit = slothTransaction.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit).OrderByDescending(a => a.Amount).First();
