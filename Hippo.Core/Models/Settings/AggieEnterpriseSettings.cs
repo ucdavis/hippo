@@ -9,6 +9,7 @@
         public string ScopeApp { get; set; }
         public string ScopeEnv { get; set; }
 
-        public string NaturalAccount { get; set; } //May not need this
+        public string DebitNaturalAccount { get; set; } 
+        public string CreditNaturalAccount { get; set; }
     }
 }

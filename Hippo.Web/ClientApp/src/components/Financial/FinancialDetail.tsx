@@ -104,6 +104,12 @@ export const FinancialDetail = () => {
       const result = await response.json();
       console.log(result);
       setChartStringValidation(result);
+      if (result.chartString) {
+        setFinancialDetail((prevFinancialDetail) => ({
+          ...prevFinancialDetail,
+          chartString: result.chartString,
+        }));
+      }
     }
   };
 

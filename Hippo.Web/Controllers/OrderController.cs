@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Hippo.Core.Domain.Product;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers
 {
@@ -36,7 +37,7 @@ namespace Hippo.Web.Controllers
         [Route("api/order/validateChartString/{chartString}")]
         public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
         {
-            return await _aggieEnterpriseService.IsChartStringValid(chartString);
+            return await _aggieEnterpriseService.IsChartStringValid(chartString, Directions.Debit);
 
         }
 
@@ -771,7 +772,7 @@ namespace Hippo.Web.Controllers
             {
                 if (model.Billings.Any(a => a.ChartString == billing.ChartString))
                 {
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString, Directions.Debit);
                     if (chartStringValidation.IsValid == false)
                     {
                         return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
@@ -792,7 +793,7 @@ namespace Hippo.Web.Controllers
                 else
                 {
                     //Validate the chart string
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
+                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString, Directions.Debit);
                     if (chartStringValidation.IsValid == false)
                     {
                         return new ProcessingResult
