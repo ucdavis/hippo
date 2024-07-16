@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Hippo.Core.Domain;
 using Serilog;
-using Octokit;
+using System.Net;
 
 
 namespace Hippo.Core.Services
@@ -34,14 +34,16 @@ namespace Hippo.Core.Services
         private ISecretsService _secretsService;
         private readonly SlothSettings _slothSettings;
         private readonly IHttpClientFactory _clientFactory;
+        private readonly IHistoryService _historyService;
         private readonly JsonSerializerOptions _serializerOptions;
 
-        public SlothService(AppDbContext dbContext, ISecretsService secretsService, IOptions<SlothSettings> slothSettings, IHttpClientFactory clientFactory)
+        public SlothService(AppDbContext dbContext, ISecretsService secretsService, IOptions<SlothSettings> slothSettings, IHttpClientFactory clientFactory, IHistoryService historyService)
         {
             _dbContext = dbContext;
             _secretsService = secretsService;
             _slothSettings = slothSettings.Value;
             _clientFactory = clientFactory;
+            _historyService = historyService;
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -81,7 +83,7 @@ namespace Hippo.Core.Services
                 }
                 return false;
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return false;
             }
@@ -106,69 +108,108 @@ namespace Hippo.Core.Services
                 var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
 
                 using var client = _clientFactory.CreateClient();
-                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
+                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}");
                 client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
-                foreach(var payment in group)
+                foreach (var payment in group)
                 {
-                    var slothTransaction = new TransactionViewModel
-                    {
-                        AutoApprove = financialDetail.AutoApprove,
-                        MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
-                        MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{payment.Order.Cluster.Name}/order/details/{payment.OrderId}",
-                        Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
-                        Source = financialDetail.FinancialSystemApiSource,
-                        SourceType = "Recharge",
-                    };
+                    var slothTransaction = CreateTransaction(financialDetail, payment);
+                    Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?
 
-                    slothTransaction.AddMetadata("OrderId", payment.OrderId.ToString());
-                    slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
-                    slothTransaction.AddMetadata("Cluster", payment.Order.Cluster.Name);
-                    if(!string.IsNullOrWhiteSpace(payment.Order.ExternalReference))
+                    var response = await client.PostAsync("Transactions", new StringContent(JsonSerializer.Serialize(slothTransaction, _serializerOptions), Encoding.UTF8, "application/json"));
+                    if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
                     {
-                        slothTransaction.AddMetadata("ExternalReference", payment.Order.ExternalReference);
-                    }                    
-                    slothTransaction.AddMetadata("OrderName", payment.Order.Name);
-                    slothTransaction.AddMetadata("Product", payment.Order.ProductName);
-                    slothTransaction.AddMetadata("Category", payment.Order.Category);                    
-                    foreach(var meta in payment.Order.MetaData)
-                    {
-                        slothTransaction.AddMetadata(meta.Name, meta.Value);
-                    }
+                        var content = await response.Content.ReadAsStringAsync();
+                        Log.Information("Sloth Success Response", content);
+                        var slothResponse = JsonSerializer.Deserialize<SlothResponseModel>(content, _serializerOptions);
+                        payment.FinancialSystemId = slothResponse.Id;
+                        payment.TrackingNumber = slothResponse.KfsTrackingNumber;
+                        payment.Status = Payment.Statuses.Processing;
 
-                    var transfer = new TransferViewModel
-                    {
-                        Amount = Math.Round(payment.Amount, 2),
-                        Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
-                        FinancialSegmentString = financialDetail.ChartString,
-                        Direction = TransferViewModel.Directions.Credit,
-                    };
-                    slothTransaction.Transfers.Add(transfer);
+                        //Do this when the payment has been completed?
+                        //payment.Order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Can I update the order here?
 
-                    foreach(var billing in payment.Order.Billings)
-                    {
-                        var debitTransfer = new TransferViewModel
-                        {
-                            Amount = Math.Round(payment.Amount * (billing.Percentage/100m), 2),
-                            Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
-                            FinancialSegmentString = billing.ChartString,
-                            Direction = TransferViewModel.Directions.Debit,
-                        };
-                        slothTransaction.Transfers.Add(debitTransfer);
-                    }
-
-                    var debtitTotal = slothTransaction.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit).Sum(a => a.Amount);
-                    var difference = debtitTotal - Math.Round(payment.Amount, 2);
-                    if(difference != 0)
-                    {
-                        Log.Error($"The total debits do not match the total credit for Order: {payment.OrderId} Name: {payment.Order.Name}");
-                        Log.Error($"Total Debits: {debtitTotal} Total Credit: {Math.Round(payment.Amount, 2)} Difference: {difference}");
+                        await _historyService.OrderUpdated(payment.Order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
                         
+                        await _dbContext.SaveChangesAsync();
+
+                    }
+                    else
+                    {
+                        Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                        Log.Error($"Error: {response.ReasonPhrase}");
                     }
                 }
 
             }
 
+            
+
             throw new NotImplementedException();
+        }
+
+        private TransactionViewModel CreateTransaction(FinancialDetail financialDetail, Payment payment)
+        {
+            var slothTransaction = new TransactionViewModel
+            {
+                AutoApprove = financialDetail.AutoApprove,
+                MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
+                MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{payment.Order.Cluster.Name}/order/details/{payment.OrderId}",
+                Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                Source = financialDetail.FinancialSystemApiSource,
+                SourceType = "Recharge",
+            };
+
+            slothTransaction.AddMetadata("OrderId", payment.OrderId.ToString());
+            slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
+            slothTransaction.AddMetadata("Cluster", payment.Order.Cluster.Name);
+            if (!string.IsNullOrWhiteSpace(payment.Order.ExternalReference))
+            {
+                slothTransaction.AddMetadata("ExternalReference", payment.Order.ExternalReference);
+            }
+            slothTransaction.AddMetadata("OrderName", payment.Order.Name);
+            slothTransaction.AddMetadata("Product", payment.Order.ProductName);
+            slothTransaction.AddMetadata("Category", payment.Order.Category);
+            foreach (var meta in payment.Order.MetaData)
+            {
+                slothTransaction.AddMetadata(meta.Name, meta.Value);
+            }
+
+            var transfer = new TransferViewModel
+            {
+                Amount = Math.Round(payment.Amount, 2),
+                Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                FinancialSegmentString = financialDetail.ChartString,
+                Direction = TransferViewModel.Directions.Credit,
+            };
+            slothTransaction.Transfers.Add(transfer);
+
+            foreach (var billing in payment.Order.Billings)
+            {
+                var debitTransfer = new TransferViewModel
+                {
+                    Amount = Math.Round(payment.Amount * (billing.Percentage / 100m), 2),
+                    Description = $"Order: {payment.OrderId} Name: {payment.Order.Name}",
+                    FinancialSegmentString = billing.ChartString,
+                    Direction = TransferViewModel.Directions.Debit,
+                };
+                if (debitTransfer.Amount > 0)
+                {
+                    slothTransaction.Transfers.Add(debitTransfer);
+                }
+            }
+
+            var difference = Math.Round(payment.Amount, 2) - slothTransaction.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit).Sum(a => a.Amount);
+            if (difference != 0)
+            {
+                //TODO: Test this
+                Log.Error($"The total debits do not match the total credit for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                Log.Error($"Total Credit: {Math.Round(payment.Amount, 2)} Difference: {difference}");
+                //Adjust the biggest debit
+                var biggestDebit = slothTransaction.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit).OrderByDescending(a => a.Amount).First();
+                biggestDebit.Amount += difference;
+            }
+
+            return slothTransaction;
         }
 
         Task<bool> ISlothService.UpdatePayments()
