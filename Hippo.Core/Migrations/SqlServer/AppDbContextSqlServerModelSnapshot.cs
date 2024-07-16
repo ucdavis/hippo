@@ -882,7 +882,7 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasOne("Hippo.Core.Domain.Order", "Order")
                         .WithMany("Billings")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
