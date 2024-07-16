@@ -251,7 +251,9 @@ namespace Hippo.Web.Controllers
             var orderToReturn = existingOrder;
 
             try
-            { await _dbContext.SaveChangesAsync(); }
+            { 
+                await _dbContext.SaveChangesAsync(); 
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);

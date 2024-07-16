@@ -97,7 +97,7 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Order>().HasIndex(o => o.Status);
             modelBuilder.Entity<Order>().HasIndex(o => o.ExpirationDate);
             modelBuilder.Entity<Order>().HasIndex(o => o.NextNotificationDate);
-            modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<OrderMetaData>().HasOne(o => o.Order).WithMany(o => o.MetaData).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Payment>().HasOne(o => o.Order).WithMany(o => o.Payments).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Order>()
