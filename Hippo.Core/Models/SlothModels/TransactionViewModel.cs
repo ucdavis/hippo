@@ -27,6 +27,11 @@ namespace Hippo.Core.Models.SlothModels
 
         public string Description { get; set; } //If it isn't set, Sloth with use one of the transfer descriptions...
 
+        public bool ValidateFinancialSegmentStrings { get; set; } = true;
+
+        [MaxLength(128)]
+        public string ProcessorTrackingNumber { get; set; }
+
         public IList<MetadataEntry> Metadata { get; set; } = new List<MetadataEntry>();
 
         public void AddMetadata(string name, string value)

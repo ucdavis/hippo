@@ -120,6 +120,8 @@ namespace Hippo.Core.Services
                     {
                         var order = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
 
+                        //TODO: ? Check if the txn is already on sloth? To do this sloth would need to be changed, or I'd need to write the the processor tracking number
+
                         var slothTransaction = CreateTransaction(financialDetail, order, payment);
                         Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?
 
@@ -136,7 +138,7 @@ namespace Hippo.Core.Services
                             //Do this when the payment has been completed?
                             //order.BalanceRemaining -= Math.Round(payment.Amount, 2); //Should I update the order here?
 
-                            await _historyService.OrderUpdated(order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount)}");
+                            await _historyService.OrderUpdated(order, null, $"Payment sent for processing. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
 
                             await _dbContext.SaveChangesAsync();
 
@@ -146,6 +148,8 @@ namespace Hippo.Core.Services
                         {
                             Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
                             Log.Error($"Error: {response.ReasonPhrase}");
+                            await _historyService.OrderPaymentFailure(order, $"Error processing payment: {payment.Id} for Order: {payment.OrderId} Error: {response.ReasonPhrase}");
+                            await _dbContext.SaveChangesAsync();
                             wereThereErrors = true;
                         }
                     }
@@ -169,8 +173,10 @@ namespace Hippo.Core.Services
             {
                 AutoApprove = financialDetail.AutoApprove,
                 MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
-                MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}/{order.Cluster.Name}/order/details/{payment.OrderId}",
-                Description = $"Order: {payment.OrderId} Name: {order.Name}",
+                ProcessorTrackingNumber = $"{payment.OrderId}-{payment.Id}",
+                ValidateFinancialSegmentStrings = true,
+                MerchantTrackingUrl = $"{_slothSettings.HippoBaseUrl}{order.Cluster.Name}/order/details/{payment.OrderId}",
+                Description = $"Order: {payment.OrderId}-{payment.Id} Name: {order.Name}",
                 Source = financialDetail.FinancialSystemApiSource,
                 SourceType = "Recharge",
             };
@@ -228,9 +234,93 @@ namespace Hippo.Core.Services
             return slothTransaction;
         }
 
-        Task<bool> ISlothService.UpdatePayments()
+        public async Task<bool> UpdatePayments()
         {
-            throw new NotImplementedException();
+            var wereThereErrors = false;
+
+
+            var allPayments = await _dbContext.Payments.Include(a => a.Order).ThenInclude(a => a.Cluster).Where(a => a.Status == Payment.Statuses.Processing).ToListAsync();
+
+            var paymentGroups = allPayments.GroupBy(a => a.Order.ClusterId);
+
+            foreach (var group in paymentGroups)
+            {
+                var clusterId = group.Key;
+                var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
+                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
+
+                using var client = _clientFactory.CreateClient();
+                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
+                client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
+                foreach (var payment in group)
+                {
+                    if (string.IsNullOrWhiteSpace(payment.FinancialSystemId))
+                    {
+                        wereThereErrors = true;
+                        Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name} Error: Missing FinancialSystemId");
+                        continue;
+                    }
+                    var order = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
+
+                    var response = await client.GetAsync(payment.FinancialSystemId);
+                    if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var slothResponse = JsonSerializer.Deserialize<SlothResponseModel>(content, _serializerOptions);
+
+                        switch (slothResponse.Status)
+                        {
+                            case SlothStatuses.Completed:
+                                payment.Status = Payment.Statuses.Completed;
+                                await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
+                                //order.BalanceRemaining -= Math.Round(payment.Amount, 2); Don't do this here, this is a ballance that is available to pay, not the total paid
+                                var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
+                                if (order.Total >= totalPayments)
+                                {                                    
+                                    order.Status = Order.Statuses.Completed;
+                                    await _historyService.OrderUpdated(order, null, $"Total Payments completed reached. ");
+                                    order.NextPaymentDate = null;
+                                }
+                                
+                                await _dbContext.SaveChangesAsync();
+                                break;
+                            case SlothStatuses.Processing:
+                            case SlothStatuses.PendingApproval:
+                            case SlothStatuses.Scheduled:
+                                //Do nothing
+                                break;
+                            case SlothStatuses.Rejected:
+                                // do nothing? Should get fixed in sloth
+                                break;
+                            case SlothStatuses.Cancelled:
+                                //Need to do something here
+                                payment.Status = Payment.Statuses.Cancelled;
+                                order.BalanceRemaining += Math.Round(payment.Amount, 2); //Add the amount back to the balance remaining
+                                await _historyService.OrderUpdated(order, null, $"Payment CANCELLED. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
+                                await _dbContext.SaveChangesAsync();
+                                break;
+                            default:
+                                wereThereErrors = true;
+                                Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name} Error: {slothResponse.Status}");
+                                await _historyService.OrderPaymentFailure(order, $"Error processing payment: {payment.Id} for Order: {payment.OrderId} Error: {slothResponse.Status}");
+                                await _dbContext.SaveChangesAsync();
+                                break;
+                        }
+
+                    }
+                    else
+                    {
+                        wereThereErrors = true;
+                        Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name}");
+                        Log.Error($"Error: {response.ReasonPhrase}");
+                        await _historyService.OrderPaymentFailure(order, $"Error processing payment: {payment.Id} for Order: {payment.OrderId} Error: {response.ReasonPhrase}");
+                        await _dbContext.SaveChangesAsync();
+                    }
+                }
+
+            }
+
+            return !wereThereErrors;
         }
     }
 }
