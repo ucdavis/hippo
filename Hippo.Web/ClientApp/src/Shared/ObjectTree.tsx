@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { ListGroup, ListGroupItem, Collapse } from "reactstrap";
+import {
+  ListGroup,
+  ListGroupItem,
+  Collapse,
+  FormGroup,
+  Input,
+  Label,
+} from "reactstrap";
 import { isObject } from "../util/TypeChecks";
 import { filterCommonProperties } from "../util/ObjectHelpers";
 
@@ -9,6 +16,7 @@ interface ObjectTreeProps {
 
 const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
+  const [allExpanded, setAllExpanded] = useState(false);
 
   const toggle = (event: React.MouseEvent) => {
     const id = event.currentTarget.getAttribute("id");
@@ -40,7 +48,9 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
               {valueIsObject && (
                 <i
                   className={
-                    expanded[id] ? "fas fa-caret-down" : "fas fa-caret-right"
+                    expanded[id] || allExpanded
+                      ? "fas fa-caret-down"
+                      : "fas fa-caret-right"
                   }
                 ></i>
               )}{" "}
@@ -50,13 +60,14 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
                   valueIsObject &&
                   value.hasOwnProperty("name") &&
                   !expanded[id] &&
+                  !allExpanded &&
                   (value["name"] as string)
               }
               {!keyIsNumber && `${key}: `}
               {!valueIsObject && value}
             </div>
             {valueIsObject && (
-              <Collapse isOpen={expanded[id]}>
+              <Collapse isOpen={expanded[id] || allExpanded}>
                 <ListGroup>{renderItems(value, id, level + 1)}</ListGroup>
               </Collapse>
             )}
@@ -69,7 +80,21 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
   };
 
   return (
-    <ListGroup flush>{renderItems(filterCommonProperties(obj))}</ListGroup>
+    <div>
+      <FormGroup switch>
+        <Input
+          type="switch"
+          checked={allExpanded}
+          onClick={() => {
+            setAllExpanded(!allExpanded);
+          }}
+        />
+        <Label check size="sm">
+          Expand All
+        </Label>
+      </FormGroup>
+      <ListGroup flush>{renderItems(filterCommonProperties(obj))}</ListGroup>
+    </div>
   );
 };
 
