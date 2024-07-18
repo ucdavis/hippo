@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Hippo.Jobs.OrderProcess": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "development"
+      }
+    }
+  }
+}
