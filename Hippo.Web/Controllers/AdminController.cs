@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text;
 using static Hippo.Core.Domain.Account;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers;
 
@@ -25,8 +26,9 @@ public class AdminController : SuperController
     private INotificationService _notificationService;
     private ISecretsService _secretsService;
     private IAggieEnterpriseService _aggieEnterpriseService;
+    private ISlothService _slothService;
 
-    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService)
+    public AdminController(AppDbContext dbContext, IUserService userService, IIdentityService identityService, ISshService sshService, INotificationService notificationService, IHistoryService historyService, ISecretsService secretsService, IAggieEnterpriseService aggieEnterpriseService, ISlothService slothService)
     {
         _dbContext = dbContext;
         _userService = userService;
@@ -36,6 +38,7 @@ public class AdminController : SuperController
         _notificationService = notificationService;
         _secretsService = secretsService;
         _aggieEnterpriseService = aggieEnterpriseService;
+        _slothService = slothService;
     }
 
     [HttpGet]
@@ -169,8 +172,12 @@ public class AdminController : SuperController
                 }
 
                 clusterModel.MaskedApiKey = sb.ToString();
+
+                clusterModel.IsSlothValid = await _slothService.TestApiKey(cluster.Id);
             }
         }
+
+       
         
         return Ok(clusterModel);
     }
@@ -191,7 +198,7 @@ public class AdminController : SuperController
 
             };
         }
-        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString);
+        var validateChartString = await _aggieEnterpriseService.IsChartStringValid(model.ChartString, Directions.Credit);
         if (!validateChartString.IsValid)
         {
             return BadRequest($"Invalid Chart String Errors: {validateChartString.Message}");
@@ -202,7 +209,7 @@ public class AdminController : SuperController
         }
         //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
-        existingFinancialDetail.ChartString = model.ChartString;
+        existingFinancialDetail.ChartString = validateChartString.ChartString;
         existingFinancialDetail.AutoApprove = model.AutoApprove;
 
         if (existingFinancialDetail.Id == 0)

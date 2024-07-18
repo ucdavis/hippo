@@ -97,6 +97,7 @@ namespace Hippo.Core.Domain
             public const string Completed = "Completed";
             public const string AdhocPayment = "Adhoc Payment";
             public const string ChartStringUpdated = "Chart String Updated";
+            public const string PaymentFailed = "Payment Failed";
 
             public static List<string> TypeList = new List<string>
             {
@@ -109,7 +110,8 @@ namespace Hippo.Core.Domain
                 Rejected,
                 Completed,
                 AdhocPayment,
-                ChartStringUpdated
+                ChartStringUpdated,
+                PaymentFailed
             }.ToList();
         }
 

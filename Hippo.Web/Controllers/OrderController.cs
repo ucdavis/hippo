@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Hippo.Core.Domain.Product;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers
 {
@@ -33,10 +34,10 @@ namespace Hippo.Web.Controllers
 
 
         [HttpGet]
-        [Route("api/order/validateChartString/{chartString}")]
-        public async Task<ChartStringValidationModel> ValidateChartString(string chartString)
+        [Route("api/order/validateChartString/{chartString}/{direction}")]
+        public async Task<ChartStringValidationModel> ValidateChartString(string chartString, string direction)
         {
-            return await _aggieEnterpriseService.IsChartStringValid(chartString);
+            return await _aggieEnterpriseService.IsChartStringValid(chartString, direction);
 
         }
 
@@ -249,7 +250,14 @@ namespace Hippo.Web.Controllers
 
             var orderToReturn = existingOrder;
 
-            await _dbContext.SaveChangesAsync();
+            try
+            { 
+                await _dbContext.SaveChangesAsync(); 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var rtmodel = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == model.Id)
@@ -755,6 +763,17 @@ namespace Hippo.Web.Controllers
                 return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
             }
 
+            //Validate and fix and passed chart strings
+            foreach(var mBilling in model.Billings)
+            {
+                var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(mBilling.ChartString, Directions.Debit);
+                if (chartStringValidation.IsValid == false)
+                {
+                    return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
+                }
+                mBilling.ChartString = chartStringValidation.ChartString;
+            }
+
             //Check for duplicate chart strings
             var duplicateChartStrings = model.Billings.GroupBy(a => a.ChartString).Where(a => a.Count() > 1).Select(a => a.Key).ToList();
             if (duplicateChartStrings.Any())
@@ -771,11 +790,6 @@ namespace Hippo.Web.Controllers
             {
                 if (model.Billings.Any(a => a.ChartString == billing.ChartString))
                 {
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
-                    if (chartStringValidation.IsValid == false)
-                    {
-                        return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
-                    }
                     billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
                 }
                 else
@@ -791,16 +805,6 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    //Validate the chart string
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString);
-                    if (chartStringValidation.IsValid == false)
-                    {
-                        return new ProcessingResult
-                        {
-                            Success = false,
-                            Message = $"Invalid Chart String: {chartStringValidation.Message}"
-                        };
-                    }
                     order.Billings.Add(new Billing
                     {
                         ChartString = billing.ChartString,

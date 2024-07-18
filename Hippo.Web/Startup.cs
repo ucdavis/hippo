@@ -187,6 +187,7 @@ namespace Hippo.Web
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
+            services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<IEmailService, EmailService>();
@@ -196,6 +197,7 @@ namespace Hippo.Web
             services.AddScoped<ISshService, SshService>();
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
+            
 
             if (Configuration.GetValue<bool>("EventQueueEnabled"))
             {
@@ -209,6 +211,9 @@ namespace Hippo.Web
             services.AddHttpContextAccessor();
             services.AddScoped<IMjmlRenderer, MjmlRenderer>();
             services.AddScoped<ApiKeyAuthFilter>();
+
+            services.AddHttpClient();
+            services.AddScoped<ISlothService, SlothService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)

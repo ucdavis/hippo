@@ -18,6 +18,6 @@ namespace Hippo.Core.Models.OrderModels
 
         public string MaskedApiKey { get; set; }
 
-
+        public bool IsSlothValid { get; set; } = false;
     }
 }

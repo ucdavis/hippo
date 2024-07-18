@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
@@ -9,6 +9,7 @@ import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { authenticatedFetch } from "../../util/api";
 import ChartStringValidation from "./ChartStringValidation";
 import OrderFormField from "./OrderFormField";
+import { Card, CardBody, CardTitle } from "reactstrap";
 
 declare const window: Window &
   typeof globalThis & {
@@ -62,6 +63,13 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     remove(index);
   };
 
+  const [notification, setNotification] = useState<string>("");
+  const showNotification = (message: string) => {
+    setNotification(message);
+    // Optionally, clear the notification after some time
+    setTimeout(() => setNotification(""), 5000);
+  };
+
   const lookupChartString = async (index: number) => {
     const existingBilling = getValues("billings")[index];
     //console.log(existingBilling);
@@ -74,7 +82,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       const rtValue = await validateChartString(chart.data, index);
 
       update(index, {
-        chartString: chart.data,
+        chartString: rtValue.chartString,
         id: existingBilling.id,
         percentage: existingBilling.percentage,
         chartStringValidation: {
@@ -101,7 +109,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     const rtValue = await validateChartString(chartString, index);
 
     update(index, {
-      chartString: chartString,
+      chartString: rtValue.chartString,
       id: existingBilling.id,
       percentage: existingBilling.percentage,
       chartStringValidation: {
@@ -117,7 +125,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   const validateChartString = async (chartString: string, index: number) => {
     let response = await authenticatedFetch(
-      `/api/order/validateChartString/${chartString}`,
+      `/api/order/validateChartString/${chartString}/Debit`,
       {
         method: "GET",
       },
@@ -125,6 +133,9 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     //console.log(response);
     if (response.ok) {
       const result = await response.json();
+      if (chartString !== result.chartString) {
+        showNotification(result.warning);
+      }
       return result;
     }
     return { isValid: false, message: "Failed to validate chart string" };
@@ -150,6 +161,19 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     <>
       <h2>Billing Info</h2>
       <h2>Chart Strings</h2>
+      {notification && (
+        <div>
+          <br />
+          <Card className="card-danger">
+            <CardTitle>
+              <h3>The Chart String has been updated!</h3>
+            </CardTitle>
+            <CardBody>
+              <div>{notification}</div>
+            </CardBody>
+          </Card>
+        </div>
+      )}
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
