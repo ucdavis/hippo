@@ -275,10 +275,10 @@ namespace Hippo.Core.Services
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 //order.BalanceRemaining -= Math.Round(payment.Amount, 2); Don't do this here, this is a ballance that is available to pay, not the total paid
                                 var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
-                                if (order.Total >= totalPayments)
+                                if (order.Total <= totalPayments)
                                 {                                    
                                     order.Status = Order.Statuses.Completed;
-                                    await _historyService.OrderUpdated(order, null, $"Total Payments completed reached. ");
+                                    await _historyService.OrderUpdated(order, null, $"Order paid in full.");
                                     order.NextPaymentDate = null;
                                 }
                                 
