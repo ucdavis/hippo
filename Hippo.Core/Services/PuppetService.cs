@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Utilities;
 using Microsoft.Extensions.Caching.Memory;
@@ -46,7 +47,7 @@ namespace Hippo.Core.Services
                 var appToken = handler.WriteToken(handler.CreateJwtSecurityToken(
                     issuer: _settings.GithubAppId,
                     issuedAt: now,
-                    expires: now.AddMinutes(10),
+                    expires: now.AddMinutes(9), // Don't request max of 10 in order to avoid differences in clock drift
                     signingCredentials: new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256)
                 ));
                 // send request for an app installation token
@@ -89,14 +90,16 @@ namespace Hippo.Core.Services
                 var groupName = kvp.Key.ToString();
                 var groupNode = kvp.Value as Dictionary<object, object>;
                 var sponsors = groupNode.GetStrings("sponsors");
+                var group = new PuppetGroup 
+                {
+                    Name = groupName, 
+                    Data = JsonHelper.DeserializeToJsonNode(_yamlDotNetJsonSerializer.Serialize(groupNode))
+                };
+                data.Groups.Add(group);
                 // only add groups that have sponsors
                 if (sponsors.Length > 0)
                 {
-                    data.GroupsWithSponsors.Add(new PuppetGroup 
-                    {
-                        Name = groupName, 
-                        Data = JsonHelper.DeserializeToJsonElement(_yamlDotNetJsonSerializer.Serialize(groupNode))
-                    });
+                    data.GroupsWithSponsors.Add(group);
                     foreach (var user in sponsors)
                     {
                         groupSponsors.AddOrUpdate(user, new List<string> { groupName }, (k, v) => { v.Add(groupName); return v; });
@@ -127,7 +130,7 @@ namespace Hippo.Core.Services
                 userNode.Remove("password");
                 userNode.Remove("fullname");
                 userNode.Remove("email");
-                puppetUser.Data = JsonHelper.DeserializeToJsonElement(_yamlDotNetJsonSerializer.Serialize(userNode));
+                puppetUser.Data = JsonHelper.DeserializeToJsonNode(_yamlDotNetJsonSerializer.Serialize(userNode));
 
                 data.Users.Add(puppetUser);
             }
@@ -165,6 +168,7 @@ namespace Hippo.Core.Services
 
     public class PuppetData
     {
+        public List<PuppetGroup> Groups { get; set; } = new();
         public List<PuppetGroup> GroupsWithSponsors { get; set; } = new();
         public List<PuppetUser> Users { get; set; } = new();
     }
@@ -176,13 +180,13 @@ namespace Hippo.Core.Services
         public string Email { get; set; }
         public string[] Groups { get; set; } = new string[] { };
         public string[] SponsorForGroups { get; set; } = new string[] { };
-        public JsonElement Data { get; set; }
+        public JsonNode Data { get; set; }
     }
 
     public class PuppetGroup
     {
         public string Name { get; set; }
-        public JsonElement Data { get; set; }
+        public JsonNode Data { get; set; }
 
     }
 

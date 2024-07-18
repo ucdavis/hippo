@@ -27,6 +27,7 @@ import CreateOrder from "./components/Order/CreateOrder";
 import EditOrder from "./components/Order/EditOrder";
 import UpdateChartStrings from "./components/Order/UpdateChartStrings";
 import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
+import NotFound from "./NotFound";
 
 declare var Hippo: AppContextShape;
 
@@ -175,6 +176,7 @@ const App = () => {
               }
             />
             <Route path="/softwarerequest" element={<SoftwareRequestForm />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </ModalProvider>

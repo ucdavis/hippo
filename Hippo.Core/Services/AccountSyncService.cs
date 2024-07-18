@@ -1,5 +1,8 @@
 
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using EFCore.BulkExtensions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
@@ -40,19 +43,19 @@ namespace Hippo.Core.Services
                 Log.Information("Syncing accounts for clusters {ClusterNames}", string.Join(", ", clusters.Select(c => c.Name)));
 
                 var now = DateTime.UtcNow;
-                var mapClusterIdsToPuppetData = new Dictionary<int, PuppetData>();
+                var mapClusterIdsToPuppetData = new Dictionary<int, PuppetDataContext>();
 
                 foreach (var cluster in clusters)
                 {
                     var puppetData = await _puppetService.GetPuppetData(cluster.Name, cluster.Domain);
-                    mapClusterIdsToPuppetData.Add(cluster.Id, puppetData);
+                    mapClusterIdsToPuppetData.Add(cluster.Id, new PuppetDataContext { ClusterId = cluster.Id, PuppetData = puppetData });
                 }
 
                 // refresh temp table data
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
-                await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.Users.Select(u => new TempKerberos { ClusterId = x.Key, Kerberos = u.Kerberos })));
-                await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.GroupsWithSponsors.Select(g => new TempGroup { ClusterId = x.Key, Group = g.Name })));
+                await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.Users.Select(u => new TempKerberos { ClusterId = x.Key, Kerberos = u.Kerberos })));
+                await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.GroupsWithSponsors.Select(g => new TempGroup { ClusterId = x.Key, Group = g.Name })));
 
                 var mapKerbsToUserIds = await _dbContext.Users
                     .Where(u => _dbContext.TempKerberos.Any(tg => tg.Kerberos == u.Kerberos))
@@ -61,7 +64,7 @@ namespace Hippo.Core.Services
 
                 // setup desired state of groups and accounts
                 var desiredAccounts = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.Users.Select(u => new Account
+                    .SelectMany(x => x.Value.PuppetData.Users.Select(u => new Account
                     {
                         Name = u.Name,
                         Email = u.Email,
@@ -70,17 +73,17 @@ namespace Hippo.Core.Services
                         ClusterId = x.Key,
                         CreatedOn = now,
                         UpdatedOn = now,
-                        Data = u.Data
+                        Data = ExpandQosReferences(u.Data, x.Value)
                     }))
                     .Where(a => IsValid(a))
                     .ToArray();
                 var desiredGroups = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.GroupsWithSponsors.Select(g => new Group
+                    .SelectMany(x => x.Value.PuppetData.GroupsWithSponsors.Select(g => new Group
                     {
                         Name = g.Name,
                         DisplayName = g.Name,
                         ClusterId = x.Key,
-                        Data = g.Data
+                        Data = ExpandQosReferences(g.Data, x.Value)
                     }))
                     .Where(g => IsValid(g))
                     .ToArray();
@@ -96,7 +99,7 @@ namespace Hippo.Core.Services
                     .ToArrayAsync();
 
                 // insert/update groups and accounts
-                Log.Information("Inserting/Updating {GroupQuantity} groups and {AccountQuantity} accounts", 
+                Log.Information("Inserting/Updating {GroupQuantity} groups and {AccountQuantity} accounts",
                     desiredGroups.Length, desiredAccounts.Length);
                 await _dbContext.BulkInsertOrUpdateAsync(desiredGroups, new BulkConfig
                 {
@@ -122,7 +125,7 @@ namespace Hippo.Core.Services
 
                 // setup desired state of group memberships
                 var desiredGroupAccounts = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.Users
+                    .SelectMany(x => x.Value.PuppetData.Users
                         .Where(u => mapClusterIdAndKerberosToAccountId.ContainsKey((x.Key, u.Kerberos)))
                         .SelectMany(u => u.Groups.Select(g => new GroupMemberAccount
                         {
@@ -131,7 +134,7 @@ namespace Hippo.Core.Services
                         })));
 
                 var desiredGroupAdminAccounts = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.Users
+                    .SelectMany(x => x.Value.PuppetData.Users
                         .Where(u => mapClusterIdAndKerberosToAccountId.ContainsKey((x.Key, u.Kerberos)))
                         .SelectMany(u => u.SponsorForGroups.Select(g => new GroupAdminAccount
                         {
@@ -140,7 +143,7 @@ namespace Hippo.Core.Services
                         })));
 
                 // insert/update/delete group memberships
-                Log.Information("Inserting/Updating/Deleting {GroupMembershipQuantity} group memberships and {GroupAdminMembershipQuantity} group admin memberships", 
+                Log.Information("Inserting/Updating/Deleting {GroupMembershipQuantity} group memberships and {GroupAdminMembershipQuantity} group admin memberships",
                     desiredGroupAccounts.Count(), desiredGroupAdminAccounts.Count());
                 await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAccounts);
                 await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAdminAccounts);
@@ -187,6 +190,67 @@ namespace Hippo.Core.Services
             return true;
         }
 
+
+        /// <summary>
+        /// Converts <paramref name="data"/> to a <seealso cref="JsonElement"/> with all string qos references replaced
+        /// with the objects they reference.
+        /// </summary>
+        /// <remarks>
+        /// A qos string of 'gpum-users-gpum-qos' would map to the object found under $.group.gpum-users.slurm.partitions.gpum.qos
+        /// </remarks>
+        private JsonElement ExpandQosReferences(JsonNode data, PuppetDataContext context)
+        {
+            var partitions = data["slurm"]?["partitions"]?.AsObject();
+            if (partitions != null)
+            {
+                foreach (var kvp in partitions.Where(kvp => kvp.Value != null))
+                {
+                    var stringQosNode = kvp.Value?["qos"];
+                    if (stringQosNode is not JsonValue qosStringValue)
+                        continue; // no value property named "qos"
+                    if (!qosStringValue.TryGetValue<string>(out var qosString))
+                        continue; // qos property is not a string
+                    var match = System.Text.RegularExpressions.Regex.Match(qosString, "(?'groupAndPartition'.+?)-qos");
+                    if (!match.Success)
+                        continue; // qos string doesn't what we were expecting
+                    var expandedQosNode = context.MapQosStringToQosObject.GetOrAdd(qosString, key =>
+                    {
+                        // With an unfortunate convention of separating group and partition names with a character that can appear
+                        // unescaped in both group and partition names, we're forced to iterate through every possible combination
+                        // and check to see if it exists in the dom...
+                        foreach ((var groupName, var partitionName) in GetPossibleGroupAndPartitionNames(match.Groups["groupAndPartition"].Value))
+                        {
+                            var group = context.PuppetData.Groups.FirstOrDefault(g => g.Name == groupName);
+                            if (group == null)
+                                continue; // no groups found matching groupName
+                            var objectQosNode = group.Data?["slurm"]?["partitions"]?[partitionName]?["qos"];
+                            if (objectQosNode == null)
+                                continue; // no qos found for given partitionName
+                            return objectQosNode;
+                        }
+                        // fallback to original value...
+                        return stringQosNode;
+                    });
+                    if (expandedQosNode is not JsonObject)
+                        continue;
+                    // TODO: replace Deserialize with DeepClone; available in dotnet 8
+                    kvp.Value["qos"] = expandedQosNode.Deserialize<JsonObject>();
+                }
+            }
+            return data.Deserialize<JsonElement>();
+        }
+
+        static IEnumerable<(string, string)> GetPossibleGroupAndPartitionNames(string groupAndPartition)
+        {
+            var segments = groupAndPartition.Split("-");
+            if (segments.Length < 2)
+                throw new ArgumentException($"{nameof(groupAndPartition)} should contain at least two segments");
+            for (var i = 1; i < segments.Length; i++)
+            {
+                yield return (string.Join("-", segments.Take(i)), string.Join("-", segments.Skip(i)));
+            }
+        }
+
         static bool IsValid<T>(T obj)
         {
             var results = new List<ValidationResult>();
@@ -197,6 +261,13 @@ namespace Hippo.Core.Services
                 return false;
             }
             return true;
+        }
+
+        private class PuppetDataContext
+        {
+            public int ClusterId { get; set; }
+            public PuppetData PuppetData { get; set; }
+            public ConcurrentDictionary<string, JsonNode> MapQosStringToQosObject { get; set; } = new();
         }
     }
 }
