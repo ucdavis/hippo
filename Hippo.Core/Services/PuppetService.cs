@@ -47,7 +47,7 @@ namespace Hippo.Core.Services
                 var appToken = handler.WriteToken(handler.CreateJwtSecurityToken(
                     issuer: _settings.GithubAppId,
                     issuedAt: now,
-                    expires: now.AddMinutes(10),
+                    expires: now.AddMinutes(9), // Don't request max of 10 in order to avoid differences in clock drift
                     signingCredentials: new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256)
                 ));
                 // send request for an app installation token
