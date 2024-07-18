@@ -763,6 +763,17 @@ namespace Hippo.Web.Controllers
                 return new ProcessingResult { Success = false, Message = "The sum of the percentages must be 100%." };
             }
 
+            //Validate and fix and passed chart strings
+            foreach(var mBilling in model.Billings)
+            {
+                var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(mBilling.ChartString, Directions.Debit);
+                if (chartStringValidation.IsValid == false)
+                {
+                    return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
+                }
+                mBilling.ChartString = chartStringValidation.ChartString;
+            }
+
             //Check for duplicate chart strings
             var duplicateChartStrings = model.Billings.GroupBy(a => a.ChartString).Where(a => a.Count() > 1).Select(a => a.Key).ToList();
             if (duplicateChartStrings.Any())
@@ -779,13 +790,7 @@ namespace Hippo.Web.Controllers
             {
                 if (model.Billings.Any(a => a.ChartString == billing.ChartString))
                 {
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString, Directions.Debit);
-                    if (chartStringValidation.IsValid == false)
-                    {
-                        return new ProcessingResult { Success = false, Message = $"Invalid Chart String: {chartStringValidation.Message}" };
-                    }
                     billing.Percentage = model.Billings.First(a => a.ChartString == billing.ChartString).Percentage;
-                    billing.ChartString = chartStringValidation.ChartString;
                 }
                 else
                 {
@@ -800,19 +805,9 @@ namespace Hippo.Web.Controllers
                 }
                 else
                 {
-                    //Validate the chart string
-                    var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(billing.ChartString, Directions.Debit);
-                    if (chartStringValidation.IsValid == false)
-                    {
-                        return new ProcessingResult
-                        {
-                            Success = false,
-                            Message = $"Invalid Chart String: {chartStringValidation.Message}"
-                        };
-                    }
                     order.Billings.Add(new Billing
                     {
-                        ChartString = chartStringValidation.ChartString,
+                        ChartString = billing.ChartString,
                         Percentage = billing.Percentage,
                         Order = order,
                         Updated = DateTime.UtcNow
