@@ -47,23 +47,41 @@ public class AccountUpdateYamlService : IAccountUpdateService
         var group = queuedEventModel.Data.Groups.SingleOrDefault();
         var serializer = new Serializer();
         return serializer.Serialize(
-            new
-            {
-                groups = group != null ? new[] { group.Name } : new string[] { },
-                account = new
+            string.IsNullOrWhiteSpace(account.Key)
+                ? new
                 {
-                    name = account.Name,
-                    email = account.Email,
-                    kerb = account.Kerberos,
-                    iam = account.Iam,
-                    mothra = account.Mothra,
-                    key = account.Key
-                },
-                meta = new
-                {
-                    cluster = queuedEventModel.Data.Cluster
+                    groups = group != null ? new[] { group.Name } : new string[] { },
+                    account = new
+                    {
+                        name = account.Name,
+                        email = account.Email,
+                        kerb = account.Kerberos,
+                        iam = account.Iam,
+                        mothra = account.Mothra,
+                        // no key in this request, so excluding it from yaml
+                    },
+                    meta = new
+                    {
+                        cluster = queuedEventModel.Data.Cluster
+                    }
                 }
-            }
+                : new
+                {
+                    groups = group != null ? new[] { group.Name } : new string[] { },
+                    account = new
+                    {
+                        name = account.Name,
+                        email = account.Email,
+                        kerb = account.Kerberos,
+                        iam = account.Iam,
+                        mothra = account.Mothra,
+                        key = account.Key
+                    },
+                    meta = new
+                    {
+                        cluster = queuedEventModel.Data.Cluster
+                    }
+                }
         );
     }
 
