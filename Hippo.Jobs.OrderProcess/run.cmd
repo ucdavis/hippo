@@ -1,3 +1,3 @@
 @echo off
 
-dotnet Hippo.Jobs.OderProcess.dll
+dotnet Hippo.Jobs.OrderProcess.dll
