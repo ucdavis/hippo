@@ -50,7 +50,7 @@ namespace Hippo.Jobs.OrderProcess
 
 
             }
-            catch (Exception ex)
+            catch (Exception ex) //Maybe have a try catch for each service call?
             {
                 Log.Error(ex, "Unhandled exception");
                 return 1;
