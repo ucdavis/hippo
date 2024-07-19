@@ -18,11 +18,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Email", "Hippo.Email\Hippo.Email.csproj", "{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Email", "Hippo.Email\Hippo.Email.csproj", "{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.Core", "Hippo.Jobs.Core\Hippo.Jobs.Core.csproj", "{A209A012-28D5-4022-AFEF-8BC7415234C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.Core", "Hippo.Jobs.Core\Hippo.Jobs.Core.csproj", "{A209A012-28D5-4022-AFEF-8BC7415234C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.PuppetSync", "Hippo.Jobs.PuppetSync\Hippo.Jobs.PuppetSync.csproj", "{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.PuppetSync", "Hippo.Jobs.PuppetSync\Hippo.Jobs.PuppetSync.csproj", "{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.OrderProcess", "Hippo.Jobs.OrderProcess\Hippo.Jobs.OrderProcess.csproj", "{78FAF686-A9B2-4894-8275-9F1730056A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,10 @@ Global
 		{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78FAF686-A9B2-4894-8275-9F1730056A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78FAF686-A9B2-4894-8275-9F1730056A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78FAF686-A9B2-4894-8275-9F1730056A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78FAF686-A9B2-4894-8275-9F1730056A62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
