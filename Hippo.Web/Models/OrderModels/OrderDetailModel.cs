@@ -23,7 +23,8 @@ namespace Hippo.Web.Models.OrderModels
         public string BalanceRemaining { get; set; } = string.Empty;
 
         public string InstallmentDate { get; set; } = string.Empty;
-        public string ExpirationDate { get; set; } = string.Empty; //This would default to InstallmentDate + LifeCycle Months        
+        public string ExpirationDate { get; set; } = string.Empty; //This would default to InstallmentDate + LifeCycle Months                                                                   
+        public string NextPaymentDate { get; set; } = string.Empty; 
 
         public User? PiUser { get; set; }
 
@@ -50,6 +51,7 @@ namespace Hippo.Web.Models.OrderModels
                 LifeCycle = order.LifeCycle,
                 InstallmentDate = order.InstallmentDate != null ? order.InstallmentDate.Value.ToPacificTime().ToString("yyyy-MM-dd") : string.Empty,
                 ExpirationDate = order.ExpirationDate != null ? order.ExpirationDate.Value.ToPacificTime().ToString("yyyy-MM-dd") : string.Empty,
+                NextPaymentDate = order.NextPaymentDate != null ? order.NextPaymentDate.Value.ToPacificTime().ToString("yyyy-MM-dd") : string.Empty,
                 Quantity = order.Quantity,
                 Status = order.Status,
                 ExternalReference = order.ExternalReference,
