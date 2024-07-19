@@ -345,7 +345,7 @@ namespace Hippo.Web.Controllers
                     switch(existingOrder.InstallmentType)
                     {
                         case InstallmentTypes.Monthly:
-                            existingOrder.NextPaymentDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1);
+                            existingOrder.NextPaymentDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1).FromPacificTime();
                             break;
                         case InstallmentTypes.Yearly:
                             existingOrder.NextPaymentDate = new DateTime(DateTime.UtcNow.Year + 1, 1, 1).FromPacificTime();

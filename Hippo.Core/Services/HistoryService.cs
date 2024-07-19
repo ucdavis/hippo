@@ -282,7 +282,7 @@ namespace Hippo.Core.Services
                 ClusterId = order.Cluster.Id,
                 Status = order.Status,
                 ActedBy = actedBy,
-                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
+                AdminAction = actedBy != order.PrincipalInvestigator?.Owner,
                 Action = action,
                 Type = HistoryTypes.Detail,
                 Details = Serialize(order)

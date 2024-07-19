@@ -1,11 +1,14 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Hippo.Core.Domain.Product;
 
 namespace Hippo.Core.Services
 {
@@ -18,19 +21,59 @@ namespace Hippo.Core.Services
     public class PaymentsService : IPaymentsService
     {
         private readonly AppDbContext _dbContext;
+        private readonly IHistoryService _historyService;
 
-        public PaymentsService(AppDbContext dbContext)
+        public PaymentsService(AppDbContext dbContext, IHistoryService historyService)
         {
             _dbContext = dbContext;
+            _historyService = historyService;
         }
         public async Task<bool> CreatePayments()
         {
-            //Do a check on all active orders that don't have a next payment date and a balance > 0
-            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
+            //Do a check on all active orders that don't have a next payment date and a balance > 0 
+            var orderCheck = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
+            foreach (var order in orderCheck)
+            {
+                if (order.Payments.Any(a => a.CreatedBy == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
+                {
+                    Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
+                    continue;
+                }
+                switch (order.InstallmentType)
+                {
+                    case InstallmentTypes.Monthly:
+                        order.NextPaymentDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1).FromPacificTime();
+                        break;
+                    case InstallmentTypes.Yearly:
+                        order.NextPaymentDate = new DateTime(DateTime.UtcNow.Year + 1, 1, 1).FromPacificTime();
+                        break;
+                    case InstallmentTypes.OneTime:
+                        order.NextPaymentDate = DateTime.UtcNow.Date;
+                        break;
+                }
+
+                _dbContext.Orders.Update(order);
+            }
+            
+            var orders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
             foreach (var order in orders) {
-                //Check if the installment amount is greater than the balance remaining
-                //Check if there is a payment already created 
-                //check if we have a small amount remaining, if so just pay it all.
+
+                if(order.Total <= order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount))
+                {
+                    order.Status = Order.Statuses.Completed;
+                    order.NextPaymentDate = null;
+                    //TODO: A notification? This Shold happen when sloth updates, but just in case.
+                    _dbContext.Orders.Update(order);
+                    await _dbContext.SaveChangesAsync();
+                    continue;
+                }
+
+                //Need to ignore manual ones...
+                if(order.Payments.Any(a => a.CreatedBy == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
+                {
+                    Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
+                    continue;
+                }
 
                 var paymentAmount = order.InstallmentAmount;
                 if(paymentAmount > Math.Round(order.BalanceRemaining, 2))
@@ -38,21 +81,42 @@ namespace Hippo.Core.Services
                     paymentAmount = Math.Round(order.BalanceRemaining, 2);
                 }
                 var newBalance = Math.Round(order.BalanceRemaining - paymentAmount, 2);
+                
+                //Check if we have a small amount remaining, if so just pay it all.
                 if(newBalance > 0 && newBalance <= 1.0m)
                 {
                     paymentAmount = Math.Round(order.BalanceRemaining, 2);
                 }
 
+                var payment = new Payment
+                {
+                    Order = order,
+                    Amount = paymentAmount,
+                    Status = Payment.Statuses.Created,
+                    CreatedOn = DateTime.UtcNow
+                };
 
-                //var payment = new Payment
-                //{
-                //    Order = order,
-                //    Amount =  Math.Round( order.InstallmentAmount, 2),
-                //    Status = Payment.Statuses.Created
-                //};
-                //_dbContext.Payments.Add(payment);
-                //order.NextPaymentDate = order.NextPaymentDate.Value.AddMonths(1);
-                //_dbContext.Orders.Update(order);
+                order.Payments.Add(payment);
+                order.BalanceRemaining -= paymentAmount;
+
+                //If the balance is 0, then we will complete the order when sloth marks the payment as completed
+                switch (order.InstallmentType)
+                {
+                    case InstallmentTypes.Monthly:
+                        order.NextPaymentDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1).FromPacificTime();
+                        break;
+                    case InstallmentTypes.Yearly:
+                        order.NextPaymentDate = new DateTime(DateTime.UtcNow.Year + 1, 1, 1).FromPacificTime();
+                        break;
+                    case InstallmentTypes.OneTime:
+                        order.NextPaymentDate = DateTime.UtcNow.Date.AddDays(5); //Just to give some time to pay
+                        break;
+                }
+
+                _dbContext.Orders.Update(order);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
             }
 
 
