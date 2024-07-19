@@ -38,7 +38,7 @@ namespace Hippo.Core.Services
                     paymentAmount = Math.Round(order.BalanceRemaining, 2);
                 }
                 var newBalance = Math.Round(order.BalanceRemaining - paymentAmount, 2);
-                if(newBalance > 0 && newBalance < order.InstallmentAmount)
+                if(newBalance > 0 && newBalance <= 1.0m)
                 {
                     paymentAmount = Math.Round(order.BalanceRemaining, 2);
                 }
