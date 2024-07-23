@@ -184,6 +184,7 @@ namespace Hippo.Core.Services
             slothTransaction.AddMetadata("OrderId", payment.OrderId.ToString());
             slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
             slothTransaction.AddMetadata("Cluster", order.Cluster.Name);
+            slothTransaction.AddMetadata("Balance Remaining (Including this)", order.BalanceRemaining.ToString("C"));
             if (!string.IsNullOrWhiteSpace(order.ExternalReference))
             {
                 slothTransaction.AddMetadata("ExternalReference", order.ExternalReference);
