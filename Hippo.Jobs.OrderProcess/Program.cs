@@ -42,6 +42,8 @@ namespace Hippo.Jobs.OrderProcess
 
                 var successUpdates = slothService.UpdatePayments().GetAwaiter().GetResult();
 
+                var successNotify = paymentsService.NotifyAboutFailedPayments().GetAwaiter().GetResult();
+
                 if (!successPayments)
                 {
                     Log.Error("There was one or more problems running the sloth service 1.");                    
@@ -113,12 +115,15 @@ namespace Hippo.Jobs.OrderProcess
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication")); //Don't know if I need this. Copy Pasta 
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
+            services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
 
             services.AddScoped<IPaymentsService, PaymentsService>();
+            services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
             services.AddSingleton<IHistoryService, HistoryService>();
             services.AddHttpClient();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddScoped<ISlothService, SlothService>();
+            //TODO: This will probably need the notification service as well.
 
 
             return services.BuildServiceProvider();
