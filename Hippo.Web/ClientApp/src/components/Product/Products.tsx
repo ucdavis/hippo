@@ -78,6 +78,7 @@ export const Products = () => {
               className="form-control"
               id="fieldDescription"
               value={editProductModel.description}
+              required
               rows={3}
               onChange={(e) => {
                 const model: ProductModel = {
@@ -223,6 +224,7 @@ export const Products = () => {
         notEmptyOrFalsey(editProductModel.name) &&
         notEmptyOrFalsey(editProductModel.category) &&
         notEmptyOrFalsey(editProductModel.units) &&
+        notEmptyOrFalsey(editProductModel.description) &&
         !notification.pending &&
         parseFloat(editProductModel.unitPrice) > 0 &&
         editProductModel.installments > 0 &&
