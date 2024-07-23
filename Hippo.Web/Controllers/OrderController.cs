@@ -343,17 +343,16 @@ namespace Hippo.Web.Controllers
                     existingOrder.Status = Order.Statuses.Active;
 
                     var now = DateTime.UtcNow;
-                    //Ok, it is active, we need to set other things like the next payment date, etc.
-                    switch(existingOrder.InstallmentType)
+                    switch (existingOrder.InstallmentType)
                     {
                         case InstallmentTypes.Monthly:
-                            existingOrder.NextPaymentDate = new DateTime(now.Year, DateTime.UtcNow.Month, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddMonths(1);
+                            existingOrder.NextPaymentDate = new DateTime(now.Year, DateTime.Now.Month, 1).AddMonths(1).Date.FromPacificTime();
                             break;
                         case InstallmentTypes.Yearly:
-                            existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddYears(1);
+                            existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
                             break;
                         case InstallmentTypes.OneTime:
-                            existingOrder.NextPaymentDate = now.AddDays(1);
+                            existingOrder.NextPaymentDate = now.Date.AddDays(1);
                             break;
                     }
 

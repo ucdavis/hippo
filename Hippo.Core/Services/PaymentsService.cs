@@ -34,7 +34,7 @@ namespace Hippo.Core.Services
             var orderCheck = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
             foreach (var order in orderCheck)
             {
-                if (order.Payments.Any(a => a.CreatedBy == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
+                if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
                 {
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
                     continue;
@@ -42,6 +42,7 @@ namespace Hippo.Core.Services
                 SetNextPaymentDate(order);
 
                 _dbContext.Orders.Update(order);
+                await _dbContext.SaveChangesAsync();
             }
             
             var orders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
