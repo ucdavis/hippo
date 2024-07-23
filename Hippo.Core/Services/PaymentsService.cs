@@ -108,13 +108,13 @@ namespace Hippo.Core.Services
             switch (order.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    order.NextPaymentDate = new DateTime(now.Year, DateTime.Now.Month, 1).AddMonths(1).Date.FromPacificTime();
+                    order.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).Date.FromPacificTime();
                     break;
                 case InstallmentTypes.Yearly:
                     order.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    order.NextPaymentDate = now.AddDays(1);
+                    order.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
                     break;
             }
         }
