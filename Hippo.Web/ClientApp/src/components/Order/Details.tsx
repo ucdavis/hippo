@@ -630,17 +630,39 @@ export const Details = () => {
               </div>
             </div>
           )}
-          <br />
           {order.nextPaymentDate && (
-            <div className="form-group">
-              <label htmlFor="fieldNextPaymentDate">Next Payment Date</label>
-              <input
-                className="form-control"
-                id="fieldNextPaymentDate"
-                value={convertToPacificDate(order.nextPaymentDate)}
-                readOnly
-              />
-            </div>
+            <>
+              <div className="form-group">
+                <label htmlFor="fieldNextPaymentDate">Next Payment Date</label>
+                <input
+                  className="form-control"
+                  id="fieldNextPaymentDate"
+                  value={convertToPacificDate(order.nextPaymentDate)}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="fieldNextPaymentDate">
+                  Next Payment Amount
+                </label>
+                <div className="input-group">
+                  <div className="input-group-prepend">
+                    <span
+                      className="input-group-text"
+                      style={{ height: "38px" }}
+                    >
+                      <i className="fas fa-dollar-sign" />
+                    </span>
+                  </div>
+                  <input
+                    className="form-control"
+                    id="fieldNextPaymentDate"
+                    value={order.nextPaymentAmount}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </>
           )}
           {order.payments.length !== 0 && (
             <ReactTable
