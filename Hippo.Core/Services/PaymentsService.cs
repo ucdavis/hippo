@@ -39,20 +39,7 @@ namespace Hippo.Core.Services
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
                     continue;
                 }
-                var now = DateTime.UtcNow;
-                //Ok, it is active, we need to set other things like the next payment date, etc.
-                switch (order.InstallmentType)
-                {
-                    case InstallmentTypes.Monthly:
-                        order.NextPaymentDate = new DateTime(now.Year, DateTime.UtcNow.Month, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddMonths(1);
-                        break;
-                    case InstallmentTypes.Yearly:
-                        order.NextPaymentDate = new DateTime(now.Year, 1, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddYears(1);
-                        break;
-                    case InstallmentTypes.OneTime:
-                        order.NextPaymentDate = now.AddDays(1);
-                        break;
-                }
+                SetNextPaymentDate(order);
 
                 _dbContext.Orders.Update(order);
             }
@@ -101,20 +88,7 @@ namespace Hippo.Core.Services
                 order.Payments.Add(payment);
                 order.BalanceRemaining -= paymentAmount;
 
-                var now = DateTime.UtcNow;
-                //Ok, it is active, we need to set other things like the next payment date, etc.
-                switch (order.InstallmentType)
-                {
-                    case InstallmentTypes.Monthly:
-                        order.NextPaymentDate = new DateTime(now.Year, DateTime.UtcNow.Month, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddMonths(1);
-                        break;
-                    case InstallmentTypes.Yearly:
-                        order.NextPaymentDate = new DateTime(now.Year, 1, 1, now.Hour, now.Minute, now.Second, now.Millisecond).AddYears(1);
-                        break;
-                    case InstallmentTypes.OneTime:
-                        order.NextPaymentDate = now.AddDays(1);
-                        break;
-                }
+                SetNextPaymentDate(order);
 
                 _dbContext.Orders.Update(order);
                 await _dbContext.SaveChangesAsync();
@@ -125,6 +99,23 @@ namespace Hippo.Core.Services
 
             // Create payments
             return true;
+        }
+
+        private void SetNextPaymentDate(Order order)
+        {
+            var now = DateTime.UtcNow;
+            switch (order.InstallmentType)
+            {
+                case InstallmentTypes.Monthly:
+                    order.NextPaymentDate = new DateTime(now.Year, DateTime.Now.Month, 1).AddMonths(1).Date.FromPacificTime();
+                    break;
+                case InstallmentTypes.Yearly:
+                    order.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
+                    break;
+                case InstallmentTypes.OneTime:
+                    order.NextPaymentDate = now.AddDays(1);
+                    break;
+            }
         }
 
         public async Task<bool> NotifyAboutFailedPayments()
