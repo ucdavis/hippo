@@ -107,7 +107,6 @@ namespace Hippo.Core.Services
                 _dbContext.Orders.Update(order);
                 await _dbContext.SaveChangesAsync();
 
-                return true;
             }
 
 
