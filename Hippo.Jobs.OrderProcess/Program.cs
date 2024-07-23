@@ -30,6 +30,13 @@ namespace Hippo.Jobs.OrderProcess
                 var provider = ConfigureServices();
 
                 var slothService = provider.GetRequiredService<ISlothService>();
+                var paymentsService = provider.GetRequiredService<IPaymentsService>();
+
+                var successCreatePayments = paymentsService.CreatePayments().GetAwaiter().GetResult();
+                if(!successCreatePayments)
+                {
+                    Log.Error("There was one or more problems running the payments service 1.");
+                }
 
                 var successPayments = slothService.ProcessPayments().GetAwaiter().GetResult();
 
@@ -50,7 +57,7 @@ namespace Hippo.Jobs.OrderProcess
 
 
             }
-            catch (Exception ex)
+            catch (Exception ex) //Maybe have a try catch for each service call?
             {
                 Log.Error(ex, "Unhandled exception");
                 return 1;
@@ -107,6 +114,7 @@ namespace Hippo.Jobs.OrderProcess
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
 
+            services.AddScoped<IPaymentsService, PaymentsService>();
             services.AddSingleton<IHistoryService, HistoryService>();
             services.AddHttpClient();
             services.AddSingleton<ISecretsService, SecretsService>();

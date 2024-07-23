@@ -341,6 +341,23 @@ namespace Hippo.Web.Controllers
                     }
 
                     existingOrder.Status = Order.Statuses.Active;
+
+                    var now = DateTime.UtcNow;
+                    switch (existingOrder.InstallmentType)
+                    {
+                        case InstallmentTypes.Monthly:
+                            existingOrder.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).Date.FromPacificTime();
+                            break;
+                        case InstallmentTypes.Yearly:
+                            existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
+                            break;
+                        case InstallmentTypes.OneTime:
+                            existingOrder.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
+                            break;
+                    }
+
+
+
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
 
@@ -552,6 +569,11 @@ namespace Hippo.Web.Controllers
 
                 order.Adjustment = model.Adjustment;
                 order.AdjustmentReason = model.AdjustmentReason;
+                if(order.Adjustment != 0)
+                {
+                    order.Total = order.Adjustment + order.SubTotal;
+                    order.BalanceRemaining = order.Total;
+                }
             }
             // Deal with OrderMeta data
             foreach (var metaData in model.MetaData)
@@ -642,6 +664,11 @@ namespace Hippo.Web.Controllers
                     existingOrder.Description = model.Description;
                     existingOrder.Adjustment = model.Adjustment;
                     existingOrder.AdjustmentReason = model.AdjustmentReason;
+                    if (existingOrder.Adjustment != 0)
+                    {
+                        existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
+                        existingOrder.BalanceRemaining = existingOrder.Total;
+                    }
                     existingOrder.AdminNotes = model.AdminNotes;
                     existingOrder.InstallmentType = model.InstallmentType; //TODO, validate that this is set correctly
                     existingOrder.Installments = model.Installments;
