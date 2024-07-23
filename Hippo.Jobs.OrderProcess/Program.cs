@@ -35,7 +35,7 @@ namespace Hippo.Jobs.OrderProcess
                 var successCreatePayments = paymentsService.CreatePayments().GetAwaiter().GetResult();
                 if(!successCreatePayments)
                 {
-                    Log.Error("There was one or more problems running the payments service 1.");
+                    Log.Error("There was one or more problems running the CreatePayments service.");
                 }
 
                 var successPayments = slothService.ProcessPayments().GetAwaiter().GetResult();
@@ -51,6 +51,10 @@ namespace Hippo.Jobs.OrderProcess
                 if (!successUpdates)
                 {
                     Log.Error("There was one or more problems running the sloth service 2.");
+                }
+                if(!successNotify)
+                {
+                    Log.Error("There was one or more problems running the NotifyAboutFailedPayments service.");
                 }
                 if (!successPayments || !successUpdates)
                 {

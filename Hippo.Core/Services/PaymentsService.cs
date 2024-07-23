@@ -183,8 +183,7 @@ namespace Hippo.Core.Services
                 }
 
             }
-
-            //var orders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date < now.Date).ToListAsync();
+            
             return true;
         }
     }
