@@ -59,9 +59,22 @@ namespace Hippo.Core.Services
                 }
 
                 //Need to ignore manual ones...
-                if(order.Payments.Any(a => a.CreatedBy == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
+                if(order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
                 {
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
+                    continue;
+                }
+
+                //TODO: Recalculate balance remaining in case DB value is wrong?
+                var localBalance = Math.Round( order.Total - order.Payments.Where(a => a.Status == Payment.Statuses.Completed || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount), 2);
+                if (localBalance != order.BalanceRemaining)
+                {
+                    Log.Information("Order {0} has a balance mismatch. Local: {1} DB: {2}", order.Id, localBalance, order.BalanceRemaining);
+                    order.BalanceRemaining = localBalance;
+                }
+                if(order.BalanceRemaining <= 0)
+                {
+                    Log.Information("Order {0} has a balance of 0. Skipping", order.Id);
                     continue;
                 }
 
