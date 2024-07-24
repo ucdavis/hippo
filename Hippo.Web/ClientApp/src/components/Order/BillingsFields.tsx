@@ -131,7 +131,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         method: "GET",
       },
     );
-    //console.log(response);
+
     if (response.ok) {
       const result = await response.json();
       if (chartString !== result.chartString) {

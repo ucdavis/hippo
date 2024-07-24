@@ -82,7 +82,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
     );
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       if (data?.name) {
         setFoundPI(`Found User ${data.name} (${data.email})`);
       } else {

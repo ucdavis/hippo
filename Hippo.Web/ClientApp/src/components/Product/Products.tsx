@@ -245,7 +245,7 @@ export const Products = () => {
   const handleDelete = useCallback(
     async (id: number) => {
       const product = products?.find((p) => p.id === id);
-      // console.log(product);
+
       if (product === undefined) {
         alert("Product not found");
         return;
@@ -287,7 +287,6 @@ export const Products = () => {
   const handleEdit = useCallback(
     async (id: number) => {
       const product = products?.find((p) => p.id === id);
-      console.log(product);
       if (product === undefined) {
         alert("Product not found");
         return;

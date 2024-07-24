@@ -20,6 +20,8 @@ import {
   convertToPacificDate,
   convertToPacificTime,
 } from "../../util/DateHelper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -42,7 +44,7 @@ export const Details = () => {
   const calculateBalanceRemaining = (data: any) => {
     const balanceRemaining = parseFloat(data.balanceRemaining);
     setBalanceRemaining(balanceRemaining);
-    const balancePending = data?.payments
+    const balancePending = data.payments
       .filter(
         (payment) =>
           payment.status !== "Completed" && payment.status !== "Cancelled",
@@ -59,7 +61,7 @@ export const Details = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+
         setOrder(data);
         calculateBalanceRemaining(data);
       } else {
@@ -142,7 +144,7 @@ export const Details = () => {
       id: "amount",
       cell: (value) => (
         <span>
-          <i className="fas fa-dollar-sign" />{" "}
+          <FontAwesomeIcon icon={faDollarSign} />{" "}
           {value.row.original.amount.toFixed(2)}
         </span>
       ),
@@ -266,7 +268,6 @@ export const Details = () => {
     if (!confirmed) {
       return;
     }
-    //console.log(editPaymentModel);
 
     const req = authenticatedFetch(
       `/api/${cluster}/order/makepayment/${orderId}?amount=${editPaymentModel.amount}`,
@@ -287,7 +288,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
       setEditPaymentModel({
         id: 0,
@@ -359,7 +359,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
     }
   }, [
@@ -402,7 +401,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data); //Maybe redirect?
     }
   };
@@ -457,7 +455,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
     }
   };
@@ -599,7 +596,7 @@ export const Details = () => {
             <div className="input-group">
               <div className="input-group-prepend">
                 <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
+                  <FontAwesomeIcon icon={faDollarSign} />
                 </span>
               </div>
               <input
@@ -618,7 +615,7 @@ export const Details = () => {
               <div className="input-group">
                 <div className="input-group-prepend">
                   <span className="input-group-text" style={{ height: "38px" }}>
-                    <i className="fas fa-dollar-sign" />
+                    <FontAwesomeIcon icon={faDollarSign} />
                   </span>
                 </div>
                 <input
@@ -651,7 +648,7 @@ export const Details = () => {
                       className="input-group-text"
                       style={{ height: "38px" }}
                     >
-                      <i className="fas fa-dollar-sign" />
+                      <FontAwesomeIcon icon={faDollarSign} />
                     </span>
                   </div>
                   <input
