@@ -31,7 +31,7 @@ namespace Hippo.Core.Services
         public async Task<bool> CreatePayments()
         {
             //Do a check on all active orders that don't have a next payment date and a balance > 0 
-            var orderCheck = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
+            var orderCheck = await _dbContext.Orders.Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
             foreach (var order in orderCheck)
             {
                 if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
