@@ -44,7 +44,7 @@ export const Details = () => {
   const calculateBalanceRemaining = (data: any) => {
     const balanceRemaining = parseFloat(data.balanceRemaining);
     setBalanceRemaining(balanceRemaining);
-    const balancePending = data?.payments
+    const balancePending = data.payments
       .filter(
         (payment) =>
           payment.status !== "Completed" && payment.status !== "Cancelled",
