@@ -155,7 +155,7 @@ public class AdminController : SuperController
 
         if (existingFinancialDetail != null)
         {
-            var apiKey = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+            var apiKey = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey);
             if (!string.IsNullOrWhiteSpace(apiKey))
             {
                 var sb = new StringBuilder();
@@ -194,7 +194,7 @@ public class AdminController : SuperController
             existingFinancialDetail = new FinancialDetail
             {
                 ClusterId = cluster.Id,
-                SecretAccessKey = Guid.NewGuid(),
+                SecretAccessKey = Guid.NewGuid().ToString(),
 
             };
         }
@@ -205,9 +205,9 @@ public class AdminController : SuperController
         }
         if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
         {
-            await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey.ToString(), model.FinancialSystemApiKey);
+            await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey, model.FinancialSystemApiKey);
         }
-        //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+        //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey);
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
         existingFinancialDetail.ChartString = validateChartString.ChartString;
         existingFinancialDetail.AutoApprove = model.AutoApprove;
