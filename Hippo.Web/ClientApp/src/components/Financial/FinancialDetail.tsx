@@ -12,7 +12,7 @@ declare const window: Window &
 
 export const FinancialDetail = () => {
   const [financialDetail, setFinancialDetail] =
-    useState<FinancialDetailModel | null>(null);
+    useState<FinancialDetailModel>();
   const { cluster: clusterName } = useParams();
   const [notification, setNotification] = usePromiseNotification();
   const [chartStringValidation, setChartStringValidation] =
@@ -77,8 +77,6 @@ export const FinancialDetail = () => {
     const chart = await window.Finjector.findChartSegmentString();
 
     if (chart.status === "success") {
-      //alert("Chart Segment: " + chart.data);
-
       financialDetail.chartString = chart.data;
 
       setFinancialDetail((prevFinancialDetail) => ({
