@@ -118,14 +118,14 @@ export const Details = () => {
       id: "actedBy",
       cell: (value) => (
         <>
-          {value.row.original.actedBy && (
+          {value.row.original.actedBy ? (
             <>
-              {value.row.original.actedBy.firstName}{" "}
-              {value.row.original.actedBy.lastName} (
+              {value.row.original.actedBy.name} (
               {value.row.original.actedBy.email})
             </>
+          ) : (
+            <>System</>
           )}
-          {!value.row.original.actedBy && <>System</>}
         </>
       ),
     }),
@@ -310,18 +310,18 @@ export const Details = () => {
             <div>Set Status to: {updateStatusModel.newStatus}</div>
             <hr />
             {updateStatusModel.newStatus === "Submitted" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will submit the order to the cluster admins for processing.
               </div>
             )}
             {updateStatusModel.newStatus === "Processing" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will indicate that an admin will start working on the
                 order.
               </div>
             )}
             {updateStatusModel.newStatus === "Active" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will move the order to active and allow manual billing as
                 well as scheduled billing.
               </div>
@@ -507,7 +507,7 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={["Submitted", "Processing"].includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={() => updateStatus()}>
+            <button className="btn btn-primary" onClick={updateStatus}>
               {" "}
               Approve Order
             </button>{" "}
@@ -520,7 +520,7 @@ export const Details = () => {
               order.billings.length > 0
             }
           >
-            <button className="btn btn-primary" onClick={() => updateStatus()}>
+            <button className="btn btn-primary" onClick={updateStatus}>
               {" "}
               Approve Order
             </button>{" "}
@@ -531,7 +531,7 @@ export const Details = () => {
               ["Created", "Submitted"].includes(order.status)
             }
           >
-            <button className="btn btn-primary" onClick={() => cancelOrder()}>
+            <button className="btn btn-primary" onClick={cancelOrder}>
               {" "}
               Cancel Order
             </button>{" "}
@@ -540,7 +540,7 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={["Submitted", "Processing"].includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={() => rejectOrder()}>
+            <button className="btn btn-primary" onClick={rejectOrder}>
               {" "}
               Reject Order
             </button>{" "}
@@ -564,7 +564,7 @@ export const Details = () => {
               balanceRemaining > 0
             }
           >
-            <button className="btn btn-primary" onClick={() => makePayment()}>
+            <button className="btn btn-primary" onClick={makePayment}>
               {" "}
               Onetime Payment
             </button>
