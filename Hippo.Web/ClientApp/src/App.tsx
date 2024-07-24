@@ -23,9 +23,9 @@ import { FinancialDetail } from "./components/Financial/FinancialDetail";
 import { Products } from "./components/Product/Products";
 import { Orders } from "./components/Order/Orders";
 import { Details } from "./components/Order/Details";
-import CreateOrder from "./components/Order/CreateOrder";
-import EditOrder from "./components/Order/EditOrder";
-import UpdateChartStrings from "./components/Order/UpdateChartStrings";
+import { CreateOrder } from "./components/Order/CreateOrder";
+import { EditOrder } from "./components/Order/EditOrder";
+import { UpdateChartStrings } from "./components/Order/UpdateChartStrings";
 import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
 import NotFound from "./NotFound";
 

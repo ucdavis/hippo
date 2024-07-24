@@ -155,7 +155,7 @@ public class AdminController : SuperController
 
         if (existingFinancialDetail != null)
         {
-            var apiKey = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+            var apiKey = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey);
             if (!string.IsNullOrWhiteSpace(apiKey))
             {
                 var sb = new StringBuilder();
@@ -194,7 +194,7 @@ public class AdminController : SuperController
             existingFinancialDetail = new FinancialDetail
             {
                 ClusterId = cluster.Id,
-                SecretAccessKey = Guid.NewGuid(),
+                SecretAccessKey = Guid.NewGuid().ToString(),
 
             };
         }
@@ -205,9 +205,9 @@ public class AdminController : SuperController
         }
         if (!string.IsNullOrWhiteSpace(model.FinancialSystemApiKey))
         {
-            await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey.ToString(), model.FinancialSystemApiKey);
+            await _secretsService.SetSecret(existingFinancialDetail.SecretAccessKey, model.FinancialSystemApiKey);
         }
-        //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey.ToString());
+        //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey);
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
         existingFinancialDetail.ChartString = validateChartString.ChartString;
         existingFinancialDetail.AutoApprove = model.AutoApprove;
@@ -222,7 +222,37 @@ public class AdminController : SuperController
         }
 
         await _dbContext.SaveChangesAsync();
-        return Ok(existingFinancialDetail);
+
+        var clusterModel = new FinancialDetailModel
+        {
+            FinancialSystemApiKey = string.Empty,
+            FinancialSystemApiSource = existingFinancialDetail?.FinancialSystemApiSource,
+            ChartString = existingFinancialDetail?.ChartString,
+            AutoApprove = existingFinancialDetail?.AutoApprove ?? false,
+            MaskedApiKey = "NOT SET"
+        };
+        var apiKey = await _secretsService.GetSecret(existingFinancialDetail?.SecretAccessKey);
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < apiKey.Length; i++)
+            {
+                if (i < 4 || i >= apiKey.Length - 4)
+                {
+                    sb.Append(apiKey[i]);
+                }
+                else
+                {
+                    sb.Append('*');
+                }
+            }
+
+            clusterModel.MaskedApiKey = sb.ToString();
+
+            clusterModel.IsSlothValid = await _slothService.TestApiKey(cluster.Id);
+        }
+
+        return Ok(clusterModel);
 
     }
 }

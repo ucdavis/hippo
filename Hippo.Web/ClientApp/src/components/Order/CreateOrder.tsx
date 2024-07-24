@@ -34,7 +34,7 @@ const defaultOrder: OrderModel = {
   history: [],
   percentTotal: 0,
 };
-const CreateOrder: React.FC = () => {
+export const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
@@ -55,12 +55,6 @@ const CreateOrder: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setOrder(data);
-          // const balanceRemaining = parseFloat(data.balanceRemaining);
-          // setBalanceRemaining(balanceRemaining);
-          // const balancePending = data?.payments
-          //   .filter((payment) => payment.status !== "Completed")
-          //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-          // setBalancePending(balancePending);
         } else {
           alert("Error fetching product for order");
         }
@@ -115,9 +109,6 @@ const CreateOrder: React.FC = () => {
       billings: updatedOrder.billings,
     };
 
-    console.log(editedOrder);
-    console.log(JSON.stringify(editedOrder));
-
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",
       body: JSON.stringify(editedOrder),
@@ -171,5 +162,3 @@ const CreateOrder: React.FC = () => {
     </div>
   );
 };
-
-export default CreateOrder;

@@ -12,7 +12,7 @@ declare const window: Window &
 
 export const FinancialDetail = () => {
   const [financialDetail, setFinancialDetail] =
-    useState<FinancialDetailModel | null>(null);
+    useState<FinancialDetailModel>();
   const { cluster: clusterName } = useParams();
   const [notification, setNotification] = usePromiseNotification();
   const [chartStringValidation, setChartStringValidation] =
@@ -68,8 +68,10 @@ export const FinancialDetail = () => {
       },
     );
     if ((await request).ok) {
-      // refresh the page
-      window.location.reload();
+      // refresh the data
+      const data = await (await request).json();
+      setFinancialDetail(data);
+      await validateChartString(data.chartString);
     }
   };
 
@@ -77,8 +79,6 @@ export const FinancialDetail = () => {
     const chart = await window.Finjector.findChartSegmentString();
 
     if (chart.status === "success") {
-      //alert("Chart Segment: " + chart.data);
-
       financialDetail.chartString = chart.data;
 
       setFinancialDetail((prevFinancialDetail) => ({
@@ -99,10 +99,9 @@ export const FinancialDetail = () => {
         method: "GET",
       },
     );
-    //console.log(response);
+
     if (response.ok) {
       const result = await response.json();
-      console.log(result);
       setChartStringValidation(result);
       if (result.chartString) {
         setFinancialDetail((prevFinancialDetail) => ({

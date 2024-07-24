@@ -61,7 +61,7 @@ namespace Hippo.Core.Services
             try
             {
                 var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
-                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
+                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey);
 
                 using var client = _clientFactory.CreateClient();
                 client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Sources/");
@@ -111,7 +111,7 @@ namespace Hippo.Core.Services
                 {
                     var clusterId = group.Key;
                     var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
-                    var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
+                    var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey);
 
                     using var client = _clientFactory.CreateClient();
                     client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}");
@@ -248,7 +248,7 @@ namespace Hippo.Core.Services
             {
                 var clusterId = group.Key;
                 var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
-                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey.ToString());
+                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey);
 
                 using var client = _clientFactory.CreateClient();
                 client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");

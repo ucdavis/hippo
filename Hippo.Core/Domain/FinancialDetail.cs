@@ -7,7 +7,7 @@ namespace Hippo.Core.Domain
     {
         [Key]
         public int Id { get; set; }
-        public Guid SecretAccessKey { get; set; } //Used to get the FinancialSystemApiKey from the secret service
+        public string SecretAccessKey { get; set; } //Used to get the FinancialSystemApiKey from the secret service
         [Required]
         [MaxLength(50)]
         public string FinancialSystemApiSource { get; set; }
