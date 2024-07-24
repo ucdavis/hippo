@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { OrderModel } from "../../types";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
@@ -40,6 +40,7 @@ export const CreateOrder: React.FC = () => {
   const [order, setOrder] = useState<OrderModel>(null);
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -63,12 +64,12 @@ export const CreateOrder: React.FC = () => {
       fetchProductOrder();
     } else {
       if (isClusterAdmin === false) {
-        window.location.href = `/${cluster}/product/index`;
+        navigate(`/${cluster}/product/index`);
       } else {
         setOrder(defaultOrder);
       }
     }
-  }, [cluster, isClusterAdmin, productId]);
+  }, [cluster, isClusterAdmin, navigate, productId]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -128,7 +129,7 @@ export const CreateOrder: React.FC = () => {
     if (response.ok) {
       const data = await response.json();
 
-      window.location.href = `/${cluster}/order/details/${data.id}`;
+      navigate(`/${cluster}/order/details/${data.id}`);
     }
 
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
