@@ -34,7 +34,7 @@ const defaultOrder: OrderModel = {
   history: [],
   percentTotal: 0,
 };
-const CreateOrder: React.FC = () => {
+export const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
@@ -171,5 +171,3 @@ const CreateOrder: React.FC = () => {
     </div>
   );
 };
-
-export default CreateOrder;

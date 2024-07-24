@@ -6,7 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
-const EditOrder: React.FC = () => {
+export const EditOrder: React.FC = () => {
   const { cluster, orderId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
@@ -131,5 +131,3 @@ const EditOrder: React.FC = () => {
     </div>
   );
 };
-
-export default EditOrder;
