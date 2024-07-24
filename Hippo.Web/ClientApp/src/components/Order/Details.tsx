@@ -118,14 +118,14 @@ export const Details = () => {
       id: "actedBy",
       cell: (value) => (
         <>
-          {value.row.original.actedBy && (
+          {value.row.original.actedBy ? (
             <>
-              {value.row.original.actedBy.firstName}{" "}
-              {value.row.original.actedBy.lastName} (
+              {value.row.original.actedBy.name} (
               {value.row.original.actedBy.email})
             </>
+          ) : (
+            <>System</>
           )}
-          {!value.row.original.actedBy && <>System</>}
         </>
       ),
     }),
