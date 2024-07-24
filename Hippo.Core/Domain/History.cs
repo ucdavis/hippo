@@ -99,7 +99,7 @@ namespace Hippo.Core.Domain
             public const string ChartStringUpdated = "Chart String Updated";
             public const string PaymentFailed = "Payment Failed";
 
-            public static List<string> TypeList = new List<string>
+            public static List<string> OrderActionList = new List<string>
             {
                 Created,
                 Updated,

@@ -134,7 +134,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save([FromBody] OrderPostModel model) //TODO: Might need to change this to a post model....
+        public async Task<IActionResult> Save([FromBody] OrderPostModel model) 
         {
             //Pass the product id too? 
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);            
