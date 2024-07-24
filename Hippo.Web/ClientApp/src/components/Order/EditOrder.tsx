@@ -26,7 +26,6 @@ export const EditOrder: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setOrder(data);
       } else {
         alert("Error fetching order");
@@ -74,10 +73,6 @@ export const EditOrder: React.FC = () => {
       installmentDate: updatedOrder.installmentDate,
       billings: updatedOrder.billings,
     };
-
-    console.log(editedOrder);
-    console.log(JSON.stringify(editedOrder));
-    debugger;
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",

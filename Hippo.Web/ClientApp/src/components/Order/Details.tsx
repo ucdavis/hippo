@@ -61,7 +61,7 @@ export const Details = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+
         setOrder(data);
         calculateBalanceRemaining(data);
       } else {
@@ -268,7 +268,6 @@ export const Details = () => {
     if (!confirmed) {
       return;
     }
-    //console.log(editPaymentModel);
 
     const req = authenticatedFetch(
       `/api/${cluster}/order/makepayment/${orderId}?amount=${editPaymentModel.amount}`,
@@ -289,7 +288,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
       setEditPaymentModel({
         id: 0,
@@ -361,7 +359,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
     }
   }, [
@@ -404,7 +401,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data); //Maybe redirect?
     }
   };
@@ -459,7 +455,6 @@ export const Details = () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setOrder(data);
     }
   };
