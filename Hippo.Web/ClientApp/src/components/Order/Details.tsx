@@ -310,18 +310,18 @@ export const Details = () => {
             <div>Set Status to: {updateStatusModel.newStatus}</div>
             <hr />
             {updateStatusModel.newStatus === "Submitted" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will submit the order to the cluster admins for processing.
               </div>
             )}
             {updateStatusModel.newStatus === "Processing" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will indicate that an admin will start working on the
                 order.
               </div>
             )}
             {updateStatusModel.newStatus === "Active" && (
-              <div style={{ backgroundColor: "#90ee90" }}>
+              <div className="merlot-bg">
                 This will move the order to active and allow manual billing as
                 well as scheduled billing.
               </div>
