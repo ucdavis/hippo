@@ -507,7 +507,7 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={["Submitted", "Processing"].includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={() => updateStatus()}>
+            <button className="btn btn-primary" onClick={updateStatus}>
               {" "}
               Approve Order
             </button>{" "}
@@ -520,7 +520,7 @@ export const Details = () => {
               order.billings.length > 0
             }
           >
-            <button className="btn btn-primary" onClick={() => updateStatus()}>
+            <button className="btn btn-primary" onClick={updateStatus}>
               {" "}
               Approve Order
             </button>{" "}
@@ -531,7 +531,7 @@ export const Details = () => {
               ["Created", "Submitted"].includes(order.status)
             }
           >
-            <button className="btn btn-primary" onClick={() => cancelOrder()}>
+            <button className="btn btn-primary" onClick={cancelOrder}>
               {" "}
               Cancel Order
             </button>{" "}
@@ -540,7 +540,7 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={["Submitted", "Processing"].includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={() => rejectOrder()}>
+            <button className="btn btn-primary" onClick={rejectOrder}>
               {" "}
               Reject Order
             </button>{" "}
@@ -564,7 +564,7 @@ export const Details = () => {
               balanceRemaining > 0
             }
           >
-            <button className="btn btn-primary" onClick={() => makePayment()}>
+            <button className="btn btn-primary" onClick={makePayment}>
               {" "}
               Onetime Payment
             </button>
