@@ -55,12 +55,6 @@ export const CreateOrder: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setOrder(data);
-          // const balanceRemaining = parseFloat(data.balanceRemaining);
-          // setBalanceRemaining(balanceRemaining);
-          // const balancePending = data?.payments
-          //   .filter((payment) => payment.status !== "Completed")
-          //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-          // setBalancePending(balancePending);
         } else {
           alert("Error fetching product for order");
         }
@@ -114,9 +108,6 @@ export const CreateOrder: React.FC = () => {
       installmentDate: updatedOrder.installmentDate,
       billings: updatedOrder.billings,
     };
-
-    console.log(editedOrder);
-    console.log(JSON.stringify(editedOrder));
 
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",
