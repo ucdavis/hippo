@@ -88,8 +88,6 @@ namespace Hippo.Web.Controllers
             //TODO: When accounts has an IsActive flag, we will need to ignore the query filters.
 
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
             if (model == null)
@@ -261,8 +259,6 @@ namespace Hippo.Web.Controllers
 
             //To make sure the model has all the info needed to update the UI
             var rtmodel = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == model.Id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
@@ -371,8 +367,6 @@ namespace Hippo.Web.Controllers
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
@@ -408,8 +402,6 @@ namespace Hippo.Web.Controllers
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
@@ -449,8 +441,6 @@ namespace Hippo.Web.Controllers
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
@@ -514,8 +504,6 @@ namespace Hippo.Web.Controllers
             await _dbContext.SaveChangesAsync();
 
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
-                .Include(a => a.MetaData).Include(a => a.Payments).Include(a => a.PrincipalInvestigator).ThenInclude(a => a.Owner)
-                .Include(a => a.History.Where(w => w.Type == History.HistoryTypes.Primary)).ThenInclude(a => a.ActedBy)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
