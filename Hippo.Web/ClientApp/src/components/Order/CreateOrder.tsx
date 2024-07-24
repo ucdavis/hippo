@@ -145,21 +145,19 @@ export const CreateOrder: React.FC = () => {
 
   return (
     <div>
-      {order && (
-        <div>
-          <h2>Create Order</h2>
+      <div>
+        <h2>Create Order</h2>
 
-          <OrderForm
-            orderProp={order}
-            readOnly={false}
-            isAdmin={isClusterAdmin}
-            cluster={cluster}
-            onlyChartStrings={false}
-            onSubmit={submitOrder}
-          />
-          {notification.pending && <div>Saving...</div>}
-        </div>
-      )}
+        <OrderForm
+          orderProp={order}
+          readOnly={false}
+          isAdmin={isClusterAdmin}
+          cluster={cluster}
+          onlyChartStrings={false}
+          onSubmit={submitOrder}
+        />
+        {notification.pending && <div>Saving...</div>}
+      </div>
     </div>
   );
 };
