@@ -68,14 +68,10 @@ export const FinancialDetail = () => {
       },
     );
     if ((await request).ok) {
-      // refresh the page
-
+      // refresh the data
       const data = await (await request).json();
-      console.log(data);
       setFinancialDetail(data);
       await validateChartString(data.chartString);
-      //debugger;
-      //window.location.reload();
     }
   };
 
@@ -103,10 +99,9 @@ export const FinancialDetail = () => {
         method: "GET",
       },
     );
-    //console.log(response);
+
     if (response.ok) {
       const result = await response.json();
-      console.log(result);
       setChartStringValidation(result);
       if (result.chartString) {
         setFinancialDetail((prevFinancialDetail) => ({
