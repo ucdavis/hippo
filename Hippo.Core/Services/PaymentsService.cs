@@ -44,8 +44,9 @@ namespace Hippo.Core.Services
                 _dbContext.Orders.Update(order);
                 await _dbContext.SaveChangesAsync();
             }
-            
-            var orders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
+
+            //If I add a history call here, I'll also need to get the cluster .Include(a => a.Cluster)
+            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
             foreach (var order in orders) {
 
                 if(order.Total <= order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount))
