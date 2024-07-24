@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { OrderModel } from "../../types";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
-const UpdateChartStrings: React.FC = () => {
+export const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
   const [order, setOrder] = useState<OrderModel>(null);
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -25,7 +26,6 @@ const UpdateChartStrings: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setOrder(data);
       } else {
         alert("Error fetching order");
@@ -74,10 +74,6 @@ const UpdateChartStrings: React.FC = () => {
       billings: updatedOrder.billings,
     };
 
-    console.log(editedOrder);
-    console.log(JSON.stringify(editedOrder));
-    debugger;
-
     const req = authenticatedFetch(`/api/${cluster}/order/UpdateBilling`, {
       method: "POST",
       body: JSON.stringify(editedOrder),
@@ -96,8 +92,7 @@ const UpdateChartStrings: React.FC = () => {
 
     if (response.ok) {
       const data = await response.json();
-
-      window.location.href = `/${cluster}/order/details/${data.id}`;
+      navigate(`/${cluster}/order/details/${data.id}`);
     }
 
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
@@ -131,5 +126,3 @@ const UpdateChartStrings: React.FC = () => {
     </div>
   );
 };
-
-export default UpdateChartStrings;

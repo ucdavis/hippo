@@ -217,7 +217,7 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("SecretAccessKey")
+                    b.Property<string>("SecretAccessKey")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
