@@ -72,7 +72,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   const lookupChartString = async (index: number) => {
     const existingBilling = getValues("billings")[index];
-    //console.log(existingBilling);
 
     const chart = await window.Finjector.findChartSegmentString();
 
@@ -95,7 +94,9 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         },
       });
     } else {
-      alert("Failed!");
+      alert(
+        "Unknown error happened. Please try again and let us know if the problem persists.",
+      );
     }
   };
 
@@ -130,7 +131,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         method: "GET",
       },
     );
-    //console.log(response);
+
     if (response.ok) {
       const result = await response.json();
       if (chartString !== result.chartString) {
