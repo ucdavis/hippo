@@ -222,7 +222,37 @@ public class AdminController : SuperController
         }
 
         await _dbContext.SaveChangesAsync();
-        return Ok(existingFinancialDetail);
+
+        var clusterModel = new FinancialDetailModel
+        {
+            FinancialSystemApiKey = string.Empty,
+            FinancialSystemApiSource = existingFinancialDetail?.FinancialSystemApiSource,
+            ChartString = existingFinancialDetail?.ChartString,
+            AutoApprove = existingFinancialDetail?.AutoApprove ?? false,
+            MaskedApiKey = "NOT SET"
+        };
+        var apiKey = await _secretsService.GetSecret(existingFinancialDetail?.SecretAccessKey);
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < apiKey.Length; i++)
+            {
+                if (i < 4 || i >= apiKey.Length - 4)
+                {
+                    sb.Append(apiKey[i]);
+                }
+                else
+                {
+                    sb.Append('*');
+                }
+            }
+
+            clusterModel.MaskedApiKey = sb.ToString();
+
+            clusterModel.IsSlothValid = await _slothService.TestApiKey(cluster.Id);
+        }
+
+        return Ok(clusterModel);
 
     }
 }

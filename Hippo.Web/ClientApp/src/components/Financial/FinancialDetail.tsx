@@ -69,7 +69,13 @@ export const FinancialDetail = () => {
     );
     if ((await request).ok) {
       // refresh the page
-      window.location.reload();
+
+      const data = await (await request).json();
+      console.log(data);
+      setFinancialDetail(data);
+      await validateChartString(data.chartString);
+      //debugger;
+      //window.location.reload();
     }
   };
 
