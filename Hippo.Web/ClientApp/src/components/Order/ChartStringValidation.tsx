@@ -15,7 +15,7 @@ const ChartStringValidation: React.FC<ChartStringValidationProps> = ({
 }) => {
   const [chartStringValidation, setChartStringValidation] =
     React.useState<ChartStringValidationModel>(null);
-  const [status, setStatus] = React.useState<ChartStringStatus>(undefined);
+  const [status, setStatus] = React.useState<ChartStringStatus>();
 
   React.useEffect(() => {
     if (!chartString) {
