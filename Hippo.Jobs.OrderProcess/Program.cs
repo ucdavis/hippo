@@ -35,12 +35,14 @@ namespace Hippo.Jobs.OrderProcess
                 var successCreatePayments = paymentsService.CreatePayments().GetAwaiter().GetResult();
                 if(!successCreatePayments)
                 {
-                    Log.Error("There was one or more problems running the payments service 1.");
+                    Log.Error("There was one or more problems running the CreatePayments service.");
                 }
 
                 var successPayments = slothService.ProcessPayments().GetAwaiter().GetResult();
 
                 var successUpdates = slothService.UpdatePayments().GetAwaiter().GetResult();
+
+                var successNotify = paymentsService.NotifyAboutFailedPayments().GetAwaiter().GetResult();
 
                 if (!successPayments)
                 {
@@ -49,6 +51,10 @@ namespace Hippo.Jobs.OrderProcess
                 if (!successUpdates)
                 {
                     Log.Error("There was one or more problems running the sloth service 2.");
+                }
+                if(!successNotify)
+                {
+                    Log.Error("There was one or more problems running the NotifyAboutFailedPayments service.");
                 }
                 if (!successPayments || !successUpdates)
                 {
@@ -113,12 +119,15 @@ namespace Hippo.Jobs.OrderProcess
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication")); //Don't know if I need this. Copy Pasta 
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
+            services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
 
             services.AddScoped<IPaymentsService, PaymentsService>();
+            services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
             services.AddSingleton<IHistoryService, HistoryService>();
             services.AddHttpClient();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddScoped<ISlothService, SlothService>();
+            //TODO: This will probably need the notification service as well.
 
 
             return services.BuildServiceProvider();
