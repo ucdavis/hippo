@@ -20,6 +20,8 @@ import {
   convertToPacificDate,
   convertToPacificTime,
 } from "../../util/DateHelper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -142,7 +144,7 @@ export const Details = () => {
       id: "amount",
       cell: (value) => (
         <span>
-          <i className="fas fa-dollar-sign" />{" "}
+          <FontAwesomeIcon icon={faDollarSign} />{" "}
           {value.row.original.amount.toFixed(2)}
         </span>
       ),
@@ -599,7 +601,7 @@ export const Details = () => {
             <div className="input-group">
               <div className="input-group-prepend">
                 <span className="input-group-text" style={{ height: "38px" }}>
-                  <i className="fas fa-dollar-sign" />
+                  <FontAwesomeIcon icon={faDollarSign} />
                 </span>
               </div>
               <input
@@ -618,7 +620,7 @@ export const Details = () => {
               <div className="input-group">
                 <div className="input-group-prepend">
                   <span className="input-group-text" style={{ height: "38px" }}>
-                    <i className="fas fa-dollar-sign" />
+                    <FontAwesomeIcon icon={faDollarSign} />
                   </span>
                 </div>
                 <input
@@ -651,7 +653,7 @@ export const Details = () => {
                       className="input-group-text"
                       style={{ height: "38px" }}
                     >
-                      <i className="fas fa-dollar-sign" />
+                      <FontAwesomeIcon icon={faDollarSign} />
                     </span>
                   </div>
                   <input
