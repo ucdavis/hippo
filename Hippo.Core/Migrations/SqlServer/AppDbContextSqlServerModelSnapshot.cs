@@ -140,7 +140,8 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<string>("ChartString")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -222,7 +223,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasDefaultValue(true);
 
                     b.Property<string>("ChartString")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
@@ -233,7 +235,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("SecretAccessKey")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -440,7 +443,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("SubTotal")
                         .HasColumnType("decimal(18,2)");
@@ -452,7 +456,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Units")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -517,19 +522,23 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("FinancialSystemId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("TrackingNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -617,7 +626,8 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Units")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
