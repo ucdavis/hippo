@@ -145,6 +145,7 @@ export const FinancialDetail = () => {
             value={financialDetail.financialSystemApiSource}
             onChange={handleInputChange}
             required
+            maxLength={50}
           />
         </div>
 
@@ -186,6 +187,7 @@ export const FinancialDetail = () => {
                 validateChartString(e.target.value);
               }}
               required
+              maxLength={128}
             />
             <button
               className="btn btn-primary"
