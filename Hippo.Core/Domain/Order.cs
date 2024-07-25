@@ -21,7 +21,7 @@ namespace Hippo.Core.Domain
         public string ExternalReference { get; set; }
 
         [Required]
-        [Range(0.0001, double.MaxValue)]
+        [Range(0.01, double.MaxValue)]
         public decimal Quantity { get; set; }
 
         public decimal Adjustment { get; set; }
