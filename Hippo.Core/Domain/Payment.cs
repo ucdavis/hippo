@@ -12,12 +12,15 @@ namespace Hippo.Core.Domain
     {
         [Key]
         public int Id { get; set; }
+        [MaxLength(128)]
         public string FinancialSystemId { get; set; } //For sloth, this is the transaction ID (guid)
-        public string TrackingNumber { get; set; } // KFS tracking number
+        [MaxLength(20)]
+        public string TrackingNumber { get; set; } // KFS tracking number. So probably only ever 10 characters...
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public decimal Amount { get; set; }
+        [MaxLength(20)]
         public string Status { get; set; }
-
+        [MaxLength(250)]
         public string Details { get; set; } //chart strings, credit/debit, and amounts
 
 
