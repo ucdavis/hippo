@@ -61,6 +61,7 @@ export const Products = () => {
               className="form-control"
               id="fieldName"
               required
+              maxLength={50}
               value={editProductModel.name}
               onChange={(e) => {
                 const model: ProductModel = {
@@ -79,6 +80,7 @@ export const Products = () => {
               id="fieldDescription"
               value={editProductModel.description}
               required
+              maxLength={250}
               rows={3}
               onChange={(e) => {
                 const model: ProductModel = {
@@ -96,6 +98,7 @@ export const Products = () => {
               className="form-control"
               id="fieldCategory"
               required
+              maxLength={50}
               value={editProductModel.category}
               onChange={(e) => {
                 const model: ProductModel = {
@@ -135,6 +138,7 @@ export const Products = () => {
               className="form-control"
               id="fieldUnits"
               required
+              maxLength={50}
               value={editProductModel.units}
               onChange={(e) => {
                 const model: ProductModel = {

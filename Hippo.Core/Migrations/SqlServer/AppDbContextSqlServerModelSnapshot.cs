@@ -384,7 +384,8 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");
@@ -589,7 +590,8 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("ClusterId")
                         .HasColumnType("int");

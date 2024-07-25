@@ -190,6 +190,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   label="Category"
                   readOnly={readOnly || !isAdmin}
                   disabled={!readOnly && !isAdmin}
+                  maxLength={50}
                 />
                 <OrderFormField
                   name="units"
@@ -197,6 +198,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   required={true}
                   readOnly={readOnly || !isAdmin}
                   disabled={!readOnly && !isAdmin}
+                  maxLength={50}
                 />
 
                 <OrderFormField
@@ -264,7 +266,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   label="Quantity"
                   required={true}
                   readOnly={readOnly}
-                  min={0.000001}
+                  min={0.01}
                   valueAsNumber={true}
                   deps={"total"}
                 />

@@ -200,6 +200,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                       onChartStringBlur(index, e.target.value);
                     }}
                     readOnly={readOnly}
+                    maxLength={128}
                   />
                 </td>
                 <td width={"10%;"}>

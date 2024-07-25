@@ -52,6 +52,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                 required={true}
                 autoComplete="nope"
                 readOnly={readOnly}
+                maxLength={128}
               />
             </Col>
             <Col>
@@ -63,6 +64,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                 name={`metaData.${index}.value`}
                 required={true}
                 readOnly={readOnly}
+                maxLength={450}
               />
             </Col>
             {!readOnly && (
