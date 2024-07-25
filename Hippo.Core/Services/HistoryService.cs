@@ -205,5 +205,90 @@ namespace Hippo.Core.Services
             };
             await historyService.AddHistory(history);
         }
+
+        public static async Task OrderCreated(this IHistoryService historyService, Order order, User actedBy)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
+                Action = History.OrderActions.Created,
+                Type = HistoryTypes.Primary,
+                Details = $"Order total: {order.Total}"
+            };
+
+            await historyService.AddHistory(history);
+        }
+
+        public static async Task OrderUpdated(this IHistoryService historyService, Order order, User actedBy)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator.Owner,
+                Action = History.OrderActions.Updated,
+                Type = HistoryTypes.Primary,
+                Details = $"Order total: {order.Total}"
+            };
+
+            await historyService.AddHistory(history);
+        }
+
+        public static async Task OrderUpdated(this IHistoryService historyService, Order order, User actedBy, string details)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator?.Owner,
+                Action = History.OrderActions.Updated,
+                Type = HistoryTypes.Primary,
+                Details = !string.IsNullOrWhiteSpace(details) ? details : $"Order total: {order.Total}"
+            };
+
+            await historyService.AddHistory(history);
+        }
+
+        public static async Task OrderPaymentFailure(this IHistoryService historyService, Order order, string details)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = null,
+                AdminAction = true,
+                Action = History.OrderActions.PaymentFailed,
+                Type = HistoryTypes.Detail,
+                Details = details
+            };
+
+            await historyService.AddHistory(history);
+        }
+
+        public static async Task OrderSnapshot(this IHistoryService historyService, Order order, User actedBy, string action)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = actedBy,
+                AdminAction = actedBy != order.PrincipalInvestigator?.Owner,
+                Action = action,
+                Type = HistoryTypes.Detail,
+                Details = Serialize(order)
+            };
+
+            await historyService.AddHistory(history);
+        }
     }
 }

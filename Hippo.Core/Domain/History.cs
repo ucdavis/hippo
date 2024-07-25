@@ -32,8 +32,14 @@ namespace Hippo.Core.Domain
         public int? ClusterId { get; set; } //When we have a cluster identifier 
         public Cluster Cluster { get; set; }
 
+        public int? OrderId { get; set; }
+        public Order Order { get; set; }
+
         [MaxLength(50)]
         public string Status { get; set; }
+
+        [MaxLength(50)]
+        public string Type { get; set; } = HistoryTypes.Detail;
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,8 +47,11 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<History>().HasIndex(h => h.ActedDate);
             modelBuilder.Entity<History>().HasIndex(h => h.Action);
             modelBuilder.Entity<History>().HasIndex(h => h.ClusterId);
+            modelBuilder.Entity<History>().HasIndex(h => h.Type);
+            modelBuilder.Entity<History>().HasIndex(h => h.OrderId);
             modelBuilder.Entity<History>().HasOne(h => h.ActedBy).WithMany().HasForeignKey(a => a.ActedById).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<History>().HasOne(h => h.Cluster).WithMany().HasForeignKey(a => a.ClusterId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<History>().HasOne(h => h.Order).WithMany(o => o.History).HasForeignKey(a => a.OrderId).OnDelete(DeleteBehavior.Restrict);
         }
 
         public class Actions
@@ -74,6 +83,48 @@ namespace Hippo.Core.Domain
                 QueuedEventUpdated,
             }.ToList();
 
+        }
+
+        public class OrderActions
+        {
+            public const string Created = "Created";
+            public const string Updated = "Updated";
+            public const string Submitted = "Submitted";
+            public const string Processing = "Processing";
+            public const string Cancelled = "Cancelled";
+            public const string Active = "Active";
+            public const string Rejected = "Rejected";
+            public const string Completed = "Completed";
+            public const string AdhocPayment = "Adhoc Payment";
+            public const string ChartStringUpdated = "Chart String Updated";
+            public const string PaymentFailed = "Payment Failed";
+
+            public static List<string> OrderActionList = new List<string>
+            {
+                Created,
+                Updated,
+                Submitted,
+                Processing,
+                Cancelled,
+                Active,
+                Rejected,
+                Completed,
+                AdhocPayment,
+                ChartStringUpdated,
+                PaymentFailed
+            }.ToList();
+        }
+
+        public class HistoryTypes
+        {
+            public const string Primary = "Primary";
+            public const string Detail = "Detail";
+
+            public static List<string> TypeList = new List<string>
+            {
+                Primary,
+                Detail
+            }.ToList();
         }
     }
 }

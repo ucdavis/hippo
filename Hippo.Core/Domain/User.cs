@@ -46,6 +46,7 @@ namespace Hippo.Core.Domain
         public List<Permission> Permissions { get; set; } = new();
 
 
+
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(a => a.Iam).IsUnique();
@@ -62,6 +63,7 @@ namespace Hippo.Core.Domain
                 .WithMany(u => u.Permissions)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

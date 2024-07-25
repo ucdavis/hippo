@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Mjml.Net;
 using Razor.Templating.Core;
 using System.Text;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers
 {
@@ -183,7 +184,7 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestAggieEnterprise()
         {
-            var model = await _aggieEnterpriseService.IsChartStringValid("3110-13U02-ADNO006-522201-43-000-0000000000-200504-0000-000000-000000");
+            var model = await _aggieEnterpriseService.IsChartStringValid("3110-13U02-ADNO006-522201-43-000-0000000000-200504-0000-000000-000000", Directions.Debit);
 
             return Content(model.IsValid.ToString());
 

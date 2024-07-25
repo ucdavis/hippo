@@ -12,6 +12,7 @@
     "react-bootstrap-typeahead": "^6.3.2",
     "react-csv": "^2.2.2",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.5",
     "react-hot-toast": "^2.2.0",
     "react-innertext": "^1.1.5",
     "react-modal-hook": "^3.0.2",

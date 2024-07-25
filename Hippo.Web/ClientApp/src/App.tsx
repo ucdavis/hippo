@@ -19,6 +19,13 @@ import { Clusters } from "./components/Account/Clusters";
 import { Clusters as AdminClusters } from "./components/ClusterAdmin/Clusters";
 import { Groups } from "./components/Admin/Groups";
 import { ShowFor } from "./Shared/ShowFor";
+import { FinancialDetail } from "./components/Financial/FinancialDetail";
+import { Products } from "./components/Product/Products";
+import { Orders } from "./components/Order/Orders";
+import { Details } from "./components/Order/Details";
+import { CreateOrder } from "./components/Order/CreateOrder";
+import { EditOrder } from "./components/Order/EditOrder";
+import { UpdateChartStrings } from "./components/Order/UpdateChartStrings";
 import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
 import NotFound from "./NotFound";
 
@@ -91,6 +98,80 @@ const App = () => {
               element={
                 <ShowFor roles={["System"]} alternative={<Restricted />}>
                   <AdminClusters />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/admin/financialdetails"
+              element={
+                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                  <FinancialDetail />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/product/index"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Products />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/:orderType"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Orders />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/details/:orderId"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <Details />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/edit/:orderId"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <EditOrder />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/updatechartstrings/:orderId"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <UpdateChartStrings />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/create/:productId?"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <CreateOrder />
                 </ShowFor>
               }
             />

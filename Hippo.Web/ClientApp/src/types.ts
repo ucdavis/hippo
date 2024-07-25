@@ -111,6 +111,7 @@ export interface ClusterModel {
   email: string;
   accessTypes: AccessType[];
   sshKey?: string;
+  allowOrders: boolean;
 }
 
 export type ModelState = Record<string, string>;
@@ -215,4 +216,121 @@ export interface PuppetGroupRecord {
   tag?: Set<string>;
   storage?: PuppetGroupStorage[];
   slurm?: SlurmRecord;
+}
+
+export interface FinancialDetailModel {
+  financialSystemApiKey: string;
+  financialSystemApiSource: string;
+  chartString: string;
+  autoApprove: boolean;
+  maskedApiKey: string;
+  isSlothValid: boolean;
+}
+export interface ChartStringValidationModel {
+  isValid: boolean;
+  description: string;
+  accountManager: string;
+  accountManagerEmail: string;
+  message: string;
+  warning: string;
+}
+
+export interface ProductBase {
+  category: string;
+  description: string;
+  units: string;
+  unitPrice: string;
+  installments: number;
+  installmentType: string;
+  lifeCycle: number;
+}
+
+export interface ProductModel extends Partial<ProductBase> {
+  id: number;
+  name: string;
+}
+
+export interface OrderMetadataModel {
+  id: number;
+  name: string;
+  value: string;
+}
+
+export interface OrderBillingModel {
+  id: number;
+  chartString: string;
+  percentage: string;
+  chartStringValidation: ChartStringValidationModel;
+}
+
+export interface PaymentModel {
+  id: number;
+  amount: number;
+  entryAmount: string;
+  status: string;
+  createdOn: string;
+  createdBy?: User;
+  //Possibly have the chart string(s) and percent here
+}
+export interface HistoryModel {
+  id: number;
+  actedBy: User;
+  action: string;
+  status: string;
+  details: string;
+  actedDate: string;
+}
+
+export interface OrderModel extends Partial<ProductBase> {
+  id: number;
+  PILookup: string;
+  name: string;
+  productName: string;
+  notes: string;
+  quantity: number;
+  adjustment: number;
+  adjustmentReason: string;
+  status: string;
+  createdOn: string;
+  externalReference: string;
+  adminNotes: string;
+  subTotal: string;
+  total: string;
+  balanceRemaining: string;
+  piUser?: User;
+  installmentDate?: string;
+  expirationDate?: string;
+  metaData: OrderMetadataModel[];
+  billings: OrderBillingModel[];
+  payments: PaymentModel[];
+  history: HistoryModel[];
+  percentTotal: number;
+  nextPaymentDate?: string;
+  nextPaymentAmount?: string;
+}
+
+export interface OrderListModel {
+  id: number;
+  name: string;
+  description: string;
+  units: string;
+  quantity: number;
+  createdOn: string;
+  status: string;
+  total: string;
+  balanceRemaining: string;
+  sponsorName: string;
+}
+
+export interface OrderTotalCalculationModel extends Partial<OrderModel> {
+  unitPrice: string;
+  quantity: number;
+  adjustment: number;
+  subTotal: string;
+  total: string;
+}
+
+export interface UpdateOrderStatusModel {
+  currentStatus: string;
+  newStatus: string;
 }

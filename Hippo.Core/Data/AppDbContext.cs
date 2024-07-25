@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,6 +41,12 @@ namespace Hippo.Core.Data
         public virtual DbSet<TempKerberos> TempKerberos { get; set; }
         public virtual DbSet<QueuedEvent> QueuedEvents { get; set; }
         public virtual DbSet<AccessType> AccessTypes { get; set; }
+        public virtual DbSet<FinancialDetail> FinancialDetails { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Billing> Billings { get; set; }
+        public virtual DbSet<OrderMetaData> MetaData { get; set; }
+        public virtual DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -57,6 +63,11 @@ namespace Hippo.Core.Data
             Domain.GroupMemberAccount.OnModelCreating(builder);
             QueuedEvent.OnModelCreating(builder, this);
             AccessType.OnModelCreating(builder);
+            FinancialDetail.OnModelCreating(builder);
+            Product.OnModelCreating(builder);
+            OrderMetaData.OnModelCreating(builder);
+            Order.OnModelCreating(builder);
+            Payment.OnModelCreating(builder);
             TempGroup.OnModelCreating(builder);
             Domain.TempKerberos.OnModelCreating(builder);
         }

@@ -5,12 +5,13 @@ using Hippo.Core.Models;
 using Hippo.Core.Models.Settings;
 using Microsoft.Extensions.Options;
 using Serilog;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Core.Services
 {
     public interface IAggieEnterpriseService
     {
-        Task<ChartStringValidationModel> IsChartStringValid(string chartString, bool validateCVRs = true);
+        Task<ChartStringValidationModel> IsChartStringValid(string chartString, string direction, bool validateCVRs = true);
     }
     public class AggieEnterpriseService : IAggieEnterpriseService
     {
@@ -34,7 +35,7 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<ChartStringValidationModel> IsChartStringValid(string chartString, bool validateCVRs = true)
+        public async Task<ChartStringValidationModel> IsChartStringValid(string chartString, string direction, bool validateCVRs = true)
         {
             var rtValue = new ChartStringValidationModel();
             rtValue.IsValid = false;
@@ -43,10 +44,16 @@ namespace Hippo.Core.Services
             var segmentStringType = FinancialChartValidation.GetFinancialChartStringType(chartString);
             rtValue.ChartType = segmentStringType;
 
+            var naturalAccount = AeSettings.DebitNaturalAccount;
+            if(direction == Directions.Credit)
+            {
+                naturalAccount = AeSettings.CreditNaturalAccount;
+            }
+
 
             if (segmentStringType == FinancialChartStringType.Gl)
             {
-                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount);
+                chartString = ReplaceNaturalAccount(chartString, naturalAccount, rtValue);
                 rtValue.ChartString = chartString;
 
                 var result = await _aggieClient.GlValidateChartstring.ExecuteAsync(chartString, validateCVRs);
@@ -83,11 +90,11 @@ namespace Hippo.Core.Services
 
                 rtValue.Description = $"{data.GlValidateChartstring.SegmentNames.DepartmentName} - {data.GlValidateChartstring.SegmentNames.FundName}";
 
-                if (!string.IsNullOrWhiteSpace(AeSettings.NaturalAccount))
+                if (!string.IsNullOrWhiteSpace(naturalAccount))
                 {
-                    if (rtValue.GlSegments.Account != AeSettings.NaturalAccount)
+                    if (rtValue.GlSegments.Account != naturalAccount)
                     {
-                        rtValue.Messages.Add($"Natural Account must be {AeSettings.NaturalAccount}");
+                        rtValue.Messages.Add($"Natural Account must be {naturalAccount}");
                         rtValue.IsValid = false;
                     }
                 }
@@ -97,7 +104,7 @@ namespace Hippo.Core.Services
 
             if (segmentStringType == FinancialChartStringType.Ppm)
             {
-                chartString = ReplaceNaturalAccount(chartString, AeSettings.NaturalAccount);
+                chartString = ReplaceNaturalAccount(chartString, naturalAccount, rtValue);
                 rtValue.ChartString = chartString;
                 var result = await _aggieClient.PpmSegmentStringValidate.ExecuteAsync(chartString);
 
@@ -131,11 +138,14 @@ namespace Hippo.Core.Services
 
 
                 await GetPpmAccountManager(rtValue);
-
-                if (rtValue.PpmSegments.ExpenditureType != AeSettings.NaturalAccount)
+                if (!string.IsNullOrWhiteSpace(naturalAccount))
                 {
-                    rtValue.Messages.Add($"Expenditure Type must be {AeSettings.NaturalAccount}");
-                    rtValue.IsValid = false;
+
+                    if (rtValue.PpmSegments.ExpenditureType != naturalAccount)
+                    {
+                        rtValue.Messages.Add($"Expenditure Type must be {naturalAccount}");
+                        rtValue.IsValid = false;
+                    }
                 }
 
                 return rtValue;
@@ -147,7 +157,7 @@ namespace Hippo.Core.Services
             return rtValue;
         }
 
-        public string ReplaceNaturalAccount(string chartString, string naturalAccount)
+        public string ReplaceNaturalAccount(string chartString, string naturalAccount, ChartStringValidationModel model)
         {
             if(string.IsNullOrWhiteSpace(naturalAccount))
             {
@@ -158,12 +168,20 @@ namespace Hippo.Core.Services
             if (segmentStringType == FinancialChartStringType.Gl)
             {
                 var segments = FinancialChartValidation.GetGlSegments(chartString);
+                if(segments.Account != naturalAccount)
+                {
+                    model.Warnings.Add(new KeyValuePair<string, string>("Account", $"Natural Account {segments.Account} will be replaced with {naturalAccount}"));
+                }
                 segments.Account = naturalAccount;
                 return segments.ToSegmentString();
             }
             if (segmentStringType == FinancialChartStringType.Ppm)
             {
                 var segments = FinancialChartValidation.GetPpmSegments(chartString);
+                if (segments.ExpenditureType != naturalAccount)
+                {
+                    model.Warnings.Add(new KeyValuePair<string, string>("Expenditure Type", $"Natural Account {segments.ExpenditureType} replaced with {naturalAccount}"));
+                }
                 segments.ExpenditureType = naturalAccount;
                 return segments.ToSegmentString();
             }
@@ -180,7 +198,7 @@ namespace Hippo.Core.Services
             {
                 rtValue.AccountManager = data.PpmProjectByNumber.PrimaryProjectManagerName;
                 rtValue.AccountManagerEmail = data.PpmProjectByNumber.PrimaryProjectManagerEmail;
-                rtValue.Description = data.PpmProjectByNumber.Name;
+                rtValue.Description = $"{data.PpmProjectByNumber.Name} - {rtValue.AccountManager}";
             }
             return;
         }
