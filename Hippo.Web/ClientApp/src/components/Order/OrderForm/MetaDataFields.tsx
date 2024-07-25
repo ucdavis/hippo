@@ -1,12 +1,12 @@
-import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { OrderModel } from "../../types";
 
-import FormField from "../../Shared/Form/FormField";
 import { Row, Col } from "reactstrap";
-import HipButton from "../../Shared/HipButton";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import FormField from "../../../Shared/Form/FormField";
+import HipButton from "../../../Shared/HipButton";
+import { OrderModel } from "../../../types";
 
 type MetaDataFieldsProps = {
   readOnly: boolean;

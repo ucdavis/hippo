@@ -3,7 +3,7 @@ import { OrderModel } from "../../types";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
-import OrderForm from "./OrderForm";
+import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 
 export const EditOrder: React.FC = () => {

@@ -9,7 +9,7 @@ import {
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import OrderForm from "./OrderForm";
+import OrderForm from "./OrderForm/OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { usePromiseNotification } from "../../util/Notifications";

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Card, CardBody, CardTitle } from "reactstrap";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
@@ -8,8 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { authenticatedFetch } from "../../util/api";
 import ChartStringValidation from "./ChartStringValidation";
-import OrderFormField from "./OrderFormField";
-import { Card, CardBody, CardTitle } from "reactstrap";
+
+import OrderFormField from "./OrderForm/OrderFormField";
 
 declare const window: Window &
   typeof globalThis & {
