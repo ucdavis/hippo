@@ -31,6 +31,7 @@ namespace Hippo.Core.Domain
         public decimal BalanceRemaining { get; set; } //We will also calculate this when we do a payment
         public string Notes { get; set; }
         public string AdminNotes { get; set; }
+        [MaxLength(20)]
         public string Status { get; set; }
         
         public DateTime? InstallmentDate { get; set; }

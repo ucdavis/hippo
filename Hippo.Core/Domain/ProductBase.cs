@@ -20,6 +20,7 @@ namespace Hippo.Core.Domain
         public string Name { get; set; }
         [MaxLength(250)]
         public string Description { get; set; }
+        [MaxLength(50)]
         public string Units { get; set; } //Informational like TB, or fair share points
         [Required]
         [Range(0.01, double.MaxValue)]

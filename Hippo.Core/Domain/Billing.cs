@@ -8,6 +8,7 @@ namespace Hippo.Core.Domain
         [Key]
         public int Id { get; set; }
         [Required]
+        [MaxLength(128)]
         public string ChartString { get; set; }
         public decimal Percentage { get; set; } = 100;
         [Required]
