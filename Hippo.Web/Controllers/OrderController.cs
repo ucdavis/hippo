@@ -97,6 +97,38 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        /// <summary>
+        /// Primary is the default one to show to the user
+        /// </summary>
+        /// <param name="id">Order Id</param>
+        /// <param name="max"></param>
+        /// <param name="type">All, Primary, Detail</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetHistories(int id, int max = 5, string type = "Primary")
+        {
+            var query = _dbContext.Histories.Where(a => a.OrderId == id && a.Order != null && a.Order.Cluster.Name == Cluster && a.Type == History.HistoryTypes.Primary).OrderByDescending(a => a.ActedDate);
+            if(type == History.HistoryTypes.Detail)
+            {
+                query = _dbContext.Histories.Where(a => a.OrderId == id && a.Order != null && a.Order.Cluster.Name == Cluster && a.Type == History.HistoryTypes.Detail).OrderByDescending(a => a.ActedDate);
+            }else if(type == "All")
+            {
+                query = _dbContext.Histories.Where(a => a.OrderId == id && a.Order != null && a.Order.Cluster.Name == Cluster).OrderByDescending(a => a.ActedDate);
+            }
+
+            var model = await query.Take(max).Select(OrderHistoryModel.Projection()).ToListAsync();
+            
+            return Ok(model);
+            
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPayments(int id, int max = 10)
+        {
+            var model = await _dbContext.Payments.Where(a => a.OrderId == id && a.Order.Cluster.Name == Cluster).OrderByDescending(a => a.CreatedOn).Take(max).Select(OrderPaymentModel.Projection()).ToListAsync();
+            return Ok(model);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {

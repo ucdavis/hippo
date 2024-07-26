@@ -33,7 +33,7 @@ namespace Hippo.Web.Models.OrderModels
         public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
         public List<Payment> Payments { get; set; } = new();
-        //TODO: will need to add more
+        //TODO: remove History and Payments from here once the new endpoints are used.
 
         public static Expression<Func<Order, OrderDetailModel>> Projection()
         {
