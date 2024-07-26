@@ -1,11 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  HistoryModel,
-  OrderModel,
-  PaymentModel,
-  UpdateOrderStatusModel,
-} from "../../types";
+import { OrderModel, PaymentModel, UpdateOrderStatusModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -22,6 +17,7 @@ import {
 } from "../../util/DateHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { HistoryTable } from "./HistoryTable";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -102,39 +98,6 @@ export const Details = () => {
       }
     }
   }, [order]);
-
-  const historyColumnHelper = createColumnHelper<HistoryModel>();
-
-  const historyColumns = [
-    historyColumnHelper.accessor("actedDate", {
-      header: "Date",
-      id: "actedDate",
-      cell: (value) => (
-        <span>{convertToPacificTime(value.row.original.actedDate)}</span>
-      ),
-    }),
-    historyColumnHelper.accessor("actedBy", {
-      header: "Actor",
-      id: "actedBy",
-      cell: (value) => (
-        <>
-          {value.row.original.actedBy ? (
-            <>
-              {value.row.original.actedBy.name} (
-              {value.row.original.actedBy.email})
-            </>
-          ) : (
-            <>System</>
-          )}
-        </>
-      ),
-    }),
-    historyColumnHelper.accessor("status", { header: "Status", id: "status" }),
-    historyColumnHelper.accessor("details", {
-      header: "Details",
-      id: "details",
-    }),
-  ];
 
   const paymentColumnHelper = createColumnHelper<PaymentModel>();
 
@@ -577,19 +540,8 @@ export const Details = () => {
             onlyChartStrings={false}
             onSubmit={submitOrder}
           />
-          <h2>History</h2>
-          <ReactTable
-            columns={historyColumns}
-            data={order.history}
-            initialState={{
-              sorting: [
-                {
-                  id: "actedDate",
-                  desc: true,
-                },
-              ],
-            }}
-          />
+
+          <HistoryTable />
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>

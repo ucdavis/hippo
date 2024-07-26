@@ -30,7 +30,6 @@ namespace Hippo.Web.Models.OrderModels
         public User? PiUser { get; set; }
 
         public List<OrderMetaData> MetaData { get; set; } = new();
-        public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
         public List<Payment> Payments { get; set; } = new();
         //TODO: remove History and Payments from here once the new endpoints are used.
@@ -65,7 +64,6 @@ namespace Hippo.Web.Models.OrderModels
                 Total = order.Total.ToString("F2"),
                 BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 MetaData = order.MetaData,
-                History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
                 Billings = order.Billings,
                 Payments = order.Payments
             };
@@ -95,7 +93,6 @@ namespace Hippo.Web.Models.OrderModels
                 Total = "0.00",
                 BalanceRemaining = "0.00", //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 MetaData = new List<OrderMetaData>(),
-                History = new List<History>(),
                 Billings = new List<Billing>(),
                 Payments = new List<Payment>()
             };
