@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { HistoryModel } from "../../types";
 import { ReactTable } from "../../Shared/ReactTable";
 import { convertToPacificTime } from "../../util/DateHelper";
@@ -8,11 +9,16 @@ import { useParams } from "react-router-dom";
 
 interface HistoryTableProps {
   numberOfRows: number;
+  showLinkToAll: boolean;
 }
 
-export const HistoryTable: React.FC<HistoryTableProps> = ({ numberOfRows }) => {
+export const HistoryTable: React.FC<HistoryTableProps> = ({
+  numberOfRows,
+  showLinkToAll,
+}) => {
   const [histories, setHistories] = useState<HistoryModel[]>([]);
   const { cluster, orderId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHistories = async () => {
@@ -75,7 +81,24 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({ numberOfRows }) => {
   return (
     <>
       <h2>History</h2>
-      <small>Last {numberOfRows} or fewer Actions</small>
+      <small>Last {numberOfRows} or fewer Actions</small>{" "}
+      {showLinkToAll ? (
+        <button
+          onClick={() =>
+            navigate(`/${cluster}/order/orderHistories/${orderId}`)
+          }
+          className="float-right"
+        >
+          View All
+        </button>
+      ) : (
+        <button
+          onClick={() => navigate(`/${cluster}/order/details/${orderId}`)}
+          className="float-right"
+        >
+          Back to Order Details
+        </button>
+      )}
       <ReactTable
         columns={historyColumns}
         data={histories}
