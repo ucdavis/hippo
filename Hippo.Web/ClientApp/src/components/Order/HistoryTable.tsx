@@ -6,14 +6,21 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { authenticatedFetch } from "../../util/api";
 import { useParams } from "react-router-dom";
 
-export const HistoryTable: React.FC = () => {
+interface HistoryTableProps {
+  numberOfRows: number;
+}
+
+export const HistoryTable: React.FC<HistoryTableProps> = ({ numberOfRows }) => {
   const [histories, setHistories] = useState<HistoryModel[]>([]);
   const { cluster, orderId } = useParams();
 
   useEffect(() => {
     const fetchHistories = async () => {
+      console.log(
+        `/api/${cluster}/order/GetHistories/${orderId}?max=${numberOfRows}`,
+      );
       const response = await authenticatedFetch(
-        `/api/${cluster}/order/GetHistories/${orderId}`,
+        `/api/${cluster}/order/GetHistories/${orderId}?max=${numberOfRows}`,
       );
 
       if (response.ok) {
@@ -26,7 +33,7 @@ export const HistoryTable: React.FC = () => {
     };
 
     fetchHistories();
-  }, [cluster, orderId]);
+  }, [cluster, numberOfRows, orderId]);
 
   const historyColumnHelper = createColumnHelper<HistoryModel>();
 
@@ -68,7 +75,7 @@ export const HistoryTable: React.FC = () => {
   return (
     <>
       <h2>History</h2>
-      <small>Last 5 Actions</small>
+      <small>Last {numberOfRows} or fewer Actions</small>
       <ReactTable
         columns={historyColumns}
         data={histories}

@@ -541,7 +541,7 @@ export const Details = () => {
             onSubmit={submitOrder}
           />
 
-          <HistoryTable />
+          <HistoryTable numberOfRows={5} />
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
