@@ -5,7 +5,7 @@ import { HipFormFieldProps } from "./formTypes";
 import { HipFormGroup } from "./HipFormGroup";
 
 /**
- * FormField component that combines react-hook-form register with reactstrap input.
+ * HipFormField component that combines react-hook-form register with reactstrap input.
  *
  * To display only as text, set `readOnly` to true. This will still register the field so it is included in the form state.
  * It will only display the value, not any children passed to it (like with `<select>` and `<options>`).
@@ -57,10 +57,12 @@ const HipFormField = <T extends Record<string, any>>({
 
   return (
     <HipFormGroup wrap={readOnly} readOnly={readOnly}>
-      <Label className={`hip-form-label`} for={`field-${name}`}>
-        {label}
-        {required && !readOnly && <span> *</span>}
-      </Label>
+      {label && (
+        <Label className={`hip-form-label`} for={`field-${name}`}>
+          {label}
+          {required && !readOnly && <span> *</span>}
+        </Label>
+      )}
       <HipInputGroup
         prepend={inputPrepend}
         append={inputAppend}

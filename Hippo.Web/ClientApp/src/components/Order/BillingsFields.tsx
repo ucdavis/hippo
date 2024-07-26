@@ -68,6 +68,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   const [notification, setNotification] = useState<string>("");
   const showNotification = (message: string) => {
     setNotification(message);
+    // @laholstege TODO: use notification util
     // Optionally, clear the notification after some time
     setTimeout(() => setNotification(""), 5000);
   };
@@ -161,7 +162,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup noWrap={true}>
+    <HipFormGroup wrap={false}>
       <h2>Billing Info</h2>
       <h2>Chart Strings</h2>
       {notification && (

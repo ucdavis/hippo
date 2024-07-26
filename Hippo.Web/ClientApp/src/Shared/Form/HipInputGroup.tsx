@@ -11,8 +11,6 @@ interface InputGroupWrapperProps extends InputGroupProps {
 /**
  * Wraps an input group with prepend and append elements.
  * Will return the children if readOnly or no prepend/append
- * @param param0
- * @returns
  */
 const HipInputGroup: React.FC<InputGroupWrapperProps> = ({
   children,
