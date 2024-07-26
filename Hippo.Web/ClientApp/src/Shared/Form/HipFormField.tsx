@@ -1,8 +1,8 @@
 import React from "react";
-import { Col, FormFeedback, Input, Label } from "reactstrap";
-import InputGroupWrapper from "./InputGroupWrapper";
-import { FormFieldProps } from "./formTypes";
-import { HipFormGroup } from "./HipForm";
+import { FormFeedback, Input, Label } from "reactstrap";
+import HipInputGroup from "./HipInputGroup";
+import { HipFormFieldProps } from "./formTypes";
+import { HipFormGroup } from "./HipFormGroup";
 
 /**
  * FormField component that combines react-hook-form register with reactstrap input.
@@ -12,7 +12,7 @@ import { HipFormGroup } from "./HipForm";
  *
  * 'hip-form-group' is added to the FormGroup, and 'read-only' is added if `readOnly` is true.
  */
-const FormField = <T extends Record<string, any>>({
+const HipFormField = <T extends Record<string, any>>({
   register,
   error,
   type = "text",
@@ -30,7 +30,7 @@ const FormField = <T extends Record<string, any>>({
   children,
   disabled, // select out disabled and don't pass it to register or it will set the value to undefined
   ...options
-}: FormFieldProps<T>) => {
+}: HipFormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
     required: {
       value: required,
@@ -61,7 +61,7 @@ const FormField = <T extends Record<string, any>>({
         {label}
         {required && !readOnly && <span> *</span>}
       </Label>
-      <InputGroupWrapper
+      <HipInputGroup
         prepend={inputPrepend}
         append={inputAppend}
         readOnly={readOnly}
@@ -82,9 +82,9 @@ const FormField = <T extends Record<string, any>>({
           {!readOnly ? children : null}
         </Input>
         {!!error && <FormFeedback>{error.message}</FormFeedback>}
-      </InputGroupWrapper>
+      </HipInputGroup>
     </HipFormGroup>
   );
 };
 
-export default FormField;
+export default HipFormField;

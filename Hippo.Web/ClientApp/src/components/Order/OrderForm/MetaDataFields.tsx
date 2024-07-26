@@ -4,10 +4,10 @@ import { Row, Col, Label } from "reactstrap";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import FormField from "../../../Shared/Form/FormField";
+import FormField from "../../../Shared/Form/HipFormField";
 import HipButton from "../../../Shared/HipButton";
 import { OrderModel } from "../../../types";
-import { HipFormGroup } from "../../../Shared/Form/HipForm";
+import { HipFormGroup } from "../../../Shared/Form/HipFormGroup";
 
 type MetaDataFieldsProps = {
   readOnly: boolean;
@@ -71,7 +71,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
               />
             </Col>
             {!readOnly && (
-              <Col md={2}>
+              <Col md={3}>
                 <HipButton
                   title="Remove Metadata"
                   aria-label="Remove Metadata"

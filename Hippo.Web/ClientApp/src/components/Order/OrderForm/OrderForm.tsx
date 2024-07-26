@@ -3,7 +3,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
-import FormSubmitButton from "../../../Shared/Form/FormSubmitButton";
+import HipFormSubmitButton from "../../../Shared/Form/HipFormSubmitButton";
 import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
@@ -200,6 +200,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   disabled={!readOnly && !isAdmin}
                   maxLength={50}
                 />
+
                 <OrderFormField
                   name="unitPrice"
                   label="Unit Price"
@@ -249,6 +250,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   required={false}
                   readOnly={readOnly}
                 />
+
                 <OrderFormField
                   name="quantity"
                   label="Quantity"
@@ -324,7 +326,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           </>
         )}
 
-        {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
+        {!readOnly && <HipFormSubmitButton className="mb-3 mt-3" />}
       </HipForm>
     </FormProvider>
   );

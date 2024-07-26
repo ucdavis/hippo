@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, FormGroup, FormGroupProps, FormProps } from "reactstrap";
+import { Form, FormProps } from "reactstrap";
 
 interface HipFormProps extends FormProps {
   wrap?: boolean;
@@ -18,27 +18,5 @@ export const HipForm: React.FC<HipFormProps> = ({
     >
       {children}
     </Form>
-  );
-};
-
-interface HipFormGroupProps extends FormGroupProps {
-  noWrap?: boolean;
-  readOnly?: boolean;
-}
-
-export const HipFormGroup: React.FC<HipFormGroupProps> = ({
-  noWrap,
-  readOnly,
-  className,
-  children,
-  ...rest
-}) => {
-  return (
-    <FormGroup
-      className={`hip-form-group ${className}${noWrap ? " no-wrap" : ""}${readOnly ? " read-only" : ""}`}
-      {...rest}
-    >
-      {children}
-    </FormGroup>
   );
 };

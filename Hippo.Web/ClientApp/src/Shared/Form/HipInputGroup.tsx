@@ -14,7 +14,7 @@ interface InputGroupWrapperProps extends InputGroupProps {
  * @param param0
  * @returns
  */
-const InputGroupWrapper: React.FC<InputGroupWrapperProps> = ({
+const HipInputGroup: React.FC<InputGroupWrapperProps> = ({
   children,
   prepend,
   append,
@@ -33,4 +33,4 @@ const InputGroupWrapper: React.FC<InputGroupWrapperProps> = ({
   );
 };
 
-export default InputGroupWrapper;
+export default HipInputGroup;

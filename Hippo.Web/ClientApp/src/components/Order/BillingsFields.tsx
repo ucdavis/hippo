@@ -3,7 +3,7 @@ import { Card, CardBody, CardTitle } from "reactstrap";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
-import FormField from "../../Shared/Form/FormField";
+import FormField from "../../Shared/Form/HipFormField";
 import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,7 @@ import { authenticatedFetch } from "../../util/api";
 import ChartStringValidation from "./ChartStringValidation";
 
 import OrderFormField from "./OrderForm/OrderFormField";
+import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
 
 declare const window: Window &
   typeof globalThis & {
@@ -160,7 +161,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <>
+    <HipFormGroup noWrap={true}>
       <h2>Billing Info</h2>
       <h2>Chart Strings</h2>
       {notification && (
@@ -273,7 +274,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           <FontAwesomeIcon icon={faPlus} size="sm" /> Add Billing
         </HipButton>
       )}
-    </>
+    </HipFormGroup>
   );
 };
 
