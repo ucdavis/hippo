@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../../types";
-import { Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import FormSubmitButton from "../../../Shared/Form/FormSubmitButton";
@@ -11,6 +10,7 @@ import OrderFormTotalFields from "./OrderFormTotalFields";
 import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
+import { HipForm } from "../../../Shared/Form/HipForm";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -140,7 +140,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   // TODO: rest of input validation?
   return (
     <FormProvider {...methods}>
-      <Form onSubmit={handleSubmit(submitForm)} className="mb-3">
+      <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
         <OrderFormField
           name="status"
           label="Status"
@@ -200,7 +200,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   disabled={!readOnly && !isAdmin}
                   maxLength={50}
                 />
-
                 <OrderFormField
                   name="unitPrice"
                   label="Unit Price"
@@ -211,27 +210,17 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   valueAsNumber={true}
                   deps={"total"}
                 />
-                {readOnly && (
-                  <OrderFormField
-                    name="installmentType"
-                    label="Installment Type"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                  ></OrderFormField>
-                )}
-                {!readOnly && (
-                  <OrderFormField
-                    name="installmentType"
-                    label="Installment Type"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    type="select"
-                  >
-                    <option value="OneTime">One Time</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Yearly">Yearly</option>
-                  </OrderFormField>
-                )}
+                <OrderFormField
+                  name="installmentType"
+                  label="Installment Type"
+                  readOnly={readOnly || !isAdmin}
+                  disabled={!readOnly && !isAdmin}
+                  type="select"
+                >
+                  <option value="OneTime">One Time</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Yearly">Yearly</option>
+                </OrderFormField>
                 {installmentType !== "OneTime" && (
                   <OrderFormField
                     name="installments"
@@ -260,7 +249,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   required={false}
                   readOnly={readOnly}
                 />
-
                 <OrderFormField
                   name="quantity"
                   label="Quantity"
@@ -337,7 +325,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
         )}
 
         {!readOnly && <FormSubmitButton className="mb-3 mt-3" />}
-      </Form>
+      </HipForm>
     </FormProvider>
   );
 };

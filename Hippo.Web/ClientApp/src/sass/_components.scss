@@ -275,10 +275,28 @@ hr {
   border-bottom: 1px dotted $primary-color;
 }
 .card-danger {
-    border: 5px solid $red;
-    text-align: center;  
+  border: 5px solid $red;
+  text-align: center;
 }
-.card-center{
-    text-align: center;  
-    border: 5px solid;
+.card-center {
+  text-align: center;
+  border: 5px solid;
+}
+
+.hip-form {
+  &.wrap {
+    display: flex;
+    flex-wrap: wrap;
+    .hip-form-group {
+      flex-basis: 100%;
+      flex-grow: 1;
+      flex-shrink: 0;
+      &.read-only {
+        flex-basis: 50%;
+      }
+    }
+    .no-wrap {
+      flex-basis: 100%;
+    }
+  }
 }

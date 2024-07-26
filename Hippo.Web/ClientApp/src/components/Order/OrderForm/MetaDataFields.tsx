@@ -1,12 +1,13 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-import { Row, Col } from "reactstrap";
+import { Row, Col, Label } from "reactstrap";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import FormField from "../../../Shared/Form/FormField";
 import HipButton from "../../../Shared/HipButton";
 import { OrderModel } from "../../../types";
+import { HipFormGroup } from "../../../Shared/Form/HipForm";
 
 type MetaDataFieldsProps = {
   readOnly: boolean;
@@ -37,11 +38,13 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <>
-      <h2>Metadata</h2>
+    <HipFormGroup noWrap={true}>
+      <Label for="metaData" tag="h2">
+        Metadata
+      </Label>
       {fields.map((field, index) => {
         return (
-          <Row key={field.id}>
+          <Row key={field.id} className="no-wrap">
             <Col>
               <FormField
                 key={`name-${field.id}`}
@@ -68,7 +71,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
               />
             </Col>
             {!readOnly && (
-              <Col md={3}>
+              <Col md={2}>
                 <HipButton
                   title="Remove Metadata"
                   aria-label="Remove Metadata"
@@ -89,7 +92,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
           <FontAwesomeIcon icon={faPlus} size="sm" /> Add Metadata
         </HipButton>
       )}
-    </>
+    </HipFormGroup>
   );
 };
 
