@@ -691,7 +691,19 @@ namespace Hippo.Web.Controllers
                 existingOrder.Description = model.Description;
                 existingOrder.Name = model.Name;
                 existingOrder.Notes = model.Notes;
-                existingOrder.Quantity = model.Quantity;
+                //existingOrder.Quantity = model.Quantity; //If quantity changes, we will need to update the total and balance remaining
+                if(existingOrder.Quantity != model.Quantity)
+                {
+                    existingOrder.Quantity = model.Quantity;
+                    existingOrder.SubTotal = model.Quantity * existingOrder.UnitPrice;
+                    existingOrder.Total = model.Quantity * existingOrder.UnitPrice;
+                    existingOrder.BalanceRemaining = model.Quantity * existingOrder.UnitPrice;
+                    if(existingOrder.Adjustment != 0)
+                    {
+                        existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
+                        existingOrder.BalanceRemaining = existingOrder.Total;
+                    }
+                }
 
                 ProcessMetaData(model, existingOrder);
 
