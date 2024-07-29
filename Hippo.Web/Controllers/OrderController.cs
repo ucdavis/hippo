@@ -513,6 +513,20 @@ namespace Hippo.Web.Controllers
         private async Task<ProcessingResult> SaveNewOrder(OrderPostModel model, Account principalInvestigator, Cluster cluster, bool isClusterOrSystemAdmin, User currentUser)
         {
             var rtValue = new ProcessingResult();
+            var nextStatus = Order.Statuses.Created;
+
+            if(principalInvestigator.OwnerId == currentUser.Id)
+            {
+                nextStatus = Order.Statuses.Submitted;
+                if (!model.Billings.Any())
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "You must have billing information to submit an order.";
+                    return rtValue;
+                }
+            }
+
+
             //Ok, this is a new order that we have to create
             var order = new Order
             {
@@ -535,7 +549,7 @@ namespace Hippo.Web.Controllers
                 BalanceRemaining = model.Quantity * model.UnitPrice,
                 Notes = model.Notes,
                 AdminNotes = model.AdminNotes,
-                Status = Order.Statuses.Created,
+                Status = nextStatus,
                 Cluster = cluster,
                 ClusterId = cluster.Id,
                 PrincipalInvestigator = principalInvestigator,
