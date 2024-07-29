@@ -23,9 +23,6 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
 
   useEffect(() => {
     const fetchPayments = async () => {
-      console.log(
-        `/api/${cluster}/order/GetPayments/${orderId}?max=${numberOfRows}`,
-      );
       const response = await authenticatedFetch(
         `/api/${cluster}/order/GetPayments/${orderId}?max=${numberOfRows}`,
       );

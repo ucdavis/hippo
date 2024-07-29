@@ -22,9 +22,6 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
 
   useEffect(() => {
     const fetchHistories = async () => {
-      console.log(
-        `/api/${cluster}/order/GetHistories/${orderId}?max=${numberOfRows}`,
-      );
       const response = await authenticatedFetch(
         `/api/${cluster}/order/GetHistories/${orderId}?max=${numberOfRows}`,
       );
