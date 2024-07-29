@@ -84,9 +84,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       <small>Last {numberOfRows} or fewer Actions</small>{" "}
       {showLinkToAll ? (
         <button
-          onClick={() =>
-            navigate(`/${cluster}/order/orderHistories/${orderId}`)
-          }
+          onClick={() => navigate(`/${cluster}/order/history/${orderId}`)}
           className="float-right"
         >
           View All

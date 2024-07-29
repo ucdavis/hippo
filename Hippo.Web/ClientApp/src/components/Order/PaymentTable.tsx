@@ -97,9 +97,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         <>
           {payments.length >= numberOfRows && (
             <button
-              onClick={() =>
-                navigate(`/${cluster}/order/orderPayments/${orderId}`)
-              }
+              onClick={() => navigate(`/${cluster}/order/payments/${orderId}`)}
               className="float-right"
             >
               View All

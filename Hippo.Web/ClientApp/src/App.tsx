@@ -145,7 +145,7 @@ const App = () => {
               }
             />
             <Route
-              path="/:cluster/order/orderHistories/:orderId"
+              path="/:cluster/order/history/:orderId"
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
@@ -156,7 +156,7 @@ const App = () => {
               }
             />
             <Route
-              path="/:cluster/order/orderPayments/:orderId"
+              path="/:cluster/order/payments/:orderId"
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
