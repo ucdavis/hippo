@@ -1,5 +1,7 @@
 using Hippo.Core.Domain;
 using Hippo.Core.Extensions;
+using Hippo.Core.Services;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
@@ -21,19 +23,21 @@ namespace Hippo.Web.Models.OrderModels
         public string SubTotal { get; set; } = string.Empty;
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
+        public string BalancePending { get; set; } = string.Empty;
 
         public string InstallmentDate { get; set; } = string.Empty;
         public string ExpirationDate { get; set; } = string.Empty; //This would default to InstallmentDate + LifeCycle Months                                                                   
         public DateTime? NextPaymentDate { get; set; } //No idea why I needs to add 1 day below... Couldn't get the conversion correct. Seems to skip time portion
         public string NextPaymentAmount { get; set; } = string.Empty;
 
+        public int HistoryCount { get; set; }
+        public int PaymentCount { get; set; }
+
         public User? PiUser { get; set; }
 
         public List<OrderMetaData> MetaData { get; set; } = new();
-        public List<History> History { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
-        public List<Payment> Payments { get; set; } = new();
-        //TODO: will need to add more
+
 
         public static Expression<Func<Order, OrderDetailModel>> Projection()
         {
@@ -64,10 +68,11 @@ namespace Hippo.Web.Models.OrderModels
                 SubTotal = order.SubTotal.ToString("F2"),
                 Total = order.Total.ToString("F2"),
                 BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
+                BalancePending = order.Payments.Where(a => a.Status != Payment.Statuses.Completed && a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount).ToString("F2"),
                 MetaData = order.MetaData,
-                History = (List<History>)order.History.Where(a => a.Type == Hippo.Core.Domain.History.HistoryTypes.Primary),
                 Billings = order.Billings,
-                Payments = order.Payments
+                HistoryCount = order.History.Count,
+                PaymentCount = order.Payments.Count
             };
         }
 
@@ -94,10 +99,11 @@ namespace Hippo.Web.Models.OrderModels
                 SubTotal = "0.00",
                 Total = "0.00",
                 BalanceRemaining = "0.00", //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
+                BalancePending = "0.00",
                 MetaData = new List<OrderMetaData>(),
-                History = new List<History>(),
                 Billings = new List<Billing>(),
-                Payments = new List<Payment>()
+                HistoryCount = 0,
+                PaymentCount = 0
             };
         }
     }

@@ -1,11 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  HistoryModel,
-  OrderModel,
-  PaymentModel,
-  UpdateOrderStatusModel,
-} from "../../types";
+import { OrderModel, PaymentModel, UpdateOrderStatusModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -22,6 +17,8 @@ import {
 } from "../../util/DateHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { HistoryTable } from "./HistoryTable";
+import { PaymentTable } from "./PaymentTable";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -44,13 +41,13 @@ export const Details = () => {
   const calculateBalanceRemaining = (data: any) => {
     const balanceRemaining = parseFloat(data.balanceRemaining);
     setBalanceRemaining(balanceRemaining);
-    const balancePending = data.payments
-      .filter(
-        (payment) =>
-          payment.status !== "Completed" && payment.status !== "Cancelled",
-      )
-      .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-    setBalancePending(balancePending);
+    // const balancePending = data.payments
+    //   .filter(
+    //     (payment) =>
+    //       payment.status !== "Completed" && payment.status !== "Cancelled",
+    //   )
+    //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
+    setBalancePending(parseFloat(data.balancePending));
   };
 
   useEffect(() => {
@@ -103,78 +100,6 @@ export const Details = () => {
     }
   }, [order]);
 
-  const historyColumnHelper = createColumnHelper<HistoryModel>();
-
-  const historyColumns = [
-    historyColumnHelper.accessor("actedDate", {
-      header: "Date",
-      id: "actedDate",
-      cell: (value) => (
-        <span>{convertToPacificTime(value.row.original.actedDate)}</span>
-      ),
-    }),
-    historyColumnHelper.accessor("actedBy", {
-      header: "Actor",
-      id: "actedBy",
-      cell: (value) => (
-        <>
-          {value.row.original.actedBy ? (
-            <>
-              {value.row.original.actedBy.name} (
-              {value.row.original.actedBy.email})
-            </>
-          ) : (
-            <>System</>
-          )}
-        </>
-      ),
-    }),
-    historyColumnHelper.accessor("status", { header: "Status", id: "status" }),
-    historyColumnHelper.accessor("details", {
-      header: "Details",
-      id: "details",
-    }),
-  ];
-
-  const paymentColumnHelper = createColumnHelper<PaymentModel>();
-
-  const paymentColumns = [
-    paymentColumnHelper.accessor("amount", {
-      header: "Amount",
-      id: "amount",
-      cell: (value) => (
-        <span>
-          <FontAwesomeIcon icon={faDollarSign} />{" "}
-          {value.row.original.amount.toFixed(2)}
-        </span>
-      ),
-    }),
-    paymentColumnHelper.accessor("status", { header: "Status", id: "status" }),
-    paymentColumnHelper.accessor("createdOn", {
-      header: "Created On",
-      id: "createdOn",
-      cell: (value) => (
-        <span>{convertToPacificTime(value.row.original.createdOn)}</span>
-      ),
-    }),
-    paymentColumnHelper.accessor("createdBy", {
-      header: "Created By",
-      id: "createdBy",
-      cell: (value) => (
-        <>
-          {value.row.original.createdBy && (
-            <>
-              {value.row.original.createdBy.firstName}{" "}
-              {value.row.original.createdBy.lastName} (
-              {value.row.original.createdBy.email})
-            </>
-          )}
-          {!value.row.original.createdBy && <>System</>}
-        </>
-      ),
-    }),
-  ];
-
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
     const editedOrder: OrderModel = {
@@ -185,12 +110,13 @@ export const Details = () => {
       total: updatedOrder.total,
       subTotal: updatedOrder.subTotal,
       balanceRemaining: updatedOrder.balanceRemaining,
+      balancePending: updatedOrder.balancePending,
       billings: updatedOrder.billings,
-      payments: updatedOrder.payments,
-      history: updatedOrder.history,
       piUser: updatedOrder.piUser,
       percentTotal: updatedOrder.percentTotal,
       nextPaymentDate: updatedOrder.nextPaymentDate,
+      historyCount: updatedOrder.historyCount,
+      paymentCount: updatedOrder.paymentCount,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
@@ -577,18 +503,11 @@ export const Details = () => {
             onlyChartStrings={false}
             onSubmit={submitOrder}
           />
-          <h2>History</h2>
-          <ReactTable
-            columns={historyColumns}
-            data={order.history}
-            initialState={{
-              sorting: [
-                {
-                  id: "actedDate",
-                  desc: true,
-                },
-              ],
-            }}
+
+          <HistoryTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            historyCount={order.historyCount}
           />
           <h2>Payments</h2>
           <div className="form-group">
@@ -661,20 +580,11 @@ export const Details = () => {
               </div>
             </>
           )}
-          {order.payments.length !== 0 && (
-            <ReactTable
-              columns={paymentColumns}
-              data={order.payments}
-              initialState={{
-                sorting: [
-                  {
-                    id: "createdOn",
-                    desc: true,
-                  },
-                ],
-              }}
-            />
-          )}
+          <PaymentTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            paymentCount={order.paymentCount}
+          />
         </div>
       </div>
     </div>
