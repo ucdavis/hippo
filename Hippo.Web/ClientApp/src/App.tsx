@@ -28,7 +28,8 @@ import { EditOrder } from "./components/Order/EditOrder";
 import { UpdateChartStrings } from "./components/Order/UpdateChartStrings";
 import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestForm";
 import NotFound from "./NotFound";
-import OrderHistories from "./components/Order/OrderHistories";
+import { OrderHistories } from "./components/Order/OrderHistories";
+import { OrderPayments } from "./components/Order/OrderPayments";
 
 declare var Hippo: AppContextShape;
 
@@ -151,6 +152,17 @@ const App = () => {
                   alternative={<Restricted />}
                 >
                   <OrderHistories />
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/order/orderPayments/:orderId"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  alternative={<Restricted />}
+                >
+                  <OrderPayments />
                 </ShowFor>
               }
             />

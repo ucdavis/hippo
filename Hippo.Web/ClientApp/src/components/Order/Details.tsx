@@ -18,6 +18,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { HistoryTable } from "./HistoryTable";
+import { PaymentTable } from "./PaymentTable";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -98,45 +99,6 @@ export const Details = () => {
       }
     }
   }, [order]);
-
-  const paymentColumnHelper = createColumnHelper<PaymentModel>();
-
-  const paymentColumns = [
-    paymentColumnHelper.accessor("amount", {
-      header: "Amount",
-      id: "amount",
-      cell: (value) => (
-        <span>
-          <FontAwesomeIcon icon={faDollarSign} />{" "}
-          {value.row.original.amount.toFixed(2)}
-        </span>
-      ),
-    }),
-    paymentColumnHelper.accessor("status", { header: "Status", id: "status" }),
-    paymentColumnHelper.accessor("createdOn", {
-      header: "Created On",
-      id: "createdOn",
-      cell: (value) => (
-        <span>{convertToPacificTime(value.row.original.createdOn)}</span>
-      ),
-    }),
-    paymentColumnHelper.accessor("createdBy", {
-      header: "Created By",
-      id: "createdBy",
-      cell: (value) => (
-        <>
-          {value.row.original.createdBy && (
-            <>
-              {value.row.original.createdBy.firstName}{" "}
-              {value.row.original.createdBy.lastName} (
-              {value.row.original.createdBy.email})
-            </>
-          )}
-          {!value.row.original.createdBy && <>System</>}
-        </>
-      ),
-    }),
-  ];
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -613,20 +575,7 @@ export const Details = () => {
               </div>
             </>
           )}
-          {order.payments.length !== 0 && (
-            <ReactTable
-              columns={paymentColumns}
-              data={order.payments}
-              initialState={{
-                sorting: [
-                  {
-                    id: "createdOn",
-                    desc: true,
-                  },
-                ],
-              }}
-            />
-          )}
+          <PaymentTable numberOfRows={5} showLinkToAll={true} />
         </div>
       </div>
     </div>
