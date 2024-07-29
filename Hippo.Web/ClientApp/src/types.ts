@@ -306,6 +306,8 @@ export interface OrderModel extends Partial<ProductBase> {
   percentTotal: number;
   nextPaymentDate?: string;
   nextPaymentAmount?: string;
+  historyCount: number;
+  paymentCount: number;
 }
 
 export interface OrderListModel {

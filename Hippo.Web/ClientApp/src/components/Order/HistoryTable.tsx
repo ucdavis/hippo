@@ -10,11 +10,13 @@ import { useParams } from "react-router-dom";
 interface HistoryTableProps {
   numberOfRows: number;
   showLinkToAll: boolean;
+  historyCount: number;
 }
 
 export const HistoryTable: React.FC<HistoryTableProps> = ({
   numberOfRows,
   showLinkToAll,
+  historyCount,
 }) => {
   const [histories, setHistories] = useState<HistoryModel[]>([]);
   const { cluster, orderId } = useParams();
@@ -36,7 +38,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
     };
 
     fetchHistories();
-  }, [cluster, numberOfRows, orderId]);
+  }, [cluster, numberOfRows, orderId, historyCount]);
 
   const historyColumnHelper = createColumnHelper<HistoryModel>();
 
