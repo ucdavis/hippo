@@ -11,11 +11,13 @@ import { ReactTable } from "../../Shared/ReactTable";
 interface PaymentTableProps {
   numberOfRows: number;
   showLinkToAll: boolean;
+  paymentCount: number;
 }
 
 export const PaymentTable: React.FC<PaymentTableProps> = ({
   numberOfRows,
   showLinkToAll,
+  paymentCount,
 }) => {
   const [payments, setPayments] = useState<PaymentModel[]>([]);
   const { cluster, orderId } = useParams();
@@ -37,7 +39,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
     };
 
     fetchPayments();
-  }, [cluster, numberOfRows, orderId]);
+  }, [cluster, numberOfRows, orderId, paymentCount]);
 
   const paymentColumnHelper = createColumnHelper<PaymentModel>();
 

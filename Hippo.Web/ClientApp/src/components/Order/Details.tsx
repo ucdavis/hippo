@@ -115,6 +115,8 @@ export const Details = () => {
       piUser: updatedOrder.piUser,
       percentTotal: updatedOrder.percentTotal,
       nextPaymentDate: updatedOrder.nextPaymentDate,
+      historyCount: updatedOrder.historyCount,
+      paymentCount: updatedOrder.paymentCount,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
@@ -502,7 +504,11 @@ export const Details = () => {
             onSubmit={submitOrder}
           />
 
-          <HistoryTable numberOfRows={5} showLinkToAll={true} />
+          <HistoryTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            historyCount={order.historyCount}
+          />
           <h2>Payments</h2>
           <div className="form-group">
             <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
@@ -574,7 +580,11 @@ export const Details = () => {
               </div>
             </>
           )}
-          <PaymentTable numberOfRows={5} showLinkToAll={true} />
+          <PaymentTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            paymentCount={order.paymentCount}
+          />
         </div>
       </div>
     </div>

@@ -30,6 +30,9 @@ namespace Hippo.Web.Models.OrderModels
         public DateTime? NextPaymentDate { get; set; } //No idea why I needs to add 1 day below... Couldn't get the conversion correct. Seems to skip time portion
         public string NextPaymentAmount { get; set; } = string.Empty;
 
+        public int HistoryCount { get; set; }
+        public int PaymentCount { get; set; }
+
         public User? PiUser { get; set; }
 
         public List<OrderMetaData> MetaData { get; set; } = new();
@@ -67,7 +70,9 @@ namespace Hippo.Web.Models.OrderModels
                 BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 BalancePending = order.Payments.Where(a => a.Status != Payment.Statuses.Completed && a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount).ToString("F2"),
                 MetaData = order.MetaData,
-                Billings = order.Billings
+                Billings = order.Billings,
+                HistoryCount = order.History.Count,
+                PaymentCount = order.Payments.Count
             };
         }
 
@@ -96,7 +101,9 @@ namespace Hippo.Web.Models.OrderModels
                 BalanceRemaining = "0.00", //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 BalancePending = "0.00",
                 MetaData = new List<OrderMetaData>(),
-                Billings = new List<Billing>()
+                Billings = new List<Billing>(),
+                HistoryCount = 0,
+                PaymentCount = 0
             };
         }
     }

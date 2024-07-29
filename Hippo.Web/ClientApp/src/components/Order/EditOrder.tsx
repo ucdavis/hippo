@@ -49,6 +49,8 @@ export const EditOrder: React.FC = () => {
       piUser: null,
       percentTotal: updatedOrder.percentTotal,
       nextPaymentDate: updatedOrder.nextPaymentDate,
+      historyCount: updatedOrder.historyCount,
+      paymentCount: updatedOrder.paymentCount,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
