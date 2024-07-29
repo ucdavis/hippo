@@ -28,10 +28,9 @@ const defaultOrder: OrderModel = {
   subTotal: "",
   total: "",
   balanceRemaining: "",
+  balancePending: "",
   metaData: [],
   billings: [],
-  payments: [],
-  history: [],
   percentTotal: 0,
 };
 export const CreateOrder: React.FC = () => {
@@ -81,8 +80,7 @@ export const CreateOrder: React.FC = () => {
       total: updatedOrder.total,
       subTotal: updatedOrder.subTotal,
       balanceRemaining: updatedOrder.balanceRemaining,
-      payments: updatedOrder.payments,
-      history: updatedOrder.history,
+      balancePending: updatedOrder.balancePending,
       piUser: updatedOrder.piUser,
       percentTotal: updatedOrder.percentTotal,
       nextPaymentDate: updatedOrder.nextPaymentDate,

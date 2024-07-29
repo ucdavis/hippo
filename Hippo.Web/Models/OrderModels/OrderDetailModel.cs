@@ -1,5 +1,7 @@
 using Hippo.Core.Domain;
 using Hippo.Core.Extensions;
+using Hippo.Core.Services;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
@@ -21,6 +23,7 @@ namespace Hippo.Web.Models.OrderModels
         public string SubTotal { get; set; } = string.Empty;
         public string Total { get; set; } = string.Empty;
         public string BalanceRemaining { get; set; } = string.Empty;
+        public string BalancePending { get; set; } = string.Empty;
 
         public string InstallmentDate { get; set; } = string.Empty;
         public string ExpirationDate { get; set; } = string.Empty; //This would default to InstallmentDate + LifeCycle Months                                                                   
@@ -31,8 +34,7 @@ namespace Hippo.Web.Models.OrderModels
 
         public List<OrderMetaData> MetaData { get; set; } = new();
         public List<Billing> Billings { get; set; } = new();
-        public List<Payment> Payments { get; set; } = new();
-        //TODO: remove History and Payments from here once the new endpoints are used.
+
 
         public static Expression<Func<Order, OrderDetailModel>> Projection()
         {
@@ -63,9 +65,9 @@ namespace Hippo.Web.Models.OrderModels
                 SubTotal = order.SubTotal.ToString("F2"),
                 Total = order.Total.ToString("F2"),
                 BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
+                BalancePending = order.Payments.Where(a => a.Status != Payment.Statuses.Completed && a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount).ToString("F2"),
                 MetaData = order.MetaData,
-                Billings = order.Billings,
-                Payments = order.Payments
+                Billings = order.Billings
             };
         }
 
@@ -92,9 +94,9 @@ namespace Hippo.Web.Models.OrderModels
                 SubTotal = "0.00",
                 Total = "0.00",
                 BalanceRemaining = "0.00", //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
+                BalancePending = "0.00",
                 MetaData = new List<OrderMetaData>(),
-                Billings = new List<Billing>(),
-                Payments = new List<Payment>()
+                Billings = new List<Billing>()
             };
         }
     }

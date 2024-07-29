@@ -41,13 +41,13 @@ export const Details = () => {
   const calculateBalanceRemaining = (data: any) => {
     const balanceRemaining = parseFloat(data.balanceRemaining);
     setBalanceRemaining(balanceRemaining);
-    const balancePending = data.payments
-      .filter(
-        (payment) =>
-          payment.status !== "Completed" && payment.status !== "Cancelled",
-      )
-      .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-    setBalancePending(balancePending);
+    // const balancePending = data.payments
+    //   .filter(
+    //     (payment) =>
+    //       payment.status !== "Completed" && payment.status !== "Cancelled",
+    //   )
+    //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
+    setBalancePending(parseFloat(data.balancePending));
   };
 
   useEffect(() => {
@@ -110,9 +110,8 @@ export const Details = () => {
       total: updatedOrder.total,
       subTotal: updatedOrder.subTotal,
       balanceRemaining: updatedOrder.balanceRemaining,
+      balancePending: updatedOrder.balancePending,
       billings: updatedOrder.billings,
-      payments: updatedOrder.payments,
-      history: updatedOrder.history,
       piUser: updatedOrder.piUser,
       percentTotal: updatedOrder.percentTotal,
       nextPaymentDate: updatedOrder.nextPaymentDate,

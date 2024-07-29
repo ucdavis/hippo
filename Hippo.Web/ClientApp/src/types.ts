@@ -297,13 +297,12 @@ export interface OrderModel extends Partial<ProductBase> {
   subTotal: string;
   total: string;
   balanceRemaining: string;
+  balancePending: string;
   piUser?: User;
   installmentDate?: string;
   expirationDate?: string;
   metaData: OrderMetadataModel[];
   billings: OrderBillingModel[];
-  payments: PaymentModel[];
-  history: HistoryModel[];
   percentTotal: number;
   nextPaymentDate?: string;
   nextPaymentAmount?: string;
