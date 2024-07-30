@@ -1,4 +1,4 @@
-import { OrderModel } from "../../types";
+import { OrderModel } from "../../../types";
 import { useFormContext, useWatch } from "react-hook-form";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

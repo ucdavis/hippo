@@ -5,14 +5,20 @@ interface InputGroupWrapperProps extends InputGroupProps {
   children: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
+  readOnly?: boolean;
 }
 
-const InputGroupWrapper: React.FC<InputGroupWrapperProps> = ({
+/**
+ * Wraps an input group with prepend and append elements.
+ * Will return the children if readOnly or no prepend/append
+ */
+const HipInputGroup: React.FC<InputGroupWrapperProps> = ({
   children,
   prepend,
   append,
+  readOnly,
 }) => {
-  if (!prepend && !append) {
+  if (readOnly || (!prepend && !append)) {
     return <>{children}</>;
   }
 
@@ -25,4 +31,4 @@ const InputGroupWrapper: React.FC<InputGroupWrapperProps> = ({
   );
 };
 
-export default InputGroupWrapper;
+export default HipInputGroup;
