@@ -60,6 +60,7 @@ export const fakeAccounts: AccountModel[] = [
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
     data: {} as PuppetUserRecord,
+    tags: [],
   },
   {
     id: 2,
@@ -73,6 +74,7 @@ export const fakeAccounts: AccountModel[] = [
     adminOfGroups: [],
     accessTypes: ["OpenOnDemand", "SshKey"],
     data: {} as PuppetUserRecord,
+    tags: [],
   },
 ];
 

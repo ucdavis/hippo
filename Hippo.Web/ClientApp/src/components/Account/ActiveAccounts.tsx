@@ -1,25 +1,39 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { AccountModel } from "../../types";
-import { authenticatedFetch } from "../../util/api";
+import { AccountModel, AccountTagsModel } from "../../types";
+import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
+import SearchTags from "../../Shared/SearchTags";
 import ObjectTree from "../../Shared/ObjectTree";
+import { usePromiseNotification } from "../../util/Notifications";
 
 export const ActiveAccounts = () => {
+  const [notification, setNotification] = usePromiseNotification();
   const [accounts, setAccounts] = useState<AccountModel[]>();
-  const [viewing, setViewing] = useState<number>();
+  const [viewing, setViewing] = useState<AccountModel>();
+  const [editing, setEditing] = useState<AccountModel>();
 
   const { cluster } = useParams();
+  const [tags, setTags] = useState<string[]>([]);
+  useEffect(() => {
+    const fetchTags = async () => {
+      const response = await authenticatedFetch(`/api/${cluster}/tags/getall`);
+      const data = await response.json();
+      setTags(data);
+    };
+
+    fetchTags();
+  }, [cluster]);
 
   const [showDetails] = useConfirmationDialog(
     {
       title: "Account Details",
       message: () => {
-        const account = accounts.find((a) => a.id === viewing);
+        const account = accounts.find((a) => a.id === viewing.id);
         return (
           <div className="row justify-content-center">
             <div className="col-md-8">
@@ -60,6 +74,17 @@ export const ActiveAccounts = () => {
                 ></input>
               </div>
               <div className="form-group">
+                <label className="form-label">Tags</label>
+                <SearchTags
+                  onSelect={setTags}
+                  disabled={true}
+                  selected={account.tags}
+                  options={[]}
+                  placeHolder={""}
+                  id={"accountTags"}
+                />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Details</label>
                 <ObjectTree obj={account.data} />
               </div>
@@ -72,14 +97,71 @@ export const ActiveAccounts = () => {
     [accounts, viewing],
   );
 
+  const [editTags] = useConfirmationDialog<string[]>(
+    {
+      title: "Edit Account Tags",
+      message: (setReturn) => {
+        return (
+          <SearchTags
+            onSelect={(tags) => {
+              setReturn(tags);
+              setEditing((editing) => ({ ...editing, tags }));
+            }}
+            disabled={false}
+            options={tags}
+            selected={editing.tags}
+            placeHolder={"Enter tags here"}
+            id={"searchTags"}
+          />
+        );
+      },
+    },
+    [accounts, editing],
+  );
+
   const handleDetails = useCallback(
     async (account: AccountModel) => {
-      setViewing(account.id);
+      setViewing({ ...account });
       await showDetails();
       setViewing(undefined);
     },
     [showDetails],
   );
+
+  const handleEditTags = async (account: AccountModel) => {
+    setEditing({ ...account });
+    const [confirmed, newTags] = await editTags();
+    if (confirmed) {
+      const accountTagsModel: AccountTagsModel = {
+        AccountId: account.id,
+        Tags: newTags,
+      };
+      const request = authenticatedFetch(
+        `/api/${cluster}/tags/UpdateAccountTags`,
+        {
+          method: "POST",
+          body: JSON.stringify(accountTagsModel),
+        },
+      );
+      setNotification(request, "Updating Tags", "Tags Updated", async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(response);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await request;
+      if (response.ok) {
+        setAccounts((accounts) => [
+          ...accounts.filter((a) => a.id !== account.id),
+          { ...account, tags: newTags },
+        ]);
+      }
+    }
+    setEditing(undefined);
+  };
 
   const columnHelper = createColumnHelper<AccountModel>();
 
@@ -121,16 +203,28 @@ export const ActiveAccounts = () => {
         header: "Updated On",
       },
     ),
+    columnHelper.accessor((row) => row.tags.join(", "), {
+      header: "Tags",
+    }),
     columnHelper.display({
       id: "actions",
       header: "Action",
       cell: (props) => (
-        <button
-          onClick={() => handleDetails(props.row.original)}
-          className="btn btn-primary"
-        >
-          {viewing === props.row.original.id ? "Viewing..." : "Details"}
-        </button>
+        <>
+          <button
+            onClick={() => handleDetails(props.row.original)}
+            className="btn btn-primary"
+          >
+            {viewing?.id === props.row.original.id ? "Viewing..." : "Details"}
+          </button>{" "}
+          |{" "}
+          <button
+            onClick={() => handleEditTags(props.row.original)}
+            className="btn btn-primary"
+          >
+            {editing?.id === props.row.original.id ? "Editing..." : "Edit Tags"}
+          </button>{" "}
+        </>
       ),
     }),
   ];
