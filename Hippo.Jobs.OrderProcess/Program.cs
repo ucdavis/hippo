@@ -132,7 +132,7 @@ namespace Hippo.Jobs.OrderProcess
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IMjmlRenderer, MjmlRenderer>();
-            services.AddScoped<IUserService, UserService>(); 
+
 
 
             return services.BuildServiceProvider();
