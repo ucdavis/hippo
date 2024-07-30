@@ -24,12 +24,14 @@ namespace Hippo.Core.Services
         private readonly AppDbContext _dbContext;
         private readonly IHistoryService _historyService;
         private readonly IAggieEnterpriseService _aggieEnterpriseService;
+        private readonly INotificationService _notificationService;
 
-        public PaymentsService(AppDbContext dbContext, IHistoryService historyService, IAggieEnterpriseService aggieEnterpriseService)
+        public PaymentsService(AppDbContext dbContext, IHistoryService historyService, IAggieEnterpriseService aggieEnterpriseService, INotificationService notificationService)
         {
             _dbContext = dbContext;
             _historyService = historyService;
             _aggieEnterpriseService = aggieEnterpriseService;
+            _notificationService = notificationService;
         }
         public async Task<bool> CreatePayments()
         {
@@ -164,8 +166,17 @@ namespace Hippo.Core.Services
                     }
                     if (invalidChartStrings)
                     {
+                        Log.Error("Order {0} has an invalid chart string", order.Id);
                         //TODO: Notify the sponsor
                         //Remember to add notification/email service to job
+                        try
+                        {
+                           await _notificationService.SponsorPaymentFailureNotification(new string[] { order.PrincipalInvestigator.Email }, order);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Failed to notify sponsor for order {0}", order.Id);
+                        }
 
 
                         invalidOrderIdsInCluster.Add(order.Id);
@@ -177,8 +188,17 @@ namespace Hippo.Core.Services
                     //Send email to cluster admins with list of orders that have failed payments
                     //https://localhost:44371/caesfarm/order/details/46
 
-                    var clusterAdmins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == orderGroup.Key && p.Role.Name == Role.Codes.ClusterAdmin)).OrderBy(u => u.LastName).ThenBy(u => u.FirstName).ToArrayAsync();
+                    var clusterAdmins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == orderGroup.Key && p.Role.Name == Role.Codes.ClusterAdmin)).Select(a => a.Email).ToArrayAsync();
                     //TODO: Notify the cluster admins with a single email
+
+                    try
+                    {
+                        await _notificationService.AdminPaymentFailureNotification(clusterAdmins, invalidOrderIdsInCluster.ToArray());
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to notify cluster admins for cluster {0}", cluster.Id);
+                    }
 
                 }
 

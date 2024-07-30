@@ -23,6 +23,10 @@ namespace Hippo.Core.Services
         Task<bool> AccountDecision(Request request, bool isApproved, string overrideSponsor = null, string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
         Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
+
+        Task<bool> AdminPaymentFailureNotification(string[] emails, int[] orderIds);
+        Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
+        Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
     }
 
     public class NotificationService : INotificationService
@@ -236,6 +240,22 @@ namespace Hippo.Core.Services
                 .Where(e => e != null)
                 .ToArrayAsync();
             return groupAdminEmails;
+        }
+
+        public Task<bool> AdminPaymentFailureNotification(string[] emails, int[] orderIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
+        {
+            //Can pass the simple part for the general text, and the order for the specific details
+            throw new NotImplementedException();
         }
     }
 }
