@@ -644,6 +644,7 @@ namespace Hippo.Web.Controllers
             if(order.Status == Order.Statuses.Created)
             {
                 //Notify the PI that they need to enter billing info and submit the order.
+                await NotifySponsorOrderCreatedByAdmin(order);
             }
             if(order.Status == Order.Statuses.Submitted)
             {
@@ -671,6 +672,29 @@ namespace Hippo.Web.Controllers
                 };
 
                 await _notificationService.OrderNotification(emailModel, order, clusterAdmins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderCreatedByAdmin(Order order)
+        {
+            try
+            {                
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "New Order Created",
+                    Header = "A new order has been created for you.",
+                    Paragraphs = new List<string>
+                    {
+                        "A new order has been created for you. Please enter the billing information and approve it for processing.",
+                        "If you believe this was done in error, please contact the cluster admins before canceleing it."
+                    }
+                };
+
+                await _notificationService.OrderNotification(emailModel, order, new string[] {order.PrincipalInvestigator.Email});
             }
             catch (Exception ex)
             {
