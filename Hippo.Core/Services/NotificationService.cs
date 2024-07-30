@@ -20,7 +20,7 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequest(Request request);
-        Task<bool> AccountDecision(Request request, bool isApproved, string overrideSponsor = null, string reason = null);
+        Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy , string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
         Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
 
@@ -34,33 +34,22 @@ namespace Hippo.Core.Services
         private readonly AppDbContext _dbContext;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
-        private readonly IUserService _userService;
         private readonly IMjmlRenderer _mjmlRenderer;
 
         public NotificationService(AppDbContext dbContext, IEmailService emailService,
-            IOptions<EmailSettings> emailSettings, IUserService userService, IMjmlRenderer mjmlRenderer)
+            IOptions<EmailSettings> emailSettings, IMjmlRenderer mjmlRenderer)
         {
             _dbContext = dbContext;
             _emailService = emailService;
             _emailSettings = emailSettings.Value;
-            _userService = userService;
             _mjmlRenderer = mjmlRenderer;
         }
 
-        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string details = "")
+        public async Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy, string details = "")
         {
 
             try
             {
-                var decidedBy = String.Empty;
-                if (!string.IsNullOrWhiteSpace(overrideDecidedBy))
-                {
-                    decidedBy = overrideDecidedBy;
-                }
-                else
-                {
-                    decidedBy = (await _userService.GetCurrentUser()).Name;
-                }
 
                 var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}"; //TODO: Only have button if approved?
                 var emailTo = request.Requester.Email;
