@@ -12,6 +12,7 @@ using static Hippo.Core.Domain.Product;
 using static Hippo.Core.Models.SlothModels.TransferViewModel;
 using Serilog;
 using Hippo.Email.Models;
+using System.Runtime.CompilerServices;
 
 namespace Hippo.Web.Controllers
 {
@@ -222,6 +223,7 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("Invalid Installment Type Detected.");
             }
+            var result = new ProcessingResult();
 
             if (model.Id == 0)
             {
@@ -231,6 +233,7 @@ namespace Hippo.Web.Controllers
                     return BadRequest(processingResult.Message);
                 }
                 orderToReturn = processingResult.Order;
+                result = processingResult;
             }
             else
             {
@@ -241,12 +244,25 @@ namespace Hippo.Web.Controllers
                 }
 
                 orderToReturn = processingResult.Order;
-
+                result = processingResult;
             }
 
 
 
             await _dbContext.SaveChangesAsync();
+
+            if(result.NotificationMethod != null && orderToReturn != null)
+            {
+                switch (result.NotificationMethod)
+                {
+                    case "NotifyAdminOrderSubmitted":
+                        await NotifyAdminOrderSubmitted(orderToReturn);
+                        break;
+                    case "NotifySponsorOrderCreatedByAdmin":
+                        await NotifySponsorOrderCreatedByAdmin(orderToReturn);
+                        break;
+                }
+            }
 
 
             return Ok(orderToReturn);
@@ -641,16 +657,14 @@ namespace Hippo.Web.Controllers
             rtValue.Success = true;
             rtValue.Order = order;
 
+
             if(order.Status == Order.Statuses.Created)
             {
-                //Notify the PI that they need to enter billing info and submit the order.
-                await NotifySponsorOrderCreatedByAdmin(order);
+                rtValue.NotificationMethod = "NotifySponsorOrderCreatedByAdmin";
             }
             if(order.Status == Order.Statuses.Submitted)
             {
-                //Notify the admins that a new order has been submitted.
-                //This can be done in a couple places, so private method
-                await NotifyAdminOrderSubmitted(order);
+                rtValue.NotificationMethod = "NotifyAdminOrderSubmitted";
             }
             
             return rtValue;
@@ -1004,6 +1018,8 @@ namespace Hippo.Web.Controllers
             public string? Message { get; set; }
 
             public Order? Order { get; set; }
+
+            public string? NotificationMethod { get; set; }
         }
     }
 }

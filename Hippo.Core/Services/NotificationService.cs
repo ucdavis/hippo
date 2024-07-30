@@ -252,10 +252,40 @@ namespace Hippo.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
+        public async Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
         {
-            //Can pass the simple part for the general text, and the order for the specific details
-            throw new NotImplementedException();
+            try
+            {
+                var message = simpleNotificationModel.Paragraphs.FirstOrDefault();
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = simpleNotificationModel.Subject,
+                    Header = simpleNotificationModel.Header,
+                    Paragraphs = simpleNotificationModel.Paragraphs,
+                };
+
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = ccEmails,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = simpleNotificationModel.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Notification", ex);
+                return false;
+            }
         }
     }
 }

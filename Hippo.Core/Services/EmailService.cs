@@ -52,10 +52,12 @@ namespace Hippo.Core.Services
                 {
                     message.To.Add(new MailAddress(email, email));
                 }
-
-                foreach (var ccEmail in emailModel.CcEmails)
+                if (emailModel.CcEmails != null)
                 {
-                    message.CC.Add(new MailAddress(ccEmail));
+                    foreach (var ccEmail in emailModel.CcEmails)
+                    {
+                        message.CC.Add(new MailAddress(ccEmail));
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(_emailSettings.BccEmail))
