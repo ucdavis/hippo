@@ -24,7 +24,7 @@ namespace Hippo.Core.Services
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
         Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
 
-        Task<bool> AdminPaymentFailureNotification(string[] emails, int[] orderIds);
+        Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
     }
@@ -231,9 +231,43 @@ namespace Hippo.Core.Services
             return groupAdminEmails;
         }
 
-        public Task<bool> AdminPaymentFailureNotification(string[] emails, int[] orderIds)
+        public async Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var message = "The payment for one or more orders in hippo have failed.";
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    Subject = "Payment failed",
+                    Header = "Order Payment Failed",
+                    Paragraphs = new List<string>(),
+                };
+                foreach (var orderId in orderIds)
+                {
+                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}"); 
+
+                }
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderAdminPaymentFail_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = null,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = model.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Sponsor Payment Failure Notification", ex);
+                return false;
+            }
         }
 
         public async Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order)
