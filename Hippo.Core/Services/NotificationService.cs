@@ -247,9 +247,43 @@ namespace Hippo.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order)
+        public async Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var message = "The payment for the following order has failed. Please update your billing information in Hippo.";
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = "Payment failed",
+                    Header = "Order Payment Failed",
+                    Paragraphs = new List<string>(),
+                };
+                model.Paragraphs.Add("The payment for this order has failed.");
+                model.Paragraphs.Add("This is most likely due to a Aggie Enterprise Chart String which is no longer valid.");
+                model.Paragraphs.Add("The order details will have the validation message from Aggie Enterprise.");
+                model.Paragraphs.Add("Please update your billing information in Hippo.");
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = null,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = model.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Sponsor Payment Failure Notification", ex);
+                return false;
+            }
         }
 
         public async Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)

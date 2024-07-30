@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Mjml.Net;
 using Serilog;
 
 
@@ -120,6 +121,7 @@ namespace Hippo.Jobs.OrderProcess
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
             services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
+            services.Configure<EmailSettings>(Configuration.GetSection("Email"));
 
             services.AddScoped<IPaymentsService, PaymentsService>();
             services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
@@ -127,7 +129,10 @@ namespace Hippo.Jobs.OrderProcess
             services.AddHttpClient();
             services.AddSingleton<ISecretsService, SecretsService>();
             services.AddScoped<ISlothService, SlothService>();
-            //TODO: This will probably need the notification service as well.
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IMjmlRenderer, MjmlRenderer>();
+            services.AddScoped<IUserService, UserService>(); 
 
 
             return services.BuildServiceProvider();
