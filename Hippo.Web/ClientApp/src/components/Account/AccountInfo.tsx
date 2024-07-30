@@ -61,7 +61,7 @@ export const AccountInfo = () => {
       message: (setReturn) => {
         return (
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-12">
               <div className="form-group">
                 <GroupLookup
                   setSelection={(selection) =>
@@ -106,7 +106,7 @@ export const AccountInfo = () => {
       message: (setReturn) => {
         return (
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-12">
               <div className="form-group">
                 <label className="form-label">
                   Please paste your public SSH key.
@@ -242,7 +242,7 @@ export const AccountInfo = () => {
   return (
     <>
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <p>Welcome {context.user.detail.firstName}</p>
           {!!memberOfGroups.length && (
             <>

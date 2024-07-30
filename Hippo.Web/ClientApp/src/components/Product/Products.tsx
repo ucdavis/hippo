@@ -409,7 +409,7 @@ export const Products = () => {
             className="btn btn-primary"
             to={`/${cluster}/order/create/${row.original.id}`}
           >
-            Order It
+            Order
           </Link>{" "}
           <ShowFor roles={["ClusterAdmin"]}>
             <button
@@ -433,7 +433,7 @@ export const Products = () => {
   if (products === undefined) {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
+        <div className="col-md-12">Loading...</div>
       </div>
     );
   } else {
@@ -441,7 +441,7 @@ export const Products = () => {
       <div>
         <ShowFor roles={["ClusterAdmin"]}>
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-12">
               <button className="btn btn-primary" onClick={handleCreate}>
                 {" "}
                 Add Product{" "}
@@ -455,7 +455,7 @@ export const Products = () => {
         </ShowFor>
         <hr />
         <div className="row justify-content-center">
-          <div className="col-md-8">
+          <div className="col-md-12">
             <ReactTable columns={columns} data={products} />
           </div>
         </div>

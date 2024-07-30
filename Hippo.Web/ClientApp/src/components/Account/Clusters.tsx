@@ -8,16 +8,14 @@ export const Clusters = () => {
 
   return (
     <div className="row justify-content-center">
-      <div className="col-md-8">
+      <div className="col-md-12">
         <nav className="simple-nav">
           <ShowFor roles={["System"]}>
             <NavLink
               id="adminClusters"
               className="nav-item nav-link"
               to={`/clusteradmin/clusters`}
-              style={({ isActive }) =>
-                isActive ? { fontWeight: "bold" } : {}
-              }
+              style={({ isActive }) => (isActive ? { fontWeight: "bold" } : {})}
             >
               Manage Clusters
             </NavLink>

@@ -336,7 +336,7 @@ export const Details = () => {
     message: (setReturn) => {
       return (
         <div className="row justify-content-center">
-          <div className="col-md-8">
+          <div className="col-md-12">
             <div className="form-group">
               <label className="form-label">Reason</label>
 
@@ -392,7 +392,7 @@ export const Details = () => {
   return (
     <div>
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <h1>Order Details: Id {order.id}</h1>
           <h2>
             {order.piUser?.name} ({order.piUser?.email})

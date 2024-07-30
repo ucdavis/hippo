@@ -239,6 +239,7 @@ hr {
 }
 .group-card-admin {
   border-left: 2px solid $primary-color;
+  padding-left: 8px;
 }
 
 .group-info-baseline {
@@ -282,7 +283,9 @@ hr {
   text-align: center;
   border: 5px solid;
 }
-
+hr {
+  opacity: 1;
+}
 .hip-form {
   &.wrap {
     display: flex;
@@ -292,11 +295,26 @@ hr {
       flex-grow: 1;
       flex-shrink: 0;
       &.read-only {
-        flex-basis: 50%;
+        flex-basis: 10%;
+        border-bottom: 1px solid $borders;
+        border-top: 1px solid $borders;
+        label {
+          font-size: 1rem;
+          color: $secondary-font;
+          margin-bottom: 0;
+          margin-top: 16px;
+        }
+        input {
+          color: $primary-font;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
       }
     }
+    //admin
     .no-wrap {
-      flex-basis: 100%;
+      flex-basis: 48%;
+      margin-right: 2%;
     }
   }
 }

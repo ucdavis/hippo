@@ -129,7 +129,6 @@ export const Requests = () => {
               ? "Approving..."
               : "Approve"}
           </button>
-          {" | "}
           {requestApproving !== props.row.original.id && (
             <RejectRequest
               request={props.row.original}
@@ -148,13 +147,13 @@ export const Requests = () => {
   if (requests === undefined) {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
+        <div className="col-md-12">Loading...</div>
       </div>
     );
   } else {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <p>There are {requests.length} request(s) awaiting approval</p>
           <ReactTable
             columns={columns}

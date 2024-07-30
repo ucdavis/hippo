@@ -15,7 +15,7 @@ export const AppNav = () => {
   return (
     <div>
       <div className="row appheader justify-content-center">
-        <div className="col-md-8 hippo">
+        <div className="col-md-12 hippo">
           <NavLink to={cluster ? `/${cluster?.name}/` : "/clusters"}>
             <HippoLogo />
           </NavLink>
@@ -47,7 +47,7 @@ export const AppNav = () => {
       {/* Only show links if a cluster has been identified */}
       {cluster && (
         <div className="row justify-content-center">
-          <div className="col-md-8">
+          <div className="col-md-12">
             <nav className="simple-nav">
               {accountInCluster && (
                 <NavLink

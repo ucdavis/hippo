@@ -58,7 +58,7 @@ const HipFormField = <T extends Record<string, any>>({
   return (
     <HipFormGroup wrap={readOnly} readOnly={readOnly}>
       {label && (
-        <Label className={`hip-form-label`} for={`field-${name}`}>
+        <Label for={`field-${name}`}>
           {label}
           {required && !readOnly && <span> *</span>}
         </Label>

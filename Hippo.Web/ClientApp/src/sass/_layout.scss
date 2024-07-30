@@ -40,10 +40,10 @@ header {
 .simple-nav {
   display: flex;
   justify-content: center;
-  padding-bottom: 4%;
+  padding-bottom: 2%;
   a.nav-item {
-    padding: 1% 1.5%;
-    margin: 2%;
+    padding: 8px 16px;
+    margin: 6px;
     color: $primary-font;
     border-bottom: 2px solid $primary-color;
     box-shadow: $box-shadow;

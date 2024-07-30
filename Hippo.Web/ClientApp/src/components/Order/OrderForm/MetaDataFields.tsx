@@ -42,6 +42,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
       <Label for="metaData" tag="h2">
         Metadata
       </Label>
+      <br />
       {fields.map((field, index) => {
         return (
           <Row key={field.id} className="no-wrap">
@@ -76,8 +77,6 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                   title="Remove Metadata"
                   aria-label="Remove Metadata"
                   color="danger"
-                  outline={true}
-                  size="sm"
                   onClick={() => removeMetaData(index)}
                 >
                   <FontAwesomeIcon icon={faTrash} />
@@ -88,8 +87,8 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
         );
       })}
       {!readOnly && (
-        <HipButton outline={true} color="secondary" onClick={addMetaData}>
-          <FontAwesomeIcon icon={faPlus} size="sm" /> Add Metadata
+        <HipButton color="primary" onClick={addMetaData}>
+          <FontAwesomeIcon icon={faPlus} /> Add Metadata
         </HipButton>
       )}
     </HipFormGroup>
