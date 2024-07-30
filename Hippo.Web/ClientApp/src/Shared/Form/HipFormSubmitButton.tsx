@@ -4,9 +4,11 @@ import { OrderModel } from "../../types";
 import { useFormContext } from "react-hook-form";
 import HipButton from "../HipButton";
 
-interface FormSubmitButtonProps extends ButtonProps {}
+interface HipFormSubmitButtonProps extends ButtonProps {}
 
-const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ ...props }) => {
+const HipFormSubmitButton: React.FC<HipFormSubmitButtonProps> = ({
+  ...props
+}) => {
   const {
     formState: {
       isDirty,
@@ -41,4 +43,4 @@ const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({ ...props }) => {
   );
 };
 
-export default FormSubmitButton;
+export default HipFormSubmitButton;
