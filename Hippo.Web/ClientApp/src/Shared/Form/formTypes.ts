@@ -19,12 +19,12 @@ type FormFieldCommonProps<T> = Omit<InputProps, "pattern"> &
     register?: UseFormRegister<T>;
   };
 
-export type FormFieldProps<T> = FormFieldCommonProps<T> & {
+export type HipFormFieldProps<T> = FormFieldCommonProps<T> & {
   error?: FieldError;
   name: FieldPath<T>;
 };
 
-export type FormFieldArrayProps<T> = FormFieldCommonProps<T> & {
+export type HipFormFieldArrayProps<T> = FormFieldCommonProps<T> & {
   arrayName: ArrayPath<T>;
   errors: FieldErrors<T>;
   register: UseFormRegister<T>;
