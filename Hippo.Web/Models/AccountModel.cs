@@ -19,6 +19,7 @@ namespace Hippo.Web.Models
         public List<string> AccessTypes { get; set; } = new();
         public DateTime UpdatedOn { get; set; }
         public JsonElement? Data { get; set; }
+        public List<string> Tags { get; set; } = new();
 
         public AccountModel()
         {
@@ -67,6 +68,7 @@ namespace Hippo.Web.Models
             UpdatedOn = account.UpdatedOn;
             AccessTypes = account.AccessTypes.Select(at => at.Name).ToList();
             Data = account.Data;
+            Tags = account.Tags.Select(t => t.Name).ToList();
         }
 
         public static Expression<Func<Account, AccountModel>> GetProjection(bool isClusterOrSystemAdmin, int currentUserId)
@@ -118,7 +120,8 @@ namespace Hippo.Web.Models
                 }).OrderBy(x => x.Name).ToList(),
                 UpdatedOn = a.UpdatedOn,
                 AccessTypes = a.AccessTypes.Select(at => at.Name).ToList(),
-                Data = a.Data
+                Data = a.Data,
+                Tags = a.Tags.Select(t => t.Name).ToList()
             };
         }
     }

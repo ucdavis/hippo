@@ -64,6 +64,9 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public List<Order> Orders { get; set; } = new();
 
+        [JsonIgnore]
+        public List<Tag> Tags { get; set; } = new();
+
         internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
         {
             modelBuilder.Entity<Account>().HasQueryFilter(a => a.Cluster.IsActive);

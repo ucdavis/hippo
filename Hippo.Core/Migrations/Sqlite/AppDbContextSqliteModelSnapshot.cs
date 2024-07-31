@@ -47,6 +47,21 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("AccessTypeCluster");
                 });
 
+            modelBuilder.Entity("AccountTag", b =>
+                {
+                    b.Property<int>("AccountsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AccountsId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("AccountTag");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.AccessType", b =>
                 {
                     b.Property<int>("Id")
@@ -734,6 +749,27 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("Hippo.Core.Domain.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ClusterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("Hippo.Core.Domain.TempGroup", b =>
                 {
                     b.Property<int>("ClusterId")
@@ -829,6 +865,21 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.Cluster", null)
                         .WithMany()
                         .HasForeignKey("ClustersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AccountTag", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hippo.Core.Domain.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1064,6 +1115,17 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Navigation("Cluster");
 
                     b.Navigation("Requester");
+                });
+
+            modelBuilder.Entity("Hippo.Core.Domain.Tag", b =>
+                {
+                    b.HasOne("Hippo.Core.Domain.Cluster", "Cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cluster");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Account", b =>
