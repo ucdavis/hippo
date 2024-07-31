@@ -128,7 +128,7 @@ public class RequestController : SuperController
         request.Status = AccountRequest.Statuses.Processing;
         request.UpdatedOn = DateTime.UtcNow;
 
-        var success = await _notificationService.AccountDecision(request, true, 
+        var success = await _notificationService.AccountDecision(request, true, decidedBy: currentUser.Name,
             reason: "Your account request has been approved. You will receive another email with more details once your " +
             $"account is created on {Cluster}. You can check the \"My Account\" tab of Hippo to see what " +
             "resources you have access to.");
@@ -183,7 +183,7 @@ public class RequestController : SuperController
         request.Status = AccountRequest.Statuses.Processing;
         request.UpdatedOn = DateTime.UtcNow;
 
-        var success = await _notificationService.AccountDecision(request, true);
+        var success = await _notificationService.AccountDecision(request, true, currentUser.Name);
         if (!success)
         {
             Log.Error("Error creating Account Decision email");
@@ -240,7 +240,7 @@ public class RequestController : SuperController
         request.Status = AccountRequest.Statuses.Rejected;
         request.UpdatedOn = DateTime.UtcNow;
 
-        var success = await _notificationService.AccountDecision(request, false, reason: model.Reason);
+        var success = await _notificationService.AccountDecision(request, false, decidedBy: currentUser.Name, reason: model.Reason);
         if (!success)
         {
             Log.Error("Error creating Account Decision email");

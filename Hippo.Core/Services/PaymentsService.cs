@@ -193,7 +193,7 @@ namespace Hippo.Core.Services
 
                     try
                     {
-                        await _notificationService.AdminPaymentFailureNotification(clusterAdmins, invalidOrderIdsInCluster.ToArray());
+                        await _notificationService.AdminPaymentFailureNotification(clusterAdmins, cluster.Name, invalidOrderIdsInCluster.ToArray());
                     }
                     catch (Exception ex)
                     {
