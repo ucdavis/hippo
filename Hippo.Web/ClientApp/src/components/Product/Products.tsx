@@ -153,7 +153,7 @@ export const Products = () => {
           <div className="form-group">
             <label htmlFor="fieldInstallmentType">Installment Type</label>
             <select
-              className="form-control"
+              className="form-control form-select"
               id="fieldInstallmentType"
               required
               value={editProductModel.installmentType}
