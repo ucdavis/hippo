@@ -284,6 +284,8 @@ namespace Hippo.Core.Services
                     Header = "Order Payment Failed",
                     Paragraphs = new List<string>(),
                 };
+                model.Paragraphs.Add($"Order: {order.Name}");
+                model.Paragraphs.Add($"Order Id: {order.Id}");
                 model.Paragraphs.Add("The payment for this order has failed.");
                 model.Paragraphs.Add("This is most likely due to a Aggie Enterprise Chart String which is no longer valid.");
                 model.Paragraphs.Add("The order details will have the validation message from Aggie Enterprise.");
