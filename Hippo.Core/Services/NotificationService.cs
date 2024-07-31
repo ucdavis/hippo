@@ -20,9 +20,13 @@ namespace Hippo.Core.Services
     public interface INotificationService
     {
         Task<bool> AccountRequest(Request request);
-        Task<bool> AccountDecision(Request request, bool isApproved, string overrideSponsor = null, string reason = null);
+        Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy , string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
         Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
+
+        Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
+        Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
+        Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
     }
 
     public class NotificationService : INotificationService
@@ -30,33 +34,22 @@ namespace Hippo.Core.Services
         private readonly AppDbContext _dbContext;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
-        private readonly IUserService _userService;
         private readonly IMjmlRenderer _mjmlRenderer;
 
         public NotificationService(AppDbContext dbContext, IEmailService emailService,
-            IOptions<EmailSettings> emailSettings, IUserService userService, IMjmlRenderer mjmlRenderer)
+            IOptions<EmailSettings> emailSettings, IMjmlRenderer mjmlRenderer)
         {
             _dbContext = dbContext;
             _emailService = emailService;
             _emailSettings = emailSettings.Value;
-            _userService = userService;
             _mjmlRenderer = mjmlRenderer;
         }
 
-        public async Task<bool> AccountDecision(Request request, bool isApproved, string overrideDecidedBy = null, string details = "")
+        public async Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy, string details = "")
         {
 
             try
             {
-                var decidedBy = String.Empty;
-                if (!string.IsNullOrWhiteSpace(overrideDecidedBy))
-                {
-                    decidedBy = overrideDecidedBy;
-                }
-                else
-                {
-                    decidedBy = (await _userService.GetCurrentUser()).Name;
-                }
 
                 var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}"; //TODO: Only have button if approved?
                 var emailTo = request.Requester.Email;
@@ -236,6 +229,122 @@ namespace Hippo.Core.Services
                 .Where(e => e != null)
                 .ToArrayAsync();
             return groupAdminEmails;
+        }
+
+        public async Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds)
+        {
+            try
+            {
+                var message = "The payment for one or more orders in hippo have failed.";
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    Subject = "Payment failed",
+                    Header = "Order Payment Failed",
+                    Paragraphs = new List<string>(),
+                };
+                foreach (var orderId in orderIds)
+                {
+                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}"); 
+
+                }
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderAdminPaymentFail_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = null,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = model.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Sponsor Payment Failure Notification", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order)
+        {
+            try
+            {
+                var message = "The payment for the following order has failed. Please update your billing information in Hippo.";
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = "Payment failed",
+                    Header = "Order Payment Failed",
+                    Paragraphs = new List<string>(),
+                };
+                model.Paragraphs.Add($"Order: {order.Name}");
+                model.Paragraphs.Add($"Order Id: {order.Id}");
+                model.Paragraphs.Add("The payment for this order has failed.");
+                model.Paragraphs.Add("This is most likely due to a Aggie Enterprise Chart String which is no longer valid.");
+                model.Paragraphs.Add("The order details will have the validation message from Aggie Enterprise.");
+                model.Paragraphs.Add("Please update your billing information in Hippo.");
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = null,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = model.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Sponsor Payment Failure Notification", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
+        {
+            try
+            {
+                var message = simpleNotificationModel.Paragraphs.FirstOrDefault();
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = simpleNotificationModel.Subject,
+                    Header = simpleNotificationModel.Header,
+                    Paragraphs = simpleNotificationModel.Paragraphs,
+                };
+
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = ccEmails,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = simpleNotificationModel.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Notification", ex);
+                return false;
+            }
         }
     }
 }
