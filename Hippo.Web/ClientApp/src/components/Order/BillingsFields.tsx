@@ -3,7 +3,7 @@ import { Card, CardBody, CardTitle } from "reactstrap";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
-import FormField from "../../Shared/Form/HipFormField";
+import HipFormField from "../../Shared/Form/HipFormField";
 import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -162,9 +162,9 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup wrap={false}>
+    <HipFormGroup size="lg">
       <h2>Billing Info</h2>
-      <h2>Chart Strings</h2>
+      <h3>Chart Strings</h3>
       {notification && (
         <div>
           <br />
@@ -192,7 +192,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
             return (
               <tr key={field.id}>
                 <td width={"40%"}>
-                  <FormField
+                  <HipFormField
                     key={`chartString-${field.id}`}
                     register={register}
                     label=""
@@ -207,7 +207,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                   />
                 </td>
                 <td width={"10%;"}>
-                  <FormField
+                  <HipFormField
                     key={`percentage-${field.id}`}
                     register={register}
                     label=""

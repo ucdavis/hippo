@@ -4,7 +4,7 @@ import { Row, Col, Label } from "reactstrap";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import FormField from "../../../Shared/Form/HipFormField";
+import HipFormField from "../../../Shared/Form/HipFormField";
 import HipButton from "../../../Shared/HipButton";
 import { OrderModel } from "../../../types";
 import { HipFormGroup } from "../../../Shared/Form/HipFormGroup";
@@ -38,16 +38,15 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup wrap={false}>
+    <HipFormGroup size="lg">
       <Label for="metaData" tag="h2">
         Metadata
       </Label>
-      <br />
       {fields.map((field, index) => {
         return (
-          <Row key={field.id} className="no-wrap">
+          <Row key={field.id}>
             <Col>
-              <FormField
+              <HipFormField
                 key={`name-${field.id}`}
                 register={register}
                 label="Name"
@@ -60,7 +59,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
               />
             </Col>
             <Col>
-              <FormField
+              <HipFormField
                 key={`value-${field.id}`}
                 register={register}
                 label="Value"
