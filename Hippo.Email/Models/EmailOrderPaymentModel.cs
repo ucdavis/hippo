@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Hippo.Email.Models
 {
-    public class OrderPaymentModel
+    public class EmailOrderPaymentModel
     {
 
         public string UcdLogoUrl { get; set; } = String.Empty;
@@ -16,13 +16,13 @@ namespace Hippo.Email.Models
 
         public string Subject { get; set; } = "";
         public string Header { get; set; } = "";
-        public List<TransferResponseModel> Transfers { get; set; } = new();
+        public List<EmailTransferResponseModel> Transfers { get; set; } = new();
 
-        public decimal TotalAmount => Transfers.Where(a => a.Direction == "Debit").Sum(t => t.Amount);
+        public string TotalAmount => Transfers.Where(a => a.Direction == "Debit").Sum(t => t.Amount).ToString("C");
 
     }
 
-    public class TransferResponseModel
+    public class EmailTransferResponseModel
     {
         public Decimal Amount { get; set; }
         public string FinancialSegmentString { get; set; } = "";
