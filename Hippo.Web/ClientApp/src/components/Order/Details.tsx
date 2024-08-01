@@ -43,6 +43,7 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
+  const [hoverAction, setHoverAction] = useState<OrderStatus | null>(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -449,7 +450,12 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={adminCanApproveStatuses.includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={updateStatus}>
+            <button
+              className="btn btn-primary"
+              onClick={updateStatus}
+              onMouseEnter={() => setHoverAction(OrderStatus.Processing)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Approve Order
             </button>{" "}
@@ -462,7 +468,12 @@ export const Details = () => {
               order.billings.length > 0
             }
           >
-            <button className="btn btn-primary" onClick={updateStatus}>
+            <button
+              className="btn btn-primary"
+              onClick={updateStatus}
+              onMouseEnter={() => setHoverAction(OrderStatus.Submitted)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Approve Order
             </button>{" "}
@@ -473,7 +484,12 @@ export const Details = () => {
               sponsorCanCancelStatuses.includes(order.status)
             }
           >
-            <button className="btn btn-primary" onClick={cancelOrder}>
+            <button
+              className="btn btn-primary"
+              onClick={cancelOrder}
+              onMouseEnter={() => setHoverAction(OrderStatus.Cancelled)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Cancel Order
             </button>{" "}
@@ -482,7 +498,12 @@ export const Details = () => {
             roles={["System", "ClusterAdmin"]}
             condition={adminCanRejectStatuses.includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={rejectOrder}>
+            <button
+              className="btn btn-primary"
+              onClick={rejectOrder}
+              onMouseEnter={() => setHoverAction(OrderStatus.Rejected)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Reject Order
             </button>{" "}
@@ -509,7 +530,7 @@ export const Details = () => {
               Onetime Payment
             </button>
           </ShowFor>
-          <StatusBar status={order.status} />
+          <StatusBar status={order.status} showOnHover={hoverAction} />
           <OrderForm
             orderProp={order}
             readOnly={true}

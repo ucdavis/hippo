@@ -7,15 +7,16 @@ interface StatusBarProps {
   status: OrderStatus;
   animated?: boolean;
   showInProgress?: boolean;
+  showOnHover?: OrderStatus;
 }
 
 const StatusBar: React.FC<StatusBarProps> = ({
   status,
   animated,
   showInProgress,
+  showOnHover,
 }) => {
   const max = 5;
-  // TODO: handle cancelled and rejected statuses
 
   return (
     <div className="hip-progress">
@@ -51,7 +52,10 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Created) >= 0
                 }
-                inProgress={status === OrderStatus.Draft && showInProgress}
+                inProgress={
+                  showOnHover === OrderStatus.Created ||
+                  (status === OrderStatus.Draft && showInProgress)
+                }
                 animated={status === OrderStatus.Draft && animated}
               />
               <HipProgress
@@ -60,7 +64,10 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Submitted) >= 0
                 }
-                inProgress={status === OrderStatus.Created}
+                inProgress={
+                  showOnHover === OrderStatus.Submitted ||
+                  (status === OrderStatus.Created && showInProgress)
+                }
                 animated={status === OrderStatus.Created && animated}
               />
               <HipProgress
@@ -69,14 +76,20 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Processing) >= 0
                 }
-                inProgress={status === OrderStatus.Submitted}
+                inProgress={
+                  showOnHover === OrderStatus.Processing ||
+                  (status === OrderStatus.Submitted && showInProgress)
+                }
                 animated={status === OrderStatus.Submitted && animated}
               />
               <HipProgress
                 label={OrderStatus.Active}
                 max={max}
                 shouldFill={compareOrderStatus(status, OrderStatus.Active) >= 0}
-                inProgress={status === OrderStatus.Processing}
+                inProgress={
+                  showOnHover === OrderStatus.Active ||
+                  (status === OrderStatus.Processing && showInProgress)
+                }
                 animated={status === OrderStatus.Processing && animated}
               />
               <HipProgress
@@ -85,7 +98,10 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Completed) >= 0
                 }
-                inProgress={status === OrderStatus.Active}
+                inProgress={
+                  showOnHover === OrderStatus.Completed ||
+                  (status === OrderStatus.Active && showInProgress)
+                }
                 animated={status === OrderStatus.Active && animated}
               />
             </>
