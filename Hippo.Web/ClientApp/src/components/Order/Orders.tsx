@@ -33,6 +33,9 @@ export const Orders = () => {
   const id = columnHelper.accessor("id", {
     header: "ID",
     id: "id",
+    filterFn: (row, id, filterValue) => {
+      return row.original.id.toString().includes(filterValue);
+    },
   });
 
   const status = columnHelper.accessor("status", {
