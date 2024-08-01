@@ -136,199 +136,192 @@ const OrderForm: React.FC<OrderFormProps> = ({
       methods.setValue("installments", 5);
     }
   }
-
   // TODO: rest of input validation?
   return (
-    <FormProvider {...methods}>
-      <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
-        <OrderFormField
-          name="status"
-          label="Status"
-          required={false}
-          readOnly={true}
-          disabled={true}
-        />
-        <hr />
-        {onlyChartStrings && <BillingsFields readOnly={readOnly} />}
-        {!onlyChartStrings && (
-          <>
-            {isAdmin && !readOnly && orderProp.id === 0 && (
-              <>
-                <OrderFormField
-                  name="PILookup"
-                  label="Order for Sponsor (email or kerb)"
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                  onBlur={(e) => {
-                    lookupPI(e.target.value);
-                  }}
-                />
-                {foundPI && <span className="text-muted">{foundPI}</span>}
-              </>
-            )}
-            <ShowFor condition={readOnly || !limitedEditing}>
-              <>
-                <OrderFormField
-                  name="productName"
-                  label="Product Name"
-                  required={true}
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  maxLength={50}
-                />
-                <OrderFormField
-                  name="description"
-                  label="Description"
-                  type="textarea"
-                  required={true}
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  maxLength={250}
-                />
-                <OrderFormField
-                  name="category"
-                  label="Category"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  maxLength={50}
-                />
-                <OrderFormField
-                  name="units"
-                  label="Units"
-                  required={true}
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  maxLength={50}
-                />
-
-                <OrderFormField
-                  name="unitPrice"
-                  label="Unit Price"
-                  required={true}
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                  valueAsNumber={true}
-                  deps={"total"}
-                />
-                <OrderFormField
-                  name="installmentType"
-                  label="Installment Type"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  type="select"
-                >
-                  <option value="OneTime">One Time</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Yearly">Yearly</option>
-                </OrderFormField>
-                {installmentType !== "OneTime" && (
+    <>
+      <FormProvider {...methods}>
+        <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
+          {onlyChartStrings && <BillingsFields readOnly={readOnly} />}
+          {!onlyChartStrings && (
+            <>
+              {isAdmin && !readOnly && orderProp.id === 0 && (
+                <>
                   <OrderFormField
-                    name="installments"
-                    label="Installments"
+                    name="PILookup"
+                    label="Order for Sponsor (email or kerb)"
+                    readOnly={readOnly}
+                    disabled={readOnly}
+                    onBlur={(e) => {
+                      lookupPI(e.target.value);
+                    }}
+                  />
+                  {foundPI && <span className="text-muted">{foundPI}</span>}
+                </>
+              )}
+              <ShowFor condition={readOnly || !limitedEditing}>
+                <>
+                  <OrderFormField
+                    name="productName"
+                    label="Product Name"
+                    required={true}
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    maxLength={50}
+                  />
+                  <OrderFormField
+                    name="description"
+                    label="Description"
+                    type="textarea"
+                    required={true}
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    maxLength={250}
+                  />
+                  <OrderFormField
+                    name="category"
+                    label="Category"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    maxLength={50}
+                  />
+                  <OrderFormField
+                    name="units"
+                    label="Units"
+                    required={true}
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    maxLength={50}
+                  />
+
+                  <OrderFormField
+                    name="unitPrice"
+                    label="Unit Price"
+                    required={true}
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                    valueAsNumber={true}
+                    deps={"total"}
+                  />
+                  <OrderFormField
+                    name="installmentType"
+                    label="Installment Type"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    type="select"
+                  >
+                    <option value="OneTime">One Time</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Yearly">Yearly</option>
+                  </OrderFormField>
+                  {installmentType !== "OneTime" && (
+                    <OrderFormField
+                      name="installments"
+                      label="Installments"
+                      readOnly={readOnly || !isAdmin}
+                      disabled={!readOnly && !isAdmin}
+                    />
+                  )}
+                  <OrderFormField
+                    name="lifeCycle"
+                    label="Life Cycle in Months"
                     readOnly={readOnly || !isAdmin}
                     disabled={!readOnly && !isAdmin}
                   />
-                )}
-                <OrderFormField
-                  name="lifeCycle"
-                  label="Life Cycle in Months"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                />
-                <OrderFormField
-                  name="name"
-                  label="Name"
-                  required={true}
-                  readOnly={readOnly}
-                  maxLength={50}
-                />
-                <OrderFormField
-                  name="notes"
-                  label="Notes"
-                  type="textarea"
-                  required={false}
-                  readOnly={readOnly}
-                />
+                  <OrderFormField
+                    name="name"
+                    label="Name"
+                    required={true}
+                    readOnly={readOnly}
+                    maxLength={50}
+                  />
+                  <OrderFormField
+                    name="notes"
+                    label="Notes"
+                    type="textarea"
+                    required={false}
+                    readOnly={readOnly}
+                  />
 
-                <OrderFormField
-                  name="quantity"
-                  label="Quantity"
-                  required={true}
-                  readOnly={readOnly}
-                  min={0.01}
-                  valueAsNumber={true}
-                  deps={"total"}
-                />
-              </>
-            </ShowFor>
+                  <OrderFormField
+                    name="quantity"
+                    label="Quantity"
+                    required={true}
+                    readOnly={readOnly}
+                    min={0.01}
+                    valueAsNumber={true}
+                    deps={"total"}
+                  />
+                </>
+              </ShowFor>
 
-            <OrderFormField
-              name="installmentDate"
-              label="Installment Date"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              type="date"
-            />
-            <OrderFormField
-              name="expirationDate"
-              label="Expiration Date"
-              readOnly={readOnly || !isAdmin}
-              disabled={!readOnly && !isAdmin}
-              type="date"
-            />
-            <ShowFor condition={readOnly || !limitedEditing}>
-              <>
-                <OrderFormField
-                  name="adjustment"
-                  label="Adjustment"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                  valueAsNumber={true}
-                  deps={"total"}
-                />
-                <OrderFormField
-                  name="adjustmentReason"
-                  label="Adjustment Reason"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  type="textarea"
-                />
-                <OrderFormField
-                  name="externalReference"
-                  label="External Reference"
-                  readOnly={readOnly || !isAdmin}
-                  disabled={!readOnly && !isAdmin}
-                  maxLength={150}
-                />
-              </>
-            </ShowFor>
-
-            {isAdmin && (
               <OrderFormField
-                name="adminNotes"
-                label="Admin Notes"
-                readOnly={readOnly}
-                type="textarea"
+                name="installmentDate"
+                label="Installment Date"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+                type="date"
               />
-            )}
-            <ShowFor condition={readOnly || !limitedEditing}>
-              <>
-                <MetaDataFields readOnly={readOnly} />
-                <hr />
-                <BillingsFields readOnly={readOnly} />
-                <hr />
-              </>
-            </ShowFor>
+              <OrderFormField
+                name="expirationDate"
+                label="Expiration Date"
+                readOnly={readOnly || !isAdmin}
+                disabled={!readOnly && !isAdmin}
+                type="date"
+              />
+              <ShowFor condition={readOnly || !limitedEditing}>
+                <>
+                  <OrderFormField
+                    name="adjustment"
+                    label="Adjustment"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                    valueAsNumber={true}
+                    deps={"total"}
+                  />
+                  <OrderFormField
+                    name="adjustmentReason"
+                    label="Adjustment Reason"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    type="textarea"
+                  />
+                  <OrderFormField
+                    name="externalReference"
+                    label="External Reference"
+                    readOnly={readOnly || !isAdmin}
+                    disabled={!readOnly && !isAdmin}
+                    maxLength={150}
+                  />
+                </>
+              </ShowFor>
 
-            <OrderFormTotalFields />
-          </>
-        )}
+              {isAdmin && (
+                <OrderFormField
+                  name="adminNotes"
+                  label="Admin Notes"
+                  readOnly={readOnly}
+                  type="textarea"
+                />
+              )}
+              <ShowFor condition={readOnly || !limitedEditing}>
+                <>
+                  <MetaDataFields readOnly={readOnly} />
+                  <hr />
+                  <BillingsFields readOnly={readOnly} />
+                  <hr />
+                </>
+              </ShowFor>
 
-        {!readOnly && <HipFormSubmitButton className="mb-3 mt-3" />}
-      </HipForm>
-    </FormProvider>
+              <OrderFormTotalFields />
+            </>
+          )}
+
+          {!readOnly && <HipFormSubmitButton className="mb-3 mt-3" />}
+        </HipForm>
+      </FormProvider>
+    </>
   );
 };
 

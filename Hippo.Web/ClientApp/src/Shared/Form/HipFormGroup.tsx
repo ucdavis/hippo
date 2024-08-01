@@ -23,7 +23,7 @@ export const HipFormGroup: React.FC<HipFormGroupProps> = ({
 }) => {
   return (
     <FormGroup
-      className={`hip-form-group ${className}${!wrap ? " no-wrap" : ""}${readOnly ? " read-only" : ""}`}
+      className={`hip-form-group ${className ?? ""}${!wrap ? " no-wrap" : ""}${readOnly ? " read-only" : ""}`}
       {...rest}
     >
       {children}

@@ -2,6 +2,7 @@ import { useContext } from "react";
 import AppContext from "../../Shared/AppContext";
 import { useParams } from "react-router-dom";
 import { SplitCamelCase } from "../../util/StringHelpers";
+import { RequestStatus } from "../../types";
 
 export const AccountStatus = () => {
   const [context] = useContext(AppContext);
@@ -26,14 +27,14 @@ export const AccountStatus = () => {
               {SplitCamelCase(request.status)}
             </span>
             .
-            {request.status === "PendingApproval" && (
+            {request.status === RequestStatus.PendingApproval && (
               <>
                 <br />
                 Your sponsor has been emailed and you will be notified when it
                 has been acted on.
               </>
             )}
-            {request.status === "Processing" && (
+            {request.status === RequestStatus.Processing && (
               <>
                 <br />
                 Your request has been approved and is in process.

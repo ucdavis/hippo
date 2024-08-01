@@ -3,9 +3,14 @@
 @import "@ucdavis/gunrockin/sass/gunrockin.scss";
 $primary-color: $cabernet;
 $secondary-color: $poppy;
+$danger: $merlot;
+$success: $quad;
+
 $theme-colors: (
   primary: $primary-color,
   secondary: $secondary-color,
+  danger: $danger,
+  success: $success,
 );
 @import "bootstrap/scss/bootstrap";
 @import "@ucdavis/gunrockin/sass/_typography.scss";
@@ -16,7 +21,6 @@ $primary-font: rgba(31, 31, 31, 0.99); //
 $secondary-font: rgba(31, 31, 31, 0.7); //
 $tertiary-font: rgba(31, 31, 31, 0.48); //
 
-$danger: $merlot;
 $error-color: $danger;
 
 @media (min-width: 576px) {

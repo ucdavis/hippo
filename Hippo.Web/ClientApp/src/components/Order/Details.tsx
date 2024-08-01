@@ -19,6 +19,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { HistoryTable } from "./HistoryTable";
 import { PaymentTable } from "./PaymentTable";
+import {
+  OrderStatus,
+  adminCanApproveStatuses,
+  adminCanRejectStatuses,
+  adminEditableStatuses,
+  canUpdateChartStringsStatuses,
+  sponsorCanAddPaymentStatuses,
+  sponsorCanApproveStatuses,
+  sponsorCanCancelStatuses,
+  sponsorEditableStatuses,
+} from "../../types/status";
+import StatusBar from "./OrderForm/StatusBar";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -31,8 +43,7 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
-  const adminEditableStatuses = ["Processing", "Active"];
-  const sponsorEditableStatuses = ["Created"];
+  const [hoverAction, setHoverAction] = useState<OrderStatus | null>(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -73,22 +84,28 @@ export const Details = () => {
     if (order) {
       // switch statement for data.status
       switch (order.status) {
-        case "Created":
+        case OrderStatus.Draft:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Submitted",
+            newStatus: OrderStatus.Created,
           });
           break;
-        case "Submitted":
+        case OrderStatus.Created:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Processing",
+            newStatus: OrderStatus.Submitted,
           });
           break;
-        case "Processing":
+        case OrderStatus.Submitted:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Active",
+            newStatus: OrderStatus.Processing,
+          });
+          break;
+        case OrderStatus.Processing:
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: OrderStatus.Active,
           });
           break;
         default:
@@ -150,7 +167,7 @@ export const Details = () => {
     id: 0,
     amount: 0,
     entryAmount: "",
-    status: "",
+    status: OrderStatus.Draft,
     createdOn: "",
   });
 
@@ -218,7 +235,7 @@ export const Details = () => {
       setEditPaymentModel({
         id: 0,
         amount: 0,
-        status: "",
+        status: OrderStatus.Draft,
         createdOn: "",
         entryAmount: "",
       });
@@ -398,7 +415,7 @@ export const Details = () => {
             {order.piUser?.name} ({order.piUser?.email})
           </h2>
           {order.piUser?.id === user.detail.id &&
-            order.status === "Created" &&
+            sponsorCanApproveStatuses.includes(order.status) &&
             order.billings.length <= 0 && (
               <h3 style={{ backgroundColor: "#ffcccc" }}>
                 This order needs to have billing information added before it can
@@ -431,9 +448,20 @@ export const Details = () => {
           </ShowFor>
           <ShowFor
             roles={["System", "ClusterAdmin"]}
-            condition={["Submitted", "Processing"].includes(order.status)}
+            condition={adminCanApproveStatuses.includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={updateStatus}>
+            <button
+              className="btn btn-primary"
+              onClick={updateStatus}
+              onMouseEnter={() =>
+                setHoverAction(
+                  order.status === OrderStatus.Submitted
+                    ? OrderStatus.Processing
+                    : OrderStatus.Active,
+                )
+              }
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Approve Order
             </button>{" "}
@@ -442,11 +470,16 @@ export const Details = () => {
           <ShowFor
             condition={
               order.piUser?.id === user.detail.id &&
-              order.status === "Created" &&
+              sponsorCanApproveStatuses.includes(order.status) &&
               order.billings.length > 0
             }
           >
-            <button className="btn btn-primary" onClick={updateStatus}>
+            <button
+              className="btn btn-primary"
+              onClick={updateStatus}
+              onMouseEnter={() => setHoverAction(OrderStatus.Submitted)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Approve Order
             </button>{" "}
@@ -454,27 +487,35 @@ export const Details = () => {
           <ShowFor
             condition={
               order.piUser?.id === user.detail.id &&
-              ["Created", "Submitted"].includes(order.status)
+              sponsorCanCancelStatuses.includes(order.status)
             }
           >
-            <button className="btn btn-primary" onClick={cancelOrder}>
+            <button
+              className="btn btn-primary"
+              onClick={cancelOrder}
+              onMouseEnter={() => setHoverAction(OrderStatus.Cancelled)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Cancel Order
             </button>{" "}
           </ShowFor>
           <ShowFor
             roles={["System", "ClusterAdmin"]}
-            condition={["Submitted", "Processing"].includes(order.status)}
+            condition={adminCanRejectStatuses.includes(order.status)}
           >
-            <button className="btn btn-primary" onClick={rejectOrder}>
+            <button
+              className="btn btn-primary"
+              onClick={rejectOrder}
+              onMouseEnter={() => setHoverAction(OrderStatus.Rejected)}
+              onMouseLeave={() => setHoverAction(null)}
+            >
               {" "}
               Reject Order
             </button>{" "}
           </ShowFor>
           <ShowFor
-            condition={
-              !["Cancelled", "Rejected", "Completed"].includes(order.status)
-            }
+            condition={canUpdateChartStringsStatuses.includes(order.status)}
           >
             <Link
               className="btn btn-primary"
@@ -485,7 +526,7 @@ export const Details = () => {
           </ShowFor>
           <ShowFor
             condition={
-              order.status === "Active" &&
+              sponsorCanAddPaymentStatuses.includes(order.status) &&
               order.piUser?.id === user.detail.id &&
               balanceRemaining > 0
             }
@@ -495,6 +536,7 @@ export const Details = () => {
               Onetime Payment
             </button>
           </ShowFor>
+          <StatusBar status={order.status} showOnHover={hoverAction} />
           <OrderForm
             orderProp={order}
             readOnly={true}

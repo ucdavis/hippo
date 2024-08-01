@@ -5,6 +5,8 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import { OrderStatus } from "../../types/status";
+import StatusBar from "./OrderForm/StatusBar";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -21,7 +23,7 @@ const defaultOrder: OrderModel = {
   quantity: 0,
   adjustment: 0,
   adjustmentReason: "",
-  status: "N/A",
+  status: OrderStatus.Draft,
   createdOn: "",
   externalReference: "",
   adminNotes: "",
@@ -148,7 +150,11 @@ export const CreateOrder: React.FC = () => {
   return (
     <div className="row col-md-12">
       <h2>Create Order</h2>
-
+      <StatusBar
+        status={order.status}
+        animated={notification.pending}
+        showInProgress={true}
+      />
       <OrderForm
         orderProp={order}
         readOnly={false}

@@ -8,6 +8,7 @@ import {
   PuppetUserRecord,
   RequestModel,
   AccountRequestDataModel,
+  RequestStatus,
 } from "../types";
 
 const fakeUser: User = {
@@ -83,7 +84,7 @@ export const fakeRequests: RequestModel[] = [
     requesterName: fakeUser.name,
     action: "CreateAccount",
     groupModel: fakeGroups[0],
-    status: "PendingApproval",
+    status: RequestStatus.PendingApproval,
     cluster: "caesfarm",
     data: {
       supervisingPI: "Dr. Bob Dobalina",
@@ -96,7 +97,7 @@ export const fakeRequests: RequestModel[] = [
     requesterName: fakeUser.name,
     action: "AddAccountToGroup",
     groupModel: fakeGroups[1],
-    status: "PendingApproval",
+    status: RequestStatus.PendingApproval,
     cluster: "caesfarm",
     data: {
       supervisingPI: "Dr. Bob Dobalina",

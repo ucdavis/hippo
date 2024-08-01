@@ -5,6 +5,7 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import StatusBar from "./OrderForm/StatusBar";
 
 export const EditOrder: React.FC = () => {
   const { cluster, orderId } = useParams();
@@ -113,7 +114,7 @@ export const EditOrder: React.FC = () => {
       {order && (
         <div>
           <h2>Edit Order</h2>
-
+          <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
             readOnly={false}
