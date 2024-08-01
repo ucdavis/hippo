@@ -11,6 +11,14 @@ namespace Hippo.Core.Models.SlothModels
         public string Id { get; set; }
         public string KfsTrackingNumber { get; set; }
         public string Status { get; set; }
+        public IList<TransferResponseModel> Transfers { get; set; }
+    }
+
+    public class TransferResponseModel
+    {
+        public Decimal Amount { get; set; }
+        public string FinancialSegmentString { get; set; }
+        public string Direction { get; set; }
     }
 
     public static class SlothStatuses

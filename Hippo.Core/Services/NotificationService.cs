@@ -27,6 +27,7 @@ namespace Hippo.Core.Services
         Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
+        Task<bool> OrderPaymentNotification(Order order, string[] emails, OrderPaymentModel orderPaymentModel);
     }
 
     public class NotificationService : INotificationService

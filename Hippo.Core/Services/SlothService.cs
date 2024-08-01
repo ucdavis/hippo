@@ -282,6 +282,13 @@ namespace Hippo.Core.Services
                                     await _historyService.OrderUpdated(order, null, $"Order paid in full.");
                                     order.NextPaymentDate = null;
                                 }
+
+                                //write content to the order history? (See what it looks like)
+                                await _historyService.OrderPaymentCompleted(order, content);
+                                
+                                var debits = slothResponse.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit);
+                                //Generate an email to the sponsor with the debit information
+                                //This will have a "short" chart string that is a link to finjector details, show the total debit amount, and the individual debits
                                 
                                 await _dbContext.SaveChangesAsync();
                                 break;

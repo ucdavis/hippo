@@ -12,7 +12,6 @@ using static Hippo.Core.Domain.Product;
 using static Hippo.Core.Models.SlothModels.TransferViewModel;
 using Serilog;
 using Hippo.Email.Models;
-using System.Runtime.CompilerServices;
 
 namespace Hippo.Web.Controllers
 {
