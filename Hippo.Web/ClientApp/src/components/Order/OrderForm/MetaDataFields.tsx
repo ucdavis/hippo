@@ -71,12 +71,13 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
               />
             </Col>
             {!readOnly && (
-              <Col md={3}>
+              <Col md={1}>
                 <HipButton
                   title="Remove Metadata"
                   aria-label="Remove Metadata"
                   color="danger"
                   onClick={() => removeMetaData(index)}
+                  size="sm"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </HipButton>
