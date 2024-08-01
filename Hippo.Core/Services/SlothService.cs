@@ -275,14 +275,8 @@ namespace Hippo.Core.Services
                         switch (slothResponse.Status)
                         {
                             case SlothStatuses.Completed:
-
-                                //TODO: comment for testing multiple runs
-
                                 payment.Status = Payment.Statuses.Completed;
-                                
-                                
-                                
-                                
+
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 //order.BalanceRemaining -= Math.Round(payment.Amount, 2); Don't do this here, this is a ballance that is available to pay, not the total paid
                                 var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
