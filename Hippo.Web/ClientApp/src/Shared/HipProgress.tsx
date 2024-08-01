@@ -1,26 +1,36 @@
 import React from "react";
-import { Progress } from "reactstrap";
+import { Progress, ProgressProps } from "reactstrap";
 
-interface HipProgressProps {
+interface HipProgressProps extends ProgressProps {
   label: string;
   max: number;
-  active: boolean;
+  shouldFill: boolean;
   inProgress: boolean;
+  animated?: boolean;
 }
 
 const HipProgress: React.FC<HipProgressProps> = ({
   label,
   max,
-  active,
+  shouldFill,
   inProgress,
+  animated,
+  value,
+  color,
+  ...rest
 }) => {
   return (
     <Progress
       bar
       max={max}
-      value={1}
-      color={active ? "primary" : inProgress ? "secondary" : "tertiary"}
+      value={value ?? 1}
+      color={
+        color ??
+        (shouldFill ? "primary" : inProgress ? "secondary" : "tertiary")
+      }
       striped={inProgress} // but show stripes for next step status
+      animated={animated}
+      {...rest}
     >
       {label}
     </Progress>

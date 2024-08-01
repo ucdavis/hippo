@@ -30,6 +30,7 @@ import {
   sponsorCanCancelStatuses,
   sponsorEditableStatuses,
 } from "../../types/status";
+import StatusBar from "./OrderForm/StatusBar";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -508,6 +509,7 @@ export const Details = () => {
               Onetime Payment
             </button>
           </ShowFor>
+          <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
             readOnly={true}
