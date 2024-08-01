@@ -90,7 +90,7 @@ namespace Hippo.Web.Models.OrderModels
                 Installments = product.Installments,
                 InstallmentType = product.InstallmentType,
                 Quantity = 0,
-                Status = Order.Statuses.Created,
+                Status = "", // wait to set status to Created until the user submits
                 ExternalReference = string.Empty,
                 Notes = string.Empty,
                 Adjustment = 0,

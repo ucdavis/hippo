@@ -5,6 +5,7 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import { OrderStatus } from "../../types/status";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -21,7 +22,7 @@ const defaultOrder: OrderModel = {
   quantity: 0,
   adjustment: 0,
   adjustmentReason: "",
-  status: "N/A",
+  status: OrderStatus.Draft,
   createdOn: "",
   externalReference: "",
   adminNotes: "",
