@@ -21,30 +21,34 @@ const StatusBar: React.FC<StatusBarProps> = ({
   return (
     <div className="hip-progress">
       <Progress multi>
-        {status === OrderStatus.Cancelled && (
-          <HipProgress
-            label={OrderStatus.Cancelled}
-            max={max}
-            value={max / 2}
-            color="danger"
-            shouldFill={true}
-            inProgress={false}
-            animated={false}
-          />
-        )}
-        {status === OrderStatus.Rejected && (
-          <HipProgress
-            label={OrderStatus.Rejected}
-            max={max}
-            value={max}
-            color="danger"
-            shouldFill={true}
-            inProgress={false}
-            animated={false}
-          />
-        )}
+        {status === OrderStatus.Cancelled ||
+          (showOnHover === OrderStatus.Cancelled && (
+            <HipProgress
+              label={OrderStatus.Cancelled}
+              max={max}
+              value={max / 2}
+              color="danger"
+              shouldFill={true}
+              inProgress={showOnHover === OrderStatus.Cancelled}
+              animated={false}
+            />
+          ))}
+        {status === OrderStatus.Rejected ||
+          (showOnHover === OrderStatus.Rejected && (
+            <HipProgress
+              label={OrderStatus.Rejected}
+              max={max}
+              value={max}
+              color="danger"
+              shouldFill={true}
+              inProgress={showOnHover === OrderStatus.Rejected}
+              animated={false}
+            />
+          ))}
         {status !== OrderStatus.Cancelled &&
-          status !== OrderStatus.Rejected && (
+          showOnHover !== OrderStatus.Cancelled &&
+          status !== OrderStatus.Rejected &&
+          showOnHover !== OrderStatus.Rejected && (
             <>
               <HipProgress
                 label={OrderStatus.Created}

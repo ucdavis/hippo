@@ -453,7 +453,13 @@ export const Details = () => {
             <button
               className="btn btn-primary"
               onClick={updateStatus}
-              onMouseEnter={() => setHoverAction(OrderStatus.Processing)}
+              onMouseEnter={() =>
+                setHoverAction(
+                  order.status === OrderStatus.Submitted
+                    ? OrderStatus.Processing
+                    : OrderStatus.Active,
+                )
+              }
               onMouseLeave={() => setHoverAction(null)}
             >
               {" "}
