@@ -249,7 +249,17 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     </HipButton>
                   </td>
                 )}
-                {readOnly && <td width={"5%"}></td>}
+                {readOnly && (
+                  <td width={"5%"}>
+                    <a
+                      href={`https://finjector.ucdavis.edu/details/${field?.chartString}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Details
+                    </a>
+                  </td>
+                )}
               </tr>
             );
           })}
