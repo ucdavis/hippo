@@ -1,8 +1,8 @@
 import React from "react";
-import { FormGroup } from "reactstrap";
+import { FormGroup, FormGroupProps } from "reactstrap";
 
-interface HipFormGroupProps {
-  wrap?: boolean;
+interface HipFormGroupProps extends FormGroupProps {
+  size: "sm" | "md" | "lg";
   readOnly?: boolean;
   className?: string;
   children: React.ReactNode;
@@ -10,12 +10,9 @@ interface HipFormGroupProps {
 
 /**
  * HipFormGroup component that wraps reactstrap FormGroup with additional classNames.
- *
- * 'hip-form-group' is added to the FormGroup, 'no-wrap' is added if `wrap` is false,
- * 'read-only' is added if `readOnly` is true.
  */
 export const HipFormGroup: React.FC<HipFormGroupProps> = ({
-  wrap,
+  size,
   readOnly,
   className,
   children,
@@ -23,7 +20,7 @@ export const HipFormGroup: React.FC<HipFormGroupProps> = ({
 }) => {
   return (
     <FormGroup
-      className={`hip-form-group ${className ?? ""}${!wrap ? " no-wrap" : ""}${readOnly ? " read-only" : ""}`}
+      className={`hip-form-group ${className ?? ""} hip-size-${size}`}
       {...rest}
     >
       {children}

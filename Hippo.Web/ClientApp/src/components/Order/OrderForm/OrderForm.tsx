@@ -154,8 +154,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
                     onBlur={(e) => {
                       lookupPI(e.target.value);
                     }}
+                    size="lg"
+                    feedback={foundPI}
                   />
-                  {foundPI && <span className="text-muted">{foundPI}</span>}
                 </>
               )}
               <ShowFor condition={readOnly || !limitedEditing}>

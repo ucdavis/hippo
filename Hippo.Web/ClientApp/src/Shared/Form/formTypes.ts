@@ -22,6 +22,8 @@ type FormFieldCommonProps<T> = Omit<InputProps, "pattern"> &
 export type HipFormFieldProps<T> = FormFieldCommonProps<T> & {
   error?: FieldError;
   name: FieldPath<T>;
+  size?: "sm" | "md" | "lg";
+  feedback?: React.ReactNode;
 };
 
 export type HipFormFieldArrayProps<T> = FormFieldCommonProps<T> & {
