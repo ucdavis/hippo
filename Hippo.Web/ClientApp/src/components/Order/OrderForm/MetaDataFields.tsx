@@ -87,7 +87,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
         );
       })}
       {!readOnly && (
-        <HipButton color="primary" onClick={addMetaData}>
+        <HipButton color="primary" onClick={addMetaData} size="sm">
           <FontAwesomeIcon icon={faPlus} /> Add Metadata
         </HipButton>
       )}
