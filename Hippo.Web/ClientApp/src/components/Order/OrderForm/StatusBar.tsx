@@ -111,7 +111,6 @@ const StatusBar: React.FC<StatusBarProps> = ({
             </>
           )}
       </Progress>
-      <hr />
     </div>
   );
 };

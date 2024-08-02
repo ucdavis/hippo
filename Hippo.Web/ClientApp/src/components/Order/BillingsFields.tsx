@@ -163,6 +163,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   return (
     <HipFormGroup size="lg">
+      <br />
       <h2>Billing Info</h2>
       <h3>Chart Strings</h3>
       {notification && (
@@ -271,8 +272,13 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       </table>
 
       {!readOnly && (
-        <HipButton outline={true} color="secondary" onClick={addBilling}>
-          <FontAwesomeIcon icon={faPlus} size="sm" /> Add Billing
+        <HipButton
+          outline={true}
+          color="primary"
+          size="sm"
+          onClick={addBilling}
+        >
+          <FontAwesomeIcon icon={faPlus} /> Add Billing
         </HipButton>
       )}
     </HipFormGroup>
