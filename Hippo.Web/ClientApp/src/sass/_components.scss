@@ -296,8 +296,6 @@ hr {
       flex-shrink: 0;
       &.hip-size-sm {
         flex-basis: 10%;
-        border-bottom: 1px solid $borders;
-        border-top: 1px solid $borders;
         label {
           font-size: 1rem;
           color: $secondary-font;
@@ -309,6 +307,10 @@ hr {
           font-weight: bold;
           margin-bottom: 8px;
         }
+      }
+      .readonly-hip-form {
+        border-bottom: 1px solid $borders;
+        border-top: 1px solid $borders;
       }
     }
     //admin
