@@ -39,7 +39,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
 
   return (
     <HipFormGroup size="lg">
-      <Label for="metaData" tag="h3">
+      <Label for="metaData" tag="h2">
         Metadata
       </Label>
       {fields.map((field, index) => {

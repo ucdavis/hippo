@@ -163,12 +163,11 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
 
   return (
     <HipFormGroup size="lg">
-      <br />
       <h2>Billing Info</h2>
-      <h3>Chart Strings</h3>
       {notification && (
         <div>
           <br />
+          {/* TODO: make prettier */}
           <Card className="card-danger">
             <CardTitle>
               <h3>The Chart String has been updated!</h3>

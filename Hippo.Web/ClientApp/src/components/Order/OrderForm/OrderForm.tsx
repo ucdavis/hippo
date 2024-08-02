@@ -11,7 +11,7 @@ import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
-import { Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -167,6 +167,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   />
                 </Row>
               )}
+              <h2>Product Information</h2>
               <Row
                 className={
                   adminCanEditLimitedStatuses
@@ -211,6 +212,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   deps={"total"}
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
+              </Row>
+              <Row className="row-cols-5">
                 <OrderFormField
                   name="installmentType"
                   label="Installment Type"
@@ -234,28 +237,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
               </Row>
-              <Row>
-                <OrderFormField
-                  name="installmentDate"
-                  label="Installment Date"
-                  type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
-                />
-                <OrderFormField
-                  name="expirationDate"
-                  label="Expiration Date"
-                  type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
-                />
-              </Row>
-              <Row>
-                <OrderFormField
-                  name="externalReference"
-                  label="External Reference"
-                  maxLength={150}
-                  canEditConditions={adminCanEditLimitedStatuses}
-                />
-              </Row>
+              <br />
+              <h2>Order Information</h2>
               <Row>
                 <OrderFormField
                   name="name"
@@ -273,6 +256,24 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   deps={"total"}
                   canEditConditions={!isDetailsPage && !limitedEditing}
                 />
+                <OrderFormField
+                  name="installmentDate"
+                  label="Installment Date"
+                  type="date"
+                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                />
+                <OrderFormField
+                  name="expirationDate"
+                  label="Expiration Date"
+                  type="date"
+                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                />
+                <OrderFormField
+                  name="externalReference"
+                  label="External Reference"
+                  maxLength={150}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
               </Row>
               <Row>
                 <OrderFormField
@@ -283,7 +284,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={!isDetailsPage && !limitedEditing}
                 />
                 {isAdmin && (
-                  <OrderFormField
+                  <OrderFormField // TODO: line up in grid
                     name="adminNotes"
                     label="Admin Notes"
                     type="textarea"
@@ -293,10 +294,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
               </Row>
               <ShowFor condition={isDetailsPage || !limitedEditing}>
                 <>
+                  <br />
                   <MetaDataFields readOnly={isDetailsPage} />
-                  <hr />
+                  <br />
                   <BillingsFields readOnly={isDetailsPage} />
-                  <hr />
+                  <br />
                 </>
               </ShowFor>
               <Row>
