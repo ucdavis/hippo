@@ -262,8 +262,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
               <OrderFormField
                 name="percentTotal"
                 label=""
-                readOnly={true}
-                disabled={true}
+                canEditConditions={false} // can never edit
                 type="number"
               />
             </td>

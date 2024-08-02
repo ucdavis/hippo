@@ -157,7 +157,7 @@ export const CreateOrder: React.FC = () => {
       />
       <OrderForm
         orderProp={order}
-        readOnly={false}
+        isDetailsPage={false}
         isAdmin={isClusterAdmin}
         cluster={cluster}
         onlyChartStrings={false}

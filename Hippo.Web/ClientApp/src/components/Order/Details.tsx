@@ -539,7 +539,7 @@ export const Details = () => {
           <StatusBar status={order.status} showOnHover={hoverAction} />
           <OrderForm
             orderProp={order}
-            readOnly={true}
+            isDetailsPage={true}
             isAdmin={isClusterAdmin}
             cluster={cluster}
             onlyChartStrings={false}

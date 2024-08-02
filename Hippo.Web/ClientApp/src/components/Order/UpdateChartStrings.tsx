@@ -116,7 +116,7 @@ export const UpdateChartStrings: React.FC = () => {
           <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
-            readOnly={false}
+            isDetailsPage={false}
             isAdmin={isClusterAdmin}
             cluster={cluster}
             onlyChartStrings={true}
