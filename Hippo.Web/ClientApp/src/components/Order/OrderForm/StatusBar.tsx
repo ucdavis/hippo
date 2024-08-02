@@ -20,6 +20,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
 
   return (
     <div className="hip-progress">
+      <h4>Order Status:</h4>
       <Progress multi>
         {(status === OrderStatus.Cancelled ||
           showOnHover === OrderStatus.Cancelled) && (
