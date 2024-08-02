@@ -27,6 +27,7 @@ namespace Hippo.Core.Services
         Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
+        Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
     }
 
     public class NotificationService : INotificationService
@@ -343,6 +344,41 @@ namespace Hippo.Core.Services
             catch (Exception ex)
             {
                 Log.Error("Error emailing Order Notification", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel)
+        {
+            try
+            {
+                var message = "Payment Processed";
+                var model = new EmailOrderPaymentModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = orderPaymentModel.Subject,
+                    Header = orderPaymentModel.Header,
+                    Transfers = orderPaymentModel.Transfers,
+                    ButtonText = "View Order",
+                };
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderPaymentNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = null,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = model.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Payment Notification", ex);
                 return false;
             }
         }

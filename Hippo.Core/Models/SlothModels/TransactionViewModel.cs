@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Hippo.Core.Models.SlothModels
 {
@@ -51,14 +46,6 @@ namespace Hippo.Core.Models.SlothModels
     public class TransferViewModel
     {
         public Decimal Amount { get; set; }
-        [StringLength(1)]
-        public string Chart { get; set; }
-        [StringLength(7)]
-        public string Account { get; set; }
-        [StringLength(5)]
-        public string SubAccount { get; set; }
-        [StringLength(4)]
-        public string ObjectCode { get; set; }
         [StringLength(40)]
         public string Description { get; set; }
         public string FinancialSegmentString { get; set; }

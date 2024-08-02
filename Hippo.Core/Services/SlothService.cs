@@ -15,6 +15,7 @@ using System.Net.Http;
 using Hippo.Core.Domain;
 using Serilog;
 using System.Net;
+using Hippo.Email.Models;
 
 
 namespace Hippo.Core.Services
@@ -35,15 +36,17 @@ namespace Hippo.Core.Services
         private readonly SlothSettings _slothSettings;
         private readonly IHttpClientFactory _clientFactory;
         private readonly IHistoryService _historyService;
+        private readonly INotificationService _notificationService;
         private readonly JsonSerializerOptions _serializerOptions;
 
-        public SlothService(AppDbContext dbContext, ISecretsService secretsService, IOptions<SlothSettings> slothSettings, IHttpClientFactory clientFactory, IHistoryService historyService)
+        public SlothService(AppDbContext dbContext, ISecretsService secretsService, IOptions<SlothSettings> slothSettings, IHttpClientFactory clientFactory, IHistoryService historyService, INotificationService notificationService)
         {
             _dbContext = dbContext;
             _secretsService = secretsService;
             _slothSettings = slothSettings.Value;
             _clientFactory = clientFactory;
             _historyService = historyService;
+            _notificationService = notificationService;
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -261,7 +264,7 @@ namespace Hippo.Core.Services
                         Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name} Error: Missing FinancialSystemId");
                         continue;
                     }
-                    var order = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
+                    var order = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Payments).Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
 
                     var response = await client.GetAsync(payment.FinancialSystemId);
                     if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
@@ -273,6 +276,7 @@ namespace Hippo.Core.Services
                         {
                             case SlothStatuses.Completed:
                                 payment.Status = Payment.Statuses.Completed;
+
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 //order.BalanceRemaining -= Math.Round(payment.Amount, 2); Don't do this here, this is a ballance that is available to pay, not the total paid
                                 var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
@@ -282,7 +286,36 @@ namespace Hippo.Core.Services
                                     await _historyService.OrderUpdated(order, null, $"Order paid in full.");
                                     order.NextPaymentDate = null;
                                 }
-                                
+                                try
+                                {
+                                    //write content to the order history? (See what it looks like)
+                                    await _historyService.OrderPaymentCompleted(order, content);
+
+                                    //Ucky, but email/core projects were not talking to each other like I expected.
+                                    var debits =  slothResponse.Transfers.Where(a => a.Direction == TransferViewModel.Directions.Debit);
+                                    var emailDebits = new List<EmailTransferResponseModel>();
+                                    foreach (var debit in debits)
+                                    {
+                                        emailDebits.Add(new EmailTransferResponseModel
+                                        {
+                                            Amount = debit.Amount,
+                                            FinancialSegmentString = debit.FinancialSegmentString,
+                                            Direction = debit.Direction,
+                                        });
+                                        
+                                    }
+                                    var emailModel = new EmailOrderPaymentModel
+                                    {
+                                        Subject = "Payment Completed",
+                                        Header = $"Payment completed for Order: {order.Name}",
+                                        Transfers = emailDebits,
+                                    };
+                                    await _notificationService.OrderPaymentNotification(order, new string[] { order.PrincipalInvestigator.Email }, emailModel);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "Error tring to notify about payment");
+                                }
                                 await _dbContext.SaveChangesAsync();
                                 break;
                             case SlothStatuses.Processing:

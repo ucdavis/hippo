@@ -290,5 +290,22 @@ namespace Hippo.Core.Services
 
             await historyService.AddHistory(history);
         }
+
+        public static async Task OrderPaymentCompleted(this IHistoryService historyService, Order order, string details)
+        {
+            var history = new History
+            {
+                Order = order,
+                ClusterId = order.Cluster.Id,
+                Status = order.Status,
+                ActedBy = null,
+                AdminAction = true,
+                Action = History.OrderActions.Updated,
+                Type = HistoryTypes.Detail,
+                Details = details
+            };
+
+            await historyService.AddHistory(history);
+        }
     }
 }
