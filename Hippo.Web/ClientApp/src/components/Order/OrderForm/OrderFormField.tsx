@@ -4,16 +4,31 @@ import HipFormField from "../../../Shared/Form/HipFormField";
 import { HipFormFieldProps } from "../../../Shared/Form/formTypes";
 import { OrderModel } from "../../../types";
 
-type OrderFormFieldProps = HipFormFieldProps<OrderModel> & {};
+type OrderFormFieldProps = HipFormFieldProps<OrderModel> & {
+  canEditConditions: boolean;
+  disabled?: never;
+  readOnly?: never;
+};
 
-const OrderFormField: React.FC<OrderFormFieldProps> = ({ ...props }) => {
+const OrderFormField: React.FC<OrderFormFieldProps> = ({
+  canEditConditions,
+  readOnly,
+  disabled,
+  ...props
+}) => {
   const {
     register,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
   return (
-    <HipFormField register={register} error={errors[props.name]} {...props} />
+    <HipFormField
+      register={register}
+      error={errors[props.name]}
+      {...props}
+      readOnly={!canEditConditions}
+      disabled={!canEditConditions}
+    />
   );
 };
 

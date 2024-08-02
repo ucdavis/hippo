@@ -3,16 +3,17 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import OrderFormField from "./OrderFormField";
+import { Row } from "reactstrap";
 
 type OrderFormTotalFieldsProps = {};
 
-const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = () => {
+const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = ({}) => {
   const { setValue } = useFormContext<OrderModel>();
 
   // watch these values and recalculate when they change
   // to have changes trigger validation for the total field,
   // add it as a dep prop for quanitity, unitPrice, and adjustment fields
-  const quantity = useWatch({
+  const quantity: number = useWatch({
     name: "quantity",
   });
 
@@ -20,7 +21,7 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = () => {
     name: "unitPrice",
   });
 
-  const adjustment = useWatch({
+  const adjustment: number = useWatch({
     name: "adjustment",
   });
 
@@ -32,23 +33,23 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = () => {
 
   return (
     <>
-      <OrderFormField
-        name="subTotal"
-        label="SubTotal"
-        readOnly={true}
-        disabled={true}
-        inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-        type="number"
-      />
-      <OrderFormField
-        type="number"
-        name="total"
-        label="Total"
-        min={0.01}
-        readOnly={true}
-        disabled={true}
-        inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-      />
+      <Row>
+        <OrderFormField
+          name="subTotal"
+          label="SubTotal"
+          canEditConditions={false} // can never edit
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+          type="number"
+        />
+        <OrderFormField
+          type="number"
+          name="total"
+          label="Total"
+          min={0.01}
+          canEditConditions={false} // can never edit
+          inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+        />
+      </Row>
     </>
   );
 };

@@ -11,10 +11,11 @@ import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
+import { Row } from "reactstrap";
 
 interface OrderFormProps {
   orderProp: OrderModel;
-  readOnly: boolean;
+  isDetailsPage: boolean;
   isAdmin: boolean;
   cluster: string;
   onlyChartStrings: boolean;
@@ -23,7 +24,7 @@ interface OrderFormProps {
 
 const OrderForm: React.FC<OrderFormProps> = ({
   orderProp,
-  readOnly,
+  isDetailsPage,
   isAdmin,
   cluster,
   onlyChartStrings,
@@ -36,6 +37,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const {
     handleSubmit,
     setError,
+    setValue,
     formState: { isDirty, isSubmitting },
   } = methods;
 
@@ -43,11 +45,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [localInstallmentType, setLocalInstallmentType] = useState(
     methods.getValues("installmentType"),
   );
+  /**
+   * Editing is limited when order status is Active, Rejected, Cancelled, or Completed
+   */
   const [limitedEditing, setLimitedEditing] = useState(false);
 
   React.useEffect(() => {
     const newStatus = orderProp.status;
-    methods.setValue("status", newStatus);
+    setValue("status", newStatus);
 
     if (
       newStatus === "Active" ||
@@ -62,10 +67,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
     const newInstallmentDate = orderProp.installmentDate;
     const newExpirationDate = orderProp.expirationDate;
-    methods.setValue("installmentDate", newInstallmentDate);
-    methods.setValue("expirationDate", newExpirationDate);
+    setValue("installmentDate", newInstallmentDate);
+    setValue("expirationDate", newExpirationDate);
   }, [
-    methods,
+    setValue,
     orderProp.expirationDate,
     orderProp.installmentDate,
     orderProp.status,
@@ -136,190 +141,185 @@ const OrderForm: React.FC<OrderFormProps> = ({
       methods.setValue("installments", 5);
     }
   }
+  const adminCanEditLimitedStatuses =
+    isAdmin && !isDetailsPage && !limitedEditing;
+
   // TODO: rest of input validation?
   return (
     <>
       <FormProvider {...methods}>
         <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
-          {onlyChartStrings && <BillingsFields readOnly={readOnly} />}
+          {onlyChartStrings && <BillingsFields readOnly={isDetailsPage} />}
           {!onlyChartStrings && (
             <>
-              {isAdmin && !readOnly && orderProp.id === 0 && (
-                <>
+              {isAdmin && !isDetailsPage && orderProp.id === 0 && (
+                <Row>
                   <OrderFormField
                     name="PILookup"
                     label="Order for Sponsor (email or kerb)"
-                    readOnly={readOnly}
-                    disabled={readOnly}
                     onBlur={(e) => {
                       lookupPI(e.target.value);
                     }}
-                    size="lg"
                     feedback={foundPI}
+                    canEditConditions={
+                      isAdmin && !isDetailsPage && orderProp.id === 0
+                    }
                   />
-                </>
+                </Row>
               )}
-              <ShowFor condition={readOnly || !limitedEditing}>
-                <>
-                  <OrderFormField
-                    name="productName"
-                    label="Product Name"
-                    required={true}
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    maxLength={50}
-                  />
-                  <OrderFormField
-                    name="description"
-                    label="Description"
-                    type="textarea"
-                    required={true}
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    maxLength={250}
-                  />
-                  <OrderFormField
-                    name="category"
-                    label="Category"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    maxLength={50}
-                  />
-                  <OrderFormField
-                    name="units"
-                    label="Units"
-                    required={true}
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    maxLength={50}
-                  />
-
-                  <OrderFormField
-                    name="unitPrice"
-                    label="Unit Price"
-                    required={true}
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                    valueAsNumber={true}
-                    deps={"total"}
-                  />
-                  <OrderFormField
-                    name="installmentType"
-                    label="Installment Type"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    type="select"
-                  >
-                    <option value="OneTime">One Time</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Yearly">Yearly</option>
-                  </OrderFormField>
-                  {installmentType !== "OneTime" && (
-                    <OrderFormField
-                      name="installments"
-                      label="Installments"
-                      readOnly={readOnly || !isAdmin}
-                      disabled={!readOnly && !isAdmin}
-                    />
-                  )}
-                  <OrderFormField
-                    name="lifeCycle"
-                    label="Life Cycle in Months"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                  />
-                  <OrderFormField
-                    name="name"
-                    label="Name"
-                    required={true}
-                    readOnly={readOnly}
-                    maxLength={50}
-                  />
-                  <OrderFormField
-                    name="notes"
-                    label="Notes"
-                    type="textarea"
-                    required={false}
-                    readOnly={readOnly}
-                  />
-
-                  <OrderFormField
-                    name="quantity"
-                    label="Quantity"
-                    required={true}
-                    readOnly={readOnly}
-                    min={0.01}
-                    valueAsNumber={true}
-                    deps={"total"}
-                  />
-                </>
-              </ShowFor>
-
-              <OrderFormField
-                name="installmentDate"
-                label="Installment Date"
-                readOnly={readOnly || !isAdmin}
-                disabled={!readOnly && !isAdmin}
-                type="date"
-              />
-              <OrderFormField
-                name="expirationDate"
-                label="Expiration Date"
-                readOnly={readOnly || !isAdmin}
-                disabled={!readOnly && !isAdmin}
-                type="date"
-              />
-              <ShowFor condition={readOnly || !limitedEditing}>
-                <>
-                  <OrderFormField
-                    name="adjustment"
-                    label="Adjustment"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                    valueAsNumber={true}
-                    deps={"total"}
-                  />
-                  <OrderFormField
-                    name="adjustmentReason"
-                    label="Adjustment Reason"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    type="textarea"
-                  />
-                  <OrderFormField
-                    name="externalReference"
-                    label="External Reference"
-                    readOnly={readOnly || !isAdmin}
-                    disabled={!readOnly && !isAdmin}
-                    maxLength={150}
-                  />
-                </>
-              </ShowFor>
-
-              {isAdmin && (
+              <Row
+                className={
+                  adminCanEditLimitedStatuses
+                    ? "row-cols-2" //
+                    : ""
+                }
+              >
                 <OrderFormField
-                  name="adminNotes"
-                  label="Admin Notes"
-                  readOnly={readOnly}
+                  name="productName"
+                  label="Product Name"
+                  required={true}
+                  maxLength={50}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
+                <OrderFormField
+                  name="description"
+                  label="Description"
+                  type="textarea"
+                  required={true}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                  maxLength={250}
+                />
+                <OrderFormField
+                  name="category"
+                  label="Category"
+                  canEditConditions={adminCanEditLimitedStatuses}
+                  maxLength={50}
+                />
+                <OrderFormField
+                  name="units"
+                  label="Units"
+                  required={true}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                  maxLength={50}
+                />
+                <OrderFormField
+                  name="unitPrice"
+                  label="Unit Price"
+                  required={true}
+                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                  valueAsNumber={true}
+                  deps={"total"}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
+                <OrderFormField
+                  name="installmentType"
+                  label="Installment Type"
+                  type="select"
+                  canEditConditions={adminCanEditLimitedStatuses}
+                >
+                  <option value="OneTime">One Time</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Yearly">Yearly</option>
+                </OrderFormField>
+                {installmentType !== "OneTime" && (
+                  <OrderFormField
+                    name="installments"
+                    label="Installments"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                  />
+                )}
+                <OrderFormField
+                  name="lifeCycle"
+                  label="Life Cycle in Months"
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
+              </Row>
+              <Row>
+                <OrderFormField
+                  name="installmentDate"
+                  label="Installment Date"
+                  type="date"
+                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                />
+                <OrderFormField
+                  name="expirationDate"
+                  label="Expiration Date"
+                  type="date"
+                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                />
+              </Row>
+              <Row>
+                <OrderFormField
+                  name="externalReference"
+                  label="External Reference"
+                  maxLength={150}
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
+              </Row>
+              <Row>
+                <OrderFormField
+                  name="name"
+                  label="Name"
+                  required={true}
+                  maxLength={50}
+                  canEditConditions={!isDetailsPage && !limitedEditing}
+                />
+                <OrderFormField
+                  name="quantity"
+                  label="Quantity"
+                  required={true}
+                  min={0.01}
+                  valueAsNumber={true}
+                  deps={"total"}
+                  canEditConditions={!isDetailsPage && !limitedEditing}
+                />
+              </Row>
+              <Row>
+                <OrderFormField
+                  name="notes"
+                  label="Notes"
+                  type="textarea"
+                  required={false}
+                  canEditConditions={!isDetailsPage && !limitedEditing}
+                />
+                {isAdmin && (
+                  <OrderFormField
+                    name="adminNotes"
+                    label="Admin Notes"
+                    type="textarea"
+                    canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  />
+                )}
+              </Row>
+              <ShowFor condition={isDetailsPage || !limitedEditing}>
+                <>
+                  <MetaDataFields readOnly={isDetailsPage} />
+                  <hr />
+                  <BillingsFields readOnly={isDetailsPage} />
+                  <hr />
+                </>
+              </ShowFor>
+              <Row>
+                <OrderFormField
+                  name="adjustment"
+                  label="Adjustment"
+                  canEditConditions={adminCanEditLimitedStatuses}
+                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                  valueAsNumber={true}
+                  deps={"total"}
+                />
+                <OrderFormField
+                  name="adjustmentReason"
+                  label="Adjustment Reason"
+                  canEditConditions={adminCanEditLimitedStatuses}
                   type="textarea"
                 />
-              )}
-              <ShowFor condition={readOnly || !limitedEditing}>
-                <>
-                  <MetaDataFields readOnly={readOnly} />
-                  <hr />
-                  <BillingsFields readOnly={readOnly} />
-                  <hr />
-                </>
-              </ShowFor>
-
+              </Row>
               <OrderFormTotalFields />
             </>
           )}
 
-          {!readOnly && <HipFormSubmitButton className="mb-3 mt-3" />}
+          {!isDetailsPage && <HipFormSubmitButton className="mb-3 mt-3" />}
         </HipForm>
       </FormProvider>
     </>

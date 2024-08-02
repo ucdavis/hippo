@@ -117,7 +117,7 @@ export const EditOrder: React.FC = () => {
           <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
-            readOnly={false}
+            isDetailsPage={false}
             isAdmin={isClusterAdmin}
             cluster={cluster}
             onlyChartStrings={false}
