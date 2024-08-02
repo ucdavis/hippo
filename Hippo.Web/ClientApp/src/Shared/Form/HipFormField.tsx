@@ -58,7 +58,7 @@ const HipFormField = <T extends Record<string, any>>({
   });
 
   return (
-    <HipFormGroup size={size ? size : readOnly ? "sm" : "md"}>
+    <HipFormGroup>
       {label && (
         <Label for={`field-${name}`}>
           {label}
