@@ -11,7 +11,7 @@ import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -148,7 +148,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   return (
     <>
       <FormProvider {...methods}>
-        <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
+        <HipForm onSubmit={handleSubmit(submitForm)}>
           {onlyChartStrings && <BillingsFields readOnly={isDetailsPage} />}
           {!onlyChartStrings && (
             <>

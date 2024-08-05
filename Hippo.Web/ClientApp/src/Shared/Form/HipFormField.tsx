@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { FormFeedback, FormText, Input, Label } from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
@@ -80,7 +80,6 @@ const HipFormField = <T extends Record<string, any>>({
           readOnly={readOnly}
           plaintext={readOnly}
           disabled={disabled}
-          autoComplete={autoComplete ?? "new-password"}
           {...rest}
         >
           {!readOnly ? children : null}
