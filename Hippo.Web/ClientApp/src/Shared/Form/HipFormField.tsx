@@ -75,7 +75,8 @@ const HipFormField = <T extends Record<string, any>>({
           innerRef={ref}
           id={`field-${name}`}
           name={autoComplete ? name : `field-${name}`} // less likely to autofill
-          type={type}
+          type={readOnly ? "text" : type}
+          tag={type === "textarea" ? "textarea" : undefined}
           invalid={!!error}
           readOnly={readOnly}
           plaintext={readOnly}

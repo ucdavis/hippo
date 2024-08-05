@@ -286,24 +286,37 @@ hr {
 hr {
   opacity: 1;
 }
-.hip-form {
-  .hip-form-group {
-    label {
-      font-size: 1rem;
-      color: $secondary-font;
-      margin-bottom: 0;
-      margin-top: 16px;
-    }
-    input {
-      color: $primary-font;
-      font-weight: bold;
-      margin-bottom: 8px;
+
+.hip-form-group {
+  label {
+    font-size: 1rem;
+    color: $secondary-font;
+    margin-bottom: 0;
+    margin-top: 16px;
+  }
+  input,
+  .hip-form-field {
+    color: $primary-font;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  input[type="textarea"].form-control-plaintext {
+    color: red !important;
+    overflow: visible;
+    height: auto;
+  }
+  // for properly displaying prepend and append when input is readonly
+  .hip-input-group-plaintext {
+    display: inline-block;
+    .form-control-plaintext {
+      display: inline;
+      width: auto;
     }
   }
-  .readonly-hip-form {
-    border-bottom: 1px solid $borders;
-    border-top: 1px solid $borders;
-  }
+}
+.readonly-hip-form {
+  border-bottom: 1px solid $borders;
+  border-top: 1px solid $borders;
 }
 
 .hip-progress {

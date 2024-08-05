@@ -18,15 +18,21 @@ const HipInputGroup: React.FC<InputGroupWrapperProps> = ({
   append,
   readOnly,
 }) => {
-  if (readOnly || (!prepend && !append)) {
+  if (!prepend && !append) {
     return <>{children}</>;
   }
 
   return (
-    <InputGroup>
-      {!!prepend && <InputGroupText>{prepend}</InputGroupText>}
+    <InputGroup className={readOnly ? " hip-input-group-plaintext" : ""}>
+      {!!prepend &&
+        (readOnly ? (
+          <>{prepend} </>
+        ) : (
+          <InputGroupText>{prepend}</InputGroupText>
+        ))}
       {children}
-      {!!append && <InputGroupText>{append}</InputGroupText>}
+      {!!append &&
+        (readOnly ? <> {append}</> : <InputGroupText>{append}</InputGroupText>)}
     </InputGroup>
   );
 };

@@ -31,6 +31,8 @@ import {
   sponsorEditableStatuses,
 } from "../../types/status";
 import StatusBar from "./OrderForm/StatusBar";
+import HipFormField from "../../Shared/Form/HipFormField";
+import OrderPaymentDetails from "./OrderForm/OrderPaymentDetails";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -545,83 +547,17 @@ export const Details = () => {
             onlyChartStrings={false}
             onSubmit={submitOrder}
           />
-
           <HistoryTable
             numberOfRows={5}
             showLinkToAll={true}
             historyCount={order.historyCount}
           />
-          <h2>Payments</h2>
-          <div className="form-group">
-            <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <FontAwesomeIcon icon={faDollarSign} />
-                </span>
-              </div>
-              <input
-                className="form-control"
-                id="fieldBalanceRemaining"
-                value={order.balanceRemaining}
-                readOnly
-              />
-            </div>
-          </div>
-          {balancePending !== 0 && (
-            <div className="form-group">
-              <label htmlFor="fieldBalancePending">
-                Total Pending Payments
-              </label>
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text" style={{ height: "38px" }}>
-                    <FontAwesomeIcon icon={faDollarSign} />
-                  </span>
-                </div>
-                <input
-                  className="form-control"
-                  id="fieldBalancePending"
-                  value={balancePending.toFixed(2)}
-                  readOnly
-                />
-              </div>
-            </div>
-          )}
-          {order.nextPaymentDate && (
-            <>
-              <div className="form-group">
-                <label htmlFor="fieldNextPaymentDate">Next Payment Date</label>
-                <input
-                  className="form-control"
-                  id="fieldNextPaymentDate"
-                  value={convertToPacificDate(order.nextPaymentDate)}
-                  readOnly
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="fieldNextPaymentDate">
-                  Next Payment Amount
-                </label>
-                <div className="input-group">
-                  <div className="input-group-prepend">
-                    <span
-                      className="input-group-text"
-                      style={{ height: "38px" }}
-                    >
-                      <FontAwesomeIcon icon={faDollarSign} />
-                    </span>
-                  </div>
-                  <input
-                    className="form-control"
-                    id="fieldNextPaymentDate"
-                    value={order.nextPaymentAmount}
-                    readOnly
-                  />
-                </div>
-              </div>
-            </>
-          )}
+          <OrderPaymentDetails
+            balancePending={order.balancePending}
+            balanceRemaining={order.balanceRemaining}
+            nextPaymentDate={order.nextPaymentDate}
+            nextPaymentAmount={order.nextPaymentAmount}
+          />
           <PaymentTable
             numberOfRows={5}
             showLinkToAll={true}
