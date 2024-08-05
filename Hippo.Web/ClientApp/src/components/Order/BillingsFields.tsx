@@ -162,7 +162,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup size="lg">
+    <HipFormGroup>
       <h2>Billing Info</h2>
       {notification && (
         <div>

@@ -300,11 +300,6 @@ hr {
     font-weight: bold;
     margin-bottom: 8px;
   }
-  input[type="textarea"].form-control-plaintext {
-    color: red !important;
-    overflow: visible;
-    height: auto;
-  }
   // for properly displaying prepend and append when input is readonly
   .hip-input-group-plaintext {
     display: inline-block;

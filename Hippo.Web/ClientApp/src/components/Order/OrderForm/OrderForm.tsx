@@ -172,7 +172,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 className={
                   adminCanEditLimitedStatuses
                     ? "row-cols-2" //
-                    : ""
+                    : "row-cols-5"
                 }
               >
                 <OrderFormField
@@ -239,7 +239,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
               </Row>
               <br />
               <h2>Order Information</h2>
-              <Row>
+              <Row className="row-cols-5">
                 <OrderFormField
                   name="name"
                   label="Name"
@@ -275,7 +275,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
               </Row>
-              <Row>
+              <Row className="row-cols-2">
                 <OrderFormField
                   name="notes"
                   label="Notes"
