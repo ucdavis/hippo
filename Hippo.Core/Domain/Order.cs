@@ -78,6 +78,7 @@ namespace Hippo.Core.Domain
             public const string Active = "Active";
             public const string Rejected = "Rejected"; //Not sure if we need this
             public const string Completed = "Completed";
+            public const string Archived = "Archived";
 
             public static List<string> StatusTypes = new List<string>
             {
@@ -87,7 +88,8 @@ namespace Hippo.Core.Domain
                 Cancelled,
                 Active,
                 Rejected,
-                Completed
+                Completed,
+                Archived,
             };
         }
         internal static void OnModelCreating(ModelBuilder modelBuilder)

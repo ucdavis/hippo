@@ -412,6 +412,31 @@ namespace Hippo.Web.Controllers
                     await NotifySponsorOrderStatusChange(existingOrder);
 
                     break;
+                case Order.Statuses.Completed:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
+                    if (expectedStatus != Order.Statuses.Archived)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
+                    if(existingOrder.BalanceRemaining > 0)
+                    {
+                        return BadRequest("You cannot archive an order that has a balance remaining.");
+                    }
+                    if(existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
+                    {
+                        return BadRequest("Expiration date must be in the past to archive an order.");
+                    }
+                    existingOrder.Status = Order.Statuses.Archived;
+                    existingOrder.NextNotificationDate = null;
+
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Archived.");
+
+                    //TODO: Notify the sponsor that the order has been archived?
+                    break;
                 default:
                     return BadRequest("You cannot change the status of an order in the current status.");
             }
