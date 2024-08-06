@@ -6,6 +6,7 @@ import { convertToPacificTime } from "../../util/DateHelper";
 import { createColumnHelper } from "@tanstack/react-table";
 import { authenticatedFetch } from "../../util/api";
 import { useParams } from "react-router-dom";
+import HipButton from "../../Shared/HipButton";
 
 interface HistoryTableProps {
   numberOfRows: number;
@@ -82,23 +83,26 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       <h2>History</h2>
       <small>Last {numberOfRows} or fewer Actions</small>{" "}
       {showLinkToAll ? (
-        <button
+        <HipButton
           onClick={() => navigate(`/${cluster}/order/history/${orderId}`)}
           className="float-right"
+          color="link"
         >
           View All
-        </button>
+        </HipButton>
       ) : (
-        <button
+        <HipButton
           onClick={() => navigate(`/${cluster}/order/details/${orderId}`)}
           className="float-right"
+          color="link"
         >
           Back to Order Details
-        </button>
+        </HipButton>
       )}
       <ReactTable
         columns={historyColumns}
         data={histories}
+        disablePagination={true} // since we are only showing past 5 actions
         initialState={{
           sorting: [
             {

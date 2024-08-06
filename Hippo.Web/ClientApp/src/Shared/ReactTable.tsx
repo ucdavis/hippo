@@ -46,6 +46,7 @@ interface Props<T extends object> {
   data: T[];
   initialState?: Partial<TableState>;
   disableExport?: boolean;
+  disablePagination?: boolean;
 }
 
 export const ReactTable = <T extends object>({
@@ -53,6 +54,7 @@ export const ReactTable = <T extends object>({
   data,
   initialState,
   disableExport = false,
+  disablePagination = false,
 }: Props<T>) => {
   const defaultColumn = React.useMemo(() => ({}) as Partial<Column<T>>, []);
 
@@ -240,77 +242,81 @@ export const ReactTable = <T extends object>({
           ))}
         </tbody>
       </table>
-      <div className="pagination justify-content-center">
-        <PaginationItem
-          className="align-self-center"
-          onClick={table.firstPage}
-          disabled={table.getCanPreviousPage()}
-        >
-          <PaginationLink first />
-        </PaginationItem>
-        <PaginationItem
-          className="align-self-center"
-          onClick={table.previousPage}
-          disabled={table.getCanPreviousPage()}
-        >
-          <PaginationLink previous />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink>
-            <span>
-              Page{" "}
-              <strong>
-                {pageIndex + 1} of {pageCount}
-              </strong>{" "}
-            </span>
-            <span>
-              | Go to page:{" "}
-              <input
-                className="form-control d-inline"
-                type="number"
-                defaultValue={pageIndex + 1}
+      {!disablePagination && (
+        <div className="pagination justify-content-center">
+          <PaginationItem
+            className="align-self-center"
+            onClick={table.firstPage}
+            disabled={table.getCanPreviousPage()}
+          >
+            <PaginationLink first />
+          </PaginationItem>
+          <PaginationItem
+            className="align-self-center"
+            onClick={table.previousPage}
+            disabled={table.getCanPreviousPage()}
+          >
+            <PaginationLink previous />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink>
+              <span>
+                Page{" "}
+                <strong>
+                  {pageIndex + 1} of {pageCount}
+                </strong>{" "}
+              </span>
+              <span>
+                | Go to page:{" "}
+                <input
+                  className="form-control d-inline"
+                  type="number"
+                  defaultValue={pageIndex + 1}
+                  onChange={(e) => {
+                    const page = e.target.value
+                      ? Number(e.target.value) - 1
+                      : 0;
+                    table.setPageIndex(page);
+                  }}
+                  style={{ width: "100px" }}
+                />
+              </span>{" "}
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink>
+              <select
+                className="form-control"
+                value={pageSize}
                 onChange={(e) => {
-                  const page = e.target.value ? Number(e.target.value) - 1 : 0;
-                  table.setPageIndex(page);
+                  setDefaultPageSize(Number(e.target.value));
+                  table.setPageSize(Number(e.target.value));
                 }}
-                style={{ width: "100px" }}
-              />
-            </span>{" "}
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink>
-            <select
-              className="form-control"
-              value={pageSize}
-              onChange={(e) => {
-                setDefaultPageSize(Number(e.target.value));
-                table.setPageSize(Number(e.target.value));
-              }}
-            >
-              {[10, 25, 50, 100].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
-                </option>
-              ))}
-            </select>{" "}
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem
-          className="align-self-center"
-          onClick={table.nextPage}
-          disabled={table.getCanNextPage()}
-        >
-          <PaginationLink next />
-        </PaginationItem>
-        <PaginationItem
-          className="align-self-center"
-          onClick={table.lastPage}
-          disabled={table.getCanNextPage()}
-        >
-          <PaginationLink last />
-        </PaginationItem>
-      </div>
+              >
+                {[10, 25, 50, 100].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    Show {pageSize}
+                  </option>
+                ))}
+              </select>{" "}
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem
+            className="align-self-center"
+            onClick={table.nextPage}
+            disabled={table.getCanNextPage()}
+          >
+            <PaginationLink next />
+          </PaginationItem>
+          <PaginationItem
+            className="align-self-center"
+            onClick={table.lastPage}
+            disabled={table.getCanNextPage()}
+          >
+            <PaginationLink last />
+          </PaginationItem>
+        </div>
+      )}
       <br />
     </>
   );
