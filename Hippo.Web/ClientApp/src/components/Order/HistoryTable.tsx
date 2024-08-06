@@ -103,6 +103,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
         columns={historyColumns}
         data={histories}
         disablePagination={true} // since we are only showing past 5 actions
+        disableFilter={true}
         initialState={{
           sorting: [
             {

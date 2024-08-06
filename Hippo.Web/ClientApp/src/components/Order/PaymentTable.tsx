@@ -117,6 +117,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         columns={paymentColumns}
         data={payments}
         disablePagination={numberOfRows <= 10} // pagination defaults to showing 10 rows per page, if we are guaranteed to show less than that, don't paginate
+        disableFilter={numberOfRows <= 10} // same as above
         initialState={{
           sorting: [
             {

@@ -47,6 +47,7 @@ interface Props<T extends object> {
   initialState?: Partial<TableState>;
   disableExport?: boolean;
   disablePagination?: boolean;
+  disableFilter?: boolean;
 }
 
 export const ReactTable = <T extends object>({
@@ -55,6 +56,7 @@ export const ReactTable = <T extends object>({
   initialState,
   disableExport = false,
   disablePagination = false,
+  disableFilter = false,
 }: Props<T>) => {
   const defaultColumn = React.useMemo(() => ({}) as Partial<Column<T>>, []);
 
@@ -66,6 +68,7 @@ export const ReactTable = <T extends object>({
     columns,
     data,
     defaultColumn,
+    enableFilters: !disableFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
