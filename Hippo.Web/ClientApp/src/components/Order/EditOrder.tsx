@@ -113,7 +113,7 @@ export const EditOrder: React.FC = () => {
     <div>
       {order && (
         <div>
-          <h2>Edit Order</h2> {/* TODO: add order name */}
+          <h2>Edit Order{order.name ? `: ${order.name}` : ""}</h2>
           <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
