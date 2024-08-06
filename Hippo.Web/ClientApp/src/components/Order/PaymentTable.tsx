@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { convertToPacificTime } from "../../util/DateHelper";
 import { ReactTable } from "../../Shared/ReactTable";
+import HipButton from "../../Shared/HipButton";
 
 interface PaymentTableProps {
   numberOfRows: number;
@@ -95,25 +96,28 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       {showLinkToAll ? (
         <>
           {payments.length >= numberOfRows && (
-            <button
+            <HipButton
               onClick={() => navigate(`/${cluster}/order/payments/${orderId}`)}
-              className="float-right"
+              color="link"
             >
               View All
-            </button>
+            </HipButton>
           )}
         </>
       ) : (
-        <button
+        <HipButton
           onClick={() => navigate(`/${cluster}/order/details/${orderId}`)}
           className="float-right"
+          color="link"
         >
           Back to Order Details
-        </button>
+        </HipButton>
       )}
       <ReactTable
         columns={paymentColumns}
         data={payments}
+        disablePagination={numberOfRows <= 10} // pagination defaults to showing 10 rows per page, if we are guaranteed to show less than that, don't paginate
+        disableFilter={numberOfRows <= 10} // same as above
         initialState={{
           sorting: [
             {

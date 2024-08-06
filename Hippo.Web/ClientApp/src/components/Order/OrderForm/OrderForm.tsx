@@ -11,7 +11,7 @@ import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -148,7 +148,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
   return (
     <>
       <FormProvider {...methods}>
-        <HipForm onSubmit={handleSubmit(submitForm)} wrap={true}>
+        <HipForm onSubmit={handleSubmit(submitForm)}>
           {onlyChartStrings && <BillingsFields readOnly={isDetailsPage} />}
           {!onlyChartStrings && (
             <>
@@ -172,7 +172,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 className={
                   adminCanEditLimitedStatuses
                     ? "row-cols-2" //
-                    : ""
+                    : "row-cols-5"
                 }
               >
                 <OrderFormField
@@ -239,7 +239,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
               </Row>
               <br />
               <h2>Order Information</h2>
-              <Row>
+              <Row className="row-cols-5">
                 <OrderFormField
                   name="name"
                   label="Name"
@@ -275,7 +275,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
               </Row>
-              <Row>
+              <Row className="row-cols-2">
                 <OrderFormField
                   name="notes"
                   label="Notes"

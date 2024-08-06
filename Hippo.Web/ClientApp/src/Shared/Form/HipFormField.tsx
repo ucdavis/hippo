@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { FormFeedback, FormText, Input, Label } from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
@@ -75,12 +75,12 @@ const HipFormField = <T extends Record<string, any>>({
           innerRef={ref}
           id={`field-${name}`}
           name={autoComplete ? name : `field-${name}`} // less likely to autofill
-          type={type}
+          type={readOnly ? "text" : type}
+          tag={type === "textarea" ? "textarea" : undefined}
           invalid={!!error}
           readOnly={readOnly}
           plaintext={readOnly}
           disabled={disabled}
-          autoComplete={autoComplete ?? "new-password"}
           {...rest}
         >
           {!readOnly ? children : null}
