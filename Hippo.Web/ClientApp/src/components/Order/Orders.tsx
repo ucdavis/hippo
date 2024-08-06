@@ -61,6 +61,9 @@ export const Orders = () => {
   const quantity = columnHelper.accessor("quantity", {
     header: "Quantity",
     id: "quantity",
+    filterFn: (row, id, filterValue) => {
+      return row.original.quantity.toString().includes(filterValue);
+    },
   });
 
   const total = columnHelper.accessor("total", {
