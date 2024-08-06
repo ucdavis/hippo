@@ -27,7 +27,7 @@ const HipFieldReadOnly: React.FC<HipFormFieldReadonlyProps> = ({
 }) => {
   return (
     <HipFormGroup>
-      {label && <Label for={`field-${name}`}>{label}</Label>}
+      {label && <Label>{label}</Label>}
       <HipInputGroup readOnly prepend={inputPrepend} append={inputAppend}>
         <span className="hip-form-field form-control-plaintext">{value}</span>
       </HipInputGroup>
