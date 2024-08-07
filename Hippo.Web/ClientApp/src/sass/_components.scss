@@ -280,7 +280,8 @@ hr {
   }
 
   .hip-form-group {
-    label {
+    label,
+    .form-label {
       font-size: 1rem;
       color: $secondary-font;
       margin-bottom: 0;
