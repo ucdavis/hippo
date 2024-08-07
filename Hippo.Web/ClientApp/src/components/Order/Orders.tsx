@@ -6,10 +6,12 @@ import { authenticatedFetch } from "../../util/api";
 import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { convertToPacificDate } from "../../util/DateHelper";
+import HipPageHeader from "../../Shared/Layout/HipPageHeader";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
   const { cluster, orderType } = useParams();
+  const isAdminOrders = orderType === "adminorders";
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -99,7 +101,7 @@ export const Orders = () => {
 
   columns.push(id);
   columns.push(status);
-  if (orderType === "adminorders") {
+  if (isAdminOrders) {
     columns.push(sponsorName);
   }
   columns.push(name);
@@ -121,6 +123,9 @@ export const Orders = () => {
       <div>
         <div className="row justify-content-center">
           <div className="col-md-12">
+            <HipPageHeader
+              title={isAdminOrders ? "Admin Orders" : "My Orders"}
+            />
             <ReactTable
               columns={columns}
               data={orders}

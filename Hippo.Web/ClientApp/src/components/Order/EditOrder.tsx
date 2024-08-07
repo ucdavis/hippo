@@ -116,7 +116,7 @@ export const EditOrder: React.FC = () => {
         <div>
           <HipPageHeader
             title={`Order ${order.id}: ${order.name}`}
-            pageName="Edit"
+            subtitle="Edit"
           />
           <StatusBar status={order.status} />
           <OrderForm

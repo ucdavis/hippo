@@ -115,7 +115,7 @@ export const UpdateChartStrings: React.FC = () => {
         <div>
           <HipPageHeader
             title={`Order ${order.id}: ${order.name}`}
-            pageName="Update Chart Strings"
+            subtitle="Update Chart Strings"
           />
           <StatusBar status={order.status} />
           <OrderForm

@@ -150,7 +150,7 @@ export const CreateOrder: React.FC = () => {
 
   return (
     <div className="row col-md-12">
-      <HipPageHeader title={`New Order`} pageName="Create" />
+      <HipPageHeader title={`New Order`} subtitle="Create" />
       <StatusBar
         status={order.status}
         animated={notification.pending}

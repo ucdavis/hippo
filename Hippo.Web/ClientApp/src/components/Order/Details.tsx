@@ -431,7 +431,7 @@ export const Details = () => {
             )}
           <HipPageHeader
             title={`Order ${order.id}: ${order.name}`}
-            pageName="Details"
+            subtitle="Details"
             buttons={
               <>
                 <ShowFor
