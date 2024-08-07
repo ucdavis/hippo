@@ -4,11 +4,16 @@ import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useParams } from "react-router-dom";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { SplitCamelCase, getGroupModelString } from "../../util/StringHelpers";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { isAccountRequest } from "../../util/TypeChecks";
 import { createColumnHelper } from "@tanstack/react-table";
+import HipButton from "../../Shared/HipButton";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -119,16 +124,15 @@ export const Requests = () => {
       header: "Action",
       cell: (props) => (
         <>
-          <button
+          <HipButton
             id="approveButton"
             disabled={notification.pending}
             onClick={() => handleApprove(props.row.original)}
-            className="btn btn-primary"
           >
             {requestApproving === props.row.original.id
               ? "Approving..."
               : "Approve"}
-          </button>
+          </HipButton>
           {requestApproving !== props.row.original.id && (
             <RejectRequest
               request={props.row.original}
@@ -146,16 +150,20 @@ export const Requests = () => {
 
   if (requests === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Pending Approvals" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">
+      <HipMainWrapper>
+        <HipTitle title="Pending Approvals" />
+        <HipBody>
           <p>There are {requests.length} request(s) awaiting approval</p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={accountsData}
             initialState={{
@@ -165,8 +173,8 @@ export const Requests = () => {
               ],
             }}
           />
-        </div>
-      </div>
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };

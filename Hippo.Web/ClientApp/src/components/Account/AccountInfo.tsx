@@ -12,6 +12,10 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import GroupDetails from "../Group/GroupDetails";
 import ObjectTree from "../../Shared/ObjectTree";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipButton from "../../Shared/HipButton";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -240,88 +244,76 @@ export const AccountInfo = () => {
   };
 
   return (
-    <>
-      <div className="row justify-content-center">
-        <div className="col-md-12">
-          <p>Welcome {context.user.detail.firstName}</p>
-          {!!memberOfGroups.length && (
-            <>
-              <p>Your account is registered with the following group(s):</p>
-              <CardColumns>
-                {memberOfGroups.map((g, i) => (
-                  <div className="group-card-admin" key={i}>
-                    <GroupInfo
-                      group={g}
-                      showDetails={() => handleShowGroup(g)}
-                    />
-                  </div>
-                ))}
-              </CardColumns>
-              <br />
-            </>
-          )}
+    <HipMainWrapper>
+      <HipTitle title={`Welcome ${context.user.detail.firstName}`} />
+      <HipBody>
+        {!!memberOfGroups.length && (
+          <>
+            <p>Your account is registered with the following group(s):</p>
+            <CardColumns>
+              {memberOfGroups.map((g, i) => (
+                <div className="group-card-admin" key={i}>
+                  <GroupInfo group={g} showDetails={() => handleShowGroup(g)} />
+                </div>
+              ))}
+            </CardColumns>
+            <br />
+          </>
+        )}
 
-          {!!adminOfGroups.length && (
-            <>
-              <p>You are an admin for the following group(s):</p>
-              <CardColumns>
-                {adminOfGroups.map((g, i) => (
-                  <div className="group-card-admin" key={i}>
-                    <GroupInfo
-                      group={g}
-                      showDetails={() => handleShowGroup(g)}
-                    />
-                  </div>
-                ))}
-              </CardColumns>
-              <br />
-            </>
-          )}
+        {!!adminOfGroups.length && (
+          <>
+            <p>You are an admin for the following group(s):</p>
+            <CardColumns>
+              {adminOfGroups.map((g, i) => (
+                <div className="group-card-admin" key={i}>
+                  <GroupInfo group={g} showDetails={() => handleShowGroup(g)} />
+                </div>
+              ))}
+            </CardColumns>
+            <br />
+          </>
+        )}
 
-          {Boolean(currentOpenRequests.length) && (
-            <>
-              <p>You have pending requests for the following group(s):</p>
+        {Boolean(currentOpenRequests.length) && (
+          <>
+            <p>You have pending requests for the following group(s):</p>
 
-              <CardColumns>
-                {currentOpenRequests.map((r, i) => (
-                  <div className="group-card-admin" key={i}>
-                    <GroupInfo
-                      group={r.groupModel}
-                      showDetails={() => handleShowGroup(r.groupModel)}
-                    />
-                  </div>
-                ))}
-              </CardColumns>
-              <br />
-            </>
-          )}
-
-          <div>
-            <button
-              onClick={() => handleViewDetails()}
-              className="btn btn-primary btn-sm"
-            >
-              View Account Details
-            </button>{" "}
-            <button
+            <CardColumns>
+              {currentOpenRequests.map((r, i) => (
+                <div className="group-card-admin" key={i}>
+                  <GroupInfo
+                    group={r.groupModel}
+                    showDetails={() => handleShowGroup(r.groupModel)}
+                  />
+                </div>
+              ))}
+            </CardColumns>
+            <br />
+          </>
+        )}
+        <div>
+          <HipButton onClick={() => handleViewDetails()} size="sm">
+            View Account Details
+          </HipButton>{" "}
+          <HipButton
+            disabled={notification.pending || availableGroups.length === 0}
+            onClick={() => handleRequestAccess()}
+            size="sm"
+          >
+            Request Access to Another Group
+          </HipButton>{" "}
+          {cluster.accessTypes.includes("SshKey") && (
+            <HipButton
               disabled={notification.pending || availableGroups.length === 0}
-              onClick={() => handleRequestAccess()}
-              className="btn btn-primary btn-sm"
+              onClick={() => handleUpdateSshKey()}
+              size="sm"
             >
-              Request Access to Another Group
-            </button>{" "}
-            {cluster.accessTypes.includes("SshKey") && (
-              <button
-                disabled={notification.pending || availableGroups.length === 0}
-                onClick={() => handleUpdateSshKey()}
-                className="btn btn-primary btn-sm"
-              >
-                Update SSH Key
-              </button>
-            )}
-          </div>
+              Update SSH Key
+            </HipButton>
+          )}
         </div>
-      </div>
-    </>
+      </HipBody>
+    </HipMainWrapper>
   );
 };

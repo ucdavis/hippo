@@ -4,7 +4,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { User } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
 
 export const ClusterAdmins = () => {
@@ -164,7 +164,7 @@ export const ClusterAdmins = () => {
           <hr />
 
           <p>There are {users.length} users with admin access</p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={usersData}
             initialState={{

@@ -6,7 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import StatusBar from "./OrderForm/StatusBar";
-import HipPageHeader from "../../Shared/Layout/HipPageHeader";
+import HipTitle from "../../Shared/Layout/HipTitle";
 
 export const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
@@ -113,7 +113,7 @@ export const UpdateChartStrings: React.FC = () => {
     <div>
       {order && (
         <div>
-          <HipPageHeader
+          <HipTitle
             title={`Order ${order.id}: ${order.name}`}
             subtitle="Update Chart Strings"
           />

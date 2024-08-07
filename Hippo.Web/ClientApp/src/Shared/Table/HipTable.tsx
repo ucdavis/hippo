@@ -21,8 +21,8 @@ import type {
 } from "@tanstack/react-table";
 import { Button, PaginationItem, PaginationLink } from "reactstrap";
 import innerText from "react-innertext";
-import { arrayToCsv, startDownload } from "../util/ExportHelpers";
-import { isStringArray } from "../util/TypeChecks";
+import { arrayToCsv, startDownload } from "../../util/ExportHelpers";
+import { isStringArray } from "../../util/TypeChecks";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
@@ -50,7 +50,7 @@ interface Props<T extends object> {
   disableFilter?: boolean;
 }
 
-export const ReactTable = <T extends object>({
+export const HipTable = <T extends object>({
   columns,
   data,
   initialState,

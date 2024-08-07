@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { AccountModel } from "../../types";
 import { authenticatedFetch } from "../../util/api";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
@@ -172,7 +172,7 @@ export const ActiveAccounts = () => {
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)
           </p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={accountsData}
             initialState={{

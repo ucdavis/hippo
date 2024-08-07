@@ -7,7 +7,10 @@ import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { OrderStatus } from "../../types/status";
 import StatusBar from "./OrderForm/StatusBar";
-import HipPageHeader from "../../Shared/Layout/HipPageHeader";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -145,26 +148,35 @@ export const CreateOrder: React.FC = () => {
   }
 
   if (!order) {
-    return <div>Loading... {productId}</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="New Order" subtitle="Create" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   return (
-    <div className="row col-md-12">
-      <HipPageHeader title={`New Order`} subtitle="Create" />
-      <StatusBar
-        status={order.status}
-        animated={notification.pending}
-        showInProgress={true}
-      />
-      <OrderForm
-        orderProp={order}
-        isDetailsPage={false}
-        isAdmin={isClusterAdmin}
-        cluster={cluster}
-        onlyChartStrings={false}
-        onSubmit={submitOrder}
-      />
-      {notification.pending && <div>Saving...</div>}
-    </div>
+    <HipMainWrapper>
+      <HipTitle title={`New Order`} subtitle="Create" />
+      <HipBody>
+        <StatusBar
+          status={order.status}
+          animated={notification.pending}
+          showInProgress={true}
+        />
+        <OrderForm
+          orderProp={order}
+          isDetailsPage={false}
+          isAdmin={isClusterAdmin}
+          cluster={cluster}
+          onlyChartStrings={false}
+          onSubmit={submitOrder}
+        />
+        {notification.pending && <div>Saving...</div>}
+      </HipBody>
+    </HipMainWrapper>
   );
 };

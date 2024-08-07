@@ -4,7 +4,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import ObjectTree from "../../Shared/ObjectTree";
@@ -197,7 +197,7 @@ export const Groups = () => {
       <div className="row justify-content-center">
         <div className="col-md-12">
           <p>There are {groups.length} groups</p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={groupsData}
             initialState={{

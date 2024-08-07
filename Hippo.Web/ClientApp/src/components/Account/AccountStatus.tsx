@@ -3,6 +3,9 @@ import AppContext from "../../Shared/AppContext";
 import { useParams } from "react-router-dom";
 import { SplitCamelCase } from "../../util/StringHelpers";
 import { RequestStatus } from "../../types";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
 
 export const AccountStatus = () => {
   const [context] = useContext(AppContext);
@@ -12,12 +15,12 @@ export const AccountStatus = () => {
   );
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-12">
-        <h3>
-          Welcome,{" "}
-          <span className="status-color">{context.user.detail.firstName}</span>
-        </h3>
+    <HipMainWrapper>
+      <HipTitle
+        title={`Welcome, ${context.user.detail.firstName}`}
+        subtitle="Account Status"
+      />
+      <HipBody>
         {!!request ? (
           <p>
             Your account request for{" "}
@@ -49,7 +52,7 @@ export const AccountStatus = () => {
             <span className="status-color">{cluster}</span>.
           </p>
         )}
-      </div>
-    </div>
+      </HipBody>
+    </HipMainWrapper>
   );
 };

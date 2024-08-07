@@ -1,6 +1,6 @@
 import React from "react";
 
-interface HipPageHeaderProps {
+interface HipTitleProps {
   title: string;
   subtitle?: string;
   buttons?: React.ReactNode;
@@ -12,13 +12,9 @@ interface HipPageHeaderProps {
  * @param subtitle optional, `<h4>`
  * @param buttons optional, adds to the right side of the header
  */
-const HipPageHeader: React.FC<HipPageHeaderProps> = ({
-  title,
-  subtitle,
-  buttons,
-}) => {
+const HipTitle: React.FC<HipTitleProps> = ({ title, subtitle, buttons }) => {
   return (
-    <div className="hip-header row justify-content-between align-items-end">
+    <div className="hip-title row justify-content-between align-items-end">
       <div className="col-md-4">
         {subtitle && <h4 className="page-subtitle">{subtitle}</h4>}
         <h2 className="page-title">{title}</h2>
@@ -30,4 +26,4 @@ const HipPageHeader: React.FC<HipPageHeaderProps> = ({
   );
 };
 
-export default HipPageHeader;
+export default HipTitle;

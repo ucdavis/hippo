@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { ProductModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
@@ -9,6 +9,10 @@ import { ShowFor } from "../../Shared/ShowFor";
 import { usePromiseNotification } from "../../util/Notifications";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 const defaultProduct: ProductModel = {
   id: 0,
@@ -431,35 +435,42 @@ export const Products = () => {
   ];
 
   if (products === undefined) {
+    // RH TODO: suspense/error boundaries
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Products" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     return (
-      <div>
-        <ShowFor roles={["ClusterAdmin"]}>
-          <div className="row justify-content-center">
-            <div className="col-md-12">
-              <button className="btn btn-primary" onClick={handleCreate}>
-                {" "}
-                Add Product{" "}
-              </button>{" "}
-              <Link className="btn btn-primary" to={`/${cluster}/order/create`}>
-                {" "}
-                Adhoc Order{" "}
-              </Link>{" "}
-            </div>
-          </div>
-        </ShowFor>
-        <hr />
-        <div className="row justify-content-center">
-          <div className="col-md-12">
-            <ReactTable columns={columns} data={products} />
-          </div>
-        </div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle
+          title="Products"
+          buttons={
+            <ShowFor roles={["ClusterAdmin"]}>
+              <>
+                <button className="btn btn-primary" onClick={handleCreate}>
+                  {" "}
+                  Add Product{" "}
+                </button>{" "}
+                <Link
+                  className="btn btn-primary"
+                  to={`/${cluster}/order/create`}
+                >
+                  {" "}
+                  Adhoc Order{" "}
+                </Link>{" "}
+              </>
+            </ShowFor>
+          }
+        />
+        <HipBody>
+          <HipTable columns={columns} data={products} />
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };
