@@ -7,6 +7,7 @@ import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { OrderStatus } from "../../types/status";
 import StatusBar from "./OrderForm/StatusBar";
+import HipPageHeader from "../../Shared/Layout/HipPageHeader";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -149,7 +150,7 @@ export const CreateOrder: React.FC = () => {
 
   return (
     <div className="row col-md-12">
-      <h2>Create Order</h2>
+      <HipPageHeader title={`New Order`} pageName="Create" />
       <StatusBar
         status={order.status}
         animated={notification.pending}

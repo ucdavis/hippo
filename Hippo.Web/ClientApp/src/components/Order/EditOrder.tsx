@@ -6,6 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import StatusBar from "./OrderForm/StatusBar";
+import HipPageHeader from "../../Shared/Layout/HipPageHeader";
 
 export const EditOrder: React.FC = () => {
   const { cluster, orderId } = useParams();
@@ -113,7 +114,10 @@ export const EditOrder: React.FC = () => {
     <div>
       {order && (
         <div>
-          <h2>Edit Order{order.name ? `: ${order.name}` : ""}</h2>
+          <HipPageHeader
+            title={`Order ${order.id}: ${order.name}`}
+            pageName="Edit"
+          />
           <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
