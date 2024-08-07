@@ -419,7 +419,7 @@ export const Details = () => {
       <div className="row justify-content-center">
         <div className="col-md-12">
           <div className="row justify-content-between align-items-end">
-            <div className="col">
+            <div className="col-md-4">
               <h1>Order Details: Id {order.id}</h1>
               <h3 className="mb-0;">
                 PI: {order.piUser?.name} ({order.piUser?.email})
@@ -433,7 +433,7 @@ export const Details = () => {
                   </h3>
                 )}
             </div>
-            <div className="col text-end">
+            <div className="col-md-8 text-end">
               <ShowFor
                 condition={
                   order.piUser?.id === user.detail.id &&
