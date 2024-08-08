@@ -198,6 +198,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                   maxLength={50}
                 />
+              </Row>
+              <Row>
                 <OrderFormField
                   name="unitPrice"
                   label="Unit Price"
@@ -207,8 +209,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   deps={"total"}
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
-              </Row>
-              <Row>
                 <OrderFormField
                   name="installmentType"
                   label="Installment Type"
