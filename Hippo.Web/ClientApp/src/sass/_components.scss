@@ -277,6 +277,7 @@ hr {
 .hip-form {
   h2 {
     margin-bottom: 0;
+    border-bottom: 2px solid transparentize($primary-color, 0.8);
   }
 
   .hip-form-group {
