@@ -274,12 +274,14 @@ hr {
   opacity: 1;
 }
 
-.hip-form {
+.hip-body {
   h2 {
     margin-bottom: 0;
     border-bottom: 2px solid transparentize($primary-color, 0.8);
   }
+}
 
+.hip-form {
   .hip-form-group {
     label,
     .form-label {
