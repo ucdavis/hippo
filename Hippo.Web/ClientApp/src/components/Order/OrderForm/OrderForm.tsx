@@ -300,6 +300,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
               </ShowFor>
               <Row>
                 <OrderFormField
+                  size="md"
                   name="adjustment"
                   label="Adjustment"
                   canEditConditions={adminCanEditLimitedStatuses}
@@ -308,6 +309,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   deps={"total"}
                 />
                 <OrderFormField
+                  size="md"
                   name="adjustmentReason"
                   label="Adjustment Reason"
                   canEditConditions={adminCanEditLimitedStatuses}
