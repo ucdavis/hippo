@@ -156,6 +156,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 <Row>
                   <OrderFormField
                     name="PILookup"
+                    size="lg"
                     label="Order for Sponsor (email or kerb)"
                     onBlur={(e) => {
                       lookupPI(e.target.value);
@@ -168,13 +169,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 </Row>
               )}
               <h2>Product Information</h2>
-              <Row
-                className={
-                  adminCanEditLimitedStatuses
-                    ? "row-cols-2" //
-                    : "row-cols-5"
-                }
-              >
+              <Row>
                 <OrderFormField
                   name="productName"
                   label="Product Name"
@@ -213,7 +208,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
               </Row>
-              <Row className="row-cols-5">
+              <Row>
                 <OrderFormField
                   name="installmentType"
                   label="Installment Type"
@@ -239,7 +234,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
               </Row>
               <br />
               <h2>Order Information</h2>
-              <Row className="row-cols-5">
+              <Row>
                 <OrderFormField
                   name="name"
                   label="Name"
@@ -275,8 +270,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
               </Row>
-              <Row className="row-cols-2">
+              <Row>
                 <OrderFormField
+                  size="md"
                   name="notes"
                   label="Notes"
                   type="textarea"
@@ -285,6 +281,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 />
                 {isAdmin && (
                   <OrderFormField // TODO: line up in grid
+                    size="md"
                     name="adminNotes"
                     label="Admin Notes"
                     type="textarea"

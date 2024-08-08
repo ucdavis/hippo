@@ -22,6 +22,7 @@ export type HipFormFieldOptions<T> = FormFieldCommonProps<T> & {
   error?: FieldError;
   name: FieldPath<T>;
   size?: "sm" | "md" | "lg";
+  colSize?: number;
   feedback?: React.ReactNode;
 };
 

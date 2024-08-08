@@ -10,6 +10,7 @@ type OrderFormFieldProps = HipFormFieldOptions<OrderModel> & {
 
 const OrderFormField: React.FC<OrderFormFieldProps> = ({
   canEditConditions,
+  size,
   ...props
 }) => {
   const {
@@ -23,6 +24,7 @@ const OrderFormField: React.FC<OrderFormFieldProps> = ({
       error={errors[props.name]}
       readOnly={!canEditConditions}
       disabled={!canEditConditions}
+      size={size ?? canEditConditions ? "md" : "sm"}
       {...props}
     />
   );

@@ -12,6 +12,7 @@ import ChartStringValidation from "./ChartStringValidation";
 
 import OrderFormField from "./OrderForm/OrderFormField";
 import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
+import HipDumbTable from "../../Shared/Table/HipDumbTable";
 
 declare const window: Window &
   typeof globalThis & {
@@ -162,7 +163,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup>
+    <>
       <h2>Billing Info</h2>
       {notification && (
         <div>
@@ -178,7 +179,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           </Card>
         </div>
       )}
-      <table className="table table-bordered table-striped">
+      <HipDumbTable>
         <thead>
           <tr>
             <th>Chart String</th>
@@ -193,6 +194,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
               <tr key={field.id}>
                 <td width={"40%"}>
                   <HipFormField
+                    size="lg"
                     key={`chartString-${field.id}`}
                     register={register}
                     label=""
@@ -208,6 +210,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                 </td>
                 <td width={"10%;"}>
                   <HipFormField
+                    size="lg"
                     key={`percentage-${field.id}`}
                     register={register}
                     label=""
@@ -277,7 +280,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
             </td>
           </tr>
         </tfoot>
-      </table>
+      </HipDumbTable>
 
       {!readOnly && (
         <HipButton
@@ -289,7 +292,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           <FontAwesomeIcon icon={faPlus} /> Add Billing
         </HipButton>
       )}
-    </HipFormGroup>
+    </>
   );
 };
 

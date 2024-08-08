@@ -30,6 +30,7 @@ const HipFormField = <T extends Record<string, any>>({
   autoComplete,
   children,
   size,
+  colSize,
   disabled, // select out disabled and don't pass it to register or it will set the value to undefined
   ...options
 }: HipFormFieldProps<T>) => {
@@ -58,7 +59,7 @@ const HipFormField = <T extends Record<string, any>>({
   });
 
   return (
-    <HipFormGroup>
+    <HipFormGroup size={size} colSize={colSize}>
       {label && (
         <Label for={`field-${name}`}>
           {label}

@@ -38,15 +38,14 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup size="lg">
-      <Label for="metaData" tag="h2">
-        Metadata
-      </Label>
-      {fields.map((field, index) => {
-        return (
-          <Row key={field.id}>
-            <Col>
+    <>
+      <h2>Metadata</h2>
+      <HipFormGroup size="lg">
+        {fields.map((field, index) => {
+          return (
+            <Row key={field.id}>
               <HipFormField
+                size="lg"
                 key={`name-${field.id}`}
                 register={register}
                 label="Name"
@@ -57,9 +56,8 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                 readOnly={readOnly}
                 maxLength={128}
               />
-            </Col>
-            <Col>
               <HipFormField
+                size="lg"
                 key={`value-${field.id}`}
                 register={register}
                 label="Value"
@@ -69,9 +67,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                 readOnly={readOnly}
                 maxLength={450}
               />
-            </Col>
-            {!readOnly && (
-              <Col md={1}>
+              {!readOnly && (
                 <HipButton
                   title="Remove Metadata"
                   aria-label="Remove Metadata"
@@ -81,17 +77,17 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </HipButton>
-              </Col>
-            )}
-          </Row>
-        );
-      })}
+              )}
+            </Row>
+          );
+        })}
+      </HipFormGroup>
       {!readOnly && (
         <HipButton color="primary" onClick={addMetaData} size="sm">
           <FontAwesomeIcon icon={faPlus} /> Add Metadata
         </HipButton>
       )}
-    </HipFormGroup>
+    </>
   );
 };
 
