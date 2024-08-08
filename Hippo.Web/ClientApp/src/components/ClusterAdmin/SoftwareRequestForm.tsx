@@ -6,6 +6,10 @@ import { ClusterNames } from "../../constants";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { SearchPerson } from "../../Shared/SearchPerson";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipButton from "../../Shared/HipButton";
 
 const defaultSoftwareRequestModel = {
   clusterName: "",
@@ -60,12 +64,12 @@ export const SoftwareRequestForm = () => {
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-12">
-        <h3>
-          Welcome,{" "}
-          <span className="status-color">{context.user.detail.firstName}</span>
-        </h3>
+    <HipMainWrapper>
+      <HipTitle
+        title={`Welcome, ${context.user.detail.firstName}`}
+        subtitle="Software Request"
+      />
+      <HipBody>
         <p>
           Please enter the following details to request a custom installation of
           software...
@@ -193,17 +197,13 @@ export const SoftwareRequestForm = () => {
           />
         </div>
         <br />
-        <button
-          disabled={notification.pending}
-          onClick={handleSubmit}
-          className="btn btn-primary"
-        >
+        <HipButton disabled={notification.pending} onClick={handleSubmit}>
           Submit
-        </button>
+        </HipButton>
         <div>
           <p className="form-helper"></p>
         </div>
-      </div>
-    </div>
+      </HipBody>
+    </HipMainWrapper>
   );
 };

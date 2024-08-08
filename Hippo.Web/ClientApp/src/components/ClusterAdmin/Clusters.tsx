@@ -4,13 +4,17 @@ import { ClusterModel, AccessType } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 import { AccessTypes } from "../../constants";
 import AppContext from "../../Shared/AppContext";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Button } from "reactstrap";
+import HipButton from "../../Shared/HipButton";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipTableActionButton from "../../Shared/Table/HipTableActionButton";
 
 const defaultCluster: ClusterModel = {
   id: 0,
@@ -422,55 +426,48 @@ export const Clusters = () => {
       header: "Action",
       cell: (props) => (
         <>
-          <button
+          <HipButton
             disabled={notification.pending}
             onClick={() => handleDetails(props.row.original.id)}
             className="btn btn-primary"
           >
             Details
-          </button>
-          {" | "}
-          <button
+          </HipButton>
+          <HipButton
             disabled={notification.pending}
             onClick={() => handleEdit(props.row.original.id)}
             className="btn btn-primary"
           >
             Edit
-          </button>
-          {" | "}
-          <button
+          </HipButton>
+          <HipButton
             disabled={notification.pending}
             onClick={() => handleRemove(props.row.original.id)}
             className="btn btn-danger"
           >
             Remove
-          </button>
+          </HipButton>
         </>
       ),
     }),
   ];
 
   return (
-    <>
-      <div className="row justify-content-center">
-        <div className="col-md-12">
-          <div className="data-table-prolog float-end">
-            <Button color="link" onClick={handleCreate}>
-              Create New Cluster
-            </Button>
-          </div>
-        </div>
-        <div className="col-md-12">
-          <ReactTable
-            columns={columns}
-            data={context.clusters}
-            initialState={{
-              sorting: [{ id: "Name", desc: false }],
-            }}
-            disableExport
-          />
-        </div>
-      </div>
-    </>
+    <HipMainWrapper>
+      <HipTitle title="Clusters" subtitle="Admin" />
+      <HipBody>
+        <HipTableActionButton onClick={handleCreate}>
+          Create New Cluster
+        </HipTableActionButton>
+        <HipTable
+          columns={columns}
+          data={context.clusters}
+          initialState={{
+            sorting: [{ id: "Name", desc: false }],
+          }}
+          disableExport
+        />
+      </HipBody>
+    </HipMainWrapper>
   );
 };

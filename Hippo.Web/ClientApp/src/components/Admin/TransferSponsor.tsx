@@ -4,6 +4,7 @@ import { AccountModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
+import HipButton from "../../Shared/HipButton";
 
 interface Props {
   account: AccountModel;
@@ -105,12 +106,8 @@ export const TransferSponsor = (props: Props) => {
     }
   };
   return (
-    <button
-      disabled={props.disabled === true}
-      onClick={transfer}
-      className="btn btn-primary"
-    >
+    <HipButton disabled={props.disabled === true} onClick={transfer}>
       Transfer
-    </button>
+    </HipButton>
   );
 };

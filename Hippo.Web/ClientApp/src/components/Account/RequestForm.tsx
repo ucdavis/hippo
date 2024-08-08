@@ -13,6 +13,10 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { GroupLookup } from "../Group/GroupLookup";
 import SshKeyInput from "../../Shared/SshKeyInput";
 import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipButton from "../../Shared/HipButton";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
@@ -94,12 +98,12 @@ export const RequestForm = () => {
   }, [clusterName, context.accounts, context.openRequests, navigate]);
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-12">
-        <h3>
-          Welcome,{" "}
-          <span className="status-color">{context.user.detail.firstName}</span>
-        </h3>
+    <HipMainWrapper>
+      <HipTitle
+        title={`Welcome, ${context.user.detail.firstName}`}
+        subtitle="Request Form"
+      />
+      <HipBody>
         <p>
           You don't seem to have an account on this cluster yet. If you'd like
           access, please answer the&nbsp;questions&nbsp;below
@@ -165,13 +169,12 @@ export const RequestForm = () => {
             </div>
           )}
         <br />
-        <button
+        <HipButton
           disabled={notification.pending || !request.accessTypes.length}
           onClick={handleSubmit}
-          className="btn btn-primary"
         >
           Submit
-        </button>
+        </HipButton>
         {cluster.accessTypes.includes("SshKey") && (
           <div>
             <br />
@@ -205,7 +208,7 @@ export const RequestForm = () => {
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </HipBody>
+    </HipMainWrapper>
   );
 };

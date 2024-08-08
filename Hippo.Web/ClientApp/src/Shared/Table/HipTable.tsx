@@ -21,8 +21,8 @@ import type {
 } from "@tanstack/react-table";
 import { Button, PaginationItem, PaginationLink } from "reactstrap";
 import innerText from "react-innertext";
-import { arrayToCsv, startDownload } from "../util/ExportHelpers";
-import { isStringArray } from "../util/TypeChecks";
+import { arrayToCsv, startDownload } from "../../util/ExportHelpers";
+import { isStringArray } from "../../util/TypeChecks";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
@@ -50,7 +50,7 @@ interface Props<T extends object> {
   disableFilter?: boolean;
 }
 
-export const ReactTable = <T extends object>({
+export const HipTable = <T extends object>({
   columns,
   data,
   initialState,
@@ -273,6 +273,7 @@ export const ReactTable = <T extends object>({
                 | Go to page:{" "}
                 <input
                   className="form-control d-inline"
+                  name="pageIndex"
                   type="number"
                   defaultValue={pageIndex + 1}
                   onChange={(e) => {
@@ -290,6 +291,7 @@ export const ReactTable = <T extends object>({
             <PaginationLink>
               <select
                 className="form-control"
+                name="pageSize"
                 value={pageSize}
                 onChange={(e) => {
                   setDefaultPageSize(Number(e.target.value));
@@ -344,6 +346,7 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
     <div>
       <input
         className="form-control"
+        id={column.id}
         type="number"
         min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
         max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
@@ -359,6 +362,7 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
       />
       <input
         className="form-control"
+        id={column.id}
         type="number"
         min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
         max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
@@ -376,6 +380,7 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
   ) : filterVariant === "select" ? (
     <select
       className="form-select"
+      id={column.id}
       onChange={(e) => column.setFilterValue(e.target.value)}
       value={columnFilterValue?.toString()}
     >
@@ -391,10 +396,12 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
     <>
       <input
         className="form-control"
+        id={column.id}
         type="text"
         value={(columnFilterValue ?? "") as string}
         onChange={(e) => column.setFilterValue(e.target.value)}
         placeholder={"Search..."}
+        autoComplete="none"
       />
     </>
   );

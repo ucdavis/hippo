@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HistoryModel } from "../../types";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { convertToPacificTime } from "../../util/DateHelper";
 import { createColumnHelper } from "@tanstack/react-table";
 import { authenticatedFetch } from "../../util/api";
@@ -99,11 +99,11 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
           Back to Order Details
         </HipButton>
       )}
-      <ReactTable
+      <HipTable
         columns={historyColumns}
         data={histories}
-        disablePagination={true} // since we are only showing past 5 actions
-        disableFilter={true}
+        disablePagination={numberOfRows <= 5} // since we are only showing past 5 actions
+        disableFilter={numberOfRows <= 5}
         initialState={{
           sorting: [
             {

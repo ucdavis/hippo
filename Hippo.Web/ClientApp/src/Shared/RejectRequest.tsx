@@ -5,6 +5,7 @@ import { authenticatedFetch, parseBadRequest } from "../util/api";
 import { usePromiseNotification } from "../util/Notifications";
 import { useConfirmationDialog } from "./ConfirmationDialog";
 import { notEmptyOrFalsey } from "../util/ValueChecks";
+import HipButton from "./HipButton";
 
 interface Props {
   request: RequestModel;
@@ -75,13 +76,13 @@ export const RejectRequest = (props: Props) => {
     }
   };
   return (
-    <button
+    <HipButton
       id="rejectButton"
       disabled={props.disabled === true}
       onClick={reject}
-      className="btn btn-danger"
+      color="danger"
     >
       Reject
-    </button>
+    </HipButton>
   );
 };

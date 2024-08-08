@@ -6,7 +6,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { convertToPacificTime } from "../../util/DateHelper";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import HipButton from "../../Shared/HipButton";
 
 interface PaymentTableProps {
@@ -113,7 +113,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
           Back to Order Details
         </HipButton>
       )}
-      <ReactTable
+      <HipTable
         columns={paymentColumns}
         data={payments}
         disablePagination={numberOfRows <= 10} // pagination defaults to showing 10 rows per page, if we are guaranteed to show less than that, don't paginate

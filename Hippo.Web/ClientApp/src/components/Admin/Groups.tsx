@@ -4,12 +4,17 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import ObjectTree from "../../Shared/ObjectTree";
 import GroupDetails from "../Group/GroupDetails";
 import { createColumnHelper } from "@tanstack/react-table";
+import HipButton from "../../Shared/HipButton";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const Groups = () => {
   // get all accounts that need approval and list them
@@ -165,20 +170,18 @@ export const Groups = () => {
       header: "Action",
       cell: (props) => (
         <>
-          <button
+          <HipButton
             disabled={notification.pending}
             onClick={() => handleEdit(props.row.original)}
-            className="btn btn-primary"
           >
             {editing === props.row.original.id ? "Updating..." : "Edit"}
-          </button>{" "}
-          <button
+          </HipButton>{" "}
+          <HipButton
             disabled={notification.pending}
             onClick={() => handleDetails(props.row.original)}
-            className="btn btn-primary"
           >
             {viewing === props.row.original.id ? "Viewing..." : "Details"}
-          </button>
+          </HipButton>
         </>
       ),
     }),
@@ -188,24 +191,28 @@ export const Groups = () => {
 
   if (groups === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Groups" subtitle="Admin" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">
+      <HipMainWrapper>
+        <HipTitle title="Groups" subtitle="Admin" />
+        <HipBody>
           <p>There are {groups.length} groups</p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={groupsData}
             initialState={{
               sorting: [{ id: "Group", desc: false }],
             }}
           />
-        </div>
-      </div>
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };

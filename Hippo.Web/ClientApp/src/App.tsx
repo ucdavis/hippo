@@ -30,12 +30,9 @@ import { SoftwareRequestForm } from "./components/ClusterAdmin/SoftwareRequestFo
 import NotFound from "./NotFound";
 import { OrderHistories } from "./components/Order/OrderHistories";
 import { OrderPayments } from "./components/Order/OrderPayments";
+import NotAuthorized from "./Shared/LoadingAndErrors/NotAuthorized";
 
 declare var Hippo: AppContextShape;
-
-const Restricted = () => (
-  <div>Sorry, you don't have access to see this page</div>
-);
 
 const App = () => {
   const [context, setContext] = useState<AppContextShape>(Hippo);
@@ -66,7 +63,7 @@ const App = () => {
             <Route
               path="/:cluster/approve"
               element={
-                <ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}>
+                <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
                   <Requests />
                 </ShowFor>
               }
@@ -74,7 +71,7 @@ const App = () => {
             <Route
               path="/:cluster/activeaccounts"
               element={
-                <ShowFor roles={["GroupAdmin"]} alternative={<Restricted />}>
+                <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
                   <ActiveAccounts />
                 </ShowFor>
               }
@@ -82,7 +79,10 @@ const App = () => {
             <Route
               path="/:cluster/admin/groups"
               element={
-                <ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}>
+                <ShowFor
+                  roles={["ClusterAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
                   <Groups />
                 </ShowFor>
               }
@@ -90,7 +90,10 @@ const App = () => {
             <Route
               path="/:cluster/admin/clusteradmins"
               element={
-                <ShowFor roles={["ClusterAdmin"]} alternative={<Restricted />}>
+                <ShowFor
+                  roles={["ClusterAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
                   <ClusterAdmins />
                 </ShowFor>
               }
@@ -98,7 +101,7 @@ const App = () => {
             <Route
               path="/clusteradmin/clusters"
               element={
-                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
                   <AdminClusters />
                 </ShowFor>
               }
@@ -106,7 +109,7 @@ const App = () => {
             <Route
               path="/:cluster/admin/financialdetails"
               element={
-                <ShowFor roles={["System"]} alternative={<Restricted />}>
+                <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
                   <FinancialDetail />
                 </ShowFor>
               }
@@ -116,7 +119,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <Products />
                 </ShowFor>
@@ -127,7 +130,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <Orders />
                 </ShowFor>
@@ -138,7 +141,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <Details />
                 </ShowFor>
@@ -149,7 +152,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <OrderHistories />
                 </ShowFor>
@@ -160,7 +163,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <OrderPayments />
                 </ShowFor>
@@ -171,7 +174,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <EditOrder />
                 </ShowFor>
@@ -182,7 +185,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <UpdateChartStrings />
                 </ShowFor>
@@ -193,7 +196,7 @@ const App = () => {
               element={
                 <ShowFor
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<Restricted />}
+                  alternative={<NotAuthorized />}
                 >
                   <CreateOrder />
                 </ShowFor>

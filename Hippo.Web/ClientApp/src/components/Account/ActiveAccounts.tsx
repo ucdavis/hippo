@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { AccountModel, AccountTagsModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
-import { ReactTable } from "../../Shared/ReactTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
@@ -10,6 +9,12 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import SearchTags from "../../Shared/SearchTags";
 import ObjectTree from "../../Shared/ObjectTree";
 import { usePromiseNotification } from "../../util/Notifications";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import { HipTable } from "../../Shared/Table/HipTable";
+import HipButton from "../../Shared/HipButton";
 
 export const ActiveAccounts = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -184,7 +189,7 @@ export const ActiveAccounts = () => {
       ),
       meta: {
         exportFn: (account) =>
-          account.memberOfGroups.map((g) => g.displayName).join(", "),
+          account.memberOfGroups.map((g) => g.displayName)?.join(", "),
       },
     }),
     columnHelper.accessor("name", {
@@ -203,7 +208,7 @@ export const ActiveAccounts = () => {
         header: "Updated On",
       },
     ),
-    columnHelper.accessor((row) => row.tags.join(", "), {
+    columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),
     columnHelper.display({
@@ -211,19 +216,13 @@ export const ActiveAccounts = () => {
       header: "Action",
       cell: (props) => (
         <>
-          <button
-            onClick={() => handleDetails(props.row.original)}
-            className="btn btn-primary"
-          >
+          <HipButton onClick={() => handleDetails(props.row.original)}>
             {viewing?.id === props.row.original.id ? "Viewing..." : "Details"}
-          </button>{" "}
+          </HipButton>{" "}
           |{" "}
-          <button
-            onClick={() => handleEditTags(props.row.original)}
-            className="btn btn-primary"
-          >
+          <HipButton onClick={() => handleEditTags(props.row.original)}>
             {editing?.id === props.row.original.id ? "Editing..." : "Edit Tags"}
-          </button>{" "}
+          </HipButton>{" "}
         </>
       ),
     }),
@@ -247,9 +246,12 @@ export const ActiveAccounts = () => {
 
   if (accounts === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Active Accounts" subtitle="Admin" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     const groupCount = new Set(
@@ -260,13 +262,14 @@ export const ActiveAccounts = () => {
         .map((g) => g.name),
     ).size;
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">
+      <HipMainWrapper>
+        <HipTitle title="Active Accounts" subtitle="Admin" />
+        <HipBody>
           <p>
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)
           </p>
-          <ReactTable
+          <HipTable
             columns={columns}
             data={accountsData}
             initialState={{
@@ -276,8 +279,8 @@ export const ActiveAccounts = () => {
               ],
             }}
           />
-        </div>
-      </div>
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };

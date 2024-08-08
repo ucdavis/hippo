@@ -3,13 +3,18 @@ import { OrderListModel } from "../../types";
 import { Link, useParams } from "react-router-dom";
 import { authenticatedFetch } from "../../util/api";
 
-import { ReactTable } from "../../Shared/ReactTable";
+import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
 import { convertToPacificDate } from "../../util/DateHelper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
   const { cluster, orderType } = useParams();
+  const isAdminOrders = orderType === "adminorders";
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -105,7 +110,7 @@ export const Orders = () => {
 
   columns.push(id);
   columns.push(status);
-  if (orderType === "adminorders") {
+  if (isAdminOrders) {
     columns.push(sponsorName);
   }
   columns.push(name);
@@ -116,32 +121,35 @@ export const Orders = () => {
   columns.push(createdOn);
   columns.push(actions);
 
+  // RH TODO: handle loading/error states
   if (orders === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Orders" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     return (
-      <div>
-        <div className="row justify-content-center">
-          <div className="col-md-12">
-            <ReactTable
-              columns={columns}
-              data={orders}
-              initialState={{
-                sorting: [
-                  {
-                    id: "createdOn",
-                    desc: true,
-                  },
-                ],
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title={isAdminOrders ? "Admin Orders" : "My Orders"} />
+        <HipBody>
+          <HipTable
+            columns={columns}
+            data={orders}
+            initialState={{
+              sorting: [
+                {
+                  id: "createdOn",
+                  desc: true,
+                },
+              ],
+            }}
+          />
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };

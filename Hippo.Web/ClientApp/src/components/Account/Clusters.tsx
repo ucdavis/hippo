@@ -2,31 +2,31 @@ import { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
 import { ShowFor } from "../../Shared/ShowFor";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipBody from "../../Shared/Layout/HipBody";
 
 export const Clusters = () => {
   const [{ clusters }] = useContext(AppContext);
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-12">
-        <nav className="simple-nav">
-          <ShowFor roles={["System"]}>
-            <NavLink
-              id="adminClusters"
-              className="nav-item nav-link"
-              to={`/clusteradmin/clusters`}
-              style={({ isActive }) => (isActive ? { fontWeight: "bold" } : {})}
-            >
-              Manage Clusters
-            </NavLink>
-          </ShowFor>
-        </nav>
-        <h3>Clusters at Hippo</h3>
-        <p>
-          HiPPO supports multiple clusters. Please select a cluster to view.
-        </p>
-        <hr />
-
+    <HipMainWrapper>
+      <nav className="simple-nav">
+        <ShowFor roles={["System"]}>
+          <NavLink
+            id="adminClusters"
+            className="nav-item nav-link"
+            to={`/clusteradmin/clusters`}
+            style={({ isActive }) => (isActive ? { fontWeight: "bold" } : {})}
+          >
+            Manage Clusters
+          </NavLink>
+        </ShowFor>
+      </nav>
+      <HipTitle title="Clusters at Hippo" />
+      <p>HiPPO supports multiple clusters. Please select a cluster to view.</p>
+      <hr />
+      <HipBody>
         <ul className="list-clusters">
           {clusters.map((cluster) => (
             <li key={cluster.name}>
@@ -58,7 +58,7 @@ export const Clusters = () => {
             </li>
           ))}
         </ul>
-      </div>
-    </div>
+      </HipBody>
+    </HipMainWrapper>
   );
 };
