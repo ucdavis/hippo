@@ -100,7 +100,12 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
         </tbody>
       </HipDumbTable>
       {!readOnly && (
-        <HipButton color="primary" onClick={addMetaData} size="sm">
+        <HipButton
+          className="mb-5"
+          color="primary"
+          onClick={addMetaData}
+          size="sm"
+        >
           <FontAwesomeIcon icon={faPlus} /> Add Metadata
         </HipButton>
       )}
