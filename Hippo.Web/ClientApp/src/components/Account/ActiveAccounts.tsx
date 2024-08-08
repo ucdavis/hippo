@@ -14,6 +14,7 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import { HipTable } from "../../Shared/Table/HipTable";
+import HipButton from "../../Shared/HipButton";
 
 export const ActiveAccounts = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -215,19 +216,13 @@ export const ActiveAccounts = () => {
       header: "Action",
       cell: (props) => (
         <>
-          <button
-            onClick={() => handleDetails(props.row.original)}
-            className="btn btn-primary"
-          >
+          <HipButton onClick={() => handleDetails(props.row.original)}>
             {viewing?.id === props.row.original.id ? "Viewing..." : "Details"}
-          </button>{" "}
+          </HipButton>{" "}
           |{" "}
-          <button
-            onClick={() => handleEditTags(props.row.original)}
-            className="btn btn-primary"
-          >
+          <HipButton onClick={() => handleEditTags(props.row.original)}>
             {editing?.id === props.row.original.id ? "Editing..." : "Edit Tags"}
-          </button>{" "}
+          </HipButton>{" "}
         </>
       ),
     }),
