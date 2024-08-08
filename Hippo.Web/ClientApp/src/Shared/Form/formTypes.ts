@@ -24,6 +24,7 @@ export type HipFormFieldOptions<T> = FormFieldCommonProps<T> & {
   size?: "sm" | "md" | "lg";
   colSize?: number;
   feedback?: React.ReactNode;
+  hideLabel?: boolean;
 };
 
 export type HipFormFieldProps<T> = HipFormFieldOptions<T> & {

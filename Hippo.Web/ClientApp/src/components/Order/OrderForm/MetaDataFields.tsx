@@ -59,7 +59,8 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                     size="lg"
                     key={`name-${field.id}`}
                     register={register}
-                    label=""
+                    label="Metadata Name"
+                    hideLabel={true}
                     error={errors.metaData?.[index]?.name}
                     name={`metaData.${index}.name`}
                     required={true}
@@ -73,7 +74,8 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                     size="lg"
                     key={`value-${field.id}`}
                     register={register}
-                    label=""
+                    label="Metadata Value"
+                    hideLabel={true}
                     error={errors.metaData?.[index]?.value}
                     name={`metaData.${index}.value`}
                     required={true}
@@ -82,13 +84,13 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                   />
                 </td>
                 {!readOnly && (
-                  <td>
+                  <td width={"15%"}>
                     <HipButton
                       title="Remove Metadata"
                       aria-label="Remove Metadata"
-                      color="danger"
                       onClick={() => removeMetaData(index)}
                       size="sm"
+                      outline={true}
                     >
                       <FontAwesomeIcon icon={faTrash} />
                     </HipButton>

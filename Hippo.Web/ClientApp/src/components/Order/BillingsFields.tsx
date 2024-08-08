@@ -234,7 +234,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     <HipButton
                       title="Lookup ChartString"
                       aria-label="Lookup ChartString"
-                      color="primary"
                       outline={true}
                       size="sm"
                       onClick={() => lookupChartString(index)}
@@ -244,7 +243,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     <HipButton
                       title="Remove ChartString"
                       aria-label="Remove ChartString"
-                      color="danger"
                       outline={true}
                       size="sm"
                       onClick={() => removeBilling(index)}

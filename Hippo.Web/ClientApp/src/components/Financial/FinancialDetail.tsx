@@ -130,7 +130,7 @@ export const FinancialDetail = () => {
 
   return (
     <HipMainWrapper>
-      <HipTitle title="Financial Detail" />
+      <HipTitle title="Details" subtitle="Financial" />
       <HipBody>
         <form onSubmit={handleSubmit}>
           <div>

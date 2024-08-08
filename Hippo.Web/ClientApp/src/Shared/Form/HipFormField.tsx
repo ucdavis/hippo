@@ -19,6 +19,7 @@ const HipFormField = <T extends Record<string, any>>({
   type = "text",
   name,
   label,
+  hideLabel = false,
   inputPrepend,
   inputAppend,
   required = false,
@@ -60,7 +61,7 @@ const HipFormField = <T extends Record<string, any>>({
 
   return (
     <HipFormGroup size={size} colSize={colSize}>
-      {label && (
+      {label && !hideLabel && (
         <Label for={`field-${name}`}>
           {label}
           {required && !readOnly && <span> *</span>}
