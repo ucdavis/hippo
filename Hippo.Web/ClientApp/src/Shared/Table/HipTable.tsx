@@ -23,6 +23,7 @@ import { Button, PaginationItem, PaginationLink } from "reactstrap";
 import innerText from "react-innertext";
 import { arrayToCsv, startDownload } from "../../util/ExportHelpers";
 import { isStringArray } from "../../util/TypeChecks";
+import HipDumbTable from "./HipDumbTable";
 
 declare module "@tanstack/react-table" {
   // allows us to define custom properties for our columns
@@ -169,7 +170,7 @@ export const HipTable = <T extends object>({
           </Button>
         </div>
       )}
-      <table className="table table-bordered table-striped">
+      <HipDumbTable>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <React.Fragment key={headerGroup.id}>
@@ -244,7 +245,7 @@ export const HipTable = <T extends object>({
             </tr>
           ))}
         </tbody>
-      </table>
+      </HipDumbTable>
       {!disablePagination && (
         <div className="pagination justify-content-center">
           <PaginationItem

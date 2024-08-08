@@ -198,7 +198,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     size="lg"
                     key={`chartString-${field.id}`}
                     register={register}
-                    label=""
+                    label="Chart String"
+                    hideLabel={true}
                     error={errors.billings?.[index]?.chartString}
                     name={`billings.${index}.chartString`}
                     autoComplete="nope"
@@ -214,7 +215,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     size="lg"
                     key={`percentage-${field.id}`}
                     register={register}
-                    label=""
+                    label="Percentage"
+                    hideLabel={true}
                     error={errors.billings?.[index]?.percentage}
                     name={`billings.${index}.percentage`}
                     readOnly={readOnly}
@@ -252,7 +254,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                   </td>
                 )}
                 {readOnly && (
-                  <td width={"5%"}>
+                  <td width={"15%"}>
                     <a
                       href={`https://finjector.ucdavis.edu/details/${field?.chartString}`}
                       target="_blank"
@@ -268,8 +270,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         </tbody>
         <tfoot>
           <tr>
-            <td>Percent Total</td>
-            <td colSpan={3}>
+            <td width={"40%"}>Percent Total</td>
+            <td width={"10%"}>
               <OrderFormField
                 name="percentTotal"
                 label=""
@@ -277,6 +279,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                 type="number"
               />
             </td>
+            <td />
+            <td width={"15%"} />
           </tr>
         </tfoot>
       </HipDumbTable>

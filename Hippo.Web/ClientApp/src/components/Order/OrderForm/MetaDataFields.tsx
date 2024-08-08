@@ -45,16 +45,16 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
       <HipDumbTable>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Value</th>
-            {!readOnly && <th></th>}
+            <th style={{ width: "45%" }}>Name</th>
+            <th style={{ width: "45%" }}>Value</th>
+            {!readOnly && <th style={{ width: "10%" }}></th>}
           </tr>
         </thead>
         <tbody>
           {fields.map((field, index) => {
             return (
               <tr key={field.id}>
-                <td>
+                <td width={"45%"}>
                   <HipFormField
                     size="lg"
                     key={`name-${field.id}`}
@@ -69,7 +69,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                     maxLength={128}
                   />
                 </td>
-                <td>
+                <td width={"45%"}>
                   <HipFormField
                     size="lg"
                     key={`value-${field.id}`}
@@ -84,7 +84,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
                   />
                 </td>
                 {!readOnly && (
-                  <td width={"15%"}>
+                  <td width={"10%"}>
                     <HipButton
                       title="Remove Metadata"
                       aria-label="Remove Metadata"
