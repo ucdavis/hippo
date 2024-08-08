@@ -5,6 +5,7 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
+import StatusBar from "./OrderForm/StatusBar";
 
 export const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
@@ -112,10 +113,10 @@ export const UpdateChartStrings: React.FC = () => {
       {order && (
         <div>
           <h2>Update Chart Strings</h2>
-
+          <StatusBar status={order.status} />
           <OrderForm
             orderProp={order}
-            readOnly={false}
+            isDetailsPage={false}
             isAdmin={isClusterAdmin}
             cluster={cluster}
             onlyChartStrings={true}

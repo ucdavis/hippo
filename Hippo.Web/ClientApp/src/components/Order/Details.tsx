@@ -16,9 +16,29 @@ import {
   convertToPacificTime,
 } from "../../util/DateHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import {
+  faDollarSign,
+  faXmark,
+  faCheck,
+  faPencil,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { HistoryTable } from "./HistoryTable";
 import { PaymentTable } from "./PaymentTable";
+import {
+  OrderStatus,
+  adminCanApproveStatuses,
+  adminCanRejectStatuses,
+  adminEditableStatuses,
+  canUpdateChartStringsStatuses,
+  sponsorCanAddPaymentStatuses,
+  sponsorCanApproveStatuses,
+  sponsorCanCancelStatuses,
+  sponsorEditableStatuses,
+} from "../../types/status";
+import StatusBar from "./OrderForm/StatusBar";
+import HipFormField from "../../Shared/Form/HipFormField";
+import OrderPaymentDetails from "./OrderForm/OrderPaymentDetails";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -31,8 +51,7 @@ export const Details = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [updateStatusModel, setUpdateStatusModel] =
     useState<UpdateOrderStatusModel | null>(null);
-  const adminEditableStatuses = ["Processing", "Active"];
-  const sponsorEditableStatuses = ["Created"];
+  const [hoverAction, setHoverAction] = useState<OrderStatus | null>(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -73,22 +92,28 @@ export const Details = () => {
     if (order) {
       // switch statement for data.status
       switch (order.status) {
-        case "Created":
+        case OrderStatus.Draft:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Submitted",
+            newStatus: OrderStatus.Created,
           });
           break;
-        case "Submitted":
+        case OrderStatus.Created:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Processing",
+            newStatus: OrderStatus.Submitted,
           });
           break;
-        case "Processing":
+        case OrderStatus.Submitted:
           setUpdateStatusModel({
             currentStatus: order.status,
-            newStatus: "Active",
+            newStatus: OrderStatus.Processing,
+          });
+          break;
+        case OrderStatus.Processing:
+          setUpdateStatusModel({
+            currentStatus: order.status,
+            newStatus: OrderStatus.Active,
           });
           break;
         default:
@@ -150,7 +175,7 @@ export const Details = () => {
     id: 0,
     amount: 0,
     entryAmount: "",
-    status: "",
+    status: OrderStatus.Draft,
     createdOn: "",
   });
 
@@ -218,7 +243,7 @@ export const Details = () => {
       setEditPaymentModel({
         id: 0,
         amount: 0,
-        status: "",
+        status: OrderStatus.Draft,
         createdOn: "",
         entryAmount: "",
       });
@@ -336,7 +361,7 @@ export const Details = () => {
     message: (setReturn) => {
       return (
         <div className="row justify-content-center">
-          <div className="col-md-8">
+          <div className="col-md-12">
             <div className="form-group">
               <label className="form-label">Reason</label>
 
@@ -392,194 +417,168 @@ export const Details = () => {
   return (
     <div>
       <div className="row justify-content-center">
-        <div className="col-md-8">
-          <h1>Order Details: Id {order.id}</h1>
-          <h2>
-            {order.piUser?.name} ({order.piUser?.email})
-          </h2>
-          {order.piUser?.id === user.detail.id &&
-            order.status === "Created" &&
-            order.billings.length <= 0 && (
-              <h3 style={{ backgroundColor: "#ffcccc" }}>
-                This order needs to have billing information added before it can
-                be submitted (Approve).
+        <div className="col-md-12">
+          <div className="row justify-content-between align-items-end">
+            <div className="col-md-4">
+              <h1>Order Details: Id {order.id}</h1>
+              <h3 className="mb-0;">
+                PI: {order.piUser?.name} ({order.piUser?.email})
               </h3>
-            )}
-          <ShowFor
-            roles={["System", "ClusterAdmin"]}
-            condition={adminEditableStatuses.includes(order.status)}
-          >
-            <Link
-              className="btn btn-primary"
-              to={`/${cluster}/order/edit/${order.id}`}
-            >
-              Edit Order
-            </Link>{" "}
-          </ShowFor>
-          <ShowFor
-            condition={
-              order.piUser?.id === user.detail.id &&
-              sponsorEditableStatuses.includes(order.status)
-            }
-          >
-            <Link
-              className="btn btn-primary"
-              to={`/${cluster}/order/edit/${order.id}`}
-            >
-              Edit Order
-            </Link>{" "}
-          </ShowFor>
-          <ShowFor
-            roles={["System", "ClusterAdmin"]}
-            condition={["Submitted", "Processing"].includes(order.status)}
-          >
-            <button className="btn btn-primary" onClick={updateStatus}>
-              {" "}
-              Approve Order
-            </button>{" "}
-          </ShowFor>
-          {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
-          <ShowFor
-            condition={
-              order.piUser?.id === user.detail.id &&
-              order.status === "Created" &&
-              order.billings.length > 0
-            }
-          >
-            <button className="btn btn-primary" onClick={updateStatus}>
-              {" "}
-              Approve Order
-            </button>{" "}
-          </ShowFor>
-          <ShowFor
-            condition={
-              order.piUser?.id === user.detail.id &&
-              ["Created", "Submitted"].includes(order.status)
-            }
-          >
-            <button className="btn btn-primary" onClick={cancelOrder}>
-              {" "}
-              Cancel Order
-            </button>{" "}
-          </ShowFor>
-          <ShowFor
-            roles={["System", "ClusterAdmin"]}
-            condition={["Submitted", "Processing"].includes(order.status)}
-          >
-            <button className="btn btn-primary" onClick={rejectOrder}>
-              {" "}
-              Reject Order
-            </button>{" "}
-          </ShowFor>
-          <ShowFor
-            condition={
-              !["Cancelled", "Rejected", "Completed"].includes(order.status)
-            }
-          >
-            <Link
-              className="btn btn-primary"
-              to={`/${cluster}/order/updatechartstrings/${order.id}`}
-            >
-              Update Chart Strings
-            </Link>{" "}
-          </ShowFor>
-          <ShowFor
-            condition={
-              order.status === "Active" &&
-              order.piUser?.id === user.detail.id &&
-              balanceRemaining > 0
-            }
-          >
-            <button className="btn btn-primary" onClick={makePayment}>
-              {" "}
-              Onetime Payment
-            </button>
-          </ShowFor>
+              {order.piUser?.id === user.detail.id &&
+                sponsorCanApproveStatuses.includes(order.status) &&
+                order.billings.length <= 0 && (
+                  <h3 style={{ backgroundColor: "#ffcccc" }}>
+                    This order needs to have billing information added before it
+                    can be submitted (Approve).
+                  </h3>
+                )}
+            </div>
+            <div className="col-md-8 text-end">
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorCanCancelStatuses.includes(order.status)
+                }
+              >
+                <button
+                  className="btn btn-danger"
+                  onClick={cancelOrder}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Cancelled)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faXmark} />
+                  Cancel Order
+                </button>{" "}
+              </ShowFor>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminCanRejectStatuses.includes(order.status)}
+              >
+                <button
+                  className="btn btn-danger"
+                  onClick={rejectOrder}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Rejected)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faXmark} />
+                  Reject Order
+                </button>{" "}
+              </ShowFor>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminEditableStatuses.includes(order.status)}
+              >
+                <Link
+                  className="btn btn-primary"
+                  to={`/${cluster}/order/edit/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faPencil} />
+                  Edit Order
+                </Link>{" "}
+              </ShowFor>
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorEditableStatuses.includes(order.status)
+                }
+              >
+                <Link
+                  className="btn btn-primary"
+                  to={`/${cluster}/order/edit/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faPencil} />
+                  Edit Order
+                </Link>{" "}
+              </ShowFor>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminCanApproveStatuses.includes(order.status)}
+              >
+                <button
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() =>
+                    setHoverAction(
+                      order.status === OrderStatus.Submitted
+                        ? OrderStatus.Processing
+                        : OrderStatus.Active,
+                    )
+                  }
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Approve Order
+                </button>{" "}
+              </ShowFor>
+              {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
+              <ShowFor
+                condition={canUpdateChartStringsStatuses.includes(order.status)}
+              >
+                <Link
+                  className="btn btn-secondary"
+                  to={`/${cluster}/order/updatechartstrings/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faDollarSign} />
+                  Update Chart Strings
+                </Link>{" "}
+              </ShowFor>
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorCanApproveStatuses.includes(order.status) &&
+                  order.billings.length > 0
+                }
+              >
+                <button
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Submitted)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Approve Order
+                </button>{" "}
+              </ShowFor>
+              <ShowFor
+                condition={
+                  sponsorCanAddPaymentStatuses.includes(order.status) &&
+                  order.piUser?.id === user.detail.id &&
+                  balanceRemaining > 0
+                }
+              >
+                <button className="btn btn-primary" onClick={makePayment}>
+                  {" "}
+                  <FontAwesomeIcon icon={faPlus} />
+                  Onetime Payment
+                </button>
+              </ShowFor>
+            </div>
+          </div>
+
+          <StatusBar status={order.status} showOnHover={hoverAction} />
           <OrderForm
             orderProp={order}
-            readOnly={true}
+            isDetailsPage={true}
             isAdmin={isClusterAdmin}
             cluster={cluster}
             onlyChartStrings={false}
             onSubmit={submitOrder}
           />
-
           <HistoryTable
             numberOfRows={5}
             showLinkToAll={true}
             historyCount={order.historyCount}
           />
-          <h2>Payments</h2>
-          <div className="form-group">
-            <label htmlFor="fieldBalanceRemaining">Balance Remaining</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <span className="input-group-text" style={{ height: "38px" }}>
-                  <FontAwesomeIcon icon={faDollarSign} />
-                </span>
-              </div>
-              <input
-                className="form-control"
-                id="fieldBalanceRemaining"
-                value={order.balanceRemaining}
-                readOnly
-              />
-            </div>
-          </div>
-          {balancePending !== 0 && (
-            <div className="form-group">
-              <label htmlFor="fieldBalancePending">
-                Total Pending Payments
-              </label>
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text" style={{ height: "38px" }}>
-                    <FontAwesomeIcon icon={faDollarSign} />
-                  </span>
-                </div>
-                <input
-                  className="form-control"
-                  id="fieldBalancePending"
-                  value={balancePending.toFixed(2)}
-                  readOnly
-                />
-              </div>
-            </div>
-          )}
-          {order.nextPaymentDate && (
-            <>
-              <div className="form-group">
-                <label htmlFor="fieldNextPaymentDate">Next Payment Date</label>
-                <input
-                  className="form-control"
-                  id="fieldNextPaymentDate"
-                  value={convertToPacificDate(order.nextPaymentDate)}
-                  readOnly
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="fieldNextPaymentDate">
-                  Next Payment Amount
-                </label>
-                <div className="input-group">
-                  <div className="input-group-prepend">
-                    <span
-                      className="input-group-text"
-                      style={{ height: "38px" }}
-                    >
-                      <FontAwesomeIcon icon={faDollarSign} />
-                    </span>
-                  </div>
-                  <input
-                    className="form-control"
-                    id="fieldNextPaymentDate"
-                    value={order.nextPaymentAmount}
-                    readOnly
-                  />
-                </div>
-              </div>
-            </>
-          )}
+          <OrderPaymentDetails
+            balancePending={order.balancePending}
+            balanceRemaining={order.balanceRemaining}
+            nextPaymentDate={order.nextPaymentDate}
+            nextPaymentAmount={order.nextPaymentAmount}
+          />
           <PaymentTable
             numberOfRows={5}
             showLinkToAll={true}

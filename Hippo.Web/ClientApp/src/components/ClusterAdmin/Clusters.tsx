@@ -453,14 +453,14 @@ export const Clusters = () => {
   return (
     <>
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <div className="data-table-prolog float-end">
             <Button color="link" onClick={handleCreate}>
               Create New Cluster
             </Button>
           </div>
         </div>
-        <div className="col-md-8">
+        <div className="col-md-12">
           <ReactTable
             columns={columns}
             data={context.clusters}

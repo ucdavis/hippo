@@ -27,7 +27,7 @@ export const Groups = () => {
       message: (setReturn) => {
         return (
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-12">
               <div className="form-group">
                 <label className="form-label">Display Name</label>
 
@@ -189,13 +189,13 @@ export const Groups = () => {
   if (groups === undefined) {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
+        <div className="col-md-12">Loading...</div>
       </div>
     );
   } else {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <p>There are {groups.length} groups</p>
           <ReactTable
             columns={columns}

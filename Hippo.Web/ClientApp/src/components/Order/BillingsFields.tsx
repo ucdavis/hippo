@@ -3,7 +3,7 @@ import { Card, CardBody, CardTitle } from "reactstrap";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
-import FormField from "../../Shared/Form/HipFormField";
+import HipFormField from "../../Shared/Form/HipFormField";
 import HipButton from "../../Shared/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -162,12 +162,12 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup wrap={false}>
+    <HipFormGroup>
       <h2>Billing Info</h2>
-      <h2>Chart Strings</h2>
       {notification && (
         <div>
           <br />
+          {/* TODO: make prettier */}
           <Card className="card-danger">
             <CardTitle>
               <h3>The Chart String has been updated!</h3>
@@ -192,7 +192,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
             return (
               <tr key={field.id}>
                 <td width={"40%"}>
-                  <FormField
+                  <HipFormField
                     key={`chartString-${field.id}`}
                     register={register}
                     label=""
@@ -207,7 +207,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                   />
                 </td>
                 <td width={"10%;"}>
-                  <FormField
+                  <HipFormField
                     key={`percentage-${field.id}`}
                     register={register}
                     label=""
@@ -271,8 +271,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
               <OrderFormField
                 name="percentTotal"
                 label=""
-                readOnly={true}
-                disabled={true}
+                canEditConditions={false} // can never edit
                 type="number"
               />
             </td>
@@ -281,8 +280,13 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       </table>
 
       {!readOnly && (
-        <HipButton outline={true} color="secondary" onClick={addBilling}>
-          <FontAwesomeIcon icon={faPlus} size="sm" /> Add Billing
+        <HipButton
+          outline={true}
+          color="primary"
+          size="sm"
+          onClick={addBilling}
+        >
+          <FontAwesomeIcon icon={faPlus} /> Add Billing
         </HipButton>
       )}
     </HipFormGroup>

@@ -36,7 +36,7 @@ export const ActiveAccounts = () => {
         const account = accounts.find((a) => a.id === viewing.id);
         return (
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-12">
               <div className="form-group">
                 <label className="form-label">Name</label>
                 <input
@@ -248,7 +248,7 @@ export const ActiveAccounts = () => {
   if (accounts === undefined) {
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">Loading...</div>
+        <div className="col-md-12">Loading...</div>
       </div>
     );
   } else {
@@ -261,7 +261,7 @@ export const ActiveAccounts = () => {
     ).size;
     return (
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-12">
           <p>
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)

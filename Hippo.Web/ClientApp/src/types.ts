@@ -1,4 +1,5 @@
 import { ClusterNames } from "./constants";
+import { OrderStatus } from "./types/status";
 
 export interface User {
   id: number;
@@ -33,8 +34,15 @@ export interface RequestModelCommon {
   requesterEmail: string;
   requesterName: string;
   groupModel: GroupModel;
-  status: "PendingApproval" | "Rejected" | "Processing" | "Completed";
+  status: RequestStatus;
   cluster: string;
+}
+
+export enum RequestStatus {
+  PendingApproval = "PendingApproval",
+  Rejected = "Rejected",
+  Processing = "Processing",
+  Completed = "Completed",
 }
 
 // action-specific RequestModel fields defined here...
@@ -273,7 +281,7 @@ export interface PaymentModel {
   id: number;
   amount: number;
   entryAmount: string;
-  status: string;
+  status: OrderStatus;
   createdOn: string;
   createdBy?: User;
   //Possibly have the chart string(s) and percent here
@@ -282,7 +290,7 @@ export interface HistoryModel {
   id: number;
   actedBy: User;
   action: string;
-  status: string;
+  status: OrderStatus;
   details: string;
   actedDate: string;
 }
@@ -296,7 +304,7 @@ export interface OrderModel extends Partial<ProductBase> {
   quantity: number;
   adjustment: number;
   adjustmentReason: string;
-  status: string;
+  status: OrderStatus;
   createdOn: string;
   externalReference: string;
   adminNotes: string;
@@ -323,7 +331,7 @@ export interface OrderListModel {
   units: string;
   quantity: number;
   createdOn: string;
-  status: string;
+  status: OrderStatus;
   total: string;
   balanceRemaining: string;
   sponsorName: string;
@@ -338,6 +346,6 @@ export interface OrderTotalCalculationModel extends Partial<OrderModel> {
 }
 
 export interface UpdateOrderStatusModel {
-  currentStatus: string;
-  newStatus: string;
+  currentStatus: OrderStatus;
+  newStatus: OrderStatus;
 }

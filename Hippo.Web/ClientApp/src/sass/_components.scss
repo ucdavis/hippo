@@ -1,13 +1,13 @@
 .btn {
   white-space: nowrap;
   display: inline-block;
-  padding: 8px 24px;
+  padding: 6px 18px;
   box-shadow:
     0 -3px 0 rgba(0, 0, 0, 0.15) inset,
     0 1px 3px rgba(0, 0, 0, 0.08);
   background: $primary-color;
   border-radius: 2px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   letter-spacing: 0.025em;
   color: #fff !important;
   text-decoration: none;
@@ -26,6 +26,9 @@
       0 3px 6px rgba(0, 0, 0, 0.08);
     background-color: lighten($primary-color, 5);
     text-decoration: none;
+  }
+  .svg-inline--fa {
+    margin-right: 8px;
   }
 }
 .btn-primary {
@@ -46,56 +49,35 @@
     border-color: lighten($primary-color, 7);
   }
 }
-.btn-outline-disabled {
-  background-color: #fff;
-  border-color: $secondary-font;
-  color: $secondary-font;
-  &:hover {
-    background-color: #fff;
-    border-color: lighten($secondary-font, 7);
-    color: lighten($secondary-font, 7);
-  }
-}
-.btn-outline {
-  background-color: #fff;
-  border-color: $primary-color;
-  color: $primary-color;
-  &:hover {
-    background-color: #fff;
-    border-color: lighten($primary-color, 7);
-    color: lighten($primary-color, 7);
-  }
-}
-.btn-outline-danger {
-  background-color: #fff;
-  border-color: $merlot;
-  color: $merlot !important;
-  &:hover {
-    background-color: #fff;
-    border-color: lighten($merlot, 9);
-    color: lighten($merlot, 9);
-  }
-}
+
 .btn-secondary {
-  background-color: $california;
-  border-color: $california;
+  background-color: $delta;
+  border-color: $delta;
   color: #fff;
   &:hover {
-    background-color: lighten($california, 7);
-    border-color: lighten($california, 7);
+    background-color: lighten($delta, 7);
+    border-color: lighten($delta, 7);
+    color: #fff;
+  }
+  .table & {
+    font-size: 0.9rem;
+    color: $delta !important;
+    background-color: rgba(0, 0, 0, 0);
+    box-shadow: none;
+    padding: 1% 2%;
+    &:hover {
+      transform: none;
+      color: $delta;
+      background-color: transparentize($delta, 0.9);
+    }
+  }
+  &.btn:focus {
+    background-color: $delta;
+    border-color: $delta;
     color: #fff;
   }
 }
-.btn-sunflower {
-  background-color: #d5b804;
-  border-color: #d5b804;
-  color: #fff;
-  &:hover {
-    background-color: lighten(#d5b804, 7);
-    border-color: lighten(#d5b804, 7);
-    color: #fff;
-  }
-}
+
 .btn-danger {
   background-color: $merlot;
   border-color: $merlot;
@@ -117,9 +99,14 @@
       background-color: transparentize($merlot, 0.9);
     }
   }
+  &.btn:focus {
+    background-color: $merlot;
+    border-color: $merlot;
+    color: #fff;
+  }
 }
 .btn-sm {
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 .box-shadow {
   box-shadow: $box-shadow;
@@ -239,6 +226,7 @@ hr {
 }
 .group-card-admin {
   border-left: 2px solid $primary-color;
+  padding-left: 8px;
 }
 
 .group-info-baseline {
@@ -282,21 +270,60 @@ hr {
   text-align: center;
   border: 5px solid;
 }
+hr {
+  opacity: 1;
+}
 
 .hip-form {
-  &.wrap {
-    display: flex;
-    flex-wrap: wrap;
-    .hip-form-group {
-      flex-basis: 100%;
-      flex-grow: 1;
-      flex-shrink: 0;
-      &.read-only {
-        flex-basis: 50%;
+  h2 {
+    margin-bottom: 0;
+  }
+
+  .hip-form-group {
+    label {
+      font-size: 1rem;
+      color: $secondary-font;
+      margin-bottom: 0;
+      margin-top: 16px;
+    }
+    input,
+    .input-group-text,
+    .hip-form-field {
+      color: $primary-font;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    // for properly displaying prepend and append when input is readonly
+    .hip-input-group-plaintext {
+      display: inline-block;
+      .form-control-plaintext {
+        display: inline;
+        width: auto;
       }
     }
-    .no-wrap {
-      flex-basis: 100%;
-    }
+  }
+}
+.readonly-hip-form {
+  border-bottom: 1px solid $borders;
+  border-top: 1px solid $borders;
+}
+
+.hip-progress {
+  margin-bottom: 24px;
+  margin-top: 24px;
+  .progress {
+    height: 30px;
+    font-size: large;
+  }
+  .bg-primary {
+    background-color: transparentize($primary-color, 0.3) !important;
+    // color: $tertiary-font;
+  }
+  .bg-tertiary {
+    background-color: transparentize($tertiary-font, 0.8);
+    color: $tertiary-font;
+  }
+  .bg-secondary {
+    background-color: transparentize($primary-color, 0.8) !important;
   }
 }

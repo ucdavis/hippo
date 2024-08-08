@@ -1,5 +1,5 @@
-import React from "react";
-import { FormFeedback, Input, Label } from "reactstrap";
+import React, { useRef } from "react";
+import { FormFeedback, FormText, Input, Label } from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
 import { HipFormGroup } from "./HipFormGroup";
@@ -10,11 +10,12 @@ import { HipFormGroup } from "./HipFormGroup";
  * To display only as text, set `readOnly` to true. This will still register the field so it is included in the form state.
  * It will only display the value, not any children passed to it (like with `<select>` and `<options>`).
  *
- * 'hip-form-group' is added to the FormGroup, and 'read-only' is added if `readOnly` is true.
+ * 'hip-form-group' is added to the FormGroup
  */
 const HipFormField = <T extends Record<string, any>>({
   register,
   error,
+  feedback,
   type = "text",
   name,
   label,
@@ -28,6 +29,7 @@ const HipFormField = <T extends Record<string, any>>({
   readOnly = false,
   autoComplete,
   children,
+  size,
   disabled, // select out disabled and don't pass it to register or it will set the value to undefined
   ...options
 }: HipFormFieldProps<T>) => {
@@ -56,9 +58,9 @@ const HipFormField = <T extends Record<string, any>>({
   });
 
   return (
-    <HipFormGroup wrap={readOnly} readOnly={readOnly}>
+    <HipFormGroup>
       {label && (
-        <Label className={`hip-form-label`} for={`field-${name}`}>
+        <Label for={`field-${name}`}>
           {label}
           {required && !readOnly && <span> *</span>}
         </Label>
@@ -69,21 +71,22 @@ const HipFormField = <T extends Record<string, any>>({
         readOnly={readOnly}
       >
         <Input
-          className={`hip-form-field ${readOnly ? "read-only" : ""}`}
+          className={`hip-form-field`}
           innerRef={ref}
           id={`field-${name}`}
           name={autoComplete ? name : `field-${name}`} // less likely to autofill
-          type={type}
+          type={readOnly ? "text" : type}
+          tag={type === "textarea" ? "textarea" : undefined}
           invalid={!!error}
           readOnly={readOnly}
           plaintext={readOnly}
           disabled={disabled}
-          autoComplete={autoComplete ?? "new-password"}
           {...rest}
         >
           {!readOnly ? children : null}
         </Input>
-        {!!error && <FormFeedback>{error.message}</FormFeedback>}
+        {feedback && <FormText>{feedback}</FormText>}
+        {!!error && <FormFeedback valid={false}>{error.message}</FormFeedback>}
       </HipInputGroup>
     </HipFormGroup>
   );

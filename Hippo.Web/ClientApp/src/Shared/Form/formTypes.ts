@@ -16,12 +16,17 @@ type FormFieldCommonProps<T> = Omit<InputProps, "pattern"> &
     label: string;
     inputPrepend?: React.ReactNode;
     inputAppend?: React.ReactNode;
-    register?: UseFormRegister<T>;
   };
 
-export type HipFormFieldProps<T> = FormFieldCommonProps<T> & {
+export type HipFormFieldOptions<T> = FormFieldCommonProps<T> & {
   error?: FieldError;
   name: FieldPath<T>;
+  size?: "sm" | "md" | "lg";
+  feedback?: React.ReactNode;
+};
+
+export type HipFormFieldProps<T> = HipFormFieldOptions<T> & {
+  register: UseFormRegister<T>;
 };
 
 export type HipFormFieldArrayProps<T> = FormFieldCommonProps<T> & {
