@@ -85,7 +85,7 @@ const ObjectTree: React.FC<ObjectTreeProps> = ({ obj }) => {
         <Input
           type="switch"
           checked={allExpanded}
-          onClick={() => {
+          onChange={() => {
             setAllExpanded(!allExpanded);
           }}
         />

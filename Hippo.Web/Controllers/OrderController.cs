@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Hippo.Core.Domain.Product;
 using static Hippo.Core.Models.SlothModels.TransferViewModel;
+using Serilog;
+using Hippo.Email.Models;
 
 namespace Hippo.Web.Controllers
 {
@@ -21,14 +23,15 @@ namespace Hippo.Web.Controllers
         private readonly IAggieEnterpriseService _aggieEnterpriseService;
         private readonly IUserService _userService;
         private readonly IHistoryService _historyService;
+        private readonly INotificationService _notificationService;
 
-
-        public OrderController(AppDbContext dbContext, IAggieEnterpriseService aggieEnterpriseService, IUserService userService, IHistoryService historyService)
+        public OrderController(AppDbContext dbContext, IAggieEnterpriseService aggieEnterpriseService, IUserService userService, IHistoryService historyService, INotificationService notificationService)
         {
             _dbContext = dbContext;
             _aggieEnterpriseService = aggieEnterpriseService;
             _userService = userService;
             _historyService = historyService;
+            _notificationService = notificationService;
         }
 
 
@@ -219,6 +222,7 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("Invalid Installment Type Detected.");
             }
+            var result = new ProcessingResult();
 
             if (model.Id == 0)
             {
@@ -228,6 +232,7 @@ namespace Hippo.Web.Controllers
                     return BadRequest(processingResult.Message);
                 }
                 orderToReturn = processingResult.Order;
+                result = processingResult;
             }
             else
             {
@@ -238,12 +243,25 @@ namespace Hippo.Web.Controllers
                 }
 
                 orderToReturn = processingResult.Order;
-
+                result = processingResult;
             }
 
 
 
             await _dbContext.SaveChangesAsync();
+
+            if(result.NotificationMethod != null && orderToReturn != null)
+            {
+                switch (result.NotificationMethod)
+                {
+                    case "NotifyAdminOrderSubmitted":
+                        await NotifyAdminOrderSubmitted(orderToReturn);
+                        break;
+                    case "NotifySponsorOrderCreatedByAdmin":
+                        await NotifySponsorOrderCreatedByAdmin(orderToReturn);
+                        break;
+                }
+            }
 
 
             return Ok(orderToReturn);
@@ -334,6 +352,7 @@ namespace Hippo.Web.Controllers
                     existingOrder.Status = Order.Statuses.Submitted;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Submitted.");
+                    await NotifyAdminOrderSubmitted(existingOrder);
 
                     break;
                 case Order.Statuses.Submitted:
@@ -348,6 +367,7 @@ namespace Hippo.Web.Controllers
                     existingOrder.Status = Order.Statuses.Processing;
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Processing.");
+                    await NotifySponsorOrderStatusChange(existingOrder);
 
                     break;
                 case Order.Statuses.Processing:
@@ -389,6 +409,33 @@ namespace Hippo.Web.Controllers
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
 
+                    await NotifySponsorOrderStatusChange(existingOrder);
+
+                    break;
+                case Order.Statuses.Completed:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
+                    if (expectedStatus != Order.Statuses.Archived)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
+                    if(existingOrder.BalanceRemaining > 0)
+                    {
+                        return BadRequest("You cannot archive an order that has a balance remaining.");
+                    }
+                    if(existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
+                    {
+                        return BadRequest("Expiration date must be in the past to archive an order.");
+                    }
+                    existingOrder.Status = Order.Statuses.Archived;
+                    existingOrder.NextNotificationDate = null;
+
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Order Archived.");
+
+                    //TODO: Notify the sponsor that the order has been archived?
                     break;
                 default:
                     return BadRequest("You cannot change the status of an order in the current status.");
@@ -633,8 +680,96 @@ namespace Hippo.Web.Controllers
 
             rtValue.Success = true;
             rtValue.Order = order;
+
+
+            if(order.Status == Order.Statuses.Created)
+            {
+                rtValue.NotificationMethod = "NotifySponsorOrderCreatedByAdmin";
+            }
+            if(order.Status == Order.Statuses.Submitted)
+            {
+                rtValue.NotificationMethod = "NotifyAdminOrderSubmitted";
+            }
             
             return rtValue;
+        }
+
+        private async Task NotifyAdminOrderSubmitted(Order order)
+        {
+            try
+            {
+                var clusterAdmins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && p.Role.Name == Role.Codes.ClusterAdmin)).Select(a => a.Email).ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "New Order Submitted",
+                    Header = "A new order has been submitted.",
+                    Paragraphs = new List<string>
+                    {
+                        $"A new order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
+                    }
+                };
+
+                await _notificationService.OrderNotification(emailModel, order, clusterAdmins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderCreatedByAdmin(Order order)
+        {
+            try
+            {                
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "New Order Created",
+                    Header = "A new order has been created for you.",
+                    Paragraphs = new List<string>
+                    {
+                        "A new order has been created for you. Please enter the billing information and approve it for processing.",
+                        "If you believe this was done in error, please contact the cluster admins before canceleing it."
+                    }
+                };
+
+                await _notificationService.OrderNotification(emailModel, order, new string[] {order.PrincipalInvestigator.Email});
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderStatusChange(Order order)
+        {
+            try
+            {             
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Order Updated",
+                    Header = "Order Status has changed",
+                    Paragraphs = new List<string>(),
+                };
+
+                if(order.Status == Order.Statuses.Processing)
+                {
+                    emailModel.Paragraphs.Add("We have begun processing your order.");
+                }
+                if(order.Status == Order.Statuses.Active)
+                {
+                    emailModel.Paragraphs.Add("Your order has been activated. Automatic billing will commence. You may also make out of cycle payments on your order.");
+                }
+                if(order.Status == Order.Statuses.Rejected)
+                {
+                    emailModel.Paragraphs.Add("Your order has been rejected.");
+                }
+
+                await _notificationService.OrderNotification(emailModel, order, new string[] {order.PrincipalInvestigator.Email});
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
         }
 
         private async Task<ProcessingResult> UpdateExistingOrder(OrderPostModel model, bool isClusterOrSystemAdmin, User currentUser)
@@ -907,6 +1042,8 @@ namespace Hippo.Web.Controllers
             public string? Message { get; set; }
 
             public Order? Order { get; set; }
+
+            public string? NotificationMethod { get; set; }
         }
     }
 }

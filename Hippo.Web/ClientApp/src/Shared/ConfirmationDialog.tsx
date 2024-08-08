@@ -9,18 +9,20 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import { useModal } from "react-modal-hook";
 import { isBoolean, isFunction } from "../util/TypeChecks";
 
+type ButtonText = "Confirm" | "Cancel" | "OK";
+
 interface Props<T> {
   title: ReactNode;
   message:
     | ReactNode
     | ((setReturnValue: Dispatch<SetStateAction<T | undefined>>) => ReactNode);
   canConfirm?: boolean | ((returnValue: T) => boolean);
-  buttons?: ["Confirm" | "Cancel" | "OK"];
+  buttons?: ButtonText[];
 }
 
 export const useConfirmationDialog = <T extends any = undefined>(
   props: Props<T>,
-  dependencies: any[] = []
+  dependencies: any[] = [],
 ) => {
   const promiseRef = useRef<Promise<[boolean, T]>>();
   const resolveRef = useRef<(value: [boolean, T]) => void>();
@@ -61,8 +63,8 @@ export const useConfirmationDialog = <T extends any = undefined>(
                 props.canConfirm === undefined
                   ? false
                   : isBoolean(props.canConfirm)
-                  ? !props.canConfirm
-                  : !props.canConfirm(returnValue)
+                    ? !props.canConfirm
+                    : !props.canConfirm(returnValue)
               }
             >
               Confirm
@@ -82,7 +84,7 @@ export const useConfirmationDialog = <T extends any = undefined>(
         </ModalFooter>
       </Modal>
     ),
-    [...dependencies, returnValue, setReturnValue]
+    [...dependencies, returnValue, setReturnValue],
   );
 
   const getConfirmation = () => {

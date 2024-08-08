@@ -72,6 +72,12 @@ export interface AccountModel {
   updatedOn: string;
   accessTypes: AccessType[];
   data: PuppetUserRecord;
+  tags: string[];
+}
+
+export interface AccountTagsModel {
+  AccountId: number;
+  Tags: string[];
 }
 
 export interface AccountCreateModel {

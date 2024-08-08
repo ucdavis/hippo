@@ -47,6 +47,7 @@ namespace Hippo.Core.Data
         public virtual DbSet<Billing> Billings { get; set; }
         public virtual DbSet<OrderMetaData> MetaData { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
+        public virtual DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
