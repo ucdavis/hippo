@@ -189,7 +189,7 @@ export const ActiveAccounts = () => {
       ),
       meta: {
         exportFn: (account) =>
-          account.memberOfGroups.map((g) => g.displayName).join(", "),
+          account.memberOfGroups.map((g) => g.displayName)?.join(", "),
       },
     }),
     columnHelper.accessor("name", {
@@ -208,7 +208,7 @@ export const ActiveAccounts = () => {
         header: "Updated On",
       },
     ),
-    columnHelper.accessor((row) => row.tags.join(", "), {
+    columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),
     columnHelper.display({
