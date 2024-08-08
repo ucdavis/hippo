@@ -42,6 +42,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
       <Label for="metaData" tag="h2">
         Metadata
       </Label>
+      <br />
       {fields.map((field, index) => {
         return (
           <Row key={field.id}>
