@@ -454,7 +454,7 @@ export const Clusters = () => {
 
   return (
     <HipMainWrapper>
-      <HipTitle title="Clusters" subtitle="Cluster Admin" />
+      <HipTitle title="Clusters" subtitle="Admin" />
       <HipBody>
         <HipTableActionButton onClick={handleCreate}>
           Create New Cluster

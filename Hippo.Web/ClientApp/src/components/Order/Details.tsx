@@ -44,6 +44,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipButton from "../../Shared/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -416,7 +417,14 @@ export const Details = () => {
   };
 
   if (!order) {
-    return <div>Loading...</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="Order" subtitle="Details" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   return (

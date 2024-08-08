@@ -13,6 +13,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import HipButton from "../../Shared/HipButton";
 
 const defaultProduct: ProductModel = {
   id: 0,
@@ -416,18 +417,15 @@ export const Products = () => {
             Order
           </Link>{" "}
           <ShowFor roles={["ClusterAdmin"]}>
-            <button
-              onClick={() => handleEdit(row.original.id)}
-              className="btn btn-primary"
-            >
+            <HipButton onClick={() => handleEdit(row.original.id)}>
               Edit
-            </button>{" "}
-            <button
+            </HipButton>{" "}
+            <HipButton
               onClick={() => handleDelete(row.original.id)}
-              className="btn btn-danger"
+              color="danger"
             >
               Delete
-            </button>
+            </HipButton>
           </ShowFor>
         </div>
       ),
@@ -452,10 +450,10 @@ export const Products = () => {
           buttons={
             <ShowFor roles={["ClusterAdmin"]}>
               <>
-                <button className="btn btn-primary" onClick={handleCreate}>
+                <HipButton className="btn btn-primary" onClick={handleCreate}>
                   {" "}
                   Add Product{" "}
-                </button>{" "}
+                </HipButton>{" "}
                 <Link
                   className="btn btn-primary"
                   to={`/${cluster}/order/create`}

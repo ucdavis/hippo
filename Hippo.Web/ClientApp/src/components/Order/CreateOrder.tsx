@@ -143,8 +143,16 @@ export const CreateOrder: React.FC = () => {
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
+  // RH TODO: handle loading/error states
   if (isClusterAdmin === null) {
-    return <div>Loading...</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="New Order" subtitle="Create" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   if (!order) {

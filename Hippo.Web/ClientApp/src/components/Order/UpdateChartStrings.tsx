@@ -7,6 +7,9 @@ import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import StatusBar from "./OrderForm/StatusBar";
 import HipTitle from "../../Shared/Layout/HipTitle";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
@@ -101,34 +104,47 @@ export const UpdateChartStrings: React.FC = () => {
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
+  // RH TODO: handle loading/error states
   if (isClusterAdmin === null) {
-    return <div>Loading...</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="Order" subtitle="Update Chart Strings" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   if (!order) {
-    return <div>Loading... {orderId}</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="Order" subtitle="Update Chart Strings" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   return (
-    <div>
-      {order && (
-        <div>
-          <HipTitle
-            title={`Order ${order.id}: ${order.name}`}
-            subtitle="Update Chart Strings"
-          />
-          <StatusBar status={order.status} />
-          <OrderForm
-            orderProp={order}
-            isDetailsPage={false}
-            isAdmin={isClusterAdmin}
-            cluster={cluster}
-            onlyChartStrings={true}
-            onSubmit={submitOrder}
-          />
-          {notification.pending && <div>Saving...</div>}
-        </div>
-      )}
-    </div>
+    <HipMainWrapper>
+      <HipTitle
+        title={`Order ${order.id}: ${order.name}`}
+        subtitle="Update Chart Strings"
+      />
+      <HipBody>
+        <StatusBar status={order.status} />
+        <OrderForm
+          orderProp={order}
+          isDetailsPage={false}
+          isAdmin={isClusterAdmin}
+          cluster={cluster}
+          onlyChartStrings={true}
+          onSubmit={submitOrder}
+        />
+        {notification.pending && <div>Saving...</div>}
+      </HipBody>
+    </HipMainWrapper>
   );
 };

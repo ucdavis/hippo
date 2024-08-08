@@ -6,6 +6,11 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
+import HipButton from "../../Shared/HipButton";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 export const ClusterAdmins = () => {
   // get all accounts that need approval and list them
@@ -117,13 +122,13 @@ export const ClusterAdmins = () => {
       id: "actions",
       header: "Action",
       cell: (props) => (
-        <button
+        <HipButton
+          color="danger"
           disabled={notification.pending}
           onClick={() => handleRemove(props.row.original)}
-          className="btn btn-danger"
         >
           {adminRemoving === props.row.original.id ? "Removing..." : "Remove"}
-        </button>
+        </HipButton>
       ),
     }),
   ];
@@ -132,14 +137,21 @@ export const ClusterAdmins = () => {
 
   if (users === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Cluster Admins" subtitle="Admin" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">
+      <HipMainWrapper>
+        <HipTitle title="Cluster Admins" subtitle="Admin" />
+        <HipBody>
+          <p>There are {users.length} users with admin access</p>
+          <hr />
+          <h3>Add Admin</h3>
           <div className="form-group">
             <label className="form-label">Email or Kerberos</label>
 
@@ -154,16 +166,10 @@ export const ClusterAdmins = () => {
             ></input>
           </div>
           <br />
-          <button
-            disabled={notification.pending}
-            className="btn btn-primary"
-            onClick={handleSubmit}
-          >
+          <HipButton disabled={notification.pending} onClick={handleSubmit}>
             Add Admin
-          </button>
-          <hr />
-
-          <p>There are {users.length} users with admin access</p>
+          </HipButton>
+          <br />
           <HipTable
             columns={columns}
             data={usersData}
@@ -171,8 +177,8 @@ export const ClusterAdmins = () => {
               sorting: [{ id: "Name", desc: false }],
             }}
           />
-        </div>
-      </div>
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };

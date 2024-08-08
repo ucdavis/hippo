@@ -4,6 +4,11 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useParams } from "react-router-dom";
 import { usePromiseNotification } from "../../util/Notifications";
 import { Card, CardBody, CardTitle } from "reactstrap";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipButton from "../../Shared/HipButton";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 
 declare const window: Window &
   typeof globalThis & {
@@ -113,155 +118,159 @@ export const FinancialDetail = () => {
   };
 
   if (!financialDetail) {
-    return <div>Loading...</div>;
+    return (
+      <HipMainWrapper>
+        <HipTitle title="Financial Detail" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
+    );
   }
 
   return (
-    <div>
-      <h1>Financial Detail</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <div>Financial API Key: {financialDetail.maskedApiKey}</div>
-        </div>
-        <div className="form-group">
-          <label htmlFor="name">Update Financial API Key:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="financialSystemApiKey"
-            name="financialSystemApiKey"
-            value={financialDetail.financialSystemApiKey}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="financialSystemApiSource">API Source:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="financialSystemApiSource"
-            name="financialSystemApiSource"
-            value={financialDetail.financialSystemApiSource}
-            onChange={handleInputChange}
-            required
-            maxLength={50}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="autoApprove">Auto Approve:</label>
-          <input
-            type="checkbox"
-            id="autoApprove"
-            name="autoApprove"
-            checked={financialDetail.autoApprove}
-            onChange={(e) =>
-              setFinancialDetail((prevFinancialDetail) => ({
-                ...prevFinancialDetail,
-                autoApprove: e.target.checked,
-              }))
-            }
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="chartString">Chart String:</label>{" "}
-          {financialDetail.chartString && (
-            <a
-              href={`https://finjector.ucdavis.edu/Details/${financialDetail.chartString}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {financialDetail.chartString}
-            </a>
-          )}
-          <div className="input-group">
+    <HipMainWrapper>
+      <HipTitle title="Financial Detail" />
+      <HipBody>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <div>Financial API Key: {financialDetail.maskedApiKey}</div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="name">Update Financial API Key:</label>
             <input
               type="text"
               className="form-control"
-              id="chartString"
-              name="chartString"
-              value={financialDetail.chartString}
+              id="financialSystemApiKey"
+              name="financialSystemApiKey"
+              value={financialDetail.financialSystemApiKey}
               onChange={handleInputChange}
-              onBlur={(e) => {
-                validateChartString(e.target.value);
-              }}
-              required
-              maxLength={128}
             />
-            <button
-              className="btn btn-primary"
-              onClick={lookupChartString}
-              type="button"
-            >
-              <i className="fas fa-search"></i>
-            </button>
           </div>
-          {!financialDetail.isSlothValid && (
-            <div>
-              <br />
-              <Card className="card-danger">
-                <CardTitle>
-                  <h2>The Sloth settings are not valid!</h2>
-                </CardTitle>
-                <CardBody>
-                  <div>
-                    The Sloth settings are not valid. This could be the API
-                    Source Name is wrong, or it doesn't match the Financial API
-                    Key's team's settings.
-                  </div>
-                </CardBody>
-              </Card>
-            </div>
-          )}
-          {chartStringValidation && (
-            <div>
-              <br />
-              <Card
-                className={
-                  chartStringValidation.isValid ? "card-center" : "card-danger"
-                }
-              >
-                <CardTitle>
-                  <h3>Chart String Details:</h3>
-                </CardTitle>
-                <CardBody>
-                  <div>
-                    Is Valid: {chartStringValidation.isValid ? "Yes" : "No"}
-                  </div>
-                  <div>Description: {chartStringValidation.description}</div>
-                  {chartStringValidation.accountManager && (
-                    <div>
-                      <div>
-                        Account Manager: {chartStringValidation.accountManager}
-                      </div>
-                      <div>
-                        Account Manager Email:{" "}
-                        {chartStringValidation.accountManagerEmail}
-                      </div>
-                    </div>
-                  )}
-                  {chartStringValidation.message && (
-                    <div>Message: {chartStringValidation.message}</div>
-                  )}
 
-                  {chartStringValidation.warning && (
-                    <div>Warning: {chartStringValidation.warning}</div>
-                  )}
-                </CardBody>
-              </Card>
+          <div className="form-group">
+            <label htmlFor="financialSystemApiSource">API Source:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="financialSystemApiSource"
+              name="financialSystemApiSource"
+              value={financialDetail.financialSystemApiSource}
+              onChange={handleInputChange}
+              required
+              maxLength={50}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="autoApprove">Auto Approve:</label>
+            <input
+              type="checkbox"
+              id="autoApprove"
+              name="autoApprove"
+              checked={financialDetail.autoApprove}
+              onChange={(e) =>
+                setFinancialDetail((prevFinancialDetail) => ({
+                  ...prevFinancialDetail,
+                  autoApprove: e.target.checked,
+                }))
+              }
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="chartString">Chart String:</label>{" "}
+            {financialDetail.chartString && (
+              <a
+                href={`https://finjector.ucdavis.edu/Details/${financialDetail.chartString}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {financialDetail.chartString}
+              </a>
+            )}
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                id="chartString"
+                name="chartString"
+                value={financialDetail.chartString}
+                onChange={handleInputChange}
+                onBlur={(e) => {
+                  validateChartString(e.target.value);
+                }}
+                required
+                maxLength={128}
+              />
+              <HipButton onClick={lookupChartString}>
+                <i className="fas fa-search"></i>
+              </HipButton>
             </div>
-          )}
-        </div>
-        <br />
-        <button
-          className="btn btn-primary"
-          disabled={notification.pending}
-          type="submit"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
+            {!financialDetail.isSlothValid && (
+              <div>
+                <br />
+                <Card className="card-danger">
+                  <CardTitle>
+                    <h2>The Sloth settings are not valid!</h2>
+                  </CardTitle>
+                  <CardBody>
+                    <div>
+                      The Sloth settings are not valid. This could be the API
+                      Source Name is wrong, or it doesn't match the Financial
+                      API Key's team's settings.
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+            {chartStringValidation && (
+              <div>
+                <br />
+                <Card
+                  className={
+                    chartStringValidation.isValid
+                      ? "card-center"
+                      : "card-danger"
+                  }
+                >
+                  <CardTitle>
+                    <h3>Chart String Details:</h3>
+                  </CardTitle>
+                  <CardBody>
+                    <div>
+                      Is Valid: {chartStringValidation.isValid ? "Yes" : "No"}
+                    </div>
+                    <div>Description: {chartStringValidation.description}</div>
+                    {chartStringValidation.accountManager && (
+                      <div>
+                        <div>
+                          Account Manager:{" "}
+                          {chartStringValidation.accountManager}
+                        </div>
+                        <div>
+                          Account Manager Email:{" "}
+                          {chartStringValidation.accountManagerEmail}
+                        </div>
+                      </div>
+                    )}
+                    {chartStringValidation.message && (
+                      <div>Message: {chartStringValidation.message}</div>
+                    )}
+
+                    {chartStringValidation.warning && (
+                      <div>Warning: {chartStringValidation.warning}</div>
+                    )}
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+          </div>
+          <br />
+          <HipButton disabled={notification.pending} type="submit">
+            Submit
+          </HipButton>
+        </form>
+      </HipBody>
+    </HipMainWrapper>
   );
 };

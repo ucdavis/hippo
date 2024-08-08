@@ -8,6 +8,11 @@ import { GroupNameWithTooltip } from "../Group/GroupNameWithTooltip";
 import { getGroupModelString } from "../../util/StringHelpers";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import ObjectTree from "../../Shared/ObjectTree";
+import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
+import HipBody from "../../Shared/Layout/HipBody";
+import HipTitle from "../../Shared/Layout/HipTitle";
+import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import HipButton from "../../Shared/HipButton";
 
 export const ActiveAccounts = () => {
   const [accounts, setAccounts] = useState<AccountModel[]>();
@@ -125,12 +130,9 @@ export const ActiveAccounts = () => {
       id: "actions",
       header: "Action",
       cell: (props) => (
-        <button
-          onClick={() => handleDetails(props.row.original)}
-          className="btn btn-primary"
-        >
+        <HipButton onClick={() => handleDetails(props.row.original)}>
           {viewing === props.row.original.id ? "Viewing..." : "Details"}
-        </button>
+        </HipButton>
       ),
     }),
   ];
@@ -153,9 +155,12 @@ export const ActiveAccounts = () => {
 
   if (accounts === undefined) {
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">Loading...</div>
-      </div>
+      <HipMainWrapper>
+        <HipTitle title="Active Accounts" subtitle="Admin" />
+        <HipBody>
+          <HipLoading />
+        </HipBody>
+      </HipMainWrapper>
     );
   } else {
     const groupCount = new Set(
@@ -166,8 +171,9 @@ export const ActiveAccounts = () => {
         .map((g) => g.name),
     ).size;
     return (
-      <div className="row justify-content-center">
-        <div className="col-md-12">
+      <HipMainWrapper>
+        <HipTitle title="Active Accounts" subtitle="Admin" />
+        <HipBody>
           <p>
             You have {accounts.length} active account(s) in {groupCount}{" "}
             group(s)
@@ -182,8 +188,8 @@ export const ActiveAccounts = () => {
               ],
             }}
           />
-        </div>
-      </div>
+        </HipBody>
+      </HipMainWrapper>
     );
   }
 };
