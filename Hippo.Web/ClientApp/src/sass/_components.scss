@@ -283,6 +283,7 @@ hr {
 
 .hip-form {
   .hip-form-group {
+    position: relative; // so the form-feedback tooltip works correctly
     label,
     .form-label {
       font-size: 1rem;

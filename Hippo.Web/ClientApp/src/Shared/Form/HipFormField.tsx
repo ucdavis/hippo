@@ -1,5 +1,12 @@
 import React, { useRef } from "react";
-import { FormFeedback, FormText, Input, Label } from "reactstrap";
+import {
+  FormFeedback,
+  FormText,
+  Input,
+  Label,
+  Tooltip,
+  UncontrolledTooltip,
+} from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
 import { HipFormGroup } from "./HipFormGroup";
@@ -15,7 +22,9 @@ import { HipFormGroup } from "./HipFormGroup";
 const HipFormField = <T extends Record<string, any>>({
   register,
   error,
+  valid,
   feedback,
+  feedbackType = "text",
   type = "text",
   name,
   label,
@@ -80,6 +89,7 @@ const HipFormField = <T extends Record<string, any>>({
           type={readOnly ? "text" : type}
           tag={type === "textarea" ? "textarea" : undefined}
           invalid={!!error}
+          valid={valid}
           readOnly={readOnly}
           plaintext={readOnly}
           disabled={disabled}
@@ -88,7 +98,14 @@ const HipFormField = <T extends Record<string, any>>({
         >
           {!readOnly ? children : null}
         </Input>
-        {feedback && <FormText>{feedback}</FormText>}
+        {feedback &&
+          (feedbackType === "tooltip" ? (
+            <FormFeedback valid={true} tooltip={true}>
+              {feedback}
+            </FormFeedback>
+          ) : (
+            <FormText>{feedback}</FormText>
+          ))}
         {!!error && <FormFeedback valid={false}>{error.message}</FormFeedback>}
       </HipInputGroup>
     </HipFormGroup>
