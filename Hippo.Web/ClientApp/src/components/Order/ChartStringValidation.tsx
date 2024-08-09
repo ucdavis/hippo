@@ -1,7 +1,12 @@
 import React from "react";
 import { authenticatedFetch } from "../../util/api";
 import { ChartStringValidationModel } from "../../types";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faCircleNotch,
+  faExclamationTriangle,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface ChartStringValidationProps {
@@ -61,26 +66,26 @@ const ChartStringValidation: React.FC<ChartStringValidationProps> = ({
   }
 
   return (
-    <span>
+    <div>
       {chartStringValidation.isValid ? (
-        <span style={{ color: "green" }}>
-          <i className="fas fa-check"></i> {chartStringValidation.description}
+        <span className="text-success">
+          <FontAwesomeIcon icon={faCheck} /> {chartStringValidation.description}
         </span>
       ) : (
-        <span style={{ color: "red" }}>
-          <i className="fas fa-times"></i> {chartStringValidation.message}
+        <span className="text-danger">
+          <FontAwesomeIcon icon={faTimes} /> {chartStringValidation.message}
         </span>
       )}
       {chartStringValidation.warning && (
         <>
           <br />
-          <span style={{ color: "orange" }}>
-            <i className="fas fa-exclamation-triangle"></i>{" "}
+          <span className="text-warning">
+            <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
             {chartStringValidation.warning}
           </span>
         </>
       )}
-    </span>
+    </div>
   );
 };
 
