@@ -12,6 +12,7 @@ import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
 import { Row } from "reactstrap";
+import { OrderStatus } from "../../../types/status";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -255,19 +256,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   name="installmentDate"
                   label="Installment Date"
                   type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                  hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="expirationDate"
                   label="Expiration Date"
                   type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                  hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="externalReference"
                   label="External Reference"
                   maxLength={150}
                   canEditConditions={adminCanEditLimitedStatuses}
+                  hideIfEmpty={true}
                 />
               </Row>
               <Row>
@@ -278,14 +282,16 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   type="textarea"
                   required={false}
                   canEditConditions={!isDetailsPage && !limitedEditing}
+                  hideIfEmpty={true}
                 />
                 {isAdmin && (
-                  <OrderFormField // TODO: line up in grid
+                  <OrderFormField
                     size="md"
                     name="adminNotes"
                     label="Admin Notes"
                     type="textarea"
-                    canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                    canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                    hideIfEmpty={true}
                   />
                 )}
               </Row>
@@ -298,24 +304,28 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   <br />
                 </>
               </ShowFor>
-              <Row>
-                <OrderFormField
-                  size="md"
-                  name="adjustment"
-                  label="Adjustment"
-                  canEditConditions={adminCanEditLimitedStatuses}
-                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                  valueAsNumber={true}
-                  deps={"total"}
-                />
-                <OrderFormField
-                  size="md"
-                  name="adjustmentReason"
-                  label="Adjustment Reason"
-                  canEditConditions={adminCanEditLimitedStatuses}
-                  type="textarea"
-                />
-              </Row>
+              {(orderProp.status !== OrderStatus.Draft || isAdmin) && (
+                <Row>
+                  <OrderFormField
+                    size="md"
+                    name="adjustment"
+                    label="Adjustment"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                    valueAsNumber={true}
+                    deps={"total"}
+                    hideIfEmpty={true}
+                  />
+                  <OrderFormField
+                    size="md"
+                    name="adjustmentReason"
+                    label="Adjustment Reason"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                    type="textarea"
+                    hideIfEmpty={true}
+                  />
+                </Row>
+              )}
               <OrderFormTotalFields />
             </>
           )}

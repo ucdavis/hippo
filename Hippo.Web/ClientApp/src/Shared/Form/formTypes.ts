@@ -6,6 +6,7 @@ import {
   FieldErrors,
   FieldPath,
   RegisterOptions,
+  UseFormGetValues,
   UseFormRegister,
 } from "react-hook-form";
 import { InputType } from "reactstrap/types/lib/Input";
@@ -27,6 +28,8 @@ export type HipFormFieldOptions<T> = FormFieldCommonProps<T> & {
   feedback?: React.ReactNode;
   feedbackType?: "text" | "tooltip";
   hideLabel?: boolean;
+  hideIfEmpty?: boolean;
+  getValues?: UseFormGetValues<T>;
 };
 
 export type HipFormFieldProps<T> = HipFormFieldOptions<T> & {

@@ -15,12 +15,14 @@ const OrderFormField: React.FC<OrderFormFieldProps> = ({
 }) => {
   const {
     register,
+    getValues,
     formState: { errors },
   } = useFormContext<OrderModel>();
 
   return (
     <HipFormField
       register={register}
+      getValues={getValues}
       error={errors[props.name]}
       readOnly={!canEditConditions}
       disabled={!canEditConditions}
