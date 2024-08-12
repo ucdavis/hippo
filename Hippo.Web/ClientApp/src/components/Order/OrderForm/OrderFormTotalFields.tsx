@@ -35,6 +35,7 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = ({}) => {
     <>
       <Row>
         <OrderFormField
+          size="md"
           name="subTotal"
           label="SubTotal"
           canEditConditions={false} // can never edit
@@ -42,6 +43,7 @@ const OrderFormTotalFields: React.FC<OrderFormTotalFieldsProps> = ({}) => {
           type="number"
         />
         <OrderFormField
+          size="md"
           type="number"
           name="total"
           label="Total"

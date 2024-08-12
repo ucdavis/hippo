@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Card, CardBody, CardTitle } from "reactstrap";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
@@ -11,7 +10,7 @@ import { authenticatedFetch } from "../../util/api";
 import ChartStringValidation from "./ChartStringValidation";
 
 import OrderFormField from "./OrderForm/OrderFormField";
-import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
+import HipDumbTable from "../../Shared/Table/HipDumbTable";
 
 declare const window: Window &
   typeof globalThis & {
@@ -21,6 +20,11 @@ declare const window: Window &
 type BillingsFieldsProps = {
   readOnly: boolean;
 };
+
+interface ValidationNotification {
+  index: number;
+  message: string;
+}
 
 const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   const {
@@ -51,7 +55,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
       chartString: "",
       percentage: percentToSet.toString(),
       chartStringValidation: {
-        isValid: true,
+        isValid: null,
         description: "",
         accountManager: "",
         accountManagerEmail: "",
@@ -65,12 +69,18 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     remove(index);
   };
 
-  const [notification, setNotification] = useState<string>("");
-  const showNotification = (message: string) => {
-    setNotification(message);
+  const [notification, setNotification] = useState<ValidationNotification>({
+    index: null,
+    message: "",
+  });
+  const showNotification = (index: number, message: string) => {
+    setNotification({
+      index: index,
+      message: message,
+    });
     // @laholstege TODO: use notification util
     // Optionally, clear the notification after some time
-    setTimeout(() => setNotification(""), 5000);
+    setTimeout(() => setNotification({ index: null, message: "" }), 5000);
   };
 
   const lookupChartString = async (index: number) => {
@@ -81,7 +91,10 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     if (chart.status === "success") {
       //add the chart.data chartString input
 
-      const rtValue = await validateChartString(chart.data, index);
+      const rtValue = await validateChartString({
+        index,
+        chartString: chart.data,
+      });
 
       update(index, {
         chartString: rtValue.chartString,
@@ -103,19 +116,24 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     }
   };
 
-  const onChartStringBlur = async (index: number, chartString: string) => {
+  const onChartStringBlur = async ({
+    index,
+    chartString,
+  }: {
+    index: number;
+    chartString: string;
+  }) => {
     if (!chartString) {
       return;
     }
 
     const existingBilling = getValues("billings")[index];
 
-    const rtValue = await validateChartString(chartString, index);
+    const rtValue = await validateChartString({ index, chartString });
 
     update(index, {
+      ...existingBilling,
       chartString: rtValue.chartString,
-      id: existingBilling.id,
-      percentage: existingBilling.percentage,
       chartStringValidation: {
         isValid: rtValue.isValid,
         description: rtValue.description,
@@ -127,7 +145,13 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     });
   };
 
-  const validateChartString = async (chartString: string, index: number) => {
+  const validateChartString = async ({
+    index,
+    chartString,
+  }: {
+    index: number;
+    chartString: string;
+  }) => {
     let response = await authenticatedFetch(
       `/api/order/validateChartString/${chartString}/Debit`,
       {
@@ -138,7 +162,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
     if (response.ok) {
       const result = await response.json();
       if (chartString !== result.chartString) {
-        showNotification(result.warning);
+        showNotification(index, result.warning);
       }
       return result;
     }
@@ -162,23 +186,11 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup>
+    <>
       <h2>Billing Info</h2>
-      {notification && (
-        <div>
-          <br />
-          {/* TODO: make prettier */}
-          <Card className="card-danger">
-            <CardTitle>
-              <h3>The Chart String has been updated!</h3>
-            </CardTitle>
-            <CardBody>
-              <div>{notification}</div>
-            </CardBody>
-          </Card>
-        </div>
-      )}
-      <table className="table table-bordered table-striped">
+      <br />
+
+      <HipDumbTable>
         <thead>
           <tr>
             <th>Chart String</th>
@@ -193,24 +205,33 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
               <tr key={field.id}>
                 <td width={"40%"}>
                   <HipFormField
+                    size="lg"
                     key={`chartString-${field.id}`}
                     register={register}
-                    label=""
-                    error={errors.billings?.[index]?.chartString}
+                    label="Chart String"
+                    hideLabel={true}
+                    error={errors.billings?.[index]?.chartString} // RH TODO: have invalid chart string produce form error
                     name={`billings.${index}.chartString`}
                     autoComplete="nope"
                     onBlur={(e) => {
-                      onChartStringBlur(index, e.target.value);
+                      onChartStringBlur({ index, chartString: e.target.value });
                     }}
                     readOnly={readOnly}
                     maxLength={128}
+                    feedback={
+                      index === notification.index ? notification.message : ""
+                    }
+                    feedbackType="tooltip"
+                    valid={!readOnly && field?.chartStringValidation?.isValid}
                   />
                 </td>
                 <td width={"10%;"}>
                   <HipFormField
+                    size="lg"
                     key={`percentage-${field.id}`}
                     register={register}
-                    label=""
+                    label="Percentage"
+                    hideLabel={true}
                     error={errors.billings?.[index]?.percentage}
                     name={`billings.${index}.percentage`}
                     readOnly={readOnly}
@@ -230,7 +251,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     <HipButton
                       title="Lookup ChartString"
                       aria-label="Lookup ChartString"
-                      color="primary"
                       outline={true}
                       size="sm"
                       onClick={() => lookupChartString(index)}
@@ -240,7 +260,6 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                     <HipButton
                       title="Remove ChartString"
                       aria-label="Remove ChartString"
-                      color="danger"
                       outline={true}
                       size="sm"
                       onClick={() => removeBilling(index)}
@@ -250,7 +269,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                   </td>
                 )}
                 {readOnly && (
-                  <td width={"5%"}>
+                  <td width={"15%"}>
                     <a
                       href={`https://finjector.ucdavis.edu/details/${field?.chartString}`}
                       target="_blank"
@@ -266,8 +285,8 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         </tbody>
         <tfoot>
           <tr>
-            <td>Percent Total</td>
-            <td colSpan={3}>
+            <td width={"40%"}>Percent Total</td>
+            <td width={"10%"}>
               <OrderFormField
                 name="percentTotal"
                 label=""
@@ -275,9 +294,11 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
                 type="number"
               />
             </td>
+            <td />
+            <td width={"15%"} />
           </tr>
         </tfoot>
-      </table>
+      </HipDumbTable>
 
       {!readOnly && (
         <HipButton
@@ -289,7 +310,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
           <FontAwesomeIcon icon={faPlus} /> Add Billing
         </HipButton>
       )}
-    </HipFormGroup>
+    </>
   );
 };
 

@@ -274,12 +274,16 @@ hr {
   opacity: 1;
 }
 
-.hip-form {
+.hip-body {
   h2 {
     margin-bottom: 0;
+    border-bottom: 2px solid transparentize($primary-color, 0.8);
   }
+}
 
+.hip-form {
   .hip-form-group {
+    position: relative; // so the form-feedback tooltip works correctly
     label,
     .form-label {
       font-size: 1rem;
@@ -327,4 +331,8 @@ hr {
   .bg-secondary {
     background-color: transparentize($primary-color, 0.8) !important;
   }
+}
+
+.hip-text-danger {
+  color: $bs-danger;
 }

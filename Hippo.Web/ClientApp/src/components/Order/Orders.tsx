@@ -134,7 +134,10 @@ export const Orders = () => {
   } else {
     return (
       <HipMainWrapper>
-        <HipTitle title={isAdminOrders ? "Admin Orders" : "My Orders"} />
+        <HipTitle
+          title={isAdminOrders ? "Orders" : "My Orders"}
+          subtitle={isAdminOrders ? "Admin" : null}
+        />
         <HipBody>
           <HipTable
             columns={columns}

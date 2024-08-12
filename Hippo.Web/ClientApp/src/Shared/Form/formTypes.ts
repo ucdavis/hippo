@@ -19,10 +19,14 @@ type FormFieldCommonProps<T> = Omit<InputProps, "pattern"> &
   };
 
 export type HipFormFieldOptions<T> = FormFieldCommonProps<T> & {
-  error?: FieldError;
   name: FieldPath<T>;
   size?: "sm" | "md" | "lg";
+  colSize?: number;
+  error?: FieldError;
+  valid?: boolean;
   feedback?: React.ReactNode;
+  feedbackType?: "text" | "tooltip";
+  hideLabel?: boolean;
 };
 
 export type HipFormFieldProps<T> = HipFormFieldOptions<T> & {

@@ -8,6 +8,7 @@ import HipFormField from "../../../Shared/Form/HipFormField";
 import HipButton from "../../../Shared/HipButton";
 import { OrderModel } from "../../../types";
 import { HipFormGroup } from "../../../Shared/Form/HipFormGroup";
+import HipDumbTable from "../../../Shared/Table/HipDumbTable";
 
 type MetaDataFieldsProps = {
   readOnly: boolean;
@@ -38,60 +39,79 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
   }
 
   return (
-    <HipFormGroup size="lg">
-      <Label for="metaData" tag="h2">
-        Metadata
-      </Label>
-      {fields.map((field, index) => {
-        return (
-          <Row key={field.id}>
-            <Col>
-              <HipFormField
-                key={`name-${field.id}`}
-                register={register}
-                label="Name"
-                error={errors.metaData?.[index]?.name}
-                name={`metaData.${index}.name`}
-                required={true}
-                autoComplete="nope"
-                readOnly={readOnly}
-                maxLength={128}
-              />
-            </Col>
-            <Col>
-              <HipFormField
-                key={`value-${field.id}`}
-                register={register}
-                label="Value"
-                error={errors.metaData?.[index]?.value}
-                name={`metaData.${index}.value`}
-                required={true}
-                readOnly={readOnly}
-                maxLength={450}
-              />
-            </Col>
-            {!readOnly && (
-              <Col md={1}>
-                <HipButton
-                  title="Remove Metadata"
-                  aria-label="Remove Metadata"
-                  color="danger"
-                  onClick={() => removeMetaData(index)}
-                  size="sm"
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                </HipButton>
-              </Col>
-            )}
-          </Row>
-        );
-      })}
+    <>
+      <h2>Metadata</h2>
+      <br />
+      <HipDumbTable>
+        <thead>
+          <tr>
+            <th style={{ width: "45%" }}>Name</th>
+            <th style={{ width: "45%" }}>Value</th>
+            {!readOnly && <th style={{ width: "10%" }}></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map((field, index) => {
+            return (
+              <tr key={field.id}>
+                <td width={"45%"}>
+                  <HipFormField
+                    size="lg"
+                    key={`name-${field.id}`}
+                    register={register}
+                    label="Metadata Name"
+                    hideLabel={true}
+                    error={errors.metaData?.[index]?.name}
+                    name={`metaData.${index}.name`}
+                    required={true}
+                    autoComplete="nope"
+                    readOnly={readOnly}
+                    maxLength={128}
+                  />
+                </td>
+                <td width={"45%"}>
+                  <HipFormField
+                    size="lg"
+                    key={`value-${field.id}`}
+                    register={register}
+                    label="Metadata Value"
+                    hideLabel={true}
+                    error={errors.metaData?.[index]?.value}
+                    name={`metaData.${index}.value`}
+                    required={true}
+                    readOnly={readOnly}
+                    maxLength={450}
+                  />
+                </td>
+                {!readOnly && (
+                  <td width={"10%"}>
+                    <HipButton
+                      title="Remove Metadata"
+                      aria-label="Remove Metadata"
+                      onClick={() => removeMetaData(index)}
+                      size="sm"
+                      outline={true}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </HipButton>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </HipDumbTable>
       {!readOnly && (
-        <HipButton color="primary" onClick={addMetaData} size="sm">
+        <HipButton
+          className="mb-5"
+          color="primary"
+          onClick={addMetaData}
+          size="sm"
+        >
           <FontAwesomeIcon icon={faPlus} /> Add Metadata
         </HipButton>
       )}
-    </HipFormGroup>
+    </>
   );
 };
 
