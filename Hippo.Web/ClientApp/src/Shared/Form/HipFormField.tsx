@@ -1,12 +1,5 @@
-import React, { useRef } from "react";
-import {
-  FormFeedback,
-  FormText,
-  Input,
-  Label,
-  Tooltip,
-  UncontrolledTooltip,
-} from "reactstrap";
+import React from "react";
+import { FormFeedback, FormText, Input, Label } from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
 import { HipFormGroup } from "./HipFormGroup";
@@ -21,6 +14,8 @@ import { HipFormGroup } from "./HipFormGroup";
  */
 const HipFormField = <T extends Record<string, any>>({
   register,
+  getValues, // optional, but required if hideIfEmpty is true
+  hideIfEmpty = false,
   error,
   valid,
   feedback,
@@ -68,6 +63,10 @@ const HipFormField = <T extends Record<string, any>>({
     ...options,
   });
 
+  const value = getValues ? getValues(name) : null;
+  if (readOnly && disabled && hideIfEmpty && !value) {
+    return null;
+  }
   return (
     <HipFormGroup size={size} colSize={colSize}>
       {label && !hideLabel && (

@@ -257,18 +257,21 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   label="Installment Date"
                   type="date"
                   canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="expirationDate"
                   label="Expiration Date"
                   type="date"
                   canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="externalReference"
                   label="External Reference"
                   maxLength={150}
                   canEditConditions={adminCanEditLimitedStatuses}
+                  hideIfEmpty={true}
                 />
               </Row>
               <Row>
