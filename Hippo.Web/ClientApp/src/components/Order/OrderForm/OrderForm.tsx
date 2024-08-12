@@ -12,6 +12,7 @@ import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
 import { Row } from "reactstrap";
+import { OrderStatus } from "../../../types/status";
 
 interface OrderFormProps {
   orderProp: OrderModel;
@@ -298,24 +299,26 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   <br />
                 </>
               </ShowFor>
-              <Row>
-                <OrderFormField
-                  size="md"
-                  name="adjustment"
-                  label="Adjustment"
-                  canEditConditions={adminCanEditLimitedStatuses}
-                  inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
-                  valueAsNumber={true}
-                  deps={"total"}
-                />
-                <OrderFormField
-                  size="md"
-                  name="adjustmentReason"
-                  label="Adjustment Reason"
-                  canEditConditions={adminCanEditLimitedStatuses}
-                  type="textarea"
-                />
-              </Row>
+              {(orderProp.status !== OrderStatus.Draft || isAdmin) && (
+                <Row>
+                  <OrderFormField
+                    size="md"
+                    name="adjustment"
+                    label="Adjustment"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                    inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+                    valueAsNumber={true}
+                    deps={"total"}
+                  />
+                  <OrderFormField
+                    size="md"
+                    name="adjustmentReason"
+                    label="Adjustment Reason"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                    type="textarea"
+                  />
+                </Row>
+              )}
               <OrderFormTotalFields />
             </>
           )}
