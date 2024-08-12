@@ -97,6 +97,16 @@ namespace Hippo.Web.Controllers
             {
                 return NotFound();
             }
+
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin && model.PiUser?.Id != currentUser.Id )
+            {
+                return BadRequest("You do not have permission to view this order.");
+            }
+
             return Ok(model);
         }
 
@@ -143,6 +153,7 @@ namespace Hippo.Web.Controllers
             {
                 return NotFound();
             }
+
             return Ok(model);
         }
 
