@@ -256,14 +256,14 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   name="installmentDate"
                   label="Installment Date"
                   type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
                   hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="expirationDate"
                   label="Expiration Date"
                   type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
                   hideIfEmpty={true}
                 />
                 <OrderFormField
@@ -282,14 +282,16 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   type="textarea"
                   required={false}
                   canEditConditions={!isDetailsPage && !limitedEditing}
+                  hideIfEmpty={true}
                 />
                 {isAdmin && (
-                  <OrderFormField // TODO: line up in grid
+                  <OrderFormField
                     size="md"
                     name="adminNotes"
                     label="Admin Notes"
                     type="textarea"
-                    canEditConditions={isAdmin && !isDetailsPage} // can edit on all statuses
+                    canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                    hideIfEmpty={true}
                   />
                 )}
               </Row>
@@ -312,6 +314,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                     inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
                     valueAsNumber={true}
                     deps={"total"}
+                    hideIfEmpty={true}
                   />
                   <OrderFormField
                     size="md"
@@ -319,6 +322,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                     label="Adjustment Reason"
                     canEditConditions={adminCanEditLimitedStatuses}
                     type="textarea"
+                    hideIfEmpty={true}
                   />
                 </Row>
               )}
