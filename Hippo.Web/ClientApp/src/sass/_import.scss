@@ -3,7 +3,8 @@
 @import "@ucdavis/gunrockin/sass/gunrockin.scss";
 $primary-color: $cabernet;
 $secondary-color: $poppy;
-$danger: #dc3545; // bootstrap red
+$bs-danger: #dc3545; // bootstrap red
+$danger: $merlot;
 $success: $quad;
 
 $theme-colors: (

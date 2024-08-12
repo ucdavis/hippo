@@ -72,7 +72,7 @@ const ChartStringValidation: React.FC<ChartStringValidationProps> = ({
           <FontAwesomeIcon icon={faCheck} /> {chartStringValidation.description}
         </span>
       ) : (
-        <span className="text-danger">
+        <span className="hip-text-danger">
           <FontAwesomeIcon icon={faTimes} /> {chartStringValidation.message}
         </span>
       )}
