@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { HipTable } from "../../Shared/Table/HipTable";
@@ -12,10 +12,10 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
-import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import HipButton from "../../Shared/HipButton";
 import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
 import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
+import HipLoadingTable from "../../Shared/LoadingAndErrors/HipLoadingTable";
 
 const defaultProduct: ProductModel = {
   id: 0,
@@ -438,9 +438,9 @@ export const Products = () => {
     // RH TODO: suspense/error boundaries
     return (
       <HipMainWrapper>
-        <HipTitle title="Products" />
+        <HipTitle title="Products" subtitle="Products" />
         <HipBody>
-          <HipLoading />
+          <HipLoadingTable />
         </HipBody>
       </HipMainWrapper>
     );
@@ -448,7 +448,8 @@ export const Products = () => {
     return (
       <HipMainWrapper>
         <HipTitle
-          title="Products"
+          title="Order Products"
+          subtitle="Products"
           buttons={
             <ShowFor roles={["ClusterAdmin"]}>
               <>
