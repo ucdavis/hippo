@@ -2,8 +2,6 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { OrderModel, PaymentModel, UpdateOrderStatusModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
-import { HipTable } from "../../Shared/Table/HipTable";
-import { createColumnHelper } from "@tanstack/react-table";
 import OrderForm from "./OrderForm/OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
@@ -11,10 +9,6 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import { ShowFor } from "../../Shared/ShowFor";
 import AppContext from "../../Shared/AppContext";
-import {
-  convertToPacificDate,
-  convertToPacificTime,
-} from "../../util/DateHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDollarSign,
@@ -37,7 +31,6 @@ import {
   sponsorEditableStatuses,
 } from "../../types/status";
 import StatusBar from "./OrderForm/StatusBar";
-import HipFormField from "../../Shared/Form/HipFormField";
 import OrderPaymentDetails from "./OrderForm/OrderPaymentDetails";
 import { Alert } from "reactstrap";
 import HipTitle from "../../Shared/Layout/HipTitle";
@@ -577,11 +570,6 @@ export const Details = () => {
           onlyChartStrings={false}
           onSubmit={submitOrder}
         />
-        <HistoryTable
-          numberOfRows={5}
-          showLinkToAll={true}
-          historyCount={order.historyCount}
-        />
         <OrderPaymentDetails
           balancePending={order.balancePending}
           balanceRemaining={order.balanceRemaining}
@@ -592,6 +580,11 @@ export const Details = () => {
           numberOfRows={5}
           showLinkToAll={true}
           paymentCount={order.paymentCount}
+        />
+        <HistoryTable
+          numberOfRows={5}
+          showLinkToAll={true}
+          historyCount={order.historyCount}
         />
       </HipBody>
     </HipMainWrapper>
