@@ -10,6 +10,8 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
+import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 
 export const Orders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
@@ -139,18 +141,28 @@ export const Orders = () => {
           subtitle={isAdminOrders ? "Admin" : null}
         />
         <HipBody>
-          <HipTable
-            columns={columns}
-            data={orders}
-            initialState={{
-              sorting: [
-                {
-                  id: "createdOn",
-                  desc: true,
-                },
-              ],
-            }}
-          />
+          <HipErrorBoundary
+            fallback={
+              <HipClientError
+                type="alert"
+                thereWasAnErrorLoadingThe="Orders"
+                contactLink={true}
+              />
+            }
+          >
+            <HipTable
+              columns={columns}
+              data={orders}
+              initialState={{
+                sorting: [
+                  {
+                    id: "createdOn",
+                    desc: true,
+                  },
+                ],
+              }}
+            />
+          </HipErrorBoundary>
         </HipBody>
       </HipMainWrapper>
     );
