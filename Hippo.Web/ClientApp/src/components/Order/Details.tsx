@@ -603,20 +603,6 @@ export const Details = () => {
         <HipErrorBoundary
           fallback={
             <HipClientError
-              thereWasAnErrorLoadingThe="Order History"
-              type="alert"
-            />
-          }
-        >
-          <HistoryTable
-            numberOfRows={5}
-            showLinkToAll={true}
-            historyCount={order.historyCount}
-          />
-        </HipErrorBoundary>
-        <HipErrorBoundary
-          fallback={
-            <HipClientError
               thereWasAnErrorLoadingThe="Order Payment Details"
               type="alert"
             />
@@ -641,6 +627,20 @@ export const Details = () => {
             numberOfRows={5}
             showLinkToAll={true}
             paymentCount={order.paymentCount}
+          />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              thereWasAnErrorLoadingThe="Order History"
+              type="alert"
+            />
+          }
+        >
+          <HistoryTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            historyCount={order.historyCount}
           />
         </HipErrorBoundary>
       </HipBody>
