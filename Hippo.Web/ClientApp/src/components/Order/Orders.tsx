@@ -145,7 +145,7 @@ export const Orders = () => {
             fallback={
               <HipClientError
                 type="alert"
-                thereWasAnErrorLoadingThe="Orders"
+                thereWasAnErrorLoadingThe="Orders Table"
                 contactLink={true}
               />
             }

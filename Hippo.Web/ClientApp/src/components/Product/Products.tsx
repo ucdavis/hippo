@@ -14,6 +14,8 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import HipButton from "../../Shared/HipButton";
+import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
+import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 
 const defaultProduct: ProductModel = {
   id: 0,
@@ -450,23 +452,34 @@ export const Products = () => {
           buttons={
             <ShowFor roles={["ClusterAdmin"]}>
               <>
-                <HipButton className="btn btn-primary" onClick={handleCreate}>
-                  {" "}
-                  Add Product{" "}
-                </HipButton>{" "}
-                <Link
-                  className="btn btn-primary"
-                  to={`/${cluster}/order/create`}
-                >
-                  {" "}
-                  Adhoc Order{" "}
-                </Link>{" "}
+                <HipErrorBoundary>
+                  <HipButton className="btn btn-primary" onClick={handleCreate}>
+                    {" "}
+                    Add Product{" "}
+                  </HipButton>{" "}
+                  <Link
+                    className="btn btn-primary"
+                    to={`/${cluster}/order/create`}
+                  >
+                    {" "}
+                    Adhoc Order{" "}
+                  </Link>{" "}
+                </HipErrorBoundary>
               </>
             </ShowFor>
           }
         />
         <HipBody>
-          <HipTable columns={columns} data={products} />
+          <HipErrorBoundary
+            fallback={
+              <HipClientError
+                type="alert"
+                thereWasAnErrorLoadingThe="Products Table"
+              />
+            }
+          >
+            <HipTable columns={columns} data={products} />
+          </HipErrorBoundary>
         </HipBody>
       </HipMainWrapper>
     );
