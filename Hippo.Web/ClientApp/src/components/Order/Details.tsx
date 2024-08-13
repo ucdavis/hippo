@@ -38,6 +38,8 @@ import HipButton from "../../Shared/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
+import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -435,157 +437,212 @@ export const Details = () => {
         subtitle="Details"
         buttons={
           <>
-            <ShowFor
-              condition={
-                order.piUser?.id === user.detail.id &&
-                sponsorCanCancelStatuses.includes(order.status)
-              }
-            >
-              <HipButton
-                color="danger"
-                onClick={cancelOrder}
-                onMouseEnter={() => setHoverAction(OrderStatus.Cancelled)}
-                onMouseLeave={() => setHoverAction(null)}
-              >
-                {" "}
-                <FontAwesomeIcon icon={faXmark} />
-                Cancel Order
-              </HipButton>{" "}
-            </ShowFor>
-            <ShowFor
-              roles={["System", "ClusterAdmin"]}
-              condition={adminCanRejectStatuses.includes(order.status)}
-            >
-              <HipButton
-                color="danger"
-                onClick={rejectOrder}
-                onMouseEnter={() => setHoverAction(OrderStatus.Rejected)}
-                onMouseLeave={() => setHoverAction(null)}
-              >
-                {" "}
-                <FontAwesomeIcon icon={faXmark} />
-                Reject Order
-              </HipButton>{" "}
-            </ShowFor>
-            <ShowFor
-              roles={["System", "ClusterAdmin"]}
-              condition={adminEditableStatuses.includes(order.status)}
-            >
-              <Link
-                className="btn btn-primary"
-                to={`/${cluster}/order/edit/${order.id}`}
-              >
-                <FontAwesomeIcon icon={faPencil} />
-                Edit Order
-              </Link>{" "}
-            </ShowFor>
-            <ShowFor
-              condition={
-                order.piUser?.id === user.detail.id &&
-                sponsorEditableStatuses.includes(order.status)
-              }
-            >
-              <Link
-                className="btn btn-primary"
-                to={`/${cluster}/order/edit/${order.id}`}
-              >
-                <FontAwesomeIcon icon={faPencil} />
-                Edit Order
-              </Link>{" "}
-            </ShowFor>
-            <ShowFor
-              roles={["System", "ClusterAdmin"]}
-              condition={adminCanApproveStatuses.includes(order.status)}
-            >
-              <HipButton
-                className="btn btn-primary"
-                onClick={updateStatus}
-                onMouseEnter={() =>
-                  setHoverAction(
-                    order.status === OrderStatus.Submitted
-                      ? OrderStatus.Processing
-                      : OrderStatus.Active,
-                  )
+            <HipErrorBoundary>
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorCanCancelStatuses.includes(order.status)
                 }
-                onMouseLeave={() => setHoverAction(null)}
               >
-                {" "}
-                <FontAwesomeIcon icon={faCheck} />
-                Approve Order
-              </HipButton>{" "}
-            </ShowFor>
-            {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
-            <ShowFor
-              condition={canUpdateChartStringsStatuses.includes(order.status)}
-            >
-              <Link
-                className="btn btn-secondary"
-                to={`/${cluster}/order/updatechartstrings/${order.id}`}
+                <HipButton
+                  color="danger"
+                  onClick={cancelOrder}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Cancelled)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faXmark} />
+                  Cancel Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminCanRejectStatuses.includes(order.status)}
               >
-                <FontAwesomeIcon icon={faDollarSign} />
-                Update Chart Strings
-              </Link>{" "}
-            </ShowFor>
-            <ShowFor
-              condition={
-                order.piUser?.id === user.detail.id &&
-                sponsorCanApproveStatuses.includes(order.status) &&
-                order.billings.length > 0
-              }
-            >
-              <HipButton
-                className="btn btn-primary"
-                onClick={updateStatus}
-                onMouseEnter={() => setHoverAction(OrderStatus.Submitted)}
-                onMouseLeave={() => setHoverAction(null)}
+                <HipButton
+                  color="danger"
+                  onClick={rejectOrder}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Rejected)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faXmark} />
+                  Reject Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminEditableStatuses.includes(order.status)}
               >
-                {" "}
-                <FontAwesomeIcon icon={faCheck} />
-                Approve Order
-              </HipButton>{" "}
-            </ShowFor>
-            <ShowFor
-              condition={
-                sponsorCanAddPaymentStatuses.includes(order.status) &&
-                order.piUser?.id === user.detail.id &&
-                balanceRemaining > 0
-              }
-            >
-              <HipButton className="btn btn-primary" onClick={makePayment}>
-                {" "}
-                <FontAwesomeIcon icon={faPlus} />
-                Onetime Payment
-              </HipButton>
-            </ShowFor>
+                <Link
+                  className="btn btn-primary"
+                  to={`/${cluster}/order/edit/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faPencil} />
+                  Edit Order
+                </Link>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorEditableStatuses.includes(order.status)
+                }
+              >
+                <Link
+                  className="btn btn-primary"
+                  to={`/${cluster}/order/edit/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faPencil} />
+                  Edit Order
+                </Link>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={adminCanApproveStatuses.includes(order.status)}
+              >
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() =>
+                    setHoverAction(
+                      order.status === OrderStatus.Submitted
+                        ? OrderStatus.Processing
+                        : OrderStatus.Active,
+                    )
+                  }
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Approve Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              {/* If you are the sponsor (PI) and it is in the created status, you can move it to submitted if there is billing info */}
+              <ShowFor
+                condition={canUpdateChartStringsStatuses.includes(order.status)}
+              >
+                <Link
+                  className="btn btn-secondary"
+                  to={`/${cluster}/order/updatechartstrings/${order.id}`}
+                >
+                  <FontAwesomeIcon icon={faDollarSign} />
+                  Update Chart Strings
+                </Link>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                condition={
+                  order.piUser?.id === user.detail.id &&
+                  sponsorCanApproveStatuses.includes(order.status) &&
+                  order.billings.length > 0
+                }
+              >
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Submitted)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Approve Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                condition={
+                  sponsorCanAddPaymentStatuses.includes(order.status) &&
+                  order.piUser?.id === user.detail.id &&
+                  balanceRemaining > 0
+                }
+              >
+                <HipButton className="btn btn-primary" onClick={makePayment}>
+                  {" "}
+                  <FontAwesomeIcon icon={faPlus} />
+                  Onetime Payment
+                </HipButton>
+              </ShowFor>
+            </HipErrorBoundary>
           </>
         }
       />
       <HipBody>
-        <StatusBar status={order.status} showOnHover={hoverAction} />
-        <OrderForm
-          orderProp={order}
-          isDetailsPage={true}
-          isAdmin={isClusterAdmin}
-          cluster={cluster}
-          onlyChartStrings={false}
-          onSubmit={submitOrder}
-        />
-        <OrderPaymentDetails
-          balancePending={order.balancePending}
-          balanceRemaining={order.balanceRemaining}
-          nextPaymentDate={order.nextPaymentDate}
-          nextPaymentAmount={order.nextPaymentAmount}
-        />
-        <PaymentTable
-          numberOfRows={5}
-          showLinkToAll={true}
-          paymentCount={order.paymentCount}
-        />
-        <HistoryTable
-          numberOfRows={5}
-          showLinkToAll={true}
-          historyCount={order.historyCount}
-        />
+        <HipErrorBoundary>
+          <StatusBar status={order.status} showOnHover={hoverAction} />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              thereWasAnErrorLoadingThe="Order Details"
+              type="alert"
+              contactLink={true}
+            />
+          }
+        >
+          <OrderForm
+            orderProp={order}
+            isDetailsPage={true}
+            isAdmin={isClusterAdmin}
+            cluster={cluster}
+            onlyChartStrings={false}
+            onSubmit={submitOrder}
+          />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              thereWasAnErrorLoadingThe="Order History"
+              type="alert"
+            />
+          }
+        >
+          <HistoryTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            historyCount={order.historyCount}
+          />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              thereWasAnErrorLoadingThe="Order Payment Details"
+              type="alert"
+            />
+          }
+        >
+          <OrderPaymentDetails
+            balancePending={order.balancePending}
+            balanceRemaining={order.balanceRemaining}
+            nextPaymentDate={order.nextPaymentDate}
+            nextPaymentAmount={order.nextPaymentAmount}
+          />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              thereWasAnErrorLoadingThe="Order Payment Table"
+              type="alert"
+            />
+          }
+        >
+          <PaymentTable
+            numberOfRows={5}
+            showLinkToAll={true}
+            paymentCount={order.paymentCount}
+          />
+        </HipErrorBoundary>
       </HipBody>
     </HipMainWrapper>
   );

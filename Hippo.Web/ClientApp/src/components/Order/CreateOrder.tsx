@@ -11,6 +11,8 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
+import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 
 const defaultOrder: OrderModel = {
   id: 0,
@@ -170,20 +172,31 @@ export const CreateOrder: React.FC = () => {
     <HipMainWrapper>
       <HipTitle title={`New Order`} subtitle="Create" />
       <HipBody>
-        <StatusBar
-          status={order.status}
-          animated={notification.pending}
-          showInProgress={true}
-        />
-        <OrderForm
-          orderProp={order}
-          isDetailsPage={false}
-          isAdmin={isClusterAdmin}
-          cluster={cluster}
-          onlyChartStrings={false}
-          onSubmit={submitOrder}
-        />
-        {notification.pending && <div>Saving...</div>}
+        <HipErrorBoundary>
+          <StatusBar
+            status={order.status}
+            animated={notification.pending}
+            showInProgress={true}
+          />
+        </HipErrorBoundary>
+        <HipErrorBoundary
+          fallback={
+            <HipClientError
+              type="alert"
+              thereWasAnErrorLoadingThe="Order Form"
+              contactLink={true}
+            />
+          }
+        >
+          <OrderForm
+            orderProp={order}
+            isDetailsPage={false}
+            isAdmin={isClusterAdmin}
+            cluster={cluster}
+            onlyChartStrings={false}
+            onSubmit={submitOrder}
+          />
+        </HipErrorBoundary>
       </HipBody>
     </HipMainWrapper>
   );
