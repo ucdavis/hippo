@@ -25,6 +25,25 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
         return row.original.id.toString().includes(filterValue);
       },
     });
+    const nameAndId = columnHelper.accessor("name", {
+      header: "Order",
+      id: "name",
+      filterFn: (row, id, filterValue) => {
+        return (
+          row.original.id.toString().includes(filterValue) ||
+          row.original.name.toLowerCase().includes(filterValue.toLowerCase())
+        );
+      },
+      cell: (value) => (
+        <div>
+          <Link to={`/${cluster}/order/details/${value.row.original.id}`}>
+            {value.row.original.name}
+          </Link>
+          <br />
+          <small className="text-muted">Order #{value.row.original.id}</small>
+        </div>
+      ),
+    });
 
     const status = columnHelper.accessor("status", {
       header: "Status",
@@ -34,11 +53,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     const sponsorName = columnHelper.accessor("sponsorName", {
       header: "Sponsor",
       id: "sponsorName",
-    });
-
-    const name = columnHelper.accessor("name", {
-      header: "Order Name",
-      id: "name",
     });
 
     const units = columnHelper.accessor("units", {
@@ -91,12 +105,11 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
 
     let cols = [];
 
-    cols.push(id);
+    cols.push(nameAndId);
     cols.push(status);
     if (isAdminOrders) {
       cols.push(sponsorName);
     }
-    cols.push(name);
     cols.push(units);
     cols.push(quantity);
     cols.push(total);
