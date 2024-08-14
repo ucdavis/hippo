@@ -20,6 +20,7 @@ export enum OrderStatus {
   Active = "Active",
   Rejected = "Rejected",
   Completed = "Completed",
+  Archived = "Archived",
 }
 
 /**
@@ -86,3 +87,5 @@ export const canUpdateChartStringsStatuses = [
   OrderStatus.Processing,
   OrderStatus.Active,
 ];
+
+export const adminCanArchiveStatuses = [OrderStatus.Completed];
