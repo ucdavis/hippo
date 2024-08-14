@@ -427,7 +427,7 @@ export const Details = () => {
   if (!order) {
     return (
       <HipMainWrapper>
-        <HipTitle title={`Order ${orderId}`} subtitle="Details" />
+        <HipTitle title={`Order ${orderId ?? ""}`} subtitle="Details" />
         <HipBody>
           <HipLoading />
         </HipBody>
