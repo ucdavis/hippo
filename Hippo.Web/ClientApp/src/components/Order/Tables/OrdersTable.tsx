@@ -109,11 +109,44 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     const total = columnHelper.accessor("total", {
       header: "Total",
       id: "total",
+      filterFn: (row, id, filterValue) => {
+        return row.original.total.toString().startsWith(filterValue);
+      },
+      cell: (value) => {
+        const total = value.row.original.total;
+        const balanceRemaining = value.row.original.balanceRemaining;
+        const color = balanceRemaining > 0 ? "primary" : "success";
+        const barValue = total - balanceRemaining;
+        return (
+          <div className="hip-progress table-status">
+            <Progress max={total} value={barValue} color={color}></Progress>
+            <small className="text-muted">${total.toFixed(2)}</small>
+          </div>
+        );
+      },
     });
 
     const balanceRemaining = columnHelper.accessor("balanceRemaining", {
       header: "Balance",
       id: "balanceRemaining",
+      filterFn: (row, id, filterValue) => {
+        return row.original.balanceRemaining.toString().startsWith(filterValue);
+      },
+      cell: (value) => {
+        const total = value.row.original.total;
+        const balanceRemaining = value.row.original.balanceRemaining;
+        const color = balanceRemaining > 0 ? "primary" : "success";
+        return (
+          <div className="hip-progress table-status">
+            <Progress
+              max={total}
+              value={balanceRemaining}
+              color={color}
+            ></Progress>
+            <small className="text-muted">${balanceRemaining.toFixed(2)}</small>
+          </div>
+        );
+      },
     });
 
     const createdOn = columnHelper.accessor("createdOn", {

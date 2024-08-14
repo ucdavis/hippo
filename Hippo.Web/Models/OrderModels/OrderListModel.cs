@@ -13,8 +13,8 @@ namespace Hippo.Web.Models.OrderModels
         public decimal Quantity { get; set; }
         public DateTime CreatedOn { get; set; }
         public string Status { get; set; }
-        public string Total { get; set; }
-        public string BalanceRemaining { get; set; }
+        public decimal Total { get; set; }
+        public decimal BalanceRemaining { get; set; }
 
         public string SponsorName { get; set; }
 
@@ -29,8 +29,8 @@ namespace Hippo.Web.Models.OrderModels
                 Quantity = order.Quantity,
                 CreatedOn = order.CreatedOn,
                 Status = order.Status,
-                Total = order.Total.ToString("C"),
-                BalanceRemaining = order.BalanceRemaining.ToString("C"),
+                Total = order.Total,
+                BalanceRemaining = order.BalanceRemaining,
                 SponsorName = order.PrincipalInvestigator.Name
             };
         }
