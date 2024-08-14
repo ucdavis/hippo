@@ -935,6 +935,7 @@ namespace Hippo.Web.Controllers
                     return rtValue;
                 }
                 existingOrder.AdminNotes = model.AdminNotes;
+                existingOrder.ExternalReference = model.ExternalReference;
             }
 
 

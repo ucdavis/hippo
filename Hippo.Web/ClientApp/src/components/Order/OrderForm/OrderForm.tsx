@@ -270,7 +270,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   name="externalReference"
                   label="External Reference"
                   maxLength={150}
-                  canEditConditions={adminCanEditLimitedStatuses}
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
                   hideIfEmpty={true}
                 />
               </Row>
