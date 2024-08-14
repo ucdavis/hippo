@@ -236,9 +236,23 @@ const OrderForm: React.FC<OrderFormProps> = ({
               <br />
               <h2>Order Information</h2>
               <Row>
+                {orderProp.id !== 0 && (
+                  <>
+                    <OrderFormField
+                      name="piUser.name"
+                      label="Sponsor"
+                      canEditConditions={false}
+                    />
+                    <OrderFormField
+                      name="status"
+                      label="Status"
+                      canEditConditions={false}
+                    />
+                  </>
+                )}
                 <OrderFormField
                   name="name"
-                  label="Name"
+                  label="Order Name"
                   required={true}
                   maxLength={50}
                   canEditConditions={!isDetailsPage && !limitedEditing}
@@ -251,6 +265,13 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   valueAsNumber={true}
                   deps={"total"}
                   canEditConditions={!isDetailsPage && !limitedEditing}
+                />
+                <OrderFormField
+                  name="externalReference"
+                  label="External Reference"
+                  maxLength={150}
+                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                  hideIfEmpty={true}
                 />
                 <OrderFormField
                   name="installmentDate"
@@ -267,15 +288,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   hideIfEmpty={true}
                 />
                 <OrderFormField
-                  name="externalReference"
-                  label="External Reference"
-                  maxLength={150}
-                  canEditConditions={adminCanEditLimitedStatuses}
-                  hideIfEmpty={true}
-                />
-              </Row>
-              <Row>
-                <OrderFormField
                   size="md"
                   name="notes"
                   label="Notes"
@@ -288,7 +300,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   <OrderFormField
                     size="md"
                     name="adminNotes"
-                    label="Admin Notes"
+                    label="Admin Notes (Not visible to Sponsor)"
                     type="textarea"
                     canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
                     hideIfEmpty={true}
@@ -319,7 +331,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   <OrderFormField
                     size="md"
                     name="adjustmentReason"
-                    label="Adjustment Reason"
+                    label={`Adjustment Reason${isAdmin ? " (Visible to Sponor)" : ""}`}
                     canEditConditions={adminCanEditLimitedStatuses}
                     type="textarea"
                     hideIfEmpty={true}

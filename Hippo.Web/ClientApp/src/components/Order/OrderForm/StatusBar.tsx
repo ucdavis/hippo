@@ -4,6 +4,7 @@ import { OrderStatus, compareOrderStatus } from "../../../types/status";
 import HipProgress from "../../../Shared/HipProgress";
 
 interface StatusBarProps {
+  max?: number;
   status: OrderStatus;
   animated?: boolean;
   showInProgress?: boolean;
@@ -11,15 +12,14 @@ interface StatusBarProps {
 }
 
 const StatusBar: React.FC<StatusBarProps> = ({
+  max = 5,
   status,
   animated,
   showInProgress,
   showOnHover,
 }) => {
-  const max = 5;
-
   return (
-    <div className="hip-progress">
+    <div className="hip-progress status-bar">
       <h4>Order Status:</h4>
       <Progress multi>
         {(status === OrderStatus.Cancelled ||
@@ -49,7 +49,9 @@ const StatusBar: React.FC<StatusBarProps> = ({
         {status !== OrderStatus.Cancelled &&
           showOnHover !== OrderStatus.Cancelled &&
           status !== OrderStatus.Rejected &&
-          showOnHover !== OrderStatus.Rejected && (
+          showOnHover !== OrderStatus.Rejected &&
+          status !== OrderStatus.Archived &&
+          showOnHover !== OrderStatus.Archived && (
             <>
               <HipProgress
                 label={OrderStatus.Created}
@@ -111,6 +113,18 @@ const StatusBar: React.FC<StatusBarProps> = ({
               />
             </>
           )}
+        {(status === OrderStatus.Archived ||
+          showOnHover === OrderStatus.Archived) && (
+          <HipProgress
+            label={OrderStatus.Archived}
+            max={max}
+            value={max}
+            color="secondary"
+            shouldFill={true}
+            inProgress={showOnHover === OrderStatus.Archived}
+            striped={false}
+          />
+        )}
       </Progress>
     </div>
   );

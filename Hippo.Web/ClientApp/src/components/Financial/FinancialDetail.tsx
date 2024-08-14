@@ -117,10 +117,11 @@ export const FinancialDetail = () => {
     }
   };
 
+  const Title = <HipTitle title="Details" subtitle="Financial" />;
   if (!financialDetail) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Financial Detail" />
+        {Title}
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -130,7 +131,7 @@ export const FinancialDetail = () => {
 
   return (
     <HipMainWrapper>
-      <HipTitle title="Details" subtitle="Financial" />
+      {Title}
       <HipBody>
         <form onSubmit={handleSubmit}>
           <div>

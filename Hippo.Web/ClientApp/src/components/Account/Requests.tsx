@@ -148,10 +148,14 @@ export const Requests = () => {
 
   const accountsData = useMemo(() => requests ?? [], [requests]);
 
+  const Title = (
+    <HipTitle title="Pending Approvals" subtitle="Administration" />
+  );
+
   if (requests === undefined) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Pending Approvals" />
+        {Title}
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -160,7 +164,7 @@ export const Requests = () => {
   } else {
     return (
       <HipMainWrapper>
-        <HipTitle title="Pending Approvals" />
+        {Title}
         <HipBody>
           <p>There are {requests.length} request(s) awaiting approval</p>
           <HipTable

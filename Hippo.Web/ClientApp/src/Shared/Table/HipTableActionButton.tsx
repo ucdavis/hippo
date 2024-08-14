@@ -3,7 +3,7 @@ import HipButton from "../HipButton";
 import { ButtonProps } from "reactstrap";
 
 interface HipTableActionButtonProps extends ButtonProps {
-  children: string;
+  children: React.ReactNode;
 }
 
 const HipTableActionButton: React.FC<HipTableActionButtonProps> = ({

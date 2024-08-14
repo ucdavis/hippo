@@ -314,11 +314,19 @@ hr {
 }
 
 .hip-progress {
-  margin-bottom: 24px;
-  margin-top: 24px;
-  .progress {
-    height: 30px;
-    font-size: large;
+  &.status-bar {
+    margin-bottom: 24px;
+    margin-top: 24px;
+    .progress {
+      height: 30px;
+      font-size: large;
+    }
+  }
+  &.table-status {
+    .progress {
+      height: 20px;
+      font-size: medium;
+    }
   }
   .bg-primary {
     background-color: transparentize($primary-color, 0.3) !important;
@@ -330,9 +338,43 @@ hr {
   }
   .bg-secondary {
     background-color: transparentize($primary-color, 0.8) !important;
+    color: $primary-color;
   }
 }
 
 .hip-text-danger {
   color: $bs-danger;
+}
+
+.skeleton {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  animation: skeleton-loading 1.5s infinite;
+  svg {
+    color: $primary-color;
+  }
+}
+
+.skeleton-header {
+  height: 20px;
+  width: 100px;
+  margin: 10px 0;
+}
+
+.skeleton-cell {
+  height: 16px;
+  width: 100%;
+  margin: 10px 0;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: #e0e0e0;
+  }
+  50% {
+    background-color: #f0f0f0;
+  }
+  100% {
+    background-color: #e0e0e0;
+  }
 }

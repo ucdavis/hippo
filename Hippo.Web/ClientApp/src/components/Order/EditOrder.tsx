@@ -44,47 +44,9 @@ export const EditOrder: React.FC = () => {
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
-    const editedOrder: OrderModel = {
-      // uneditable fields
-      id: updatedOrder.id,
-      status: updatedOrder.status,
-      createdOn: updatedOrder.createdOn,
-      total: updatedOrder.total,
-      subTotal: updatedOrder.subTotal,
-      balanceRemaining: updatedOrder.balanceRemaining,
-      balancePending: updatedOrder.balancePending,
-      piUser: null,
-      percentTotal: updatedOrder.percentTotal,
-      nextPaymentDate: updatedOrder.nextPaymentDate,
-      historyCount: updatedOrder.historyCount,
-      paymentCount: updatedOrder.paymentCount,
-
-      // editable fields
-      PILookup: updatedOrder.PILookup,
-      name: updatedOrder.name,
-      productName: updatedOrder.productName,
-      description: updatedOrder.description,
-      category: updatedOrder.category,
-      externalReference: updatedOrder.externalReference,
-      notes: updatedOrder.notes,
-      units: updatedOrder.units,
-      unitPrice: updatedOrder.unitPrice,
-      quantity: updatedOrder.quantity,
-      installments: updatedOrder.installments,
-      installmentType: updatedOrder.installmentType,
-      adjustment: updatedOrder.adjustment,
-      adjustmentReason: updatedOrder.adjustmentReason,
-      adminNotes: updatedOrder.adminNotes,
-      metaData: updatedOrder.metaData,
-      lifeCycle: updatedOrder.lifeCycle,
-      expirationDate: updatedOrder.expirationDate,
-      installmentDate: updatedOrder.installmentDate,
-      billings: updatedOrder.billings,
-    };
-
     const req = authenticatedFetch(`/api/${cluster}/order/Save`, {
       method: "POST",
-      body: JSON.stringify(editedOrder),
+      body: JSON.stringify(updatedOrder),
     });
 
     setNotification(req, "Saving", "Order Saved", async (r) => {
@@ -101,10 +63,11 @@ export const EditOrder: React.FC = () => {
     if (response.ok) {
       const data = await response.json();
 
+      setOrder(data);
       navigate(`/${cluster}/order/details/${data.id}`);
+    } else {
+      setOrder(updatedOrder);
     }
-
-    setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
   // RH TODO: handle loading/error states
