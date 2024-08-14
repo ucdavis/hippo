@@ -30,7 +30,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
             value={max / 2}
             color="danger"
             shouldFill={true}
-            inProgress={showOnHover === OrderStatus.Cancelled}
+            striped={showOnHover === OrderStatus.Cancelled}
             animated={false}
           />
         )}
@@ -42,7 +42,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
             value={max}
             color="danger"
             shouldFill={true}
-            inProgress={showOnHover === OrderStatus.Rejected}
+            striped={showOnHover === OrderStatus.Rejected}
             animated={false}
           />
         )}
@@ -57,7 +57,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Created) >= 0
                 }
-                inProgress={
+                striped={
                   showOnHover === OrderStatus.Created ||
                   (status === OrderStatus.Draft && showInProgress)
                 }
@@ -69,7 +69,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Submitted) >= 0
                 }
-                inProgress={
+                striped={
                   showOnHover === OrderStatus.Submitted ||
                   (status === OrderStatus.Created && showInProgress)
                 }
@@ -81,7 +81,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Processing) >= 0
                 }
-                inProgress={
+                striped={
                   showOnHover === OrderStatus.Processing ||
                   (status === OrderStatus.Submitted && showInProgress)
                 }
@@ -91,7 +91,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 label={OrderStatus.Active}
                 max={max}
                 shouldFill={compareOrderStatus(status, OrderStatus.Active) >= 0}
-                inProgress={
+                striped={
                   showOnHover === OrderStatus.Active ||
                   (status === OrderStatus.Processing && showInProgress)
                 }
@@ -103,7 +103,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Completed) >= 0
                 }
-                inProgress={
+                striped={
                   showOnHover === OrderStatus.Completed ||
                   (status === OrderStatus.Active && showInProgress)
                 }

@@ -344,8 +344,3 @@ export interface OrderTotalCalculationModel extends Partial<OrderModel> {
   subTotal: string;
   total: string;
 }
-
-export interface UpdateOrderStatusModel {
-  currentStatus: OrderStatus;
-  newStatus: OrderStatus;
-}

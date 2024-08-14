@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { OrderModel, PaymentModel, UpdateOrderStatusModel } from "../../types";
+import { OrderModel, PaymentModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import OrderForm from "./OrderForm/OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
@@ -21,6 +21,7 @@ import { HistoryTable } from "./HistoryTable";
 import { PaymentTable } from "./PaymentTable";
 import {
   OrderStatus,
+  UpdateOrderStatusModel,
   adminCanApproveStatuses,
   adminCanRejectStatuses,
   adminEditableStatuses,
@@ -40,6 +41,7 @@ import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
 import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
+import { getNextStatus } from "../../types/status";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -91,38 +93,8 @@ export const Details = () => {
 
   useEffect(() => {
     if (order) {
-      // switch statement for data.status
-      switch (order.status) {
-        case OrderStatus.Draft:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Created,
-          });
-          break;
-        case OrderStatus.Created:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Submitted,
-          });
-          break;
-        case OrderStatus.Submitted:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Processing,
-          });
-          break;
-        case OrderStatus.Processing:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Active,
-          });
-          break;
-        default:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: order.status,
-          });
-      }
+      const nextStatus: UpdateOrderStatusModel = getNextStatus(order.status);
+      setUpdateStatusModel(nextStatus);
     }
   }, [order]);
 
