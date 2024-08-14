@@ -1,4 +1,5 @@
-﻿using Hippo.Core.Extensions;
+﻿using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
 using System.Linq.Expressions;
 
 namespace Hippo.Web.Models.OrderModels
@@ -7,16 +8,18 @@ namespace Hippo.Web.Models.OrderModels
     {
 
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Units { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Units { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public DateTime CreatedOn { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public decimal Total { get; set; }
         public decimal BalanceRemaining { get; set; }
 
-        public string SponsorName { get; set; }
+        public decimal PendingAmount { get; set; }
+
+        public string SponsorName { get; set; } = string.Empty;
 
         public static Expression<Func<Core.Domain.Order, OrderListModel>> Projection()
         {
@@ -31,6 +34,7 @@ namespace Hippo.Web.Models.OrderModels
                 Status = order.Status,
                 Total = order.Total,
                 BalanceRemaining = order.BalanceRemaining,
+                PendingAmount = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount),
                 SponsorName = order.PrincipalInvestigator.Name
             };
         }
