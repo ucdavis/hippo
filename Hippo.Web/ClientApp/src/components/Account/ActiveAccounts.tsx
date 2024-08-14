@@ -219,10 +219,9 @@ export const ActiveAccounts = () => {
           <HipButton onClick={() => handleDetails(props.row.original)}>
             {viewing?.id === props.row.original.id ? "Viewing..." : "Details"}
           </HipButton>{" "}
-          |{" "}
           <HipButton onClick={() => handleEditTags(props.row.original)}>
             {editing?.id === props.row.original.id ? "Editing..." : "Edit Tags"}
-          </HipButton>{" "}
+          </HipButton>
         </>
       ),
     }),
@@ -244,43 +243,43 @@ export const ActiveAccounts = () => {
     fetchAccounts();
   }, [cluster]);
 
+  const Title = <HipTitle title="Active Accounts" subtitle="Administration" />;
   if (accounts === undefined) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Active Accounts" subtitle="Admin" />
+        {Title}
         <HipBody>
           <HipLoading />
         </HipBody>
       </HipMainWrapper>
     );
-  } else {
-    const groupCount = new Set(
-      accounts
-        .map((a) => a.memberOfGroups)
-        .flat()
-        .filter((g) => g !== null)
-        .map((g) => g.name),
-    ).size;
-    return (
-      <HipMainWrapper>
-        <HipTitle title="Active Accounts" subtitle="Admin" />
-        <HipBody>
-          <p>
-            You have {accounts.length} active account(s) in {groupCount}{" "}
-            group(s)
-          </p>
-          <HipTable
-            columns={columns}
-            data={accountsData}
-            initialState={{
-              sorting: [
-                { id: "Groups", desc: false },
-                { id: "Name", desc: false },
-              ],
-            }}
-          />
-        </HipBody>
-      </HipMainWrapper>
-    );
   }
+
+  const groupCount = new Set(
+    accounts
+      .map((a) => a.memberOfGroups)
+      .flat()
+      .filter((g) => g !== null)
+      .map((g) => g.name),
+  ).size;
+  return (
+    <HipMainWrapper>
+      {Title}
+      <HipBody>
+        <p>
+          You have {accounts.length} active account(s) in {groupCount} group(s)
+        </p>
+        <HipTable
+          columns={columns}
+          data={accountsData}
+          initialState={{
+            sorting: [
+              { id: "Groups", desc: false },
+              { id: "Name", desc: false },
+            ],
+          }}
+        />
+      </HipBody>
+    </HipMainWrapper>
+  );
 };

@@ -148,7 +148,9 @@ export const Requests = () => {
 
   const accountsData = useMemo(() => requests ?? [], [requests]);
 
-  const Title = <HipTitle title="Pending Approvals" subtitle="Admin" />;
+  const Title = (
+    <HipTitle title="Pending Approvals" subtitle="Administration" />
+  );
 
   if (requests === undefined) {
     return (
