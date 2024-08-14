@@ -14,8 +14,9 @@ const StatusDescription: React.FC<StatusDescriptionProps> = ({
   return (
     <CardText>
       <p>{orderStatusDescriptions[status].description} </p>
-      {orderStatusDescriptions[status].forAdmin}
-      {orderStatusDescriptions[status].forSponsor}
+      {isAdmin
+        ? orderStatusDescriptions[status].forAdmin
+        : orderStatusDescriptions[status].forSponsor}
     </CardText>
   );
 };

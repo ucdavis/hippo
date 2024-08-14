@@ -135,6 +135,7 @@ export const CreateOrder: React.FC = () => {
       <HipBody>
         <HipErrorBoundary>
           <StatusBar
+            isAdmin={isClusterAdmin}
             status={order.status}
             animated={notification.pending}
             showInProgress={true}

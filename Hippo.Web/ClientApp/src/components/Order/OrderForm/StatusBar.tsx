@@ -5,6 +5,7 @@ import HipProgress from "../../../Shared/HipProgress";
 import StatusDescription from "../StatusDescription";
 
 interface StatusBarProps {
+  isAdmin: boolean;
   max?: number;
   status: OrderStatus;
   animated?: boolean;
@@ -13,6 +14,7 @@ interface StatusBarProps {
 }
 
 const StatusBar: React.FC<StatusBarProps> = ({
+  isAdmin,
   max = 5,
   status,
   animated,
@@ -34,7 +36,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
             shouldFill={true}
             striped={showOnHover === OrderStatus.Cancelled}
             animated={false}
-            tooltip={<StatusDescription status={OrderStatus.Cancelled} />}
+            tooltip={
+              <StatusDescription
+                status={OrderStatus.Cancelled}
+                isAdmin={isAdmin}
+              />
+            }
           />
         )}
         {(status === OrderStatus.Rejected ||
@@ -48,7 +55,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
             shouldFill={true}
             striped={showOnHover === OrderStatus.Rejected}
             animated={false}
-            tooltip={<StatusDescription status={OrderStatus.Rejected} />}
+            tooltip={
+              <StatusDescription
+                status={OrderStatus.Rejected}
+                isAdmin={isAdmin}
+              />
+            }
           />
         )}
         {status !== OrderStatus.Cancelled &&
@@ -77,6 +89,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                         ? OrderStatus.Draft
                         : OrderStatus.Created
                     }
+                    isAdmin={isAdmin}
                   />
                 }
               />
@@ -92,7 +105,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Created && showInProgress)
                 }
                 animated={status === OrderStatus.Created && animated}
-                tooltip={<StatusDescription status={OrderStatus.Submitted} />}
+                tooltip={
+                  <StatusDescription
+                    status={OrderStatus.Submitted}
+                    isAdmin={isAdmin}
+                  />
+                }
               />
               <HipProgress
                 id="status-bar-processing"
@@ -106,7 +124,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Submitted && showInProgress)
                 }
                 animated={status === OrderStatus.Submitted && animated}
-                tooltip={<StatusDescription status={OrderStatus.Processing} />}
+                tooltip={
+                  <StatusDescription
+                    status={OrderStatus.Processing}
+                    isAdmin={isAdmin}
+                  />
+                }
               />
               <HipProgress
                 id="status-bar-active"
@@ -118,7 +141,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Processing && showInProgress)
                 }
                 animated={status === OrderStatus.Processing && animated}
-                tooltip={<StatusDescription status={OrderStatus.Active} />}
+                tooltip={
+                  <StatusDescription
+                    status={OrderStatus.Active}
+                    isAdmin={isAdmin}
+                  />
+                }
               />
               <HipProgress
                 id="status-bar-completed"
@@ -132,7 +160,12 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Active && showInProgress)
                 }
                 animated={status === OrderStatus.Active && animated}
-                tooltip={<StatusDescription status={OrderStatus.Completed} />}
+                tooltip={
+                  <StatusDescription
+                    status={OrderStatus.Completed}
+                    isAdmin={isAdmin}
+                  />
+                }
               />
             </>
           )}

@@ -137,7 +137,7 @@ export const UpdateChartStrings: React.FC = () => {
       />
       <HipBody>
         <HipErrorBoundary>
-          <StatusBar status={order.status} />
+          <StatusBar status={order.status} isAdmin={isClusterAdmin} />
         </HipErrorBoundary>
         <HipErrorBoundary
           fallback={

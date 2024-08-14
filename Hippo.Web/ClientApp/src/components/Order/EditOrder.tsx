@@ -98,7 +98,7 @@ export const EditOrder: React.FC = () => {
       <HipTitle title={`Order ${order.id}: ${order.name}`} subtitle="Edit" />
       <HipBody>
         <HipErrorBoundary>
-          <StatusBar status={order.status} />
+          <StatusBar status={order.status} isAdmin={isClusterAdmin} />
         </HipErrorBoundary>
         <HipErrorBoundary
           fallback={

@@ -538,7 +538,11 @@ export const Details = () => {
       />
       <HipBody>
         <HipErrorBoundary>
-          <StatusBar status={order.status} showOnHover={hoverAction} />
+          <StatusBar
+            status={order.status}
+            showOnHover={hoverAction}
+            isAdmin={isClusterAdmin}
+          />
         </HipErrorBoundary>
         <HipErrorBoundary
           fallback={
