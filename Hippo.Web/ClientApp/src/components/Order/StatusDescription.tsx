@@ -4,12 +4,16 @@ import { CardText } from "reactstrap";
 
 interface StatusDescriptionProps {
   status: OrderStatus;
+  isAdmin?: boolean;
 }
 
-const StatusDescription: React.FC<StatusDescriptionProps> = ({ status }) => {
+const StatusDescription: React.FC<StatusDescriptionProps> = ({
+  status,
+  isAdmin,
+}) => {
   return (
     <CardText>
-      {orderStatusDescriptions[status].description}
+      <p>{orderStatusDescriptions[status].description} </p>
       {orderStatusDescriptions[status].forAdmin}
       {orderStatusDescriptions[status].forSponsor}
     </CardText>

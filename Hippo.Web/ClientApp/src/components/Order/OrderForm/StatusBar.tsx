@@ -2,7 +2,6 @@ import React from "react";
 import { Progress } from "reactstrap";
 import { OrderStatus, compareOrderStatus } from "../../../types/status";
 import HipProgress from "../../../Shared/HipProgress";
-import { HipTooltip } from "../../../Shared/HipTooltip";
 import StatusDescription from "../StatusDescription";
 
 interface StatusBarProps {
@@ -35,6 +34,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
             shouldFill={true}
             striped={showOnHover === OrderStatus.Cancelled}
             animated={false}
+            tooltip={<StatusDescription status={OrderStatus.Cancelled} />}
           />
         )}
         {(status === OrderStatus.Rejected ||
@@ -70,6 +70,15 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Draft && showInProgress)
                 }
                 animated={status === OrderStatus.Draft && animated}
+                tooltip={
+                  <StatusDescription
+                    status={
+                      status === OrderStatus.Draft
+                        ? OrderStatus.Draft
+                        : OrderStatus.Created
+                    }
+                  />
+                }
               />
               <HipProgress
                 id="status-bar-submitted"
@@ -97,6 +106,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Submitted && showInProgress)
                 }
                 animated={status === OrderStatus.Submitted && animated}
+                tooltip={<StatusDescription status={OrderStatus.Processing} />}
               />
               <HipProgress
                 id="status-bar-active"
@@ -108,6 +118,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Processing && showInProgress)
                 }
                 animated={status === OrderStatus.Processing && animated}
+                tooltip={<StatusDescription status={OrderStatus.Active} />}
               />
               <HipProgress
                 id="status-bar-completed"
@@ -121,6 +132,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Active && showInProgress)
                 }
                 animated={status === OrderStatus.Active && animated}
+                tooltip={<StatusDescription status={OrderStatus.Completed} />}
               />
             </>
           )}

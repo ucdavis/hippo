@@ -99,50 +99,9 @@ export const Details = () => {
     }
   }, [order]);
 
-  // async function so the form can manage the loading state
+  // never actually called on this page, as details is edit only
   const submitOrder = async (updatedOrder: OrderModel) => {
-    const editedOrder: OrderModel = {
-      // uneditable fields
-      id: updatedOrder.id,
-      status: updatedOrder.status,
-      createdOn: updatedOrder.createdOn,
-      total: updatedOrder.total,
-      subTotal: updatedOrder.subTotal,
-      balanceRemaining: updatedOrder.balanceRemaining,
-      balancePending: updatedOrder.balancePending,
-      billings: updatedOrder.billings,
-      piUser: updatedOrder.piUser,
-      percentTotal: updatedOrder.percentTotal,
-      nextPaymentDate: updatedOrder.nextPaymentDate,
-      historyCount: updatedOrder.historyCount,
-      paymentCount: updatedOrder.paymentCount,
-
-      // editable fields
-      PILookup: updatedOrder.PILookup,
-      name: updatedOrder.name,
-      productName: updatedOrder.productName,
-      description: updatedOrder.description,
-      category: updatedOrder.category,
-      externalReference: updatedOrder.externalReference,
-      notes: updatedOrder.notes,
-      units: updatedOrder.units,
-      unitPrice: updatedOrder.unitPrice,
-      quantity: updatedOrder.quantity,
-      installments: updatedOrder.installments,
-      installmentType: updatedOrder.installmentType,
-      adjustment: updatedOrder.adjustment,
-      adjustmentReason: updatedOrder.adjustmentReason,
-      adminNotes: updatedOrder.adminNotes,
-      metaData: updatedOrder.metaData,
-      lifeCycle: updatedOrder.lifeCycle,
-      expirationDate: updatedOrder.expirationDate,
-      installmentDate: updatedOrder.installmentDate,
-    };
-
-    // TODO: await API call
-    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setOrder(editedOrder); // should be newOrder once it's pulling from the API
+    setOrder(updatedOrder); // should be newOrder once it's pulling from the API
   };
 
   const [editPaymentModel, setEditPaymentModel] = useState<PaymentModel>({
