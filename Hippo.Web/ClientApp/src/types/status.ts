@@ -60,6 +60,7 @@ export const sponsorCanAddPaymentStatuses = [OrderStatus.Active];
 export const adminEditableStatuses = [
   OrderStatus.Processing,
   OrderStatus.Active,
+  OrderStatus.Completed,
 ];
 
 /**
