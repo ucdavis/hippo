@@ -57,6 +57,8 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
           return 5;
         case OrderStatus.Rejected:
           return 5;
+        case OrderStatus.Archived:
+          return 5;
         default:
           return 0;
       }
@@ -75,10 +77,17 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       cell: (value) => {
         const status = value.row.original.status;
         const barValue = statusValue(status);
-        const color =
-          status === OrderStatus.Cancelled || status === OrderStatus.Rejected
-            ? "danger"
-            : "primary";
+        let color = "primary";
+        if (
+          status === OrderStatus.Cancelled ||
+          status === OrderStatus.Rejected
+        ) {
+          color = "danger";
+        } else if (status === OrderStatus.Archived) {
+          color = "secondary";
+        } else if (status === OrderStatus.Active) {
+          color = "success";
+        }
         return (
           <div className="hip-progress table-status">
             <Progress max={5} value={barValue} color={color}></Progress>

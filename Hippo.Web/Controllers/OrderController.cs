@@ -817,6 +817,7 @@ namespace Hippo.Web.Controllers
                     break;
 
                 case Order.Statuses.Active:
+                case Order.Statuses.Completed:
                     if (!isClusterOrSystemAdmin)
                     {
                         rtValue.Success = false;
@@ -825,7 +826,7 @@ namespace Hippo.Web.Controllers
                     }
                     //Only allow the dates and maybe the admin notes?
 
-                    break;
+                    break;               
                 default:
                     rtValue.Success = false;
                     rtValue.Message = "This order is in a status that doesn't support editing";
@@ -906,7 +907,7 @@ namespace Hippo.Web.Controllers
                 }
             }
 
-            if (existingOrder.Status == Order.Statuses.Active)
+            if (existingOrder.Status == Order.Statuses.Active || existingOrder.Status == Order.Statuses.Completed)
             {
                 //We will only allow these to be changed, not cleared out once active (Maybe?...)
                 if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
@@ -919,7 +920,7 @@ namespace Hippo.Web.Controllers
                 else
                 {                   
                     rtValue.Success = false;
-                    rtValue.Message = "Expiration Date is required for an order in the Active status.";
+                    rtValue.Message = "Expiration Date is required for an order in the Active/Completed status.";
                     return rtValue;
                 }
 
@@ -931,7 +932,7 @@ namespace Hippo.Web.Controllers
                 else
                 {
                     rtValue.Success = false;
-                    rtValue.Message = "Installment Date is required for an order in the Active status.";
+                    rtValue.Message = "Installment Date is required for an order in the Active/Completed status.";
                     return rtValue;
                 }
                 existingOrder.AdminNotes = model.AdminNotes;

@@ -338,6 +338,7 @@ hr {
   }
   .bg-secondary {
     background-color: transparentize($primary-color, 0.8) !important;
+    color: $primary-color;
   }
 }
 
