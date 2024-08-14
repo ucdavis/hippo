@@ -18,13 +18,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
 }) => {
   const columns = React.useMemo(() => {
     const columnHelper = createColumnHelper<OrderListModel>();
-    const id = columnHelper.accessor("id", {
-      header: "ID",
-      id: "id",
-      filterFn: (row, id, filterValue) => {
-        return row.original.id.toString().includes(filterValue);
-      },
-    });
     const nameAndId = columnHelper.accessor("name", {
       header: "Order",
       id: "name",
