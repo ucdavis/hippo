@@ -15,7 +15,6 @@ import {
   faXmark,
   faCheck,
   faPencil,
-  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { HistoryTable } from "./HistoryTable";
 import { PaymentTable } from "./PaymentTable";
@@ -427,7 +426,7 @@ export const Details = () => {
   if (!order) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Order" subtitle="Details" />
+        <HipTitle title={`Order ${orderId ?? ""}`} subtitle="Details" />
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -568,8 +567,8 @@ export const Details = () => {
                   className="btn btn-secondary"
                   to={`/${cluster}/order/updatechartstrings/${order.id}`}
                 >
-                  <FontAwesomeIcon icon={faDollarSign} />
-                  Update Chart Strings
+                  <FontAwesomeIcon icon={faPencil} />
+                  Update Billing Info
                 </Link>{" "}
               </ShowFor>
             </HipErrorBoundary>
@@ -601,9 +600,9 @@ export const Details = () => {
                   balanceRemaining > 0
                 }
               >
-                <HipButton className="btn btn-primary" onClick={makePayment}>
+                <HipButton className="btn btn-secondary" onClick={makePayment}>
                   {" "}
-                  <FontAwesomeIcon icon={faPlus} />
+                  <FontAwesomeIcon icon={faDollarSign} />
                   Onetime Payment
                 </HipButton>
               </ShowFor>
