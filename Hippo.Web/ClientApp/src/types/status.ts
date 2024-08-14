@@ -19,6 +19,7 @@ export enum OrderStatus {
   Active = "Active",
   Rejected = "Rejected",
   Completed = "Completed",
+  Archived = "Archived",
 }
 
 export interface OrderStatusDescriptions {
@@ -52,6 +53,7 @@ export const orderStatusDescriptions: Record<
   [OrderStatus.Active]: { description: "Active" },
   [OrderStatus.Rejected]: { description: "Rejected" },
   [OrderStatus.Completed]: { description: "Completed" },
+  [OrderStatus.Archived]: { description: "Archived" },
 };
 
 /**
@@ -88,6 +90,11 @@ export const getNextStatus = (status: OrderStatus): UpdateOrderStatusModel => {
       return {
         currentStatus: status,
         newStatus: OrderStatus.Active,
+      };
+    case OrderStatus.Completed:
+      return {
+        currentStatus: status,
+        newStatus: OrderStatus.Archived,
       };
     default:
       return {
@@ -126,6 +133,7 @@ export const sponsorCanAddPaymentStatuses = [OrderStatus.Active];
 export const adminEditableStatuses = [
   OrderStatus.Processing,
   OrderStatus.Active,
+  OrderStatus.Completed,
 ];
 
 /**
@@ -153,3 +161,5 @@ export const canUpdateChartStringsStatuses = [
   OrderStatus.Processing,
   OrderStatus.Active,
 ];
+
+export const adminCanArchiveStatuses = [OrderStatus.Completed];

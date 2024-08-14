@@ -23,6 +23,7 @@ import {
   OrderStatus,
   UpdateOrderStatusModel,
   adminCanApproveStatuses,
+  adminCanArchiveStatuses,
   adminCanRejectStatuses,
   adminEditableStatuses,
   canUpdateChartStringsStatuses,
@@ -248,6 +249,12 @@ export const Details = () => {
               <div className="merlot-bg">
                 This will move the order to active and allow manual billing as
                 well as scheduled billing.
+              </div>
+            )}
+            {updateStatusModel.newStatus === "Archived" && (
+              <div className="merlot-bg">
+                This will archive the order and it will no longer be visible in
+                the active orders list.
               </div>
             )}
           </>
@@ -495,6 +502,26 @@ export const Details = () => {
                   {" "}
                   <FontAwesomeIcon icon={faCheck} />
                   Approve Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={
+                  adminCanArchiveStatuses.includes(order.status) &&
+                  new Date(order.expirationDate) <= new Date()
+                }
+              >
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Archived)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Archive Order
                 </HipButton>{" "}
               </ShowFor>
             </HipErrorBoundary>
