@@ -111,7 +111,7 @@ namespace Hippo.Web.Controllers
         }
 
         /// <summary>
-        /// Primary is the default one to show to the user
+        /// Primary is the  default one to show to the user
         /// </summary>
         /// <param name="id">Order Id</param>
         /// <param name="max"></param>
