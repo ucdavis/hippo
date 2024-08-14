@@ -160,6 +160,20 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       },
     });
 
+    const actions = columnHelper.display({
+      header: "Actions",
+      cell: (value) => (
+        <div>
+          <Link
+            className="btn btn-primary"
+            to={`/${cluster}/order/details/${value.row.original.id}`}
+          >
+            Details
+          </Link>
+        </div>
+      ),
+    });
+
     let cols = [];
 
     cols.push(nameAndId);
@@ -172,6 +186,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     cols.push(total);
     cols.push(balanceRemaining);
     cols.push(createdOn);
+    cols.push(actions);
     return cols;
   }, [cluster, isAdminOrders]);
 
