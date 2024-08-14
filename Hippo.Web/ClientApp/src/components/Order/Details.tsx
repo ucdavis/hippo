@@ -427,7 +427,7 @@ export const Details = () => {
   if (!order) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Order" subtitle="Details" />
+        <HipTitle title={`Order ${orderId}`} subtitle="Details" />
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -569,7 +569,7 @@ export const Details = () => {
                   to={`/${cluster}/order/updatechartstrings/${order.id}`}
                 >
                   <FontAwesomeIcon icon={faDollarSign} />
-                  Update Chart Strings
+                  Update Billing Info
                 </Link>{" "}
               </ShowFor>
             </HipErrorBoundary>

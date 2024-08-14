@@ -106,11 +106,12 @@ export const UpdateChartStrings: React.FC = () => {
     setOrder(editedOrder); // should be newOrder once it's pulling from the API
   };
 
+  const Title = <HipTitle title="Order" subtitle="Update Billing Info" />;
   // RH TODO: handle loading/error states
   if (isClusterAdmin === null) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Order" subtitle="Update Chart Strings" />
+        {Title}
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -121,7 +122,7 @@ export const UpdateChartStrings: React.FC = () => {
   if (!order) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Order" subtitle="Update Chart Strings" />
+        {Title}
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -133,7 +134,7 @@ export const UpdateChartStrings: React.FC = () => {
     <HipMainWrapper>
       <HipTitle
         title={`Order ${order.id}: ${order.name}`}
-        subtitle="Update Chart Strings"
+        subtitle="Update Billing Info"
       />
       <HipBody>
         <HipErrorBoundary>
