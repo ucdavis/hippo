@@ -1,18 +1,22 @@
 import React from "react";
 import { Progress, ProgressProps } from "reactstrap";
+import { HipTooltip } from "./HipTooltip";
 
-interface HipProgressProps extends ProgressProps {
+export interface HipProgressProps extends ProgressProps {
+  id: string;
+  tooltip?: React.ReactNode;
   bar?: boolean;
   label?: string;
   max?: number;
   shouldFill?: boolean;
   striped?: boolean;
   animated?: boolean;
-  tooltip?: React.ReactNode;
 }
 
 const HipProgress: React.FC<HipProgressProps> = ({
-  bar,
+  id,
+  tooltip,
+  bar = true,
   label,
   max,
   shouldFill,
@@ -22,20 +26,29 @@ const HipProgress: React.FC<HipProgressProps> = ({
   color,
   ...rest
 }) => {
+  const target = "hip-progress-" + id;
   return (
-    <Progress
-      bar={bar}
-      max={max}
-      value={value ?? 1}
-      color={
-        color ?? (shouldFill ? "primary" : striped ? "secondary" : "tertiary")
-      }
-      striped={striped} // but show stripes for next step status
-      animated={animated}
-      {...rest}
-    >
-      {label}
-    </Progress>
+    <>
+      <Progress
+        id={target}
+        bar={bar}
+        max={max}
+        value={value ?? 1}
+        color={
+          color ?? (shouldFill ? "primary" : striped ? "secondary" : "tertiary")
+        }
+        striped={striped} // but show stripes for next step status
+        animated={animated}
+        {...rest}
+      >
+        {label}
+      </Progress>
+      {!!tooltip && (
+        <HipTooltip target={target} placement="top">
+          {tooltip}
+        </HipTooltip>
+      )}
+    </>
   );
 };
 

@@ -229,7 +229,8 @@ hr {
   padding-left: 8px;
 }
 
-.group-info-baseline {
+.group-info-baseline,
+.hip-tooltip {
   margin: 0;
   padding: 4px;
   text-align: left;
@@ -238,7 +239,8 @@ hr {
     text-transform: uppercase;
     font-size: 0.8rem;
   }
-  .group-info-header {
+  .group-info-header,
+  .hip-tooltip-header {
     font-weight: bold;
     margin-bottom: 0;
   }

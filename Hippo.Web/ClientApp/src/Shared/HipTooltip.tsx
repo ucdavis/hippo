@@ -1,7 +1,7 @@
 import React from "react";
-import { TooltipProps, UncontrolledTooltip } from "reactstrap";
+import { Tooltip, TooltipProps } from "reactstrap";
 
-interface HipTooltipProps extends TooltipProps {}
+export interface HipTooltipProps extends TooltipProps {}
 
 export const HipTooltip = ({
   children,
@@ -10,8 +10,12 @@ export const HipTooltip = ({
   autohide = false,
   ...deferred
 }: HipTooltipProps) => {
+  const [isOpen, setIsOpen] = React.useState(false);
   return (
-    <UncontrolledTooltip
+    <Tooltip
+      isOpen={isOpen}
+      toggle={() => setIsOpen(!isOpen)}
+      className="hip-tooltip"
       style={{ backgroundColor: "rgb(233, 226, 237)" }}
       placement={placement}
       target={target}
@@ -19,6 +23,6 @@ export const HipTooltip = ({
       {...deferred}
     >
       {children}
-    </UncontrolledTooltip>
+    </Tooltip>
   );
 };

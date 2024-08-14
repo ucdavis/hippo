@@ -1,5 +1,4 @@
 import { GroupModel } from "../../types";
-import { UncontrolledTooltip } from "reactstrap";
 import { GroupInfo } from "./GroupInfo";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import GroupDetails from "./GroupDetails";

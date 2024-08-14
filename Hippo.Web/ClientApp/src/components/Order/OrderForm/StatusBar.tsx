@@ -2,6 +2,8 @@ import React from "react";
 import { Progress } from "reactstrap";
 import { OrderStatus, compareOrderStatus } from "../../../types/status";
 import HipProgress from "../../../Shared/HipProgress";
+import { HipTooltip } from "../../../Shared/HipTooltip";
+import StatusDescription from "../StatusDescription";
 
 interface StatusBarProps {
   max?: number;
@@ -25,6 +27,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
         {(status === OrderStatus.Cancelled ||
           showOnHover === OrderStatus.Cancelled) && (
           <HipProgress
+            id="status-bar-cancelled"
             label={OrderStatus.Cancelled}
             max={max}
             value={max / 2}
@@ -37,6 +40,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
         {(status === OrderStatus.Rejected ||
           showOnHover === OrderStatus.Rejected) && (
           <HipProgress
+            id="status-bar-rejected"
             label={OrderStatus.Rejected}
             max={max}
             value={max}
@@ -44,6 +48,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
             shouldFill={true}
             striped={showOnHover === OrderStatus.Rejected}
             animated={false}
+            tooltip={<StatusDescription status={OrderStatus.Rejected} />}
           />
         )}
         {status !== OrderStatus.Cancelled &&
@@ -54,6 +59,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
           showOnHover !== OrderStatus.Archived && (
             <>
               <HipProgress
+                id="status-bar-draft"
                 label={OrderStatus.Created}
                 max={max}
                 shouldFill={
@@ -66,6 +72,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 animated={status === OrderStatus.Draft && animated}
               />
               <HipProgress
+                id="status-bar-submitted"
                 label={OrderStatus.Submitted}
                 max={max}
                 shouldFill={
@@ -76,8 +83,10 @@ const StatusBar: React.FC<StatusBarProps> = ({
                   (status === OrderStatus.Created && showInProgress)
                 }
                 animated={status === OrderStatus.Created && animated}
+                tooltip={<StatusDescription status={OrderStatus.Submitted} />}
               />
               <HipProgress
+                id="status-bar-processing"
                 label={OrderStatus.Processing}
                 max={max}
                 shouldFill={
@@ -90,6 +99,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 animated={status === OrderStatus.Submitted && animated}
               />
               <HipProgress
+                id="status-bar-active"
                 label={OrderStatus.Active}
                 max={max}
                 shouldFill={compareOrderStatus(status, OrderStatus.Active) >= 0}
@@ -100,6 +110,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 animated={status === OrderStatus.Processing && animated}
               />
               <HipProgress
+                id="status-bar-completed"
                 label={OrderStatus.Completed}
                 max={max}
                 shouldFill={
@@ -116,6 +127,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
         {(status === OrderStatus.Archived ||
           showOnHover === OrderStatus.Archived) && (
           <HipProgress
+            id="status-bar-archived"
             label={OrderStatus.Archived}
             max={max}
             value={max}
