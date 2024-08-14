@@ -1021,7 +1021,7 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasOne("Hippo.Core.Domain.Order", "Order")
                         .WithMany("MetaData")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
