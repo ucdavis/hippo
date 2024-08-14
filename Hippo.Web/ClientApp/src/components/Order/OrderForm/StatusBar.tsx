@@ -19,7 +19,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
   const max = 5;
 
   return (
-    <div className="hip-progress">
+    <div className="hip-progress status-bar">
       <h4>Order Status:</h4>
       <Progress multi>
         {(status === OrderStatus.Cancelled ||
