@@ -314,11 +314,19 @@ hr {
 }
 
 .hip-progress {
-  margin-bottom: 24px;
-  margin-top: 24px;
-  .progress {
-    height: 30px;
-    font-size: large;
+  &.status-bar {
+    margin-bottom: 24px;
+    margin-top: 24px;
+    .progress {
+      height: 30px;
+      font-size: large;
+    }
+  }
+  &.table-status {
+    .progress {
+      height: 20px;
+      font-size: medium;
+    }
   }
   .bg-primary {
     background-color: transparentize($primary-color, 0.3) !important;

@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { HipTable } from "../../../Shared/Table/HipTable";
 import { OrderListModel } from "../../../types";
 import { convertToPacificDate } from "../../../util/DateHelper";
+import HipProgress from "../../../Shared/HipProgress";
+import { Progress } from "reactstrap";
+import { OrderStatus } from "../../../types/status";
 
 interface OrdersTableProps {
   orders: OrderListModel[];
@@ -38,9 +41,51 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       ),
     });
 
+    const statusValue = (status: OrderStatus) => {
+      switch (status) {
+        case OrderStatus.Created:
+          return 1;
+        case OrderStatus.Submitted:
+          return 2;
+        case OrderStatus.Processing:
+          return 3;
+        case OrderStatus.Cancelled:
+          return 2.5;
+        case OrderStatus.Active:
+          return 4;
+        case OrderStatus.Completed:
+          return 5;
+        case OrderStatus.Rejected:
+          return 5;
+        default:
+          return 0;
+      }
+    };
     const status = columnHelper.accessor("status", {
       header: "Status",
       id: "status",
+      meta: {
+        filterVariant: "select",
+      },
+      sortingFn: (rowA, rowB) => {
+        const statusA: OrderStatus = rowA.getValue("status");
+        const statusB: OrderStatus = rowB.getValue("status");
+        return statusValue(statusA) - statusValue(statusB);
+      },
+      cell: (value) => {
+        const status = value.row.original.status;
+        const barValue = statusValue(status);
+        const color =
+          status === OrderStatus.Cancelled || status === OrderStatus.Rejected
+            ? "danger"
+            : "primary";
+        return (
+          <div className="hip-progress table-status">
+            <Progress max={5} value={barValue} color={color}></Progress>
+            <small className="text-muted">{status}</small>
+          </div>
+        );
+      },
     });
 
     const sponsorName = columnHelper.accessor("sponsorName", {
