@@ -334,6 +334,7 @@ export interface OrderListModel {
   status: OrderStatus;
   total: number;
   balanceRemaining: number;
+  pendingAmount: number;
   sponsorName: string;
 }
 
