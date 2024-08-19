@@ -257,6 +257,7 @@ export interface ProductBase {
   installments: number;
   installmentType: string;
   lifeCycle: number;
+  isRecurring: boolean;
 }
 
 export interface ProductModel extends Partial<ProductBase> {

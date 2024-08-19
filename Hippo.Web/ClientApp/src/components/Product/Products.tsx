@@ -139,6 +139,7 @@ export const Products = () => {
               }}
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="fieldUnits">Units</label>
             <input
@@ -151,6 +152,23 @@ export const Products = () => {
                 const model: ProductModel = {
                   ...editProductModel,
                   units: e.target.value,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldIsRecurring">Is Recurring</label>
+            <input
+              className="form-check"
+              id="fieldIsRecurring"
+              type="checkbox"
+              checked={editProductModel.isRecurring}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  isRecurring: e.target.checked,
                 };
                 setEditProductModel(model);
                 setReturn(model);
