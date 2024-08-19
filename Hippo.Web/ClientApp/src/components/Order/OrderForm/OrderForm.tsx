@@ -313,13 +313,15 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
                   hideIfEmpty={true}
                 />
-                <OrderFormField
-                  name="expirationDate"
-                  label="Expiration Date"
-                  type="date"
-                  canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
-                  hideIfEmpty={true}
-                />
+                {!isRecurring && (
+                  <OrderFormField
+                    name="expirationDate"
+                    label="Expiration Date"
+                    type="date"
+                    canEditConditions={isAdmin && !isDetailsPage} // admin can edit on all statuses
+                    hideIfEmpty={true}
+                  />
+                )}
                 <OrderFormField
                   size="md"
                   name="notes"
