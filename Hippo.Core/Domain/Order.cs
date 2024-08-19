@@ -41,7 +41,7 @@ namespace Hippo.Core.Domain
 
         public DateTime? NextNotificationDate { get; set; } //This will be used to send notification to the sponsor once the ExpirationDate is reached. This will be set to ExpirationDate - 30 days?
 
-        public decimal InstallmentAmount => Math.Round(Total / Installments, 2);
+        public decimal InstallmentAmount => IsRecurring ? Math.Round(Total, 2) : Math.Round(Total / Installments, 2);
 
         [Required]
         public int ClusterId { get; set; }
