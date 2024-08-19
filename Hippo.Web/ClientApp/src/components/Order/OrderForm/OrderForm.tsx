@@ -46,6 +46,10 @@ const OrderForm: React.FC<OrderFormProps> = ({
   const [localInstallmentType, setLocalInstallmentType] = useState(
     methods.getValues("installmentType"),
   );
+  const [localIsRecurring, setLocalIsRecurring] = useState(
+    methods.getValues("isRecurring"),
+  );
+
   /**
    * Editing is limited when order status is Active, Rejected, Cancelled, or Completed
    */
@@ -124,6 +128,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
     name: "installments",
   });
 
+  const isRecurring = useWatch({
+    control: methods.control,
+    name: "isRecurring",
+  });
+
   if (installmentType !== localInstallmentType) {
     setLocalInstallmentType(installmentType);
     if (installmentType === "OneTime" && installments !== 1) {
@@ -140,6 +149,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
       (installments === 1 || installments === 60)
     ) {
       methods.setValue("installments", 5);
+    }
+  }
+
+  if (isRecurring !== localIsRecurring) {
+    setLocalIsRecurring(isRecurring);
+    if (!isRecurring) {
+      methods.setValue("lifeCycle", 60);
+      if (installmentType === "Monthly") {
+        methods.setValue("installments", 60);
+      }
+      if (installmentType === "Yearly") {
+        methods.setValue("installments", 5);
+      }
+    } else {
+      methods.setValue("lifeCycle", 0);
+      methods.setValue("installments", 0);
     }
   }
   const adminCanEditLimitedStatuses =
@@ -222,23 +247,24 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   type="select"
                   canEditConditions={adminCanEditLimitedStatuses}
                 >
-                  <option value="OneTime">One Time</option>
-
+                  {!isRecurring && <option value="OneTime">One Time</option>}
                   <option value="Monthly">Monthly</option>
                   <option value="Yearly">Yearly</option>
                 </OrderFormField>
-                {installmentType !== "OneTime" && (
+                {installmentType !== "OneTime" && !isRecurring && (
                   <OrderFormField
                     name="installments"
                     label="Installments"
                     canEditConditions={adminCanEditLimitedStatuses}
                   />
                 )}
-                <OrderFormField
-                  name="lifeCycle"
-                  label="Life Cycle in Months"
-                  canEditConditions={adminCanEditLimitedStatuses}
-                />
+                {!isRecurring && (
+                  <OrderFormField
+                    name="lifeCycle"
+                    label="Life Cycle in Months"
+                    canEditConditions={adminCanEditLimitedStatuses}
+                  />
+                )}
               </Row>
               <br />
               <h2>Order Information</h2>
