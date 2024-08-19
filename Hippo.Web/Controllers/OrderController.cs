@@ -648,43 +648,12 @@ namespace Hippo.Web.Controllers
             };
 
 
-            //TODO: Move this into a private method to reuse in the edit method?
-            if (model.IsRecurring)
+            rtValue = CheckRecurring(model);
+            if(!rtValue.Success)
             {
-                if (model.InstallmentType == InstallmentTypes.OneTime)
-                {
-                    rtValue.Success = false;
-                    rtValue.Message = "Recurring orders must have an installment type of Monthly or Yearly.";
-                    return rtValue;
-                }
-                if (model.Installments != 0)
-                {
-                    rtValue.Success = false;
-                    rtValue.Message = "Recurring orders must have an installment count of 0.";
-                    return rtValue;
-                }
-                if (model.LifeCycle != 0)
-                {
-                    rtValue.Success = false;
-                    rtValue.Message = "Recurring orders must have a life cycle of 0.";
-                    return rtValue;
-                }
+                return rtValue;
             }
-            else
-            {
-                if (model.Installments <= 0)
-                {
-                    rtValue.Success = false;
-                    rtValue.Message = "Non-recurring orders must have an installment count greater than 0.";
-                    return rtValue;
-                }
-                if(model.LifeCycle <= 0)
-                {
-                    rtValue.Success = false;
-                    rtValue.Message = "Non-recurring orders must have a life cycle greater than 0.";
-                    return rtValue;
-                }
-            }
+
 
             if (isClusterOrSystemAdmin)
             {
@@ -745,6 +714,49 @@ namespace Hippo.Web.Controllers
                 rtValue.NotificationMethod = "NotifyAdminOrderSubmitted";
             }
             
+            return rtValue;
+        }
+
+        private ProcessingResult CheckRecurring(OrderPostModel model)
+        {
+            var rtValue = new ProcessingResult();
+            if (model.IsRecurring)
+            {
+                if (model.InstallmentType == InstallmentTypes.OneTime)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment type of Monthly or Yearly.";
+                    return rtValue;
+                }
+                if (model.Installments != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment count of 0.";
+                    return rtValue;
+                }
+                if (model.LifeCycle != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have a life cycle of 0.";
+                    return rtValue;
+                }
+            }
+            else
+            {
+                if (model.Installments <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have an installment count greater than 0.";
+                    return rtValue;
+                }
+                if (model.LifeCycle <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have a life cycle greater than 0.";
+                    return rtValue;
+                }
+            }
+            rtValue.Success = true;
             return rtValue;
         }
 
@@ -900,18 +912,35 @@ namespace Hippo.Web.Controllers
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
                     existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
-                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    existingOrder.IsRecurring = model.IsRecurring;
+
+                    rtValue = CheckRecurring(model);
+                    if (!rtValue.Success)
                     {
-                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                        //existingOrder.ExpirationDate = expirationDate;
+                        return rtValue;
+                    }
+                    if(model.IsRecurring == false)
+                    {
+                        if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                        {
+                            existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                            existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                            //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                            //existingOrder.ExpirationDate = expirationDate;
+                        }
+                        else
+                        {
+                            //TODO: Can we allow this to be cleared out?
+                            existingOrder.ExpirationDate = null;
+                        }
                     }
                     else
                     {
-                        //TODO: Can we allow this to be cleared out?
                         existingOrder.ExpirationDate = null;
+                        existingOrder.Installments = 0;
+                        existingOrder.LifeCycle = 0;
                     }
+
 
                     if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
@@ -953,18 +982,21 @@ namespace Hippo.Web.Controllers
             if (existingOrder.Status == Order.Statuses.Active || existingOrder.Status == Order.Statuses.Completed)
             {
                 //We will only allow these to be changed, not cleared out once active (Maybe?...)
-                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                if (model.IsRecurring == false)
                 {
-                    existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                    existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                    //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                    //existingOrder.ExpirationDate = expirationDate;
-                }
-                else
-                {                   
-                    rtValue.Success = false;
-                    rtValue.Message = "Expiration Date is required for an order in the Active/Completed status.";
-                    return rtValue;
+                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    {
+                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                        //existingOrder.ExpirationDate = expirationDate;
+                    }
+                    else
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = "Expiration Date is required for an order in the Active/Completed status.";
+                        return rtValue;
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
