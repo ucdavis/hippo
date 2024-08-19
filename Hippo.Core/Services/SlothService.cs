@@ -188,6 +188,13 @@ namespace Hippo.Core.Services
             slothTransaction.AddMetadata("PaymentId", payment.Id.ToString());
             slothTransaction.AddMetadata("Cluster", order.Cluster.Name);
             slothTransaction.AddMetadata("Balance Remaining (Including this)", order.BalanceRemaining.ToString("C"));
+            if (order.IsRecurring)
+            {
+                slothTransaction.AddMetadata("Recurring", "True");
+                slothTransaction.AddMetadata("Payment Cycle", order.InstallmentType);
+                slothTransaction.AddMetadata("Installment Amount", order.InstallmentAmount.ToString("C"));
+
+            }
             if (!string.IsNullOrWhiteSpace(order.ExternalReference))
             {
                 slothTransaction.AddMetadata("ExternalReference", order.ExternalReference);
@@ -278,13 +285,17 @@ namespace Hippo.Core.Services
                                 payment.Status = Payment.Statuses.Completed;
 
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
-                                //order.BalanceRemaining -= Math.Round(payment.Amount, 2); Don't do this here, this is a ballance that is available to pay, not the total paid
-                                var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
-                                if (order.Total <= totalPayments)
-                                {                                    
-                                    order.Status = Order.Statuses.Completed;
-                                    await _historyService.OrderUpdated(order, null, $"Order paid in full.");
-                                    order.NextPaymentDate = null;
+                                order.BalanceRemaining -= Math.Round(payment.Amount, 2); //I'm going to do all the updates of this here
+
+                                if (!order.IsRecurring)
+                                {
+                                    var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
+                                    if (order.Total <= totalPayments)
+                                    {
+                                        order.Status = Order.Statuses.Completed;
+                                        await _historyService.OrderUpdated(order, null, $"Order paid in full.");
+                                        order.NextPaymentDate = null;
+                                    }
                                 }
                                 try
                                 {
@@ -329,7 +340,7 @@ namespace Hippo.Core.Services
                             case SlothStatuses.Cancelled:
                                 //Need to do something here
                                 payment.Status = Payment.Statuses.Cancelled;
-                                order.BalanceRemaining += Math.Round(payment.Amount, 2); //Add the amount back to the balance remaining
+                                //order.BalanceRemaining += Math.Round(payment.Amount, 2); //Add the amount back to the balance remaining
                                 await _historyService.OrderUpdated(order, null, $"Payment CANCELLED. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 await _dbContext.SaveChangesAsync();
                                 break;

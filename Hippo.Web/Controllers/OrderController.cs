@@ -571,12 +571,24 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Amount must be greater than 0.01");
             }
 
-            var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
+            
 
-
-            if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments)) //TODO: Deal with recurring orders
+            if (order.IsRecurring)
             {
-                return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                //I'm assumbing that the ballance remaing is set when the payment completes. For recurring, this will also get updated with the next payment date.
+                var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount);
+                if (amount > order.BalanceRemaining || amount > (order.BalanceRemaining - totalPayments))
+                {
+                    return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                }
+            }
+            else
+            {
+                var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
+                if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments)) 
+                {
+                    return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                }
             }
 
             var payment = new Payment
@@ -590,7 +602,11 @@ namespace Hippo.Web.Controllers
             };
 
             order.Payments.Add(payment);
-            order.BalanceRemaining -= amount;
+            //if (!order.IsRecurring)
+            //{
+            //    I think this should only be done when the payment is completed.
+            //    order.BalanceRemaining -= amount; //Maybe don't do this here either?
+            //}
 
             await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Updated);
             await _historyService.OrderUpdated(order, currentUser, $"Manual Payment of ${amount} made.");
