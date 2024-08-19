@@ -51,6 +51,7 @@ namespace Hippo.Web.Models.OrderModels
                 Description = order.Description,
                 Units = order.Units,
                 UnitPrice = order.UnitPrice,
+                IsRecurring = order.IsRecurring,
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
                 LifeCycle = order.LifeCycle,
@@ -87,8 +88,10 @@ namespace Hippo.Web.Models.OrderModels
                 Description = product.Description,
                 Units = product.Units,
                 UnitPrice = product.UnitPrice,
+                IsRecurring = product.IsRecurring,
                 Installments = product.Installments,
                 InstallmentType = product.InstallmentType,
+                LifeCycle = product.LifeCycle,
                 Quantity = 0,
                 Status = "", // wait to set status to Created until the user submits
                 ExternalReference = string.Empty,

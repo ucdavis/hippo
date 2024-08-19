@@ -632,6 +632,7 @@ namespace Hippo.Web.Controllers
                 LifeCycle = model.LifeCycle,
                 Quantity = model.Quantity,
                 Billings = new List<Billing>(),
+                IsRecurring = model.IsRecurring,
 
 
                 SubTotal = model.Quantity * model.UnitPrice,

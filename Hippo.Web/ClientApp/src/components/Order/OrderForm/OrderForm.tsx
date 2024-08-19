@@ -211,12 +211,19 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
                 <OrderFormField
+                  name="isRecurring"
+                  label="Recurring"
+                  type="checkbox"
+                  canEditConditions={adminCanEditLimitedStatuses}
+                />
+                <OrderFormField
                   name="installmentType"
                   label="Installment Type"
                   type="select"
                   canEditConditions={adminCanEditLimitedStatuses}
                 >
                   <option value="OneTime">One Time</option>
+
                   <option value="Monthly">Monthly</option>
                   <option value="Yearly">Yearly</option>
                 </OrderFormField>
