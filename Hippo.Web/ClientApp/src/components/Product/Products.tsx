@@ -159,9 +159,8 @@ export const Products = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="fieldIsRecurring">Is Recurring</label>
+            <label htmlFor="fieldIsRecurring">Is Recurring</label>{" "}
             <input
-              className="form-check"
               id="fieldIsRecurring"
               type="checkbox"
               checked={editProductModel.isRecurring}
@@ -170,6 +169,21 @@ export const Products = () => {
                   ...editProductModel,
                   isRecurring: e.target.checked,
                 };
+                if (model.isRecurring) {
+                  if (model.installmentType === "OneTime") {
+                    model.installmentType = "Monthly";
+                  }
+                  model.installments = 0;
+                  model.lifeCycle = 0;
+                } else {
+                  if (model.installmentType === "Monthly") {
+                    model.installments = 60;
+                  }
+                  if (model.installmentType === "Yearly") {
+                    model.installments = 5;
+                  }
+                  model.lifeCycle = 60;
+                }
                 setEditProductModel(model);
                 setReturn(model);
               }}
@@ -206,12 +220,16 @@ export const Products = () => {
                 setReturn(model);
               }}
             >
-              <option value="OneTime">One Time</option>
+              {!editProductModel.isRecurring && (
+                <option value="OneTime">One Time</option>
+              )}
+
               <option value="Monthly">Monthly</option>
               <option value="Yearly">Yearly</option>
             </select>
           </div>
-          {editProductModel.installmentType === "OneTime" ? null : (
+          {editProductModel.installmentType === "OneTime" ||
+          editProductModel.isRecurring ? null : (
             <div className="form-group">
               <label htmlFor="fieldInstallments">Installments</label>
               <input
@@ -230,34 +248,38 @@ export const Products = () => {
               />
             </div>
           )}
-          <div className="form-group">
-            <label htmlFor="lifeCycle">Life Cycle in Months</label>
-            <input
-              className="form-control"
-              id="lifeCycle"
-              required
-              value={editProductModel.lifeCycle}
-              onChange={(e) => {
-                const model: ProductModel = {
-                  ...editProductModel,
-                  lifeCycle: parseInt(e.target.value),
-                };
-                setEditProductModel(model);
-                setReturn(model);
-              }}
-            />
-          </div>
+          {!editProductModel.isRecurring && (
+            <div className="form-group">
+              <label htmlFor="lifeCycle">Life Cycle in Months</label>
+              <input
+                className="form-control"
+                id="lifeCycle"
+                required
+                value={editProductModel.lifeCycle}
+                onChange={(e) => {
+                  const model: ProductModel = {
+                    ...editProductModel,
+                    lifeCycle: parseInt(e.target.value),
+                  };
+                  setEditProductModel(model);
+                  setReturn(model);
+                }}
+              />
+            </div>
+          )}
         </>
       ),
       canConfirm:
-        notEmptyOrFalsey(editProductModel.name) &&
-        notEmptyOrFalsey(editProductModel.category) &&
-        notEmptyOrFalsey(editProductModel.units) &&
-        notEmptyOrFalsey(editProductModel.description) &&
-        !notification.pending &&
-        parseFloat(editProductModel.unitPrice) > 0 &&
-        editProductModel.installments > 0 &&
-        editProductModel.lifeCycle > 0,
+        (notEmptyOrFalsey(editProductModel.name) &&
+          notEmptyOrFalsey(editProductModel.category) &&
+          notEmptyOrFalsey(editProductModel.units) &&
+          notEmptyOrFalsey(editProductModel.description) &&
+          !notification.pending &&
+          parseFloat(editProductModel.unitPrice) > 0 &&
+          editProductModel.isRecurring === false &&
+          editProductModel.installments > 0 &&
+          editProductModel.lifeCycle > 0) ||
+        editProductModel.isRecurring,
     },
     [editProductModel, notification.pending],
   );
