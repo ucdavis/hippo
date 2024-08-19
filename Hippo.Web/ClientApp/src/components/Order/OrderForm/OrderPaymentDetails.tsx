@@ -9,6 +9,7 @@ interface OrderPaymentDetailsProps {
   balanceRemaining: string;
   nextPaymentDate: string;
   nextPaymentAmount: string;
+  isRecurring: boolean;
 }
 
 const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
@@ -16,6 +17,7 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
   balancePending,
   nextPaymentDate,
   nextPaymentAmount,
+  isRecurring,
 }) => {
   return (
     <>
@@ -23,7 +25,9 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
       <div className="hip-form">
         <HipFormFieldReadOnly
           name="balanceRemaining"
-          label="Balance Remaining"
+          label={
+            isRecurring ? "Ballance Remaining this Cycle" : "Ballance Remaining"
+          }
           type="number"
           readOnly
           value={balanceRemaining}

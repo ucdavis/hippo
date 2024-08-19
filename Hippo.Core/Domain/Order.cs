@@ -79,6 +79,7 @@ namespace Hippo.Core.Domain
             public const string Rejected = "Rejected"; //Not sure if we need this
             public const string Completed = "Completed";
             public const string Archived = "Archived";
+            public const string Closed = "Closed"; //When a recurring order is closed so we stop processing new payments and can archive it
 
             public static List<string> StatusTypes = new List<string>
             {

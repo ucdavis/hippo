@@ -394,7 +394,7 @@ namespace Hippo.Web.Controllers
                     {
                         existingOrder.InstallmentDate = DateTime.UtcNow;
                     }
-                    if (existingOrder.ExpirationDate == null)
+                    if (existingOrder.ExpirationDate == null && !existingOrder.IsRecurring)
                     {
                         existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
                     }
@@ -432,7 +432,11 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
-                    if(existingOrder.BalanceRemaining > 0)
+                    if(existingOrder.IsRecurring) //TODO: Maybe allow this to be archived instead of cancelled? Maybe a new status of "Closed"?
+                    {
+                        return BadRequest("You cannot archive a recurring order.");
+                    }
+                    if (existingOrder.BalanceRemaining > 0)
                     {
                         return BadRequest("You cannot archive an order that has a balance remaining.");
                     }
@@ -570,7 +574,7 @@ namespace Hippo.Web.Controllers
             var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
 
 
-            if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments))
+            if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments)) //TODO: Deal with recurring orders
             {
                 return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
             }

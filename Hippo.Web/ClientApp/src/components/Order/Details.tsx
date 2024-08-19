@@ -645,6 +645,7 @@ export const Details = () => {
             balanceRemaining={order.balanceRemaining}
             nextPaymentDate={order.nextPaymentDate}
             nextPaymentAmount={order.nextPaymentAmount}
+            isRecurring={order.isRecurring}
           />
         </HipErrorBoundary>
         <HipErrorBoundary
