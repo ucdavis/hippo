@@ -646,6 +646,46 @@ namespace Hippo.Web.Controllers
                 PrincipalInvestigator = principalInvestigator,
                 CreatedOn = DateTime.UtcNow
             };
+
+
+            //TODO: Move this into a private method to reuse in the edit method?
+            if (model.IsRecurring)
+            {
+                if (model.InstallmentType == InstallmentTypes.OneTime)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment type of Monthly or Yearly.";
+                    return rtValue;
+                }
+                if (model.Installments != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment count of 0.";
+                    return rtValue;
+                }
+                if (model.LifeCycle != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have a life cycle of 0.";
+                    return rtValue;
+                }
+            }
+            else
+            {
+                if (model.Installments <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have an installment count greater than 0.";
+                    return rtValue;
+                }
+                if(model.LifeCycle <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have a life cycle greater than 0.";
+                    return rtValue;
+                }
+            }
+
             if (isClusterOrSystemAdmin)
             {
                 if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
@@ -689,6 +729,8 @@ namespace Hippo.Web.Controllers
 
             await _historyService.OrderCreated(order, currentUser);
             await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
+
+            
 
             rtValue.Success = true;
             rtValue.Order = order;
