@@ -25,6 +25,7 @@ const defaultOrder: OrderModel = {
   units: "",
   unitPrice: "",
   installments: 5,
+  isRecurring: false,
   installmentType: "Yearly",
   quantity: 0,
   adjustment: 0,
