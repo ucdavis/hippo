@@ -149,6 +149,7 @@ export const Details = () => {
       nextPaymentDate: updatedOrder.nextPaymentDate,
       historyCount: updatedOrder.historyCount,
       paymentCount: updatedOrder.paymentCount,
+      totalPaid: updatedOrder.totalPaid,
 
       // editable fields
       PILookup: updatedOrder.PILookup,
@@ -646,6 +647,7 @@ export const Details = () => {
             nextPaymentDate={order.nextPaymentDate}
             nextPaymentAmount={order.nextPaymentAmount}
             isRecurring={order.isRecurring}
+            totalPaid={order.totalPaid}
           />
         </HipErrorBoundary>
         <HipErrorBoundary

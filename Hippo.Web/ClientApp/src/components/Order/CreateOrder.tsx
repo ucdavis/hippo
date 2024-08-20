@@ -43,6 +43,7 @@ const defaultOrder: OrderModel = {
   percentTotal: 0,
   historyCount: 0,
   paymentCount: 0,
+  totalPaid: "0",
 };
 export const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();

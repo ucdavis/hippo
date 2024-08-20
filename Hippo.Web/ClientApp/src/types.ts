@@ -323,6 +323,7 @@ export interface OrderModel extends Partial<ProductBase> {
   nextPaymentAmount?: string;
   historyCount: number;
   paymentCount: number;
+  totalPaid: string;
 }
 
 export interface OrderListModel {

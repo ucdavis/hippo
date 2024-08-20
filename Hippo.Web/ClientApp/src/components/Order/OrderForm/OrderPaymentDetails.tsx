@@ -10,6 +10,7 @@ interface OrderPaymentDetailsProps {
   nextPaymentDate: string;
   nextPaymentAmount: string;
   isRecurring: boolean;
+  totalPaid: string;
 }
 
 const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
@@ -18,6 +19,7 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
   nextPaymentDate,
   nextPaymentAmount,
   isRecurring,
+  totalPaid,
 }) => {
   return (
     <>
@@ -61,6 +63,16 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
               inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
             />
           </>
+        )}
+        {Number(totalPaid) !== 0 && (
+          <HipFormFieldReadOnly
+            name="totalPaid"
+            label="Total Paid"
+            type="number"
+            readOnly
+            value={Number(totalPaid).toFixed(2)}
+            inputPrepend={<FontAwesomeIcon icon={faDollarSign} />}
+          />
         )}
       </div>
     </>
