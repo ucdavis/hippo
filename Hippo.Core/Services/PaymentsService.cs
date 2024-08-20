@@ -66,6 +66,18 @@ namespace Hippo.Core.Services
                         continue;
                     }
                 }
+                else
+                {
+                    //This is a recurring order where the next payment date has passed and the BalanceRemaining is 0. The balance should only be updated when the payment is completed. so we now want to set it for the next billing period.
+                    if (order.BalanceRemaining <= 0)
+                    {
+                        SetNextPaymentDate(order);
+                        order.BalanceRemaining += order.Total;
+                        _dbContext.Orders.Update(order);
+                        await _dbContext.SaveChangesAsync();
+                        continue;
+                    }
+                }
 
                 //Need to ignore manual ones...
                 if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
@@ -118,7 +130,7 @@ namespace Hippo.Core.Services
 
                 SetNextPaymentDate(order);
 
-                if(order.IsRecurring)
+                if(order.IsRecurring) //If the payment above gets rejected/canceled we should test this
                 {
                     //The next payment date should be set now, so add the the BallanceRemaining
                     order.BalanceRemaining += order.Total;
