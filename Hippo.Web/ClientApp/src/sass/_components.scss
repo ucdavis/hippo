@@ -263,7 +263,18 @@ hr {
 }
 .tooltip-inner {
   max-width: 100% !important;
-  background-color: mix($primary-color, #fff, 20%);
+  background-color: $primary-color;
+  p {
+    max-width: 450px;
+    color: #fff;
+  }
+}
+.tooltip.show {
+  opacity: 1 !important;
+}
+.bs-tooltip-top .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: $primary-color;
 }
 .dotted-underline {
   border-bottom: 1px dotted $primary-color;
