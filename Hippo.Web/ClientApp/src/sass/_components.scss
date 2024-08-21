@@ -268,6 +268,9 @@ hr {
     max-width: 450px;
     color: #fff;
   }
+  .card-subtitle {
+    color: #fff;
+  }
 }
 .tooltip.show {
   opacity: 1 !important;
@@ -275,6 +278,10 @@ hr {
 .bs-tooltip-top .tooltip-arrow::before,
 .bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
   border-top-color: $primary-color;
+}
+.bs-tooltip-end .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+  border-right-color: $primary-color;
 }
 .dotted-underline {
   border-bottom: 1px dotted $primary-color;
