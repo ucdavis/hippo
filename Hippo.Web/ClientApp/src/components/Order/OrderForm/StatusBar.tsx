@@ -51,7 +51,9 @@ const StatusBar: React.FC<StatusBarProps> = ({
           status !== OrderStatus.Rejected &&
           showOnHover !== OrderStatus.Rejected &&
           status !== OrderStatus.Archived &&
-          showOnHover !== OrderStatus.Archived && (
+          showOnHover !== OrderStatus.Archived &&
+          status !== OrderStatus.Closed &&
+          showOnHover !== OrderStatus.Closed && (
             <>
               <HipProgress
                 label={OrderStatus.Created}
@@ -125,6 +127,20 @@ const StatusBar: React.FC<StatusBarProps> = ({
             striped={false}
           />
         )}
+
+        {showOnHover !== OrderStatus.Archived &&
+          (status === OrderStatus.Closed ||
+            showOnHover === OrderStatus.Closed) && (
+            <HipProgress
+              label={OrderStatus.Closed}
+              max={max}
+              value={max}
+              color="secondary"
+              shouldFill={true}
+              inProgress={showOnHover === OrderStatus.Closed}
+              striped={false}
+            />
+          )}
       </Progress>
     </div>
   );
