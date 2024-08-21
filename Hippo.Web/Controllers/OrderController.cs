@@ -423,7 +423,32 @@ namespace Hippo.Web.Controllers
                     await NotifySponsorOrderStatusChange(existingOrder);
 
                     break;
+                case Order.Statuses.Active:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
+                    if (!existingOrder.IsRecurring)
+                    {
+                        return BadRequest("You cannot change the status of a non-recurring order.");
+                    }
+                    if (expectedStatus != Order.Statuses.Closed)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
+                    existingOrder.Status = Order.Statuses.Closed;
+                    existingOrder.NextPaymentDate = null;
+                    existingOrder.BalanceRemaining = 0;
+
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Recurring Order Closed.");
+
+                    //TODO: Notify the sponsor that the order has been closed?
+
+                    break;
+
                 case Order.Statuses.Completed:
+                case Order.Statuses.Closed:
                     if (!isClusterOrSystemAdmin)
                     {
                         return BadRequest("You do not have permission to change the status of this order.");
@@ -440,7 +465,7 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("You cannot archive an order that has a balance remaining.");
                     }
-                    if(existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
+                    if(existingOrder.IsRecurring && existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
                     {
                         return BadRequest("Expiration date must be in the past to archive an order.");
                     }

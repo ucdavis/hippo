@@ -117,6 +117,14 @@ export const Details = () => {
             newStatus: OrderStatus.Active,
           });
           break;
+        case OrderStatus.Active:
+          if (order.isRecurring) {
+            setUpdateStatusModel({
+              currentStatus: order.status,
+              newStatus: OrderStatus.Closed,
+            });
+          }
+          break;
         case OrderStatus.Completed:
           setUpdateStatusModel({
             currentStatus: order.status,
@@ -289,6 +297,11 @@ export const Details = () => {
               <div className="merlot-bg">
                 This will archive the order and it will no longer be visible in
                 the active orders list.
+              </div>
+            )}
+            {updateStatusModel.newStatus === "Closed" && (
+              <div className="merlot-bg">
+                This will close the order and stop any future billing.
               </div>
             )}
           </>
@@ -543,8 +556,28 @@ export const Details = () => {
               <ShowFor
                 roles={["System", "ClusterAdmin"]}
                 condition={
+                  order.isRecurring && order.status === OrderStatus.Active
+                }
+              >
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Closed)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Close Recurring Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin"]}
+                condition={
                   adminCanArchiveStatuses.includes(order.status) &&
-                  new Date(order.expirationDate) <= new Date()
+                  (order.isRecurring ||
+                    new Date(order.expirationDate) <= new Date())
                 }
               >
                 <HipButton
