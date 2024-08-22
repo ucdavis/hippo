@@ -32,7 +32,7 @@ namespace Hippo.Web.Models.OrderModels
                 Quantity = order.Quantity,
                 CreatedOn = order.CreatedOn,
                 Status = order.Status,
-                Total = order.Total,
+                Total = order.IsRecurring ? (order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount) + order.BalanceRemaining) : order.Total,
                 BalanceRemaining = order.BalanceRemaining,
                 PendingAmount = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount),
                 SponsorName = order.PrincipalInvestigator.Name

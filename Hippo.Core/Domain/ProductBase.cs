@@ -35,6 +35,8 @@ namespace Hippo.Core.Domain
         [MaxLength(10)]
         public string InstallmentType { get; set; } = InstallmentTypes.Monthly; //Monthly, Yearly, OneTime
 
+        public bool IsRecurring { get; set; } = false;
+
 
     }
 }

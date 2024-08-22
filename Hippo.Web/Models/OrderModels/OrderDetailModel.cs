@@ -33,6 +33,8 @@ namespace Hippo.Web.Models.OrderModels
         public int HistoryCount { get; set; }
         public int PaymentCount { get; set; }
 
+        public string TotalPaid { get; set; } = "0";
+
         public User? PiUser { get; set; }
 
         public List<OrderMetaData> MetaData { get; set; } = new();
@@ -51,6 +53,7 @@ namespace Hippo.Web.Models.OrderModels
                 Description = order.Description,
                 Units = order.Units,
                 UnitPrice = order.UnitPrice,
+                IsRecurring = order.IsRecurring,
                 Installments = order.Installments,
                 InstallmentType = order.InstallmentType,
                 LifeCycle = order.LifeCycle,
@@ -69,6 +72,7 @@ namespace Hippo.Web.Models.OrderModels
                 Total = order.Total.ToString("F2"),
                 BalanceRemaining = order.BalanceRemaining.ToString("F2"), //if I do this with a currency, it will add a $ sign and that makes it a little harder to work with UI side
                 BalancePending = order.Payments.Where(a => a.Status != Payment.Statuses.Completed && a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount).ToString("F2"),
+                TotalPaid = order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount).ToString("F2"),
                 MetaData = order.MetaData,
                 Billings = order.Billings,
                 HistoryCount = order.History.Count,
@@ -87,8 +91,10 @@ namespace Hippo.Web.Models.OrderModels
                 Description = product.Description,
                 Units = product.Units,
                 UnitPrice = product.UnitPrice,
+                IsRecurring = product.IsRecurring,
                 Installments = product.Installments,
                 InstallmentType = product.InstallmentType,
+                LifeCycle = product.LifeCycle,
                 Quantity = 0,
                 Status = "", // wait to set status to Created until the user submits
                 ExternalReference = string.Empty,

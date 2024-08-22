@@ -41,7 +41,7 @@ namespace Hippo.Core.Domain
 
         public DateTime? NextNotificationDate { get; set; } //This will be used to send notification to the sponsor once the ExpirationDate is reached. This will be set to ExpirationDate - 30 days?
 
-        public decimal InstallmentAmount => Math.Round(Total / Installments, 2);
+        public decimal InstallmentAmount => IsRecurring ? Math.Round(Total, 2) : Math.Round(Total / Installments, 2);
 
         [Required]
         public int ClusterId { get; set; }
@@ -79,6 +79,7 @@ namespace Hippo.Core.Domain
             public const string Rejected = "Rejected"; //Not sure if we need this
             public const string Completed = "Completed";
             public const string Archived = "Archived";
+            public const string Closed = "Closed"; //When a recurring order is closed so we stop processing new payments and can archive it
 
             public static List<string> StatusTypes = new List<string>
             {
@@ -100,6 +101,8 @@ namespace Hippo.Core.Domain
             modelBuilder.Entity<Order>().HasIndex(o => o.Status);
             modelBuilder.Entity<Order>().HasIndex(o => o.ExpirationDate);
             modelBuilder.Entity<Order>().HasIndex(o => o.NextNotificationDate);
+            modelBuilder.Entity<Order>().HasIndex(o => o.NextPaymentDate);
+            modelBuilder.Entity<Order>().HasIndex(o => o.IsRecurring);
             modelBuilder.Entity<Billing>().HasOne(o => o.Order).WithMany(o => o.Billings).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<OrderMetaData>().HasOne(o => o.Order).WithMany(o => o.MetaData).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Payment>().HasOne(o => o.Order).WithMany(o => o.Payments).HasForeignKey(o => o.OrderId).OnDelete(DeleteBehavior.Restrict);

@@ -257,6 +257,7 @@ export interface ProductBase {
   installments: number;
   installmentType: string;
   lifeCycle: number;
+  isRecurring: boolean;
 }
 
 export interface ProductModel extends Partial<ProductBase> {
@@ -322,6 +323,7 @@ export interface OrderModel extends Partial<ProductBase> {
   nextPaymentAmount?: string;
   historyCount: number;
   paymentCount: number;
+  totalPaid: string;
 }
 
 export interface OrderListModel {

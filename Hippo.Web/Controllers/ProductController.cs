@@ -46,11 +46,22 @@ namespace Hippo.Web.Controllers
                 Installments = model.Installments,
                 InstallmentType = model.InstallmentType,
                 LifeCycle = model.LifeCycle,
+                IsRecurring = model.IsRecurring,
             };
             if(product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
                 product.Installments = 1;
             }
+            if(product.IsRecurring && product.InstallmentType == Product.InstallmentTypes.OneTime)
+            {
+                return BadRequest("Recurring products must have a recurring installment type other than One Time");
+            }
+            if (product.IsRecurring)
+            {
+                product.Installments = 0;
+                product.LifeCycle = 0; //Maybe we want a lifecycle, but I don't know how that would work with recurring products
+            }
+
             _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync();
 
@@ -78,6 +89,15 @@ namespace Hippo.Web.Controllers
             if (product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
                 product.Installments = 1;
+            }
+            if (product.IsRecurring && product.InstallmentType == Product.InstallmentTypes.OneTime)
+            {
+                return BadRequest("Recurring products must have a recurring installment type other than One Time");
+            }
+            if (product.IsRecurring)
+            {
+                product.Installments = 0;
+                product.LifeCycle = 0; //Maybe we want a lifecycle, but I don't know how that would work with recurring products
             }
 
             await _dbContext.SaveChangesAsync();
