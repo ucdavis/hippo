@@ -270,22 +270,12 @@ export const Products = () => {
         </>
       ),
       canConfirm:
-        (!notification.pending &&
-          !editProductModel.isRecurring &&
-          notEmptyOrFalsey(editProductModel.name) &&
-          notEmptyOrFalsey(editProductModel.category) &&
-          notEmptyOrFalsey(editProductModel.units) &&
-          notEmptyOrFalsey(editProductModel.description) &&
-          parseFloat(editProductModel.unitPrice) > 0 &&
-          editProductModel.installments > 0 &&
-          editProductModel.lifeCycle > 0) ||
-        (!notification.pending &&
-          editProductModel.isRecurring &&
-          notEmptyOrFalsey(editProductModel.name) &&
-          notEmptyOrFalsey(editProductModel.category) &&
-          notEmptyOrFalsey(editProductModel.units) &&
-          notEmptyOrFalsey(editProductModel.description) &&
-          parseFloat(editProductModel.unitPrice) > 0),
+        !notification.pending &&
+        notEmptyOrFalsey(editProductModel.name) &&
+        notEmptyOrFalsey(editProductModel.category) &&
+        notEmptyOrFalsey(editProductModel.units) &&
+        notEmptyOrFalsey(editProductModel.description) &&
+        parseFloat(editProductModel.unitPrice) > 0,
     },
     [editProductModel, notification.pending],
   );
