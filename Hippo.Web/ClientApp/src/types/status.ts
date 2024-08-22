@@ -55,6 +55,7 @@ export const orderStatusDescriptions: Record<
   [OrderStatus.Rejected]: { description: "Rejected" },
   [OrderStatus.Completed]: { description: "Completed" },
   [OrderStatus.Archived]: { description: "Archived" },
+  [OrderStatus.Closed]: { description: "Closed" },
 };
 
 /**

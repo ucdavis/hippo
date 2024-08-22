@@ -189,6 +189,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
           (status === OrderStatus.Closed ||
             showOnHover === OrderStatus.Closed) && (
             <HipProgress
+              id="status-bar-closed"
               label={OrderStatus.Closed}
               max={max}
               value={max}
