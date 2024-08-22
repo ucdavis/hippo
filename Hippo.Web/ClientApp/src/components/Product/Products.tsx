@@ -269,17 +269,15 @@ export const Products = () => {
           )}
         </>
       ),
+
+      //TODO: This should check that the installment and lifecycle are more than 0 when it isn't a recurring product
       canConfirm:
-        (notEmptyOrFalsey(editProductModel.name) &&
-          notEmptyOrFalsey(editProductModel.category) &&
-          notEmptyOrFalsey(editProductModel.units) &&
-          notEmptyOrFalsey(editProductModel.description) &&
-          !notification.pending &&
-          parseFloat(editProductModel.unitPrice) > 0 &&
-          editProductModel.isRecurring === false &&
-          editProductModel.installments > 0 &&
-          editProductModel.lifeCycle > 0) ||
-        editProductModel.isRecurring,
+        !notification.pending &&
+        notEmptyOrFalsey(editProductModel.name) &&
+        notEmptyOrFalsey(editProductModel.category) &&
+        notEmptyOrFalsey(editProductModel.units) &&
+        notEmptyOrFalsey(editProductModel.description) &&
+        parseFloat(editProductModel.unitPrice) > 0,
     },
     [editProductModel, notification.pending],
   );
