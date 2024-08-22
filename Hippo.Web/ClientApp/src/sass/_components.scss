@@ -281,15 +281,29 @@ hr {
   }
 }
 
+.modal-content {
+  .modal-body {
+    label {
+      margin-top: 16px;
+    }
+    input[type="checkbox" i] {
+      display: block;
+    }
+  }
+}
+
 .hip-form {
   .hip-form-group {
     position: relative; // so the form-feedback tooltip works correctly
+    margin-top: 16px;
     label,
     .form-label {
       font-size: 1rem;
       color: $secondary-font;
       margin-bottom: 0;
-      margin-top: 16px;
+    }
+    .form-check-input {
+      display: block;
     }
     input,
     .input-group-text,
