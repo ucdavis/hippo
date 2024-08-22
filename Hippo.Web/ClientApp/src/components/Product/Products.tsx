@@ -269,6 +269,8 @@ export const Products = () => {
           )}
         </>
       ),
+
+      //TODO: This should check that the installment and lifecycle are more than 0 when it isn't a recurring product
       canConfirm:
         !notification.pending &&
         notEmptyOrFalsey(editProductModel.name) &&
