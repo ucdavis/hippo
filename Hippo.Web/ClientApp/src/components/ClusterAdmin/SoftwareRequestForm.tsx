@@ -9,7 +9,7 @@ import { SearchPerson } from "../../Shared/SearchPerson";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 
 const defaultSoftwareRequestModel = {
   clusterName: "",

@@ -5,7 +5,7 @@ import { authenticatedFetch, parseBadRequest } from "../util/api";
 import { usePromiseNotification } from "../util/Notifications";
 import { useConfirmationDialog } from "./ConfirmationDialog";
 import { notEmptyOrFalsey } from "../util/ValueChecks";
-import HipButton from "./HipButton";
+import HipButton from "./HipComponents/HipButton";
 
 interface Props {
   request: RequestModel;

@@ -30,18 +30,19 @@ import {
   sponsorCanApproveStatuses,
   sponsorCanCancelStatuses,
   sponsorEditableStatuses,
-} from "../../types/status";
-import StatusBar from "./OrderForm/StatusBar";
+} from "./Statuses/status";
+import StatusBar from "./Statuses/StatusBar";
 import OrderPaymentDetails from "./OrderForm/OrderPaymentDetails";
-import { Alert } from "reactstrap";
 import HipTitle from "../../Shared/Layout/HipTitle";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
 import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
-import { getNextStatus } from "../../types/status";
+import { getNextStatus } from "./Statuses/status";
+import HipAlert from "../../Shared/HipComponents/HipAlert";
+import StatusDialog from "./Statuses/StatusDialog";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -190,39 +191,11 @@ export const Details = () => {
       {
         title: "Update Order Status",
         message: (setReturn) => (
-          <>
-            <div>Current Status: {updateStatusModel.currentStatus}</div>
-            <div>Set Status to: {updateStatusModel.newStatus}</div>
-            <hr />
-            {updateStatusModel.newStatus === "Submitted" && (
-              <div className="merlot-bg">
-                This will submit the order to the cluster admins for processing.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Processing" && (
-              <div className="merlot-bg">
-                This will indicate that an admin will start working on the
-                order.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Active" && (
-              <div className="merlot-bg">
-                This will move the order to active and allow manual billing as
-                well as scheduled billing.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Archived" && (
-              <div className="merlot-bg">
-                This will archive the order and it will no longer be visible in
-                the active orders list.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Closed" && (
-              <div className="merlot-bg">
-                This will close the order and stop any future billing.
-              </div>
-            )}
-          </>
+          <StatusDialog
+            newStatus={updateStatusModel.newStatus}
+            currentStatus={updateStatusModel.currentStatus}
+            isAdmin={isClusterAdmin}
+          />
         ),
         canConfirm: !notification.pending,
       },
@@ -371,10 +344,10 @@ export const Details = () => {
       {order.piUser?.id === user.detail.id &&
         sponsorCanApproveStatuses.includes(order.status) &&
         order.billings.length <= 0 && (
-          <Alert color="danger">
+          <HipAlert color="danger">
             This order needs to have billing information added before it can be
             submitted (Approve).
-          </Alert>
+          </HipAlert>
         )}
       <HipTitle
         title={`Order ${order.id}: ${order.name}`}

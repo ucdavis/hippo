@@ -5,7 +5,7 @@ import { HipTable } from "../../../Shared/Table/HipTable";
 import { OrderListModel } from "../../../types";
 import { convertToPacificDate } from "../../../util/DateHelper";
 import { Progress } from "reactstrap";
-import { OrderStatus, statusValue } from "../../../types/status";
+import { OrderStatus, statusValue } from "../Statuses/status";
 
 interface OrdersTableProps {
   orders: OrderListModel[];

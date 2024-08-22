@@ -10,7 +10,7 @@ import { getGroupModelString } from "../../util/StringHelpers";
 import ObjectTree from "../../Shared/ObjectTree";
 import GroupDetails from "../Group/GroupDetails";
 import { createColumnHelper } from "@tanstack/react-table";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";

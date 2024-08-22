@@ -2,7 +2,7 @@ import { GroupModel } from "../../types";
 import { GroupInfo } from "./GroupInfo";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import GroupDetails from "./GroupDetails";
-import { HipTooltip } from "../../Shared/HipTooltip";
+import { HipTooltip } from "../../Shared/HipComponents/HipTooltip";
 
 interface Props {
   group: GroupModel;

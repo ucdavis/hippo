@@ -6,7 +6,7 @@ import { usePromiseNotification } from "../../util/Notifications";
 import { Card, CardBody, CardTitle } from "reactstrap";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 

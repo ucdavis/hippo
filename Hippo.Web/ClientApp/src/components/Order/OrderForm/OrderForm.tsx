@@ -12,7 +12,7 @@ import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
 import { Row } from "reactstrap";
-import { OrderStatus } from "../../../types/status";
+import { OrderStatus } from "../Statuses/status";
 
 interface OrderFormProps {
   orderProp: OrderModel;
