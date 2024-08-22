@@ -54,14 +54,29 @@ namespace Hippo.Core.Services
             var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
             foreach (var order in orders) {
 
-                if (order.Total <= order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount))
+                if (!order.IsRecurring)
                 {
-                    order.Status = Order.Statuses.Completed;
-                    order.NextPaymentDate = null;
-                    //TODO: A notification? This Shold happen when sloth updates, but just in case.
-                    _dbContext.Orders.Update(order);
-                    await _dbContext.SaveChangesAsync();
-                    continue;
+                    if (order.Total <= order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount))
+                    {
+                        order.Status = Order.Statuses.Completed;
+                        order.NextPaymentDate = null;
+                        //TODO: A notification? This Shold happen when sloth updates, but just in case.
+                        _dbContext.Orders.Update(order);
+                        await _dbContext.SaveChangesAsync();
+                        continue;
+                    }
+                }
+                else
+                {
+                    //This is a recurring order where the next payment date has passed and the BalanceRemaining is 0. The balance should only be updated when the payment is completed. so we now want to set it for the next billing period.
+                    if (order.BalanceRemaining <= 0)
+                    {
+                        SetNextPaymentDate(order);
+                        order.BalanceRemaining += order.Total;
+                        _dbContext.Orders.Update(order);
+                        await _dbContext.SaveChangesAsync();
+                        continue;
+                    }
                 }
 
                 //Need to ignore manual ones...
@@ -71,30 +86,35 @@ namespace Hippo.Core.Services
                     continue;
                 }
 
-                //TODO: Recalculate balance remaining in case DB value is wrong?
-                var localBalance = Math.Round(order.Total - order.Payments.Where(a => a.Status == Payment.Statuses.Completed || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount), 2);
-                if (localBalance != order.BalanceRemaining)
+                if (!order.IsRecurring)
                 {
-                    Log.Information("Order {0} has a balance mismatch. Local: {1} DB: {2}", order.Id, localBalance, order.BalanceRemaining);
-                    order.BalanceRemaining = localBalance;
+                    //TODO: Recalculate balance remaining in case DB value is wrong?
+                    var localBalance = Math.Round(order.Total - order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount), 2);
+                    if (localBalance != order.BalanceRemaining)
+                    {
+                        Log.Information("Order {0} has a balance mismatch. Local: {1} DB: {2}", order.Id, localBalance, order.BalanceRemaining);
+                        order.BalanceRemaining = localBalance;
+                    }
                 }
-                if (order.BalanceRemaining <= 0)
+                var pendingAmount = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount);
+                var balanceLessPending = order.BalanceRemaining - pendingAmount;
+                if (balanceLessPending <= 0)
                 {
                     Log.Information("Order {0} has a balance of 0. Skipping", order.Id);
                     continue;
                 }
 
                 var paymentAmount = order.InstallmentAmount;
-                if (paymentAmount > Math.Round(order.BalanceRemaining, 2))
+                if (paymentAmount > Math.Round(balanceLessPending, 2))
                 {
-                    paymentAmount = Math.Round(order.BalanceRemaining, 2);
+                    paymentAmount = Math.Round(balanceLessPending, 2);
                 }
-                var newBalance = Math.Round(order.BalanceRemaining - paymentAmount, 2);
+                var newBalance = Math.Round(balanceLessPending - paymentAmount, 2);
 
                 //Check if we have a small amount remaining, if so just pay it all.
                 if (newBalance > 0 && newBalance <= 1.0m)
                 {
-                    paymentAmount = Math.Round(order.BalanceRemaining, 2);
+                    paymentAmount = Math.Round(balanceLessPending, 2);
                 }
 
                 var payment = new Payment
@@ -106,9 +126,15 @@ namespace Hippo.Core.Services
                 };
 
                 order.Payments.Add(payment);
-                order.BalanceRemaining -= paymentAmount;
+                //order.BalanceRemaining -= paymentAmount; //Should only get updated once payment is completed now
 
                 SetNextPaymentDate(order);
+
+                if(order.IsRecurring) //If the payment above gets rejected/canceled we should test this
+                {
+                    //The next payment date should be set now, so add the the BallanceRemaining
+                    order.BalanceRemaining += order.Total;
+                }
 
                 _dbContext.Orders.Update(order);
                 await _dbContext.SaveChangesAsync();
@@ -135,6 +161,8 @@ namespace Hippo.Core.Services
                     order.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
                     break;
             }
+
+            
         }
 
         public async Task<bool> NotifyAboutFailedPayments()

@@ -164,7 +164,7 @@ export const FinancialDetail = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="autoApprove">Auto Approve:</label>
+            <label htmlFor="autoApprove">Auto Approve:</label>{" "}
             <input
               type="checkbox"
               id="autoApprove"

@@ -78,7 +78,7 @@ namespace Hippo.Web.Controllers
             }
 
             //Probably will want to filter out old ones that are completed and the expiration date has passed.
-            var adminStatuses = new List<string> { Order.Statuses.Submitted, Order.Statuses.Processing, Order.Statuses.Active, Order.Statuses.Completed };
+            var adminStatuses = new List<string> { Order.Statuses.Submitted, Order.Statuses.Processing, Order.Statuses.Active, Order.Statuses.Closed, Order.Statuses.Completed };
 
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && adminStatuses.Contains(a.Status)).Select(OrderListModel.Projection()).ToListAsync(); //Filter out inactive orders?
 
@@ -111,7 +111,7 @@ namespace Hippo.Web.Controllers
         }
 
         /// <summary>
-        /// Primary is the default one to show to the user
+        /// Primary is the  default one to show to the user
         /// </summary>
         /// <param name="id">Order Id</param>
         /// <param name="max"></param>
@@ -394,7 +394,7 @@ namespace Hippo.Web.Controllers
                     {
                         existingOrder.InstallmentDate = DateTime.UtcNow;
                     }
-                    if (existingOrder.ExpirationDate == null)
+                    if (existingOrder.ExpirationDate == null && !existingOrder.IsRecurring)
                     {
                         existingOrder.ExpirationDate = existingOrder.ExpirationDate = existingOrder.InstallmentDate.Value.AddMonths(existingOrder.LifeCycle);
                     }
@@ -423,7 +423,32 @@ namespace Hippo.Web.Controllers
                     await NotifySponsorOrderStatusChange(existingOrder);
 
                     break;
+                case Order.Statuses.Active:
+                    if (!isClusterOrSystemAdmin)
+                    {
+                        return BadRequest("You do not have permission to change the status of this order.");
+                    }
+                    if (!existingOrder.IsRecurring)
+                    {
+                        return BadRequest("You cannot change the status of a non-recurring order.");
+                    }
+                    if (expectedStatus != Order.Statuses.Closed)
+                    {
+                        return BadRequest("Unexpected Status found. May have already been updated.");
+                    }
+                    existingOrder.Status = Order.Statuses.Closed;
+                    existingOrder.NextPaymentDate = null;
+                    existingOrder.BalanceRemaining = 0;
+
+                    await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
+                    await _historyService.OrderUpdated(existingOrder, currentUser, "Recurring Order Closed.");
+
+                    //TODO: Notify the sponsor that the order has been closed?
+
+                    break;
+
                 case Order.Statuses.Completed:
+                case Order.Statuses.Closed:
                     if (!isClusterOrSystemAdmin)
                     {
                         return BadRequest("You do not have permission to change the status of this order.");
@@ -432,11 +457,15 @@ namespace Hippo.Web.Controllers
                     {
                         return BadRequest("Unexpected Status found. May have already been updated.");
                     }
-                    if(existingOrder.BalanceRemaining > 0)
+                    if(existingOrder.IsRecurring) //TODO: Maybe allow this to be archived instead of cancelled? Maybe a new status of "Closed"?
+                    {
+                        return BadRequest("You cannot archive a recurring order.");
+                    }
+                    if (existingOrder.BalanceRemaining > 0)
                     {
                         return BadRequest("You cannot archive an order that has a balance remaining.");
                     }
-                    if(existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
+                    if(existingOrder.IsRecurring && existingOrder.ExpirationDate == null || existingOrder.ExpirationDate >= DateTime.UtcNow)
                     {
                         return BadRequest("Expiration date must be in the past to archive an order.");
                     }
@@ -567,12 +596,24 @@ namespace Hippo.Web.Controllers
                 return BadRequest("Amount must be greater than 0.01");
             }
 
-            var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
+            
 
-
-            if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments))
+            if (order.IsRecurring)
             {
-                return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                //I'm assumbing that the ballance remaing is set when the payment completes. For recurring, this will also get updated with the next payment date.
+                var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount);
+                if (amount > order.BalanceRemaining || amount > (order.BalanceRemaining - totalPayments))
+                {
+                    return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                }
+            }
+            else
+            {
+                var totalPayments = order.Payments.Where(a => a.Status != Payment.Statuses.Cancelled).Sum(a => a.Amount);
+                if (amount > order.BalanceRemaining || amount > (order.Total - totalPayments)) 
+                {
+                    return BadRequest("Amount must be less than or equal to the balance remaining including payments that have not completed.");
+                }
             }
 
             var payment = new Payment
@@ -586,7 +627,11 @@ namespace Hippo.Web.Controllers
             };
 
             order.Payments.Add(payment);
-            order.BalanceRemaining -= amount;
+            //if (!order.IsRecurring)
+            //{
+            //    I think this should only be done when the payment is completed.
+            //    order.BalanceRemaining -= amount; //Maybe don't do this here either?
+            //}
 
             await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Updated);
             await _historyService.OrderUpdated(order, currentUser, $"Manual Payment of ${amount} made.");
@@ -632,6 +677,7 @@ namespace Hippo.Web.Controllers
                 LifeCycle = model.LifeCycle,
                 Quantity = model.Quantity,
                 Billings = new List<Billing>(),
+                IsRecurring = model.IsRecurring,
 
 
                 SubTotal = model.Quantity * model.UnitPrice,
@@ -645,6 +691,15 @@ namespace Hippo.Web.Controllers
                 PrincipalInvestigator = principalInvestigator,
                 CreatedOn = DateTime.UtcNow
             };
+
+
+            rtValue = CheckRecurring(model);
+            if(!rtValue.Success)
+            {
+                return rtValue;
+            }
+
+
             if (isClusterOrSystemAdmin)
             {
                 if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
@@ -689,6 +744,8 @@ namespace Hippo.Web.Controllers
             await _historyService.OrderCreated(order, currentUser);
             await _historyService.OrderSnapshot(order, currentUser, History.OrderActions.Created);
 
+            
+
             rtValue.Success = true;
             rtValue.Order = order;
 
@@ -702,6 +759,49 @@ namespace Hippo.Web.Controllers
                 rtValue.NotificationMethod = "NotifyAdminOrderSubmitted";
             }
             
+            return rtValue;
+        }
+
+        private ProcessingResult CheckRecurring(OrderPostModel model)
+        {
+            var rtValue = new ProcessingResult();
+            if (model.IsRecurring)
+            {
+                if (model.InstallmentType == InstallmentTypes.OneTime)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment type of Monthly or Yearly.";
+                    return rtValue;
+                }
+                if (model.Installments != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have an installment count of 0.";
+                    return rtValue;
+                }
+                if (model.LifeCycle != 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Recurring orders must have a life cycle of 0.";
+                    return rtValue;
+                }
+            }
+            else
+            {
+                if (model.Installments <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have an installment count greater than 0.";
+                    return rtValue;
+                }
+                if (model.LifeCycle <= 0)
+                {
+                    rtValue.Success = false;
+                    rtValue.Message = "Non-recurring orders must have a life cycle greater than 0.";
+                    return rtValue;
+                }
+            }
+            rtValue.Success = true;
             return rtValue;
         }
 
@@ -857,18 +957,35 @@ namespace Hippo.Web.Controllers
                     existingOrder.Units = model.Units;
                     existingOrder.ExternalReference = model.ExternalReference;
                     existingOrder.LifeCycle = model.LifeCycle; //Number of months or years the product is active for
-                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    existingOrder.IsRecurring = model.IsRecurring;
+
+                    rtValue = CheckRecurring(model);
+                    if (!rtValue.Success)
                     {
-                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                        //existingOrder.ExpirationDate = expirationDate;
+                        return rtValue;
+                    }
+                    if(model.IsRecurring == false)
+                    {
+                        if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                        {
+                            existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                            existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                            //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                            //existingOrder.ExpirationDate = expirationDate;
+                        }
+                        else
+                        {
+                            //TODO: Can we allow this to be cleared out?
+                            existingOrder.ExpirationDate = null;
+                        }
                     }
                     else
                     {
-                        //TODO: Can we allow this to be cleared out?
                         existingOrder.ExpirationDate = null;
+                        existingOrder.Installments = 0;
+                        existingOrder.LifeCycle = 0;
                     }
+
 
                     if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
@@ -910,18 +1027,21 @@ namespace Hippo.Web.Controllers
             if (existingOrder.Status == Order.Statuses.Active || existingOrder.Status == Order.Statuses.Completed)
             {
                 //We will only allow these to be changed, not cleared out once active (Maybe?...)
-                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                if (model.IsRecurring == false)
                 {
-                    existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
-                    existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
-                    //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
-                    //existingOrder.ExpirationDate = expirationDate;
-                }
-                else
-                {                   
-                    rtValue.Success = false;
-                    rtValue.Message = "Expiration Date is required for an order in the Active/Completed status.";
-                    return rtValue;
+                    if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                    {
+                        existingOrder.ExpirationDate = DateTime.Parse(model.ExpirationDate);
+                        existingOrder.ExpirationDate = existingOrder.ExpirationDate.FromPacificTime();
+                        //DateTime.TryParse(model.ExpirationDate, out var expirationDate); //I could do a try parse, but if the parse fails it should throw an error?
+                        //existingOrder.ExpirationDate = expirationDate;
+                    }
+                    else
+                    {
+                        rtValue.Success = false;
+                        rtValue.Message = "Expiration Date is required for an order in the Active/Completed status.";
+                        return rtValue;
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(model.InstallmentDate))

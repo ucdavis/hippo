@@ -25,6 +25,7 @@ const defaultOrder: OrderModel = {
   units: "",
   unitPrice: "",
   installments: 5,
+  isRecurring: false,
   installmentType: "Yearly",
   quantity: 0,
   adjustment: 0,
@@ -42,6 +43,7 @@ const defaultOrder: OrderModel = {
   percentTotal: 0,
   historyCount: 0,
   paymentCount: 0,
+  totalPaid: "0",
 };
 export const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();

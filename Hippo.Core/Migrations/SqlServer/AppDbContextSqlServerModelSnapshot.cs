@@ -430,6 +430,9 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<int>("Installments")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
                     b.Property<int>("LifeCycle")
                         .HasColumnType("int");
 
@@ -481,7 +484,11 @@ namespace Hippo.Core.Migrations.SqlServer
 
                     b.HasIndex("ExpirationDate");
 
+                    b.HasIndex("IsRecurring");
+
                     b.HasIndex("NextNotificationDate");
+
+                    b.HasIndex("NextPaymentDate");
 
                     b.HasIndex("PrincipalInvestigatorId");
 
@@ -627,6 +634,9 @@ namespace Hippo.Core.Migrations.SqlServer
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -1061,7 +1071,7 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.HasOne("Hippo.Core.Domain.Order", "Order")
                         .WithMany("MetaData")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");

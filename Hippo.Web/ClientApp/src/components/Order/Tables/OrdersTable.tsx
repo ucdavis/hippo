@@ -59,6 +59,8 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
           return 5;
         case OrderStatus.Archived:
           return 5;
+        case OrderStatus.Closed:
+          return 5;
         default:
           return 0;
       }
