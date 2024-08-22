@@ -34,6 +34,26 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("Invalid");
             }
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                return BadRequest("Name is required");
+            }
+            if (string.IsNullOrWhiteSpace(model.Description))
+            {
+                return BadRequest("Description is required");
+            }
+            if (string.IsNullOrWhiteSpace(model.Category))
+            {
+                return BadRequest("Category is required");
+            }
+            if (model.UnitPrice <= 0)
+            {
+                return BadRequest("Unit Price must be greater than 0");
+            }
+            if (string.IsNullOrWhiteSpace(model.Units))
+            {
+                return BadRequest("Units is required");
+            }
 
             var product = new Product
             {
