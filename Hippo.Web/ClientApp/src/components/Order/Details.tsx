@@ -93,7 +93,9 @@ export const Details = () => {
 
   useEffect(() => {
     if (order) {
-      const nextStatus: UpdateOrderStatusModel = getNextStatus(order.status);
+      const nextStatus: UpdateOrderStatusModel = getNextStatus({
+        status: order.status,
+      });
       setUpdateStatusModel(nextStatus);
     }
   }, [order]);

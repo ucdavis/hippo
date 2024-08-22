@@ -4,9 +4,8 @@ import { Link } from "react-router-dom";
 import { HipTable } from "../../../Shared/Table/HipTable";
 import { OrderListModel } from "../../../types";
 import { convertToPacificDate } from "../../../util/DateHelper";
-import HipProgress from "../../../Shared/HipProgress";
 import { Progress } from "reactstrap";
-import { OrderStatus } from "../../../types/status";
+import { OrderStatus, statusValue } from "../../../types/status";
 
 interface OrdersTableProps {
   orders: OrderListModel[];
@@ -41,30 +40,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       ),
     });
 
-    const statusValue = (status: OrderStatus) => {
-      switch (status) {
-        case OrderStatus.Created:
-          return 1;
-        case OrderStatus.Submitted:
-          return 2;
-        case OrderStatus.Processing:
-          return 3;
-        case OrderStatus.Cancelled:
-          return 2.5;
-        case OrderStatus.Active:
-          return 4;
-        case OrderStatus.Completed:
-          return 5;
-        case OrderStatus.Rejected:
-          return 5;
-        case OrderStatus.Archived:
-          return 5;
-        case OrderStatus.Closed:
-          return 5;
-        default:
-          return 0;
-      }
-    };
     const status = columnHelper.accessor("status", {
       header: "Status",
       id: "status",

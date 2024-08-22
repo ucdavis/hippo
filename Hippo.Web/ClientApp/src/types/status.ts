@@ -41,9 +41,9 @@ export const orderStatusDescriptions: Record<
     description:
       "The order has been created, but not yet submitted for processing.",
     forAdmin:
-      "This will create a new order for the sponsor to review, but they must review and submit it themselves.",
+      "This will create a new order for the sponsor to review, but they must review and submit it themselves before you can work on it.",
     forSponsor:
-      "You must review and submit this order before it can be processed.",
+      "You must review and submit this order before an admin can begin working on it.",
   },
   [OrderStatus.Submitted]: {
     description:
@@ -66,12 +66,47 @@ export const compareOrderStatus = (a: OrderStatus, b: OrderStatus): number => {
   return orderStatuses.indexOf(a) - orderStatuses.indexOf(b);
 };
 
+/**
+ * @param status - The status to get the value of.
+ * @returns A numeric value representing the status. This is used for sorting statuses and displaying progress bars.
+ */
+export const statusValue = (status: OrderStatus) => {
+  switch (status) {
+    case OrderStatus.Created:
+      return 1;
+    case OrderStatus.Submitted:
+      return 2;
+    case OrderStatus.Processing:
+      return 3;
+    case OrderStatus.Cancelled:
+      return 2.5;
+    case OrderStatus.Active:
+      return 4;
+    case OrderStatus.Completed:
+      return 5;
+    case OrderStatus.Rejected:
+      return 5;
+    case OrderStatus.Archived:
+      return 5;
+    case OrderStatus.Closed:
+      return 5;
+    default:
+      return 0;
+  }
+};
+
 export interface UpdateOrderStatusModel {
   currentStatus: OrderStatus;
   newStatus: OrderStatus;
 }
 
-export const getNextStatus = (status: OrderStatus): UpdateOrderStatusModel => {
+export const getNextStatus = ({
+  status,
+  isRecurring,
+}: {
+  status: OrderStatus;
+  isRecurring?: boolean;
+}): UpdateOrderStatusModel => {
   switch (status) {
     case OrderStatus.Draft:
       return {
@@ -93,6 +128,14 @@ export const getNextStatus = (status: OrderStatus): UpdateOrderStatusModel => {
         currentStatus: status,
         newStatus: OrderStatus.Active,
       };
+    case OrderStatus.Active:
+      if (isRecurring) {
+        return {
+          currentStatus: status,
+          newStatus: OrderStatus.Closed,
+        };
+      }
+      break;
     case OrderStatus.Completed:
       return {
         currentStatus: status,
