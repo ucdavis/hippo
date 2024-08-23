@@ -173,6 +173,11 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       header: "Recurring",
       id: "isRecurring",
       cell: (value) => (value.row.original.isRecurring ? "Yes" : "No"),
+      filterFn: (row, id, filterValue) => {
+        return (row.original.isRecurring ? "YES" : "NO").startsWith(
+          filterValue?.toUpperCase(),
+        );
+      },
     });
 
     const actions = columnHelper.display({
