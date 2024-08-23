@@ -441,6 +441,17 @@ export const Products = () => {
       header: "Installments",
       id: "installments",
     }),
+    columnHelper.accessor("isRecurring", {
+      header: "Recurring",
+      id: "isRecurring",
+      cell: (value) => (value.row.original.isRecurring ? "Yes" : "No"),
+      filterFn: (row, id, filterValue) => {
+        return (row.original.isRecurring ? "YES" : "NO").startsWith(
+          filterValue?.toUpperCase(),
+        );
+      },
+    }),
+
     columnHelper.accessor("installmentType", {
       header: "Type",
       id: "installmentType",
