@@ -104,19 +104,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       id: "sponsorName",
     });
 
-    const units = columnHelper.accessor("units", {
-      header: "Units",
-      id: "units",
-    });
-
-    const quantity = columnHelper.accessor("quantity", {
-      header: "Quantity",
-      id: "quantity",
-      filterFn: (row, id, filterValue) => {
-        return row.original.quantity.toString().includes(filterValue);
-      },
-    });
-
     const total = columnHelper.accessor("total", {
       header: "Total",
       id: "total",
@@ -171,6 +158,23 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       },
     });
 
+    const expirationDate = columnHelper.accessor("expirationDate", {
+      header: "Expires On",
+      id: "expirationDate",
+      cell: (value) => convertToPacificDate(value.row.original.expirationDate),
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.getValue("expirationDate"));
+        const dateB = new Date(rowB.getValue("expirationDate"));
+        return dateA.getTime() - dateB.getTime();
+      },
+    });
+
+    const isRecurring = columnHelper.accessor("isRecurring", {
+      header: "Recurring",
+      id: "isRecurring",
+      cell: (value) => (value.row.original.isRecurring ? "Yes" : "No"),
+    });
+
     const actions = columnHelper.display({
       header: "Actions",
       cell: (value) => (
@@ -192,8 +196,8 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     if (isAdminOrders) {
       cols.push(sponsorName);
     }
-    cols.push(units);
-    cols.push(quantity);
+    cols.push(isRecurring);
+    cols.push(expirationDate);
     cols.push(total);
     cols.push(balanceRemaining);
     cols.push(createdOn);

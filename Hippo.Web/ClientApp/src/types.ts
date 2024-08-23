@@ -330,14 +330,14 @@ export interface OrderListModel {
   id: number;
   name: string;
   description: string;
-  units: string;
-  quantity: number;
   createdOn: string;
   status: OrderStatus;
   total: number;
   balanceRemaining: number;
   pendingAmount: number;
   sponsorName: string;
+  expirationDate: string;
+  isRecurring: boolean;
 }
 
 export interface OrderTotalCalculationModel extends Partial<OrderModel> {
