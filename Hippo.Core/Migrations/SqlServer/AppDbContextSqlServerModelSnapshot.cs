@@ -409,6 +409,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -619,6 +620,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -636,6 +638,9 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasDefaultValue(true);
 
                     b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUnavailable")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUpdated")
