@@ -60,6 +60,7 @@ namespace Hippo.Core.Services
                     {
                         order.Status = Order.Statuses.Completed;
                         order.NextPaymentDate = null;
+                        order.BalanceRemaining = 0;
                         //TODO: A notification? This Shold happen when sloth updates, but just in case.
                         _dbContext.Orders.Update(order);
                         await _dbContext.SaveChangesAsync();
@@ -72,6 +73,7 @@ namespace Hippo.Core.Services
                     if (order.BalanceRemaining <= 0)
                     {
                         SetNextPaymentDate(order);
+                        //if for some reason the ballance is a negative, it is probably because of an over payment, so it makes sense to just add the next payment ammount
                         order.BalanceRemaining += order.Total;
                         _dbContext.Orders.Update(order);
                         await _dbContext.SaveChangesAsync();
@@ -82,6 +84,7 @@ namespace Hippo.Core.Services
                 //Need to ignore manual ones...
                 if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
                 {
+                    //This could happen if auto approve is not on, and they take a long time to approve in sloth. Not really a big deal for non recurring as the order will eventually get paid.
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
                     continue;
                 }
@@ -100,7 +103,7 @@ namespace Hippo.Core.Services
                 var balanceLessPending = order.BalanceRemaining - pendingAmount;
                 if (balanceLessPending <= 0)
                 {
-                    Log.Information("Order {0} has a balance of 0. Skipping", order.Id);
+                    Log.Information("Order {0} has a pending balance of 0. Skipping", order.Id);
                     continue;
                 }
 
