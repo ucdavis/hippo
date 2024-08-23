@@ -38,8 +38,6 @@ namespace Hippo.Core.Domain
 
         public bool IsRecurring { get; set; } = false;
 
-        public bool IsUnavailable { get; set; } = false;
-
 
     }
 }
