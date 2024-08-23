@@ -479,12 +479,17 @@ export const Products = () => {
       header: "Actions",
       cell: ({ row }) => (
         <div>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/create/${row.original.id}`}
-          >
-            Order
-          </Link>{" "}
+          <ShowFor condition={row.original.isUnavailable}>
+            <span className="badge bg-danger">Unavailable</span>{" "}
+          </ShowFor>
+          <ShowFor condition={!row.original.isUnavailable}>
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/create/${row.original.id}`}
+            >
+              Order
+            </Link>{" "}
+          </ShowFor>{" "}
           <ShowFor roles={["ClusterAdmin"]}>
             <HipButton onClick={() => handleEdit(row.original.id)}>
               Edit
