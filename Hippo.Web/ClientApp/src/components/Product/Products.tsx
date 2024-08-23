@@ -27,6 +27,8 @@ const defaultProduct: ProductModel = {
   installments: 1,
   installmentType: "OneTime",
   lifeCycle: 60,
+  isRecurring: false,
+  isUnavailable: false,
 };
 
 export const Products = () => {
@@ -152,6 +154,22 @@ export const Products = () => {
                 const model: ProductModel = {
                   ...editProductModel,
                   units: e.target.value,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldIsUnavailable">Is Unavailable</label>{" "}
+            <input
+              id="fieldIsUnavailable"
+              type="checkbox"
+              checked={editProductModel.isUnavailable}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  isUnavailable: e.target.checked,
                 };
                 setEditProductModel(model);
                 setReturn(model);
@@ -461,12 +479,17 @@ export const Products = () => {
       header: "Actions",
       cell: ({ row }) => (
         <div>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/create/${row.original.id}`}
-          >
-            Order
-          </Link>{" "}
+          <ShowFor condition={row.original.isUnavailable}>
+            <span className="badge bg-danger">Unavailable</span>{" "}
+          </ShowFor>
+          <ShowFor condition={!row.original.isUnavailable}>
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/create/${row.original.id}`}
+            >
+              Order
+            </Link>{" "}
+          </ShowFor>{" "}
           <ShowFor roles={["ClusterAdmin"]}>
             <HipButton onClick={() => handleEdit(row.original.id)}>
               Edit
