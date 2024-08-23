@@ -263,6 +263,7 @@ export interface ProductBase {
 export interface ProductModel extends Partial<ProductBase> {
   id: number;
   name: string;
+  isUnavailable: boolean;
 }
 
 export interface OrderMetadataModel {
