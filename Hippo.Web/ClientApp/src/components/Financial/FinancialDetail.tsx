@@ -9,6 +9,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipButton from "../../Shared/HipButton";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import { Form, FormGroup, Label, Input } from "reactstrap";
 
 declare const window: Window &
   typeof globalThis & {
@@ -163,7 +164,7 @@ export const FinancialDetail = () => {
             />
           </div>
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label htmlFor="autoApprove">Auto Approve:</label>{" "}
             <input
               type="checkbox"
@@ -177,7 +178,22 @@ export const FinancialDetail = () => {
                 }))
               }
             />
-          </div>
+          </div> */}
+          <Form>
+            <FormGroup switch>
+              <Input
+                type="switch"
+                checked={financialDetail.autoApprove}
+                onChange={(e) =>
+                  setFinancialDetail((prevFinancialDetail) => ({
+                    ...prevFinancialDetail,
+                    autoApprove: e.target.checked,
+                  }))
+                }
+              />
+              <Label check>Auto Approve</Label>
+            </FormGroup>
+          </Form>
           <div className="form-group">
             <label htmlFor="chartString">Chart String:</label>{" "}
             {financialDetail.chartString && (
