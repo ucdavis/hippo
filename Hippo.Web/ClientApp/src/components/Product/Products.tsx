@@ -27,6 +27,8 @@ const defaultProduct: ProductModel = {
   installments: 1,
   installmentType: "OneTime",
   lifeCycle: 60,
+  isRecurring: false,
+  isUnavailable: false,
 };
 
 export const Products = () => {
@@ -159,6 +161,22 @@ export const Products = () => {
             />
           </div>
           <div className="form-group">
+            <label htmlFor="fieldIsUnavailable">Is Unavailable</label>{" "}
+            <input
+              id="fieldIsUnavailable"
+              type="checkbox"
+              checked={editProductModel.isUnavailable}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  isUnavailable: e.target.checked,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="fieldIsRecurring">Is Recurring</label>{" "}
             <input
               id="fieldIsRecurring"
@@ -269,17 +287,15 @@ export const Products = () => {
           )}
         </>
       ),
+
+      //TODO: This should check that the installment and lifecycle are more than 0 when it isn't a recurring product
       canConfirm:
-        (notEmptyOrFalsey(editProductModel.name) &&
-          notEmptyOrFalsey(editProductModel.category) &&
-          notEmptyOrFalsey(editProductModel.units) &&
-          notEmptyOrFalsey(editProductModel.description) &&
-          !notification.pending &&
-          parseFloat(editProductModel.unitPrice) > 0 &&
-          editProductModel.isRecurring === false &&
-          editProductModel.installments > 0 &&
-          editProductModel.lifeCycle > 0) ||
-        editProductModel.isRecurring,
+        !notification.pending &&
+        notEmptyOrFalsey(editProductModel.name) &&
+        notEmptyOrFalsey(editProductModel.category) &&
+        notEmptyOrFalsey(editProductModel.units) &&
+        notEmptyOrFalsey(editProductModel.description) &&
+        parseFloat(editProductModel.unitPrice) > 0,
     },
     [editProductModel, notification.pending],
   );
@@ -443,6 +459,17 @@ export const Products = () => {
       header: "Installments",
       id: "installments",
     }),
+    columnHelper.accessor("isRecurring", {
+      header: "Recurring",
+      id: "isRecurring",
+      cell: (value) => (value.row.original.isRecurring ? "Yes" : "No"),
+      filterFn: (row, id, filterValue) => {
+        return (row.original.isRecurring ? "YES" : "NO").startsWith(
+          filterValue?.toUpperCase(),
+        );
+      },
+    }),
+
     columnHelper.accessor("installmentType", {
       header: "Type",
       id: "installmentType",
@@ -452,12 +479,17 @@ export const Products = () => {
       header: "Actions",
       cell: ({ row }) => (
         <div>
-          <Link
-            className="btn btn-primary"
-            to={`/${cluster}/order/create/${row.original.id}`}
-          >
-            Order
-          </Link>{" "}
+          <ShowFor condition={row.original.isUnavailable}>
+            <span className="badge bg-danger">Unavailable</span>{" "}
+          </ShowFor>
+          <ShowFor condition={!row.original.isUnavailable}>
+            <Link
+              className="btn btn-primary"
+              to={`/${cluster}/order/create/${row.original.id}`}
+            >
+              Order
+            </Link>{" "}
+          </ShowFor>{" "}
           <ShowFor roles={["ClusterAdmin"]}>
             <HipButton onClick={() => handleEdit(row.original.id)}>
               Edit

@@ -145,7 +145,7 @@ namespace Hippo.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var model = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+            var model = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster && a.Id == id && !a.IsUnavailable)
 
                 .Select(OrderDetailModel.ProductProjection())
                 .SingleOrDefaultAsync();

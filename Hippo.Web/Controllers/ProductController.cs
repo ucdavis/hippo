@@ -34,6 +34,26 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("Invalid");
             }
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                return BadRequest("Name is required");
+            }
+            if (string.IsNullOrWhiteSpace(model.Description))
+            {
+                return BadRequest("Description is required");
+            }
+            if (string.IsNullOrWhiteSpace(model.Category))
+            {
+                return BadRequest("Category is required");
+            }
+            if (model.UnitPrice <= 0)
+            {
+                return BadRequest("Unit Price must be greater than 0");
+            }
+            if (string.IsNullOrWhiteSpace(model.Units))
+            {
+                return BadRequest("Units is required");
+            }
 
             var product = new Product
             {
@@ -47,6 +67,7 @@ namespace Hippo.Web.Controllers
                 InstallmentType = model.InstallmentType,
                 LifeCycle = model.LifeCycle,
                 IsRecurring = model.IsRecurring,
+                IsUnavailable = model.IsUnavailable,
             };
             if(product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
@@ -86,6 +107,8 @@ namespace Hippo.Web.Controllers
             product.Installments = model.Installments;
             product.InstallmentType = model.InstallmentType;
             product.LifeCycle = model.LifeCycle;
+            product.IsUnavailable = model.IsUnavailable;
+            product.IsRecurring = model.IsRecurring;
             if (product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
                 product.Installments = 1;

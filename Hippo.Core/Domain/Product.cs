@@ -8,6 +8,9 @@ namespace Hippo.Core.Domain
         //Other fields in Product Base   
 
         public bool IsActive { get; set; }
+
+        public bool IsUnavailable { get; set; } = false;
+
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         [Required]
