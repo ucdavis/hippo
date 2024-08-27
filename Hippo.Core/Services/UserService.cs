@@ -164,7 +164,7 @@ namespace Hippo.Core.Services
         // Get any user based on their claims, creating if necessary
         public async Task<User> GetUser(Claim[] userClaims)
         {
-            string iamId = userClaims.SingleOrDefault(c => c.Type == IamIdClaimType).Value;
+            string iamId = userClaims.SingleOrDefault(c => c.Type == IamIdClaimType)?.Value;
             if (iamId == null)
             {
                 // This is a normal condition for EventQueue api requests. It's probably not helpful to log a warning.
