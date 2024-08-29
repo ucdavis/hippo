@@ -105,7 +105,7 @@ public class AdminController : SuperController
             .Include(p => p.Role)
             .Include(p => p.User)
             .Where(p =>
-                p.Id == id
+                p.UserId == id
                 && p.Cluster.Name == Cluster
                 && p.Role.Name == Role.Codes.ClusterAdmin)
             .SingleOrDefaultAsync();
