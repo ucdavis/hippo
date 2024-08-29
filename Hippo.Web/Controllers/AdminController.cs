@@ -93,6 +93,20 @@ public class AdminController : SuperController
             await _historyService.RoleAdded(user, perm);
         }
 
+        var account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.Kerberos == user.Kerberos);
+        if(account == null) {
+            await _dbContext.SaveChangesAsync();
+            account = new Account
+            {
+                Cluster = cluster,
+                Kerberos = user.Kerberos,
+                Email = user.Email,
+                Name = user.Name,
+                OwnerId = user.Id,
+            };
+            _dbContext.Accounts.Add(account);
+        }
+
 
         await _dbContext.SaveChangesAsync();
         return Ok(user);
