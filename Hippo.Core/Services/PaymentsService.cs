@@ -35,6 +35,24 @@ namespace Hippo.Core.Services
         }
         public async Task<bool> CreatePayments()
         {
+            //Do a sanity check and make sure there are no non recurring orders with a negative balance
+            var negativeBalanceOrders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Where(a => !a.IsRecurring && a.Status == Order.Statuses.Active && a.BalanceRemaining < 0).ToListAsync();
+            foreach (var order in negativeBalanceOrders)
+            {
+                Log.Error("Order {0} has a negative balance. Balance: {1}", order.Id, order.BalanceRemaining);
+                order.BalanceRemaining = order.Total - order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
+                if(order.BalanceRemaining < 0)
+                {
+                    Log.Error("Order {0} still has a negative balance. Setting to 0", order.Id);
+                    order.BalanceRemaining = 0;
+                    //Posibly set to completed? Or notify someone that there appears to be an over payment?
+                    await _historyService.OrderUpdated(order, null, "Negative balance detected. Setting Ballance to 0");
+                }
+                _dbContext.Orders.Update(order);
+                await _dbContext.SaveChangesAsync();
+            }
+
+
             //Do a check on all active orders that don't have a next payment date and a balance > 0 
             var orderCheck = await _dbContext.Orders.Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
             foreach (var order in orderCheck)
