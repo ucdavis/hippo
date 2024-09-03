@@ -68,8 +68,10 @@ namespace Hippo.Core.Services
                 await _dbContext.SaveChangesAsync();
             }
 
+            //Next payment date should be a UTC date/Time, at 7AM UTC, which should be 12AM PST
+
             //If I add a history call here, I'll also need to get the cluster .Include(a => a.Cluster)
-            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
+            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value <= DateTime.UtcNow).ToListAsync();
             foreach (var order in orders) {
 
                 if (!order.IsRecurring)
