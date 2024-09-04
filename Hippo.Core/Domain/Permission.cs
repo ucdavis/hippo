@@ -42,5 +42,11 @@ namespace Hippo.Core.Domain
                 || (p.Role.Name == Role.Codes.ClusterAdmin && p.Cluster?.Name == cluster));
         }
 
+        public static bool IsFinancialAdmin(this IEnumerable<Permission> permissions, string cluster)
+        {
+            return permissions.Any(p =>
+                p.Role.Name == Role.Codes.FinancialAdmin && p.Cluster?.Name == cluster);
+        }
+
     }
 }

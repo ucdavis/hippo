@@ -101,8 +101,9 @@ namespace Hippo.Web.Controllers
             var currentUser = await _userService.GetCurrentUser();
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+            var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster);
 
-            if (!isClusterOrSystemAdmin && model.PiUser?.Id != currentUser.Id )
+            if (!isClusterOrSystemAdmin && !isFinancialAdmin && model.PiUser?.Id != currentUser.Id )
             {
                 return BadRequest("You do not have permission to view this order.");
             }

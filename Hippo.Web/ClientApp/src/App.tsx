@@ -143,7 +143,12 @@ const App = () => {
               path="/:cluster/order/details/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <Details />
