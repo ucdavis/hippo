@@ -109,7 +109,10 @@ const App = () => {
             <Route
               path="/:cluster/admin/financialdetails"
               element={
-                <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
+                <ShowFor
+                  roles={["System", "FinancialAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
                   <FinancialDetail />
                 </ShowFor>
               }

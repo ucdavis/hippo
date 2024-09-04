@@ -105,7 +105,7 @@ export const AppNav = () => {
                   Cluster Admins
                 </NavLink>
               </ShowFor>
-              <ShowFor roles={["System"]}>
+              <ShowFor roles={["System", "FinancialAdmin"]}>
                 <NavLink
                   id="financialDetails"
                   className="nav-item nav-link"

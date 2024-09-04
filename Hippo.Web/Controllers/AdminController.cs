@@ -15,7 +15,7 @@ using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 namespace Hippo.Web.Controllers;
 
-[Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+[Authorize]
 public class AdminController : SuperController
 {
     private AppDbContext _dbContext;
@@ -42,6 +42,7 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     public async Task<IActionResult> ClusterAdmins()
     {
         // get all users with cluster admin permissions
@@ -53,6 +54,7 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     public async Task<IActionResult> AddClusterAdmin(string id)
     {
 
@@ -99,6 +101,7 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     public async Task<IActionResult> RemoveClusterAdmin(int id)
     {
         var permission = await _dbContext.Permissions
@@ -128,6 +131,7 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
+    [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
     public async Task<IActionResult> Groups()
     {
         // get all groups for cluster
@@ -139,7 +143,7 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
-    [Authorize(Policy = AccessCodes.SystemAccess)]
+    [Authorize(Policy = AccessCodes.FinancialAdminAccess)]
     public async Task<IActionResult> FinancialDetails()
     {
         var cluster = await _dbContext.Clusters.AsNoTracking().SingleAsync(c => c.Name == Cluster);
@@ -183,7 +187,7 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
-    [Authorize(Policy = AccessCodes.SystemAccess)]
+    [Authorize(Policy = AccessCodes.FinancialAdminAccess)]
     public async Task<IActionResult> UpdateFinancialDetails([FromBody] FinancialDetailModel model)
     {
         //Possibly use the secret service to set the FinancialSystemApiKey
