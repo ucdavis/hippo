@@ -13,6 +13,10 @@ const StatusDescription: React.FC<StatusDescriptionProps> = ({
 }) => {
   const { description } = orderStatusDescriptions[status];
 
+  if (!description) {
+    return null;
+  }
+
   return (
     <>
       <CardText>

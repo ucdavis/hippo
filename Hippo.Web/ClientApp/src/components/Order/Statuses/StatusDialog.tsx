@@ -1,6 +1,5 @@
 import React from "react";
 import { UpdateOrderStatusModel } from "./status";
-import StatusDescription from "./StatusDescription";
 import StatusBar from "./StatusBar";
 import StatusCard from "./StatusCard";
 
@@ -30,13 +29,11 @@ const StatusDialog: React.FC<StatusDialogProps> = ({
       <StatusCard
         status={currentStatus}
         isAdmin={isAdmin}
-        showStatusActions={true}
+        showStatusActions={false}
       />
       <StatusCard
         status={newStatus}
         isAdmin={isAdmin}
-        hideAdminDescription={true}
-        hideSponsorDescription={true}
         showStatusActions={true}
       />
     </div>

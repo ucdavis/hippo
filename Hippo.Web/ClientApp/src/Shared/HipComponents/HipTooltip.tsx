@@ -14,7 +14,7 @@ export const HipTooltip = ({
   return (
     <Tooltip
       isOpen={isOpen}
-      toggle={() => setIsOpen(true)} // @laholstege CHANGE THIS BEFORE MERGING TO MAIN
+      toggle={() => setIsOpen(!isOpen)}
       className="hip-tooltip"
       placement={placement}
       target={target}

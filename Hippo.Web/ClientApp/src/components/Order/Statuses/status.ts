@@ -180,20 +180,6 @@ export const adminCanArchiveStatuses = [
 
 export interface OrderStatusDescriptions {
   description: string;
-  adminDescription?: string;
-  sponsorDescription?: string;
-
-  sponsorCanApprove: boolean;
-  sponsorCanEdit: boolean;
-  sponsorCanCancel: boolean;
-  sponsorCanAddPayment: boolean;
-
-  adminCanEdit: boolean;
-  adminCanApprove: boolean;
-  adminCanReject: boolean;
-  adminCanArchive: boolean;
-
-  canUpdateChartStrings: boolean;
 }
 
 export const orderStatusDescriptions: Record<
@@ -202,207 +188,72 @@ export const orderStatusDescriptions: Record<
 > = {
   [OrderStatus.Draft]: {
     description: "The order has not been created yet.",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Draft),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Draft),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Draft),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Draft,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Draft),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Draft),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Draft),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Draft),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Draft,
-    ),
   },
   [OrderStatus.Created]: {
-    description:
-      "The order has been created, but not yet submitted for processing.",
-    adminDescription:
-      "This will create a new order for the sponsor to review, but they must review and submit it themselves before you can work on it.",
-    sponsorDescription:
-      "You must review and submit this order before an admin can begin working on it.",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Created),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Created),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Created),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Created,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Created),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Created),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Created),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Created),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Created,
-    ),
+    description: "The order has been created, but not yet submitted.",
   },
   [OrderStatus.Submitted]: {
-    description: "The order has been submitted and is awaiting processing.",
-    adminDescription: "",
-    sponsorDescription: "",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(
-      OrderStatus.Submitted,
-    ),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Submitted),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Submitted),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Submitted,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Submitted),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Submitted),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Submitted),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Submitted),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Submitted,
-    ),
+    description: "The order is awaiting approval by an admin.",
   },
   [OrderStatus.Processing]: {
-    description: "The order is being worked on.",
-    adminDescription: "You will still be able to edit the order.",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(
-      OrderStatus.Processing,
-    ),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Processing),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Processing),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Processing,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Processing),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Processing),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Processing),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Processing),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Processing,
-    ),
+    description: "The order has been approved and is being worked on.",
   },
   [OrderStatus.Cancelled]: {
-    description: "Cancelled",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(
-      OrderStatus.Cancelled,
-    ),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Cancelled),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Cancelled),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Cancelled,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Cancelled),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Cancelled),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Cancelled),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Cancelled),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Cancelled,
-    ),
+    description: "The order has been cancelled by the sponsor.",
   },
   [OrderStatus.Active]: {
-    description: "Active",
-    adminDescription: "You will still be able to edit the order.",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Active),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Active),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Active),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Active,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Active),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Active),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Active),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Active),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Active,
-    ),
+    description: "The order is active and billing has started.",
   },
   [OrderStatus.Rejected]: {
-    description: "Rejected",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Rejected),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Rejected),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Rejected),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Rejected,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Rejected),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Rejected),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Rejected),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Rejected),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Rejected,
-    ),
+    description: "The order has been rejected by an admin.",
   },
   [OrderStatus.Completed]: {
-    description: "Completed",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(
-      OrderStatus.Completed,
-    ),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Completed),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Completed),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Completed,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Completed),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Completed),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Completed),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Completed),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Completed,
-    ),
+    description: "The order has been completed and billing has stopped.",
   },
   [OrderStatus.Archived]: {
-    description: "Archived",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Archived),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Archived),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Archived),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Archived,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Archived),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Archived),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Archived),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Archived),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Archived,
-    ),
+    description: "The order is complete and has been archived.",
   },
   [OrderStatus.Closed]: {
-    description: "Closed",
-    sponsorCanApprove: sponsorCanApproveStatuses.includes(OrderStatus.Closed),
-    sponsorCanEdit: sponsorEditableStatuses.includes(OrderStatus.Closed),
-    sponsorCanCancel: sponsorCanCancelStatuses.includes(OrderStatus.Closed),
-    sponsorCanAddPayment: sponsorCanAddPaymentStatuses.includes(
-      OrderStatus.Closed,
-    ),
-    adminCanEdit: adminEditableStatuses.includes(OrderStatus.Closed),
-    adminCanApprove: adminCanApproveStatuses.includes(OrderStatus.Closed),
-    adminCanReject: adminCanRejectStatuses.includes(OrderStatus.Closed),
-    adminCanArchive: adminCanArchiveStatuses.includes(OrderStatus.Closed),
-    canUpdateChartStrings: canUpdateChartStringsStatuses.includes(
-      OrderStatus.Closed,
-    ),
+    description: "The recurring order has been closed and billing has stopped.",
   },
 };
 
-export const getStatusActions = (status: OrderStatus, isAdmin: boolean) => {
-  const {
-    sponsorCanApprove,
-    sponsorCanEdit,
-    sponsorCanCancel,
-    sponsorCanAddPayment,
-    adminCanEdit,
-    adminCanApprove,
-    adminCanReject,
-    adminCanArchive,
-    canUpdateChartStrings,
-  } = orderStatusDescriptions[status];
+export const getStatusActions = ({
+  status,
+  isAdmin,
+}: {
+  status: OrderStatus;
+  isAdmin: boolean;
+}): { sponsorActions: string; adminActions: string } => {
+  const sponsorCanApprove = sponsorCanApproveStatuses.includes(status);
+  const sponsorCanEdit = sponsorEditableStatuses.includes(status);
+  const sponsorCanCancel = sponsorCanCancelStatuses.includes(status);
+  const sponsorCanAddPayment = sponsorCanAddPaymentStatuses.includes(status);
+  const canUpdateChartStrings = canUpdateChartStringsStatuses.includes(status);
 
-  return [
-    sponsorCanApprove && "Approve",
-    sponsorCanEdit && "Edit",
-    sponsorCanCancel && "Cancel",
-    sponsorCanAddPayment && "Add Payment",
-    adminCanEdit && isAdmin && "Edit",
-    adminCanApprove && isAdmin && "Approve",
-    adminCanReject && isAdmin && "Reject",
-    adminCanArchive && isAdmin && "Archive",
-    canUpdateChartStrings && "Update Chart Strings",
-  ]
-    .filter((action) => !!action)
-    .join(", ");
+  const adminCanEdit = adminEditableStatuses.includes(status);
+  const adminCanApprove = adminCanApproveStatuses.includes(status);
+  const adminCanReject = adminCanRejectStatuses.includes(status);
+  const adminCanArchive = adminCanArchiveStatuses.includes(status);
+
+  return {
+    sponsorActions: [
+      sponsorCanApprove && "Approve",
+      sponsorCanEdit && "Edit",
+      sponsorCanCancel && "Cancel",
+      sponsorCanAddPayment && "Add Payment",
+      canUpdateChartStrings && "Update Billing Info",
+    ]
+      .filter((action) => !!action)
+      .join(", "),
+    adminActions: [
+      adminCanEdit && isAdmin && "Edit",
+      adminCanApprove && isAdmin && "Approve",
+      adminCanReject && isAdmin && "Reject",
+      adminCanArchive && isAdmin && "Archive",
+      canUpdateChartStrings && isAdmin && "Update Billing Info",
+    ]
+      .filter((action) => !!action)
+      .join(", "),
+  };
 };
