@@ -66,8 +66,9 @@ namespace Hippo.Web.Controllers
             var currentUser = await _userService.GetCurrentUser();
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+            var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster);
 
-            if (!isClusterOrSystemAdmin)
+            if (!isClusterOrSystemAdmin && !isFinancialAdmin)
             {
                 return BadRequest("You do not have permission to view this page.");
             }

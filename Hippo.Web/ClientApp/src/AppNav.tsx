@@ -105,7 +105,7 @@ export const AppNav = () => {
                   Cluster Admins
                 </NavLink>
               </ShowFor>
-              <ShowFor roles={["System", "FinancialAdmin"]}>
+              <ShowFor roles={["System"]}>
                 <NavLink
                   id="financialDetails"
                   className="nav-item nav-link"
@@ -143,7 +143,7 @@ export const AppNav = () => {
                 </NavLink>
               </ShowFor>
               <ShowFor
-                roles={["ClusterAdmin", "System"]}
+                roles={["ClusterAdmin", "System", "FinancialAdmin"]}
                 condition={cluster.allowOrders}
               >
                 <NavLink

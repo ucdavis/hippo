@@ -109,10 +109,7 @@ const App = () => {
             <Route
               path="/:cluster/admin/financialdetails"
               element={
-                <ShowFor
-                  roles={["System", "FinancialAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
+                <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
                   <FinancialDetail />
                 </ShowFor>
               }
@@ -132,7 +129,12 @@ const App = () => {
               path="/:cluster/order/:orderType"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <Orders />
@@ -159,7 +161,12 @@ const App = () => {
               path="/:cluster/order/history/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <OrderHistories />
@@ -170,7 +177,12 @@ const App = () => {
               path="/:cluster/order/payments/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <OrderPayments />
@@ -192,7 +204,12 @@ const App = () => {
               path="/:cluster/order/updatechartstrings/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <UpdateChartStrings />
