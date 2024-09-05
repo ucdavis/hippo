@@ -42,19 +42,30 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
-    public async Task<IActionResult> ClusterAdmins()
+    public async Task<IActionResult> ClusterAdmins(bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
         // get all users with cluster admin permissions
         return Ok(await _dbContext.Users
             .AsNoTracking()
-            .Where(u => u.Permissions.Any(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
+            .Where(u => u.Permissions.Any(p => p.Cluster.Name == Cluster && p.Role.Name == roleName))
             .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
             .ToArrayAsync());
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddClusterAdmin(string id)
+    public async Task<IActionResult> AddClusterAdmin(string id, bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -72,7 +83,7 @@ public class AdminController : SuperController
         }
 
         var user = await _dbContext.Users
-            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
+            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == roleName))
             .Where(u => u.Iam == userLookup.Iam)
             .SingleOrDefaultAsync();
 
@@ -87,7 +98,7 @@ public class AdminController : SuperController
             var perm = new Permission
             {
                 Cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster),
-                Role = await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.ClusterAdmin),
+                Role = await _dbContext.Roles.SingleAsync(r => r.Name == roleName),
             };
             user.Permissions.Add(perm);
             await _historyService.RoleAdded(user, perm);
@@ -99,15 +110,21 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
-    public async Task<IActionResult> RemoveClusterAdmin(int id)
+    public async Task<IActionResult> RemoveClusterAdmin(int id, bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
+
         var permission = await _dbContext.Permissions
             .Include(p => p.Role)
             .Include(p => p.User)
             .Where(p =>
                 p.UserId == id
                 && p.Cluster.Name == Cluster
-                && p.Role.Name == Role.Codes.ClusterAdmin)
+                && p.Role.Name == roleName)
             .SingleOrDefaultAsync();
 
         if (permission == null)
@@ -115,7 +132,7 @@ public class AdminController : SuperController
             return BadRequest("Permission not found");
         }
 
-        if (permission.UserId == (await _userService.GetCurrentUser()).Id)
+        if (permission.UserId == (await _userService.GetCurrentUser()).Id && roleName != Role.Codes.FinancialAdmin)
         {
             return BadRequest("Can't remove yourself");
         }
@@ -126,95 +143,6 @@ public class AdminController : SuperController
 
         return Ok();
     }
-
-    #region Financial Admin methods
-    [HttpGet]
-    public async Task<IActionResult> FinancialAdmins()
-    {
-        // get all users with cluster admin permissions
-        return Ok(await _dbContext.Users
-            .AsNoTracking()
-            .Where(u => u.Permissions.Any(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.FinancialAdmin))
-            .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
-            .ToArrayAsync());
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> AddFinancialAdmin(string id)
-    {
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest("You must supply either an email or kerb id to lookup.");
-        }
-
-        var cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster);
-
-        var userLookup = id.Contains("@")
-                    ? await _identityService.GetByEmail(id)
-                    : await _identityService.GetByKerberos(id);
-        if (userLookup == null)
-        {
-            return BadRequest("User Not Found");
-        }
-
-        var user = await _dbContext.Users
-            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.FinancialAdmin))
-            .Where(u => u.Iam == userLookup.Iam)
-            .SingleOrDefaultAsync();
-
-        if (user == null)
-        {
-            user = userLookup;
-            _dbContext.Users.Add(user);
-        }
-
-        if (!user.Permissions.Any())
-        {
-            var perm = new Permission
-            {
-                Cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster),
-                Role = await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.FinancialAdmin),
-            };
-            user.Permissions.Add(perm);
-            await _historyService.RoleAdded(user, perm);
-        }
-
-
-        await _dbContext.SaveChangesAsync();
-        return Ok(user);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> RemoveFinancialAdmin(int id)
-    {
-        var permission = await _dbContext.Permissions
-            .Include(p => p.Role)
-            .Include(p => p.User)
-            .Where(p =>
-                p.UserId == id
-                && p.Cluster.Name == Cluster
-                && p.Role.Name == Role.Codes.FinancialAdmin)
-            .SingleOrDefaultAsync();
-
-        if (permission == null)
-        {
-            return BadRequest("Permission not found");
-        }
-
-        //Allow self removal because it is controlled by the cluster admin role.
-        //if (permission.UserId == (await _userService.GetCurrentUser()).Id)
-        //{
-        //    return BadRequest("Can't remove yourself");
-        //}
-
-        await _historyService.RoleRemoved(permission.User, permission);
-        _dbContext.Permissions.Remove(permission);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
-    }
-    #endregion
 
 
     [HttpGet]

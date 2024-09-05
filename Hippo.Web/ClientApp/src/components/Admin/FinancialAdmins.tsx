@@ -36,7 +36,7 @@ export const FinancialAdmins = () => {
   useEffect(() => {
     const fetchFinancialAdmins = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/admin/FinancialAdmins`,
+        `/api/${cluster}/admin/ClusterAdmins/?isFinancial=true`,
       );
 
       if (response.ok) {
@@ -55,9 +55,10 @@ export const FinancialAdmins = () => {
       }
 
       setAdminRemoving(user.id);
+      let isFinancial = true;
 
       const req = authenticatedFetch(
-        `/api/${cluster}/admin/RemoveFinancialAdmin/${user.id}`,
+        `/api/${cluster}/admin/RemoveFinancialAdmin?id=${request.id}&isFinancial=${isFinancial}`,
         {
           method: "POST",
         },
@@ -84,8 +85,9 @@ export const FinancialAdmins = () => {
   );
 
   const handleSubmit = async () => {
+    let isFinancial = true;
     const req = authenticatedFetch(
-      `/api/${cluster}/admin/AddFinancialAdmin/${request.id}`,
+      `/api/${cluster}/admin/AddClusterAdmin?id=${request.id}&isFinancial=${isFinancial}`,
       {
         method: "POST",
       },
