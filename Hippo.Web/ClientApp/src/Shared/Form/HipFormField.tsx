@@ -68,7 +68,11 @@ const HipFormField = <T extends Record<string, any>>({
     return null;
   }
   return (
-    <HipFormGroup size={size} colSize={colSize}>
+    <HipFormGroup
+      size={size}
+      colSize={colSize}
+      switch={type === "switch" && !readOnly ? true : undefined}
+    >
       {label && !hideLabel && (
         <Label for={`field-${name}`}>
           {label}

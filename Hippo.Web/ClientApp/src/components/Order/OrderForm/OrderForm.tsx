@@ -239,7 +239,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 <OrderFormField
                   name="isRecurring"
                   label="Recurring"
-                  type="checkbox"
+                  type="switch"
                   canEditConditions={adminCanEditLimitedStatuses}
                 />
                 <OrderFormField
