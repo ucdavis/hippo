@@ -1,8 +1,8 @@
 import React from "react";
-import { Progress, ProgressProps } from "reactstrap";
+import { Progress } from "reactstrap";
 import { HipTooltip } from "./HipTooltip";
 
-export interface HipProgressProps extends ProgressProps {
+export interface HipProgressProps {
   id: string;
   tooltip?: React.ReactNode;
   bar?: boolean;
@@ -11,6 +11,8 @@ export interface HipProgressProps extends ProgressProps {
   shouldFill?: boolean;
   striped?: boolean;
   animated?: boolean;
+  value?: number;
+  color?: string;
 }
 
 const HipProgress: React.FC<HipProgressProps> = ({

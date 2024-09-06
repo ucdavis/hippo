@@ -21,7 +21,6 @@ const StatusDialog: React.FC<StatusDialogProps> = ({
   return (
     <div>
       <StatusBar
-        isAdmin={isAdmin}
         status={currentStatus}
         showOnHover={newStatus}
         hideTooltip={true}

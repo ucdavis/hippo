@@ -21,6 +21,8 @@ interface OrderFormProps {
   cluster: string;
   onlyChartStrings: boolean;
   onSubmit: (order: OrderModel) => Promise<void>;
+  lookupPI?: (sponsor: string) => Promise<void>;
+  foundPI?: string;
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({
@@ -30,6 +32,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
   cluster,
   onlyChartStrings,
   onSubmit,
+  lookupPI,
+  foundPI,
 }) => {
   const methods = useForm<OrderModel>({
     defaultValues: orderProp,
@@ -42,7 +46,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
     formState: { isDirty, isSubmitting },
   } = methods;
 
-  const [foundPI, setFoundPI] = useState(null);
   const [localInstallmentType, setLocalInstallmentType] = useState(
     methods.getValues("installmentType"),
   );
@@ -80,27 +83,6 @@ const OrderForm: React.FC<OrderFormProps> = ({
     orderProp.installmentDate,
     orderProp.status,
   ]);
-
-  //lookup pi value
-  const lookupPI = async (pi: string) => {
-    if (!pi) {
-      setFoundPI("");
-      return;
-    }
-    const response = await authenticatedFetch(
-      `/api/${cluster}/order/GetClusterUser/${pi}`,
-    );
-    if (response.ok) {
-      const data = await response.json();
-      if (data?.name) {
-        setFoundPI(`Found User ${data.name} (${data.email})`);
-      } else {
-        setFoundPI(`Not Found ${pi}`);
-      }
-    } else {
-      setFoundPI(`Not Found ${pi}`);
-    }
-  };
 
   const submitForm = async (data: OrderModel) => {
     if (!isDirty || isSubmitting) {
@@ -178,22 +160,26 @@ const OrderForm: React.FC<OrderFormProps> = ({
           {onlyChartStrings && <BillingsFields readOnly={isDetailsPage} />}
           {!onlyChartStrings && (
             <>
-              {isAdmin && !isDetailsPage && orderProp.id === 0 && (
-                <Row>
-                  <OrderFormField
-                    name="PILookup"
-                    size="lg"
-                    label="Order for Sponsor (email or kerb)"
-                    onBlur={(e) => {
-                      lookupPI(e.target.value);
-                    }}
-                    feedback={foundPI}
-                    canEditConditions={
-                      isAdmin && !isDetailsPage && orderProp.id === 0
-                    }
-                  />
-                </Row>
-              )}
+              {isAdmin &&
+                !isDetailsPage &&
+                orderProp.id === 0 &&
+                lookupPI && ( // only on create
+                  <Row>
+                    <OrderFormField
+                      // the form controls the actual value of the input, but the parent component does the actual lookup
+                      name="PILookup"
+                      size="lg"
+                      label="Order for Sponsor (email or kerb)"
+                      onBlur={(e) => {
+                        lookupPI(e.target.value);
+                      }}
+                      feedback={foundPI}
+                      canEditConditions={
+                        isAdmin && !isDetailsPage && orderProp.id === 0
+                      }
+                    />
+                  </Row>
+                )}
               <h2>Product Information</h2>
               <Row>
                 <OrderFormField

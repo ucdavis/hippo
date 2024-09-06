@@ -5,23 +5,21 @@ import HipProgress from "../../../Shared/HipComponents/HipProgress";
 import StatusDescription from "./StatusDescription";
 
 interface StatusBarProps {
-  isAdmin: boolean;
   hideTooltip?: boolean;
   max?: number;
   status: OrderStatus;
   animated?: boolean;
-  showInProgress?: boolean;
   showOnHover?: OrderStatus | null;
+  creatingForPI?: boolean;
 }
 
 const StatusBar: React.FC<StatusBarProps> = ({
-  isAdmin,
   hideTooltip = false,
   max = 5,
   status,
   animated,
-  showInProgress,
   showOnHover,
+  creatingForPI = false,
 }) => {
   return (
     <div className="hip-progress status-bar">
@@ -81,7 +79,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 }
                 striped={
                   showOnHover === OrderStatus.Created ||
-                  (status === OrderStatus.Draft && showInProgress)
+                  status === OrderStatus.Draft
                 }
                 animated={status === OrderStatus.Draft && animated}
                 tooltip={
@@ -105,7 +103,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 }
                 striped={
                   showOnHover === OrderStatus.Submitted ||
-                  (status === OrderStatus.Created && showInProgress)
+                  (status === OrderStatus.Draft && !creatingForPI)
                 }
                 animated={status === OrderStatus.Created && animated}
                 tooltip={
@@ -121,10 +119,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Processing) >= 0
                 }
-                striped={
-                  showOnHover === OrderStatus.Processing ||
-                  (status === OrderStatus.Submitted && showInProgress)
-                }
+                striped={showOnHover === OrderStatus.Processing}
                 animated={status === OrderStatus.Submitted && animated}
                 tooltip={
                   !hideTooltip && (
@@ -137,10 +132,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 label={OrderStatus.Active}
                 max={max}
                 shouldFill={compareOrderStatus(status, OrderStatus.Active) >= 0}
-                striped={
-                  showOnHover === OrderStatus.Active ||
-                  (status === OrderStatus.Processing && showInProgress)
-                }
+                striped={showOnHover === OrderStatus.Active}
                 animated={status === OrderStatus.Processing && animated}
                 tooltip={
                   !hideTooltip && (
@@ -155,10 +147,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
                 shouldFill={
                   compareOrderStatus(status, OrderStatus.Completed) >= 0
                 }
-                striped={
-                  showOnHover === OrderStatus.Completed ||
-                  (status === OrderStatus.Active && showInProgress)
-                }
+                striped={showOnHover === OrderStatus.Completed}
                 animated={status === OrderStatus.Active && animated}
                 tooltip={
                   !hideTooltip && (
@@ -177,8 +166,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
             value={max}
             color="secondary"
             shouldFill={true}
-            inProgress={showOnHover === OrderStatus.Archived}
-            striped={false}
+            striped={showOnHover === OrderStatus.Archived}
             tooltip={
               !hideTooltip && (
                 <StatusDescription status={OrderStatus.Archived} />
@@ -197,8 +185,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
               value={max}
               color="secondary"
               shouldFill={true}
-              inProgress={showOnHover === OrderStatus.Closed}
-              striped={false}
+              striped={showOnHover === OrderStatus.Closed}
               tooltip={
                 !hideTooltip && (
                   <StatusDescription status={OrderStatus.Closed} />

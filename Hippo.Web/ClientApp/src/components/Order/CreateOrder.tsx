@@ -52,6 +52,7 @@ export const CreateOrder: React.FC = () => {
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
   const navigate = useNavigate();
+  const [foundPI, setFoundPI] = useState(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -108,6 +109,27 @@ export const CreateOrder: React.FC = () => {
     setOrder(updatedOrder);
   };
 
+  //lookup pi value
+  const lookupPI = async (pi: string) => {
+    if (!pi) {
+      setFoundPI("");
+      return;
+    }
+    const response = await authenticatedFetch(
+      `/api/${cluster}/order/GetClusterUser/${pi}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.name) {
+        setFoundPI(`Found User ${data.name} (${data.email})`);
+      } else {
+        setFoundPI(`Not Found ${pi}`);
+      }
+    } else {
+      setFoundPI(`Not Found ${pi}`);
+    }
+  };
+
   // RH TODO: handle loading/error states
   if (isClusterAdmin === null) {
     return (
@@ -137,10 +159,9 @@ export const CreateOrder: React.FC = () => {
       <HipBody>
         <HipErrorBoundary>
           <StatusBar
-            isAdmin={isClusterAdmin}
             status={order.status}
             animated={notification.pending}
-            showInProgress={true}
+            creatingForPI={isClusterAdmin && foundPI}
           />
         </HipErrorBoundary>
         <HipErrorBoundary
@@ -159,6 +180,8 @@ export const CreateOrder: React.FC = () => {
             cluster={cluster}
             onlyChartStrings={false}
             onSubmit={submitOrder}
+            lookupPI={lookupPI}
+            foundPI={foundPI}
           />
         </HipErrorBoundary>
       </HipBody>

@@ -24,7 +24,8 @@ const StatusCard: React.FC<StatusCardProps> = ({
       <CardSubtitle tag="h4">{status}</CardSubtitle>
       <StatusDescription status={status}>
         {showStatusActions && (
-          <p className="text-muted small">
+          <span className="text-muted small">
+            <br />
             <>
               {isAdmin && (
                 <>
@@ -41,7 +42,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
                   : ` ${isAdmin ? "Sponsors" : "You"} are not able to take any actions while order is in this status.`}
               </>
             </>
-          </p>
+          </span>
         )}
       </StatusDescription>
     </>
