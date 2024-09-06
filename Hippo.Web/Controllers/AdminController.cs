@@ -42,19 +42,30 @@ public class AdminController : SuperController
     }
 
     [HttpGet]
-    public async Task<IActionResult> ClusterAdmins()
+    public async Task<IActionResult> ClusterAdmins(bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
         // get all users with cluster admin permissions
         return Ok(await _dbContext.Users
             .AsNoTracking()
-            .Where(u => u.Permissions.Any(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
+            .Where(u => u.Permissions.Any(p => p.Cluster.Name == Cluster && p.Role.Name == roleName))
             .OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
             .ToArrayAsync());
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddClusterAdmin(string id)
+    public async Task<IActionResult> AddClusterAdmin(string id, bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -72,7 +83,7 @@ public class AdminController : SuperController
         }
 
         var user = await _dbContext.Users
-            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == Role.Codes.ClusterAdmin))
+            .Include(u => u.Permissions.Where(p => p.Cluster.Name == Cluster && p.Role.Name == roleName))
             .Where(u => u.Iam == userLookup.Iam)
             .SingleOrDefaultAsync();
 
@@ -87,7 +98,7 @@ public class AdminController : SuperController
             var perm = new Permission
             {
                 Cluster = await _dbContext.Clusters.SingleAsync(c => c.Name == Cluster),
-                Role = await _dbContext.Roles.SingleAsync(r => r.Name == Role.Codes.ClusterAdmin),
+                Role = await _dbContext.Roles.SingleAsync(r => r.Name == roleName),
             };
             user.Permissions.Add(perm);
             await _historyService.RoleAdded(user, perm);
@@ -99,15 +110,21 @@ public class AdminController : SuperController
     }
 
     [HttpPost]
-    public async Task<IActionResult> RemoveClusterAdmin(int id)
+    public async Task<IActionResult> RemoveClusterAdmin(int id, bool? isFinancial)
     {
+        var roleName = Role.Codes.ClusterAdmin;
+        if (isFinancial.HasValue && isFinancial.Value)
+        {
+            roleName = Role.Codes.FinancialAdmin;
+        }
+
         var permission = await _dbContext.Permissions
             .Include(p => p.Role)
             .Include(p => p.User)
             .Where(p =>
-                p.Id == id
+                p.UserId == id
                 && p.Cluster.Name == Cluster
-                && p.Role.Name == Role.Codes.ClusterAdmin)
+                && p.Role.Name == roleName)
             .SingleOrDefaultAsync();
 
         if (permission == null)
@@ -115,7 +132,7 @@ public class AdminController : SuperController
             return BadRequest("Permission not found");
         }
 
-        if (permission.UserId == (await _userService.GetCurrentUser()).Id)
+        if (permission.UserId == (await _userService.GetCurrentUser()).Id && roleName != Role.Codes.FinancialAdmin)
         {
             return BadRequest("Can't remove yourself");
         }
@@ -126,6 +143,7 @@ public class AdminController : SuperController
 
         return Ok();
     }
+
 
     [HttpGet]
     public async Task<IActionResult> Groups()

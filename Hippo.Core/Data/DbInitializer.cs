@@ -24,52 +24,52 @@ namespace Hippo.Core.Data
                 //do what needs to be done?
             }
 
-            var JasonUser   = await CheckAndCreateUser(new User
+            var JasonUser = await CheckAndCreateUser(new User
             {
-                Email       = "jsylvestre@ucdavis.edu",
-                Kerberos    = "jsylvest",
-                FirstName   = "Jason",
-                LastName    = "Sylvestre",
-                Iam         = "1000009309",
-                MothraId    = "00600825",
+                Email = "jsylvestre@ucdavis.edu",
+                Kerberos = "jsylvest",
+                FirstName = "Jason",
+                LastName = "Sylvestre",
+                Iam = "1000009309",
+                MothraId = "00600825",
             });
-            var ScottUser   = await CheckAndCreateUser(new User
+            var ScottUser = await CheckAndCreateUser(new User
             {
-                Email       = "srkirkland@ucdavis.edu",
-                Kerberos    = "postit",
-                FirstName   = "Scott",
-                LastName    = "Kirkland",
-                Iam         = "1000029584",
-                MothraId    = "00183873",
+                Email = "srkirkland@ucdavis.edu",
+                Kerberos = "postit",
+                FirstName = "Scott",
+                LastName = "Kirkland",
+                Iam = "1000029584",
+                MothraId = "00183873",
             });
-            var JamesUser   = await CheckAndCreateUser(new User
+            var JamesUser = await CheckAndCreateUser(new User
             {
-                Email       = "jscubbage@ucdavis.edu",
-                Kerberos    = "jscub",
-                FirstName   = "James",
-                LastName    = "Cubbage",
-                Iam         = "1000025056",
-                MothraId    = "00047699",
+                Email = "jscubbage@ucdavis.edu",
+                Kerberos = "jscub",
+                FirstName = "James",
+                LastName = "Cubbage",
+                Iam = "1000025056",
+                MothraId = "00047699",
             });
 
             var SlupskyUser = await CheckAndCreateUser(new User
             {
-                Email       = "cslupsky@ucdavis.edu",
-                Kerberos    = "cslupsky",
-                FirstName   = "Carolyn",
-                LastName    = "Slupsky",
-                Iam         = "1000012183",
-                MothraId    = "00598045",
+                Email = "cslupsky@ucdavis.edu",
+                Kerberos = "cslupsky",
+                FirstName = "Carolyn",
+                LastName = "Slupsky",
+                Iam = "1000012183",
+                MothraId = "00598045",
             });
 
-            var OmenAdmin   = await CheckAndCreateUser(new User
+            var OmenAdmin = await CheckAndCreateUser(new User
             {
-                Email       = "omen@ucdavis.edu",
-                Kerberos    = "omen",
-                Iam         = "1000019756",
-                FirstName   = "Omen",
-                LastName    = "Wild",
-                MothraId    = "00457597",
+                Email = "omen@ucdavis.edu",
+                Kerberos = "omen",
+                Iam = "1000019756",
+                FirstName = "Omen",
+                LastName = "Wild",
+                MothraId = "00457597",
             });
 
             //for(int i = 1; i <= 5; i++)
@@ -83,9 +83,9 @@ namespace Hippo.Core.Data
             //    await CheckAndCreateUser(user);
             //}
 
-            var cluster     = new Cluster()
+            var cluster = new Cluster()
             {
-                Name        = "caesfarm",
+                Name = "caesfarm",
                 Description = "CAES Farm Cluster",
             };
             var fakeCluster = new Cluster()
@@ -105,12 +105,12 @@ namespace Hippo.Core.Data
                 var sampleSsh = "ABC123";
 
                 var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
-                var scottAccount   = new Account()
+                var scottAccount = new Account()
                 {
-                    Owner          = ScottUser,
-                    Name           = "Scott's Account",
-                    SshKey         = sampleSsh,
-                    Cluster        = cluster,
+                    Owner = ScottUser,
+                    Name = "Scott's Account",
+                    SshKey = sampleSsh,
+                    Cluster = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(scottAccount);
 
@@ -125,33 +125,67 @@ namespace Hippo.Core.Data
 
                 var slupskyAccount = new Account()
                 {
-                    Owner          = SlupskyUser,
-                    Name           = "Slupsky",
-                    SshKey         = sampleSsh,
-                    Cluster        = cluster,
+                    Owner = SlupskyUser,
+                    Name = "Slupsky",
+                    SshKey = sampleSsh,
+                    Cluster = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(slupskyAccount);
 
-                var otherAccount   = new Account()
+                var otherAccount = new Account()
                 {
-                    Owner          = JasonUser,
-                    Name           = "Jason's Account",
-                    SshKey         = sampleSsh,
-                    Cluster        = cluster,
+                    Owner = JasonUser,
+                    Name = "Jason's Account",
+                    SshKey = sampleSsh,
+                    Cluster = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(otherAccount);
 
                 var pendingAccount = new Account()
                 {
-                    Owner          = JamesUser,
-                    Name           = "James' Account",
-                    SshKey         = sampleSsh,
-                    Cluster        = cluster,
+                    Owner = JamesUser,
+                    Name = "James' Account",
+                    SshKey = sampleSsh,
+                    Cluster = cluster,
                 };
                 await _dbContext.Accounts.AddAsync(pendingAccount);
             }
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task CheckAndCreateRoles()
+        {
+            var update = false;
+            if (await CheckAndCreateRole(Role.Codes.System))
+            { update = true; }
+
+            if (await CheckAndCreateRole(Role.Codes.ClusterAdmin))
+            {
+                update = true;
+            }
+            if (await CheckAndCreateRole(Role.Codes.FinancialAdmin))
+            {
+                update = true;
+            }
+            if (update)
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+
+        }
+
+        private async Task<bool> CheckAndCreateRole(string roleName)
+        {
+            if (await _dbContext.Roles.AnyAsync(a => a.Name == roleName))
+            {
+                return false;
+            }
+            await _dbContext.Roles.AddAsync(new Role
+            {
+                Name = roleName,
+            });
+            return true;
         }
 
         private async Task<User> CheckAndCreateUser(User user)
@@ -167,7 +201,7 @@ namespace Hippo.Core.Data
 
         private async Task CheckAndCreateCluster(Cluster cluster)
         {
-            if(await _dbContext.Clusters.AnyAsync(a => a.Name == cluster.Name))
+            if (await _dbContext.Clusters.AnyAsync(a => a.Name == cluster.Name))
             {
                 return;
             }

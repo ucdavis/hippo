@@ -35,6 +35,24 @@ namespace Hippo.Core.Services
         }
         public async Task<bool> CreatePayments()
         {
+            //Do a sanity check and make sure there are no non recurring orders with a negative balance
+            var negativeBalanceOrders = await _dbContext.Orders.Include(a => a.Payments).Include(a => a.Cluster).Where(a => !a.IsRecurring && a.Status == Order.Statuses.Active && a.BalanceRemaining < 0).ToListAsync();
+            foreach (var order in negativeBalanceOrders)
+            {
+                Log.Error("Order {0} has a negative balance. Balance: {1}", order.Id, order.BalanceRemaining);
+                order.BalanceRemaining = order.Total - order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount);
+                if(order.BalanceRemaining < 0)
+                {
+                    Log.Error("Order {0} still has a negative balance. Setting to 0", order.Id);
+                    order.BalanceRemaining = 0;
+                    //Posibly set to completed? Or notify someone that there appears to be an over payment?
+                    await _historyService.OrderUpdated(order, null, "Negative balance detected. Setting Ballance to 0");
+                }
+                _dbContext.Orders.Update(order);
+                await _dbContext.SaveChangesAsync();
+            }
+
+
             //Do a check on all active orders that don't have a next payment date and a balance > 0 
             var orderCheck = await _dbContext.Orders.Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
             foreach (var order in orderCheck)
@@ -50,8 +68,10 @@ namespace Hippo.Core.Services
                 await _dbContext.SaveChangesAsync();
             }
 
+            //Next payment date should be a UTC date/Time, at 7AM UTC, which should be 12AM PST
+
             //If I add a history call here, I'll also need to get the cluster .Include(a => a.Cluster)
-            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value.Date <= DateTime.UtcNow.Date).ToListAsync();
+            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value <= DateTime.UtcNow).ToListAsync();
             foreach (var order in orders) {
 
                 if (!order.IsRecurring)
@@ -60,6 +80,7 @@ namespace Hippo.Core.Services
                     {
                         order.Status = Order.Statuses.Completed;
                         order.NextPaymentDate = null;
+                        order.BalanceRemaining = 0;
                         //TODO: A notification? This Shold happen when sloth updates, but just in case.
                         _dbContext.Orders.Update(order);
                         await _dbContext.SaveChangesAsync();
@@ -72,6 +93,7 @@ namespace Hippo.Core.Services
                     if (order.BalanceRemaining <= 0)
                     {
                         SetNextPaymentDate(order);
+                        //if for some reason the ballance is a negative, it is probably because of an over payment, so it makes sense to just add the next payment ammount
                         order.BalanceRemaining += order.Total;
                         _dbContext.Orders.Update(order);
                         await _dbContext.SaveChangesAsync();
@@ -82,6 +104,7 @@ namespace Hippo.Core.Services
                 //Need to ignore manual ones...
                 if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
                 {
+                    //This could happen if auto approve is not on, and they take a long time to approve in sloth. Not really a big deal for non recurring as the order will eventually get paid.
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
                     continue;
                 }
@@ -100,7 +123,7 @@ namespace Hippo.Core.Services
                 var balanceLessPending = order.BalanceRemaining - pendingAmount;
                 if (balanceLessPending <= 0)
                 {
-                    Log.Information("Order {0} has a balance of 0. Skipping", order.Id);
+                    Log.Information("Order {0} has a pending balance of 0. Skipping", order.Id);
                     continue;
                 }
 

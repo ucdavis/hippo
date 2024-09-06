@@ -213,6 +213,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                 />
                 <OrderFormField
                   name="category"
+                  required={true}
                   label="Category"
                   canEditConditions={adminCanEditLimitedStatuses}
                   maxLength={50}

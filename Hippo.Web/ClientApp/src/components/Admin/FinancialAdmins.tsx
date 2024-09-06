@@ -6,13 +6,14 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import HipButton from "../../Shared/HipComponents/HipButton";
+import HipButton from "../../Shared/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import { Button } from "reactstrap";
 
-export const ClusterAdmins = () => {
+export const FinancialAdmins = () => {
   // get all accounts that need approval and list them
   // allow user to approve or reject each account
 
@@ -33,9 +34,9 @@ export const ClusterAdmins = () => {
   );
 
   useEffect(() => {
-    const fetchClusterAdmins = async () => {
+    const fetchFinancialAdmins = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/admin/ClusterAdmins`,
+        `/api/${cluster}/admin/ClusterAdmins/?isFinancial=true`,
       );
 
       if (response.ok) {
@@ -43,7 +44,7 @@ export const ClusterAdmins = () => {
       }
     };
 
-    fetchClusterAdmins();
+    fetchFinancialAdmins();
   }, [cluster]);
 
   const handleRemove = useCallback(
@@ -54,15 +55,16 @@ export const ClusterAdmins = () => {
       }
 
       setAdminRemoving(user.id);
+      let isFinancial = true;
 
       const req = authenticatedFetch(
-        `/api/${cluster}/admin/RemoveClusterAdmin/${user.id}`,
+        `/api/${cluster}/admin/RemoveFinancialAdmin?id=${request.id}&isFinancial=${isFinancial}`,
         {
           method: "POST",
         },
       );
 
-      setNotification(req, "Removing", "Admin Removed", async (r) => {
+      setNotification(req, "Removing", "Financial Admin Removed", async (r) => {
         if (r.status === 400) {
           const errors = await parseBadRequest(response);
           return errors;
@@ -83,14 +85,15 @@ export const ClusterAdmins = () => {
   );
 
   const handleSubmit = async () => {
+    let isFinancial = true;
     const req = authenticatedFetch(
-      `/api/${cluster}/admin/AddClusterAdmin/${request.id}`,
+      `/api/${cluster}/admin/AddClusterAdmin?id=${request.id}&isFinancial=${isFinancial}`,
       {
         method: "POST",
       },
     );
 
-    setNotification(req, "Saving", "Admin Added", async (r) => {
+    setNotification(req, "Saving", "Financial Admin Added", async (r) => {
       if (r.status === 400) {
         const errors = await parseBadRequest(response);
         return errors;
@@ -138,7 +141,7 @@ export const ClusterAdmins = () => {
   if (users === undefined) {
     return (
       <HipMainWrapper>
-        <HipTitle title="Cluster Admins" subtitle="Admin" />
+        <HipTitle title="Financial Cluster Admins" subtitle="Admin" />
         <HipBody>
           <HipLoading />
         </HipBody>
@@ -148,16 +151,16 @@ export const ClusterAdmins = () => {
     return (
       <HipMainWrapper>
         <HipTitle
-          title="Cluster Admins"
+          title="Financial Cluster Admins"
           subtitle="Admin"
           buttons={
-            <Link to={`/${cluster}/admin/financialadmins`}>
-              <HipButton>Financial Admins</HipButton>
+            <Link to={`/${cluster}/admin/clusteradmins`}>
+              <HipButton>Cluster Admins</HipButton>
             </Link>
           }
         />
         <HipBody>
-          <p>There are {users.length} users with admin access</p>
+          <p>There are {users.length} users with financial admin access</p>
           <hr />
           <h3>Add Admin</h3>
           <div className="form-group">

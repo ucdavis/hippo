@@ -293,6 +293,7 @@ namespace Hippo.Core.Services
                                     if (order.Total <= totalPayments)
                                     {
                                         order.Status = Order.Statuses.Completed;
+                                        order.BalanceRemaining = 0;
                                         await _historyService.OrderUpdated(order, null, $"Order paid in full.");
                                         order.NextPaymentDate = null;
                                     }

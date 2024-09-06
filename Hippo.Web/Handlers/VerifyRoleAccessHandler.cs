@@ -57,6 +57,18 @@ namespace Hippo.Web.Handlers
                 }
             }
 
+            if(requirement.RoleStrings.Contains(Role.Codes.FinancialAdmin))
+            {
+                if(await _dbContext.Permissions.AnyAsync(p
+                    => p.User.Iam == userIamId
+                    && p.Role.Name == Role.Codes.FinancialAdmin
+                    && p.Cluster.Name == clusterName))
+                {
+                    context.Succeed(requirement);
+                    return;
+                }
+            }
+
             // remaining roles involve an optional route value (Group, GroupAdmin)
             var groupName = _httpContext?.HttpContext?.GetRouteValue("group") as string;
             
