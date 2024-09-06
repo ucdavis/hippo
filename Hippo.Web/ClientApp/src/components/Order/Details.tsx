@@ -44,7 +44,6 @@ import { getNextStatus } from "./Statuses/status";
 import HipAlert from "../../Shared/HipComponents/HipAlert";
 import StatusDialog from "./Statuses/StatusDialog";
 import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
-import { HipForm } from "../../Shared/Form/HipForm";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();

@@ -6,12 +6,11 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import HipButton from "../../Shared/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
-import { Button } from "reactstrap";
+import HipButton from "../../Shared/HipComponents/HipButton";
 
 export const FinancialAdmins = () => {
   // get all accounts that need approval and list them
