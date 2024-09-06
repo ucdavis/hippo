@@ -31,6 +31,7 @@ import NotFound from "./NotFound";
 import { OrderHistories } from "./components/Order/OrderHistories";
 import { OrderPayments } from "./components/Order/OrderPayments";
 import NotAuthorized from "./Shared/LoadingAndErrors/NotAuthorized";
+import { FinancialAdmins } from "./components/Admin/FinancialAdmins";
 
 declare var Hippo: AppContextShape;
 
@@ -99,6 +100,17 @@ const App = () => {
               }
             />
             <Route
+              path="/:cluster/admin/financialadmins"
+              element={
+                <ShowFor
+                  roles={["ClusterAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
+                  <FinancialAdmins />
+                </ShowFor>
+              }
+            />
+            <Route
               path="/clusteradmin/clusters"
               element={
                 <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
@@ -129,7 +141,12 @@ const App = () => {
               path="/:cluster/order/:orderType"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <Orders />
@@ -140,7 +157,12 @@ const App = () => {
               path="/:cluster/order/details/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <Details />
@@ -151,7 +173,12 @@ const App = () => {
               path="/:cluster/order/history/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <OrderHistories />
@@ -162,7 +189,12 @@ const App = () => {
               path="/:cluster/order/payments/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <OrderPayments />
@@ -184,7 +216,12 @@ const App = () => {
               path="/:cluster/order/updatechartstrings/:orderId"
               element={
                 <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                  roles={[
+                    "System",
+                    "ClusterAdmin",
+                    "GroupAdmin",
+                    "FinancialAdmin",
+                  ]}
                   alternative={<NotAuthorized />}
                 >
                   <UpdateChartStrings />

@@ -130,6 +130,7 @@ namespace Hippo.Web
                 options.AddAccessPolicy(AccessCodes.SystemAccess);
                 options.AddAccessPolicy(AccessCodes.ClusterAdminAccess);
                 options.AddAccessPolicy(AccessCodes.GroupAdminAccess);
+                options.AddAccessPolicy(AccessCodes.FinancialAdminAccess);
             });
             services.AddScoped<IAuthorizationHandler, VerifyRoleAccessHandler>();
 
@@ -308,12 +309,13 @@ namespace Hippo.Web
             dbContext.Database.Migrate();
 
             var initializeDb = Configuration.GetValue<bool>("Dev:InitializeDb");
-            
+            var initializer = new DbInitializer(dbContext);
+
             if (initializeDb)
-            {
-                var initializer = new DbInitializer(dbContext);
+            {                
                 initializer.Initialize(recreateDb).GetAwaiter().GetResult();
             }
+            initializer.CheckAndCreateRoles().GetAwaiter().GetResult();           
         }
     }
 }

@@ -11,7 +11,12 @@ export interface User {
   name: string;
 }
 
-export type RoleName = "System" | "ClusterAdmin" | "GroupAdmin" | "GroupMember";
+export type RoleName =
+  | "System"
+  | "ClusterAdmin"
+  | "GroupAdmin"
+  | "GroupMember"
+  | "FinancialAdmin";
 
 export type AccessType = "SshKey" | "OpenOnDemand";
 
