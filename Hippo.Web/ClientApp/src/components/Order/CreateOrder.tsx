@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { OrderModel } from "../../types";
+import { InstallmentType, OrderModel } from "../../types";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -26,7 +26,7 @@ const defaultOrder: OrderModel = {
   unitPrice: "",
   installments: 5,
   isRecurring: false,
-  installmentType: "Yearly",
+  installmentType: InstallmentType.Yearly,
   quantity: 0,
   adjustment: 0,
   adjustmentReason: "",

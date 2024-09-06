@@ -254,13 +254,19 @@ export interface ChartStringValidationModel {
   warning: string;
 }
 
+export enum InstallmentType {
+  Monthly = "Monthly",
+  Yearly = "Yearly",
+  OneTime = "OneTime",
+}
+
 export interface ProductBase {
   category: string;
   description: string;
   units: string;
   unitPrice: string;
   installments: number;
-  installmentType: string;
+  installmentType: InstallmentType;
   lifeCycle: number;
   isRecurring: boolean;
 }

@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import { ProductModel } from "../../types";
+import { InstallmentType, ProductModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { ShowFor } from "../../Shared/ShowFor";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -25,7 +25,7 @@ const defaultProduct: ProductModel = {
   unitPrice: "0.00",
   units: "",
   installments: 1,
-  installmentType: "OneTime",
+  installmentType: InstallmentType.OneTime,
   lifeCycle: 60,
   isRecurring: false,
   isUnavailable: false,
@@ -189,7 +189,7 @@ export const Products = () => {
                 };
                 if (model.isRecurring) {
                   if (model.installmentType === "OneTime") {
-                    model.installmentType = "Monthly";
+                    model.installmentType = InstallmentType.Monthly;
                   }
                   model.installments = 0;
                   model.lifeCycle = 0;
@@ -217,7 +217,7 @@ export const Products = () => {
               onChange={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
-                  installmentType: e.target.value,
+                  installmentType: e.target.value as InstallmentType,
                 };
                 if (model.installmentType === "OneTime") {
                   model.installments = 1;

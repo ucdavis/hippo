@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { OrderModel } from "../../../types";
+import { InstallmentType, OrderModel } from "../../../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import HipFormSubmitButton from "../../../Shared/Form/HipFormSubmitButton";
@@ -43,15 +43,9 @@ const OrderForm: React.FC<OrderFormProps> = ({
     handleSubmit,
     setError,
     setValue,
+    control,
     formState: { isDirty, isSubmitting },
   } = methods;
-
-  const [localInstallmentType, setLocalInstallmentType] = useState(
-    methods.getValues("installmentType"),
-  );
-  const [localIsRecurring, setLocalIsRecurring] = useState(
-    methods.getValues("isRecurring"),
-  );
 
   /**
    * Editing is limited when order status is Active, Rejected, Cancelled, or Completed
@@ -101,51 +95,51 @@ const OrderForm: React.FC<OrderFormProps> = ({
     }
   };
 
-  const installmentType = useWatch({
-    control: methods.control,
+  const installmentType: InstallmentType = useWatch({
+    control: control,
     name: "installmentType",
   });
-  const installments = useWatch({
-    control: methods.control,
+
+  const installments: number = useWatch({
+    control: control,
     name: "installments",
   });
 
-  const isRecurring = useWatch({
-    control: methods.control,
+  const isRecurring: boolean = useWatch({
+    control: control,
     name: "isRecurring",
   });
 
-  if (installmentType !== localInstallmentType) {
-    setLocalInstallmentType(installmentType);
+  React.useEffect(() => {
     if (installmentType === "OneTime" && installments !== 1) {
-      methods.setValue("installments", 1);
+      setValue("installments", 1);
     }
     if (
       installmentType === "Monthly" &&
       (installments === 1 || installments === 5)
     ) {
-      methods.setValue("installments", 60);
+      setValue("installments", 60);
     }
     if (
       installmentType === "Yearly" &&
       (installments === 1 || installments === 60)
     ) {
-      methods.setValue("installments", 5);
+      setValue("installments", 5);
     }
-  }
+  }, [installmentType, installments, setValue]);
 
-  if (isRecurring !== localIsRecurring) {
-    setLocalIsRecurring(isRecurring);
+  React.useEffect(() => {
     if (!isRecurring) {
-      methods.setValue("installmentType", "Monthly");
-      methods.setValue("lifeCycle", 60);
-      methods.setValue("installments", 60);
+      setValue("installmentType", InstallmentType.Monthly);
+      setValue("lifeCycle", 60);
+      setValue("installments", 60);
     } else {
-      methods.setValue("installmentType", "Monthly");
-      methods.setValue("lifeCycle", 0);
-      methods.setValue("installments", 0);
+      setValue("installmentType", InstallmentType.Monthly);
+      setValue("lifeCycle", 0);
+      setValue("installments", 0);
     }
-  }
+  }, [isRecurring, setValue]);
+
   const adminCanEditLimitedStatuses =
     isAdmin && !isDetailsPage && !limitedEditing;
 
