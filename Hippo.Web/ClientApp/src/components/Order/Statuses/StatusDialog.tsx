@@ -5,12 +5,18 @@ import StatusCard from "./StatusCard";
 
 interface StatusDialogProps extends UpdateOrderStatusModel {
   isAdmin: boolean;
+  hideDescription?: boolean;
+  children?: React.ReactNode;
+  newStatusDanger?: boolean;
 }
 
 const StatusDialog: React.FC<StatusDialogProps> = ({
   newStatus,
   currentStatus,
+  hideDescription = false,
   isAdmin,
+  newStatusDanger = false,
+  children,
 }) => {
   return (
     <div>
@@ -23,19 +29,31 @@ const StatusDialog: React.FC<StatusDialogProps> = ({
       <h3>
         You are changing the status of this order from{" "}
         <span className="hip-text-primary">{currentStatus}</span> to{" "}
-        <span className="hip-text-primary">{newStatus}</span>.
+        <span
+          className={
+            newStatusDanger ? "hip-text-danger-dark" : "hip-text-primary"
+          }
+        >
+          {newStatus}
+        </span>
+        .
       </h3>
-      <br />
-      <StatusCard
-        status={currentStatus}
-        isAdmin={isAdmin}
-        showStatusActions={false}
-      />
-      <StatusCard
-        status={newStatus}
-        isAdmin={isAdmin}
-        showStatusActions={true}
-      />
+      {!hideDescription && (
+        <>
+          <br />
+          <StatusCard
+            status={currentStatus}
+            isAdmin={isAdmin}
+            showStatusActions={false}
+          />
+          <StatusCard
+            status={newStatus}
+            isAdmin={isAdmin}
+            showStatusActions={true}
+          />
+        </>
+      )}
+      {children}
     </div>
   );
 };

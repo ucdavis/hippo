@@ -43,6 +43,8 @@ import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 import { getNextStatus } from "./Statuses/status";
 import HipAlert from "../../Shared/HipComponents/HipAlert";
 import StatusDialog from "./Statuses/StatusDialog";
+import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
+import { HipForm } from "../../Shared/Form/HipForm";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -238,11 +240,22 @@ export const Details = () => {
     updateStatusModel,
   ]);
 
-  const [cancelOrderConfirmation] = useConfirmationDialog<null>({
-    title: "Cancel Order",
-    message: "Are you sure you want to cancel this order?",
-    canConfirm: !notification.pending,
-  });
+  const [cancelOrderConfirmation] = useConfirmationDialog<null>(
+    {
+      title: "Cancel Order",
+      message: (setReturn) => (
+        <StatusDialog
+          newStatus={OrderStatus.Cancelled}
+          currentStatus={order.status}
+          isAdmin={isClusterAdmin}
+          newStatusDanger={true}
+          hideDescription={true}
+        />
+      ),
+      canConfirm: !notification.pending,
+    },
+    [order],
+  );
 
   const cancelOrder = async () => {
     const [confirmed] = await cancelOrderConfirmation();
@@ -274,15 +287,21 @@ export const Details = () => {
     }
   };
 
-  const [rejectOrderConfirmation] = useConfirmationDialog<string>({
-    title: "Reject Order",
-    message: (setReturn) => {
-      return (
-        <div className="row justify-content-center">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label className="form-label">Reason</label>
-
+  const [rejectOrderConfirmation] = useConfirmationDialog<string>(
+    {
+      title: "Reject Order",
+      message: (setReturn) => {
+        return (
+          <StatusDialog
+            newStatus={OrderStatus.Rejected}
+            currentStatus={order.status}
+            isAdmin={isClusterAdmin}
+            hideDescription={true}
+            newStatusDanger={true}
+          >
+            <HipFormGroup size="lg">
+              <br />
+              <h4 className="form-label">Reason</h4>
               <input
                 className="form-control"
                 id="rejectOrderReason"
@@ -290,13 +309,14 @@ export const Details = () => {
                   setReturn(e.target.value);
                 }}
               ></input>
-            </div>
-          </div>
-        </div>
-      );
+            </HipFormGroup>
+          </StatusDialog>
+        );
+      },
+      canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
     },
-    canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
-  });
+    [order],
+  );
 
   const rejectOrder = async () => {
     const [confirmed, reason] = await rejectOrderConfirmation();
