@@ -141,6 +141,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
       methods.setValue("lifeCycle", 60);
       methods.setValue("installments", 60);
     } else {
+      methods.setValue("installmentType", "Monthly");
       methods.setValue("lifeCycle", 0);
       methods.setValue("installments", 0);
     }
