@@ -10,7 +10,7 @@ import SearchDefinedOptions from "../../Shared/SearchDefinedOptions";
 import { AccessTypes } from "../../constants";
 import AppContext from "../../Shared/AppContext";
 import { createColumnHelper } from "@tanstack/react-table";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";

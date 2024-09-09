@@ -5,8 +5,8 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
-import { OrderStatus } from "../../types/status";
-import StatusBar from "./OrderForm/StatusBar";
+import { OrderStatus } from "./Statuses/status";
+import StatusBar from "./Statuses/StatusBar";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
@@ -52,6 +52,7 @@ export const CreateOrder: React.FC = () => {
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
   const navigate = useNavigate();
+  const [foundPI, setFoundPI] = useState(null);
 
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
@@ -108,6 +109,27 @@ export const CreateOrder: React.FC = () => {
     setOrder(updatedOrder);
   };
 
+  //lookup pi value
+  const lookupPI = async (pi: string) => {
+    if (!pi) {
+      setFoundPI("");
+      return;
+    }
+    const response = await authenticatedFetch(
+      `/api/${cluster}/order/GetClusterUser/${pi}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.name) {
+        setFoundPI(`Found User ${data.name} (${data.email})`);
+      } else {
+        setFoundPI(`Not Found ${pi}`);
+      }
+    } else {
+      setFoundPI(`Not Found ${pi}`);
+    }
+  };
+
   // RH TODO: handle loading/error states
   if (isClusterAdmin === null) {
     return (
@@ -139,7 +161,7 @@ export const CreateOrder: React.FC = () => {
           <StatusBar
             status={order.status}
             animated={notification.pending}
-            showInProgress={true}
+            creatingForPI={isClusterAdmin && foundPI}
           />
         </HipErrorBoundary>
         <HipErrorBoundary
@@ -158,6 +180,8 @@ export const CreateOrder: React.FC = () => {
             cluster={cluster}
             onlyChartStrings={false}
             onSubmit={submitOrder}
+            lookupPI={lookupPI}
+            foundPI={foundPI}
           />
         </HipErrorBoundary>
       </HipBody>

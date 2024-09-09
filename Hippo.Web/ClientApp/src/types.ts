@@ -1,5 +1,5 @@
 import { ClusterNames } from "./constants";
-import { OrderStatus } from "./types/status";
+import { OrderStatus } from "./components/Order/Statuses/status";
 
 export interface User {
   id: number;
@@ -352,9 +352,4 @@ export interface OrderTotalCalculationModel extends Partial<OrderModel> {
   adjustment: number;
   subTotal: string;
   total: string;
-}
-
-export interface UpdateOrderStatusModel {
-  currentStatus: OrderStatus;
-  newStatus: OrderStatus;
 }

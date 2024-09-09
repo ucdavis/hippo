@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { OrderModel, PaymentModel, UpdateOrderStatusModel } from "../../types";
+import { OrderModel, PaymentModel } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import OrderForm from "./OrderForm/OrderForm";
 import { usePermissions } from "../../Shared/usePermissions";
@@ -20,6 +20,7 @@ import { HistoryTable } from "./HistoryTable";
 import { PaymentTable } from "./PaymentTable";
 import {
   OrderStatus,
+  UpdateOrderStatusModel,
   adminCanApproveStatuses,
   adminCanArchiveStatuses,
   adminCanRejectStatuses,
@@ -29,17 +30,20 @@ import {
   sponsorCanApproveStatuses,
   sponsorCanCancelStatuses,
   sponsorEditableStatuses,
-} from "../../types/status";
-import StatusBar from "./OrderForm/StatusBar";
+} from "./Statuses/status";
+import StatusBar from "./Statuses/StatusBar";
 import OrderPaymentDetails from "./OrderForm/OrderPaymentDetails";
-import { Alert } from "reactstrap";
 import HipTitle from "../../Shared/Layout/HipTitle";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
 import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
+import { getNextStatus } from "./Statuses/status";
+import HipAlert from "../../Shared/HipComponents/HipAlert";
+import StatusDialog from "./Statuses/StatusDialog";
+import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
 
 export const Details = () => {
   const { cluster, orderId } = useParams();
@@ -91,100 +95,16 @@ export const Details = () => {
 
   useEffect(() => {
     if (order) {
-      // switch statement for data.status
-      switch (order.status) {
-        case OrderStatus.Draft:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Created,
-          });
-          break;
-        case OrderStatus.Created:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Submitted,
-          });
-          break;
-        case OrderStatus.Submitted:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Processing,
-          });
-          break;
-        case OrderStatus.Processing:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Active,
-          });
-          break;
-        case OrderStatus.Active:
-          if (order.isRecurring) {
-            setUpdateStatusModel({
-              currentStatus: order.status,
-              newStatus: OrderStatus.Closed,
-            });
-          }
-          break;
-        case OrderStatus.Completed:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: OrderStatus.Archived,
-          });
-          break;
-        default:
-          setUpdateStatusModel({
-            currentStatus: order.status,
-            newStatus: order.status,
-          });
-      }
+      const nextStatus: UpdateOrderStatusModel = getNextStatus({
+        status: order.status,
+      });
+      setUpdateStatusModel(nextStatus);
     }
   }, [order]);
 
-  // async function so the form can manage the loading state
+  // never actually called on this page, as details is edit only
   const submitOrder = async (updatedOrder: OrderModel) => {
-    const editedOrder: OrderModel = {
-      // uneditable fields
-      id: updatedOrder.id,
-      status: updatedOrder.status,
-      createdOn: updatedOrder.createdOn,
-      total: updatedOrder.total,
-      subTotal: updatedOrder.subTotal,
-      balanceRemaining: updatedOrder.balanceRemaining,
-      balancePending: updatedOrder.balancePending,
-      billings: updatedOrder.billings,
-      piUser: updatedOrder.piUser,
-      percentTotal: updatedOrder.percentTotal,
-      nextPaymentDate: updatedOrder.nextPaymentDate,
-      historyCount: updatedOrder.historyCount,
-      paymentCount: updatedOrder.paymentCount,
-      totalPaid: updatedOrder.totalPaid,
-
-      // editable fields
-      PILookup: updatedOrder.PILookup,
-      name: updatedOrder.name,
-      productName: updatedOrder.productName,
-      description: updatedOrder.description,
-      category: updatedOrder.category,
-      externalReference: updatedOrder.externalReference,
-      notes: updatedOrder.notes,
-      units: updatedOrder.units,
-      unitPrice: updatedOrder.unitPrice,
-      quantity: updatedOrder.quantity,
-      installments: updatedOrder.installments,
-      installmentType: updatedOrder.installmentType,
-      adjustment: updatedOrder.adjustment,
-      adjustmentReason: updatedOrder.adjustmentReason,
-      adminNotes: updatedOrder.adminNotes,
-      metaData: updatedOrder.metaData,
-      lifeCycle: updatedOrder.lifeCycle,
-      expirationDate: updatedOrder.expirationDate,
-      installmentDate: updatedOrder.installmentDate,
-    };
-
-    // TODO: await API call
-    // const newOrder = await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setOrder(editedOrder); // should be newOrder once it's pulling from the API
+    setOrder(updatedOrder); // should be newOrder once it's pulling from the API
   };
 
   const [editPaymentModel, setEditPaymentModel] = useState<PaymentModel>({
@@ -272,39 +192,11 @@ export const Details = () => {
       {
         title: "Update Order Status",
         message: (setReturn) => (
-          <>
-            <div>Current Status: {updateStatusModel.currentStatus}</div>
-            <div>Set Status to: {updateStatusModel.newStatus}</div>
-            <hr />
-            {updateStatusModel.newStatus === "Submitted" && (
-              <div className="merlot-bg">
-                This will submit the order to the cluster admins for processing.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Processing" && (
-              <div className="merlot-bg">
-                This will indicate that an admin will start working on the
-                order.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Active" && (
-              <div className="merlot-bg">
-                This will move the order to active and allow manual billing as
-                well as scheduled billing.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Archived" && (
-              <div className="merlot-bg">
-                This will archive the order and it will no longer be visible in
-                the active orders list.
-              </div>
-            )}
-            {updateStatusModel.newStatus === "Closed" && (
-              <div className="merlot-bg">
-                This will close the order and stop any future billing.
-              </div>
-            )}
-          </>
+          <StatusDialog
+            newStatus={updateStatusModel.newStatus}
+            currentStatus={updateStatusModel.currentStatus}
+            isAdmin={isClusterAdmin}
+          />
         ),
         canConfirm: !notification.pending,
       },
@@ -347,11 +239,22 @@ export const Details = () => {
     updateStatusModel,
   ]);
 
-  const [cancelOrderConfirmation] = useConfirmationDialog<null>({
-    title: "Cancel Order",
-    message: "Are you sure you want to cancel this order?",
-    canConfirm: !notification.pending,
-  });
+  const [cancelOrderConfirmation] = useConfirmationDialog<null>(
+    {
+      title: "Cancel Order",
+      message: (setReturn) => (
+        <StatusDialog
+          newStatus={OrderStatus.Cancelled}
+          currentStatus={order.status}
+          isAdmin={isClusterAdmin}
+          newStatusDanger={true}
+          hideDescription={true}
+        />
+      ),
+      canConfirm: !notification.pending,
+    },
+    [order],
+  );
 
   const cancelOrder = async () => {
     const [confirmed] = await cancelOrderConfirmation();
@@ -383,15 +286,21 @@ export const Details = () => {
     }
   };
 
-  const [rejectOrderConfirmation] = useConfirmationDialog<string>({
-    title: "Reject Order",
-    message: (setReturn) => {
-      return (
-        <div className="row justify-content-center">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label className="form-label">Reason</label>
-
+  const [rejectOrderConfirmation] = useConfirmationDialog<string>(
+    {
+      title: "Reject Order",
+      message: (setReturn) => {
+        return (
+          <StatusDialog
+            newStatus={OrderStatus.Rejected}
+            currentStatus={order.status}
+            isAdmin={isClusterAdmin}
+            hideDescription={true}
+            newStatusDanger={true}
+          >
+            <HipFormGroup size="lg">
+              <br />
+              <h4 className="form-label">Reason</h4>
               <input
                 className="form-control"
                 id="rejectOrderReason"
@@ -399,13 +308,14 @@ export const Details = () => {
                   setReturn(e.target.value);
                 }}
               ></input>
-            </div>
-          </div>
-        </div>
-      );
+            </HipFormGroup>
+          </StatusDialog>
+        );
+      },
+      canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
     },
-    canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
-  });
+    [order],
+  );
 
   const rejectOrder = async () => {
     const [confirmed, reason] = await rejectOrderConfirmation();
@@ -453,10 +363,10 @@ export const Details = () => {
       {order.piUser?.id === user.detail.id &&
         sponsorCanApproveStatuses.includes(order.status) &&
         order.billings.length <= 0 && (
-          <Alert color="danger">
+          <HipAlert color="danger">
             This order needs to have billing information added before it can be
             submitted (Approve).
-          </Alert>
+          </HipAlert>
         )}
       <HipTitle
         title={`Order ${order.id}: ${order.name}`}

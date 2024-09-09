@@ -14,7 +14,7 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import { HipTable } from "../../Shared/Table/HipTable";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 
 export const ActiveAccounts = () => {
   const [notification, setNotification] = usePromiseNotification();

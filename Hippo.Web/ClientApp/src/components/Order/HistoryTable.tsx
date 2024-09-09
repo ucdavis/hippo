@@ -6,7 +6,7 @@ import { convertToPacificTime } from "../../util/DateHelper";
 import { createColumnHelper } from "@tanstack/react-table";
 import { authenticatedFetch } from "../../util/api";
 import { useParams } from "react-router-dom";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 
 interface HistoryTableProps {
   numberOfRows: number;

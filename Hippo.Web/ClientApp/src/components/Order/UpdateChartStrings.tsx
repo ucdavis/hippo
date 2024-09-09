@@ -5,7 +5,7 @@ import { usePermissions } from "../../Shared/usePermissions";
 import { usePromiseNotification } from "../../util/Notifications";
 import OrderForm from "./OrderForm/OrderForm";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
-import StatusBar from "./OrderForm/StatusBar";
+import StatusBar from "./Statuses/StatusBar";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";

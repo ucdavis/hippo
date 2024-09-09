@@ -3,7 +3,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { OrderModel } from "../../types";
 
 import HipFormField from "../../Shared/Form/HipFormField";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { authenticatedFetch } from "../../util/api";

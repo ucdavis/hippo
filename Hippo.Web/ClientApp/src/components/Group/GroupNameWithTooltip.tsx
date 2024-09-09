@@ -1,8 +1,8 @@
 import { GroupModel } from "../../types";
-import { UncontrolledTooltip } from "reactstrap";
 import { GroupInfo } from "./GroupInfo";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import GroupDetails from "./GroupDetails";
+import { HipTooltip } from "../../Shared/HipComponents/HipTooltip";
 
 interface Props {
   group: GroupModel;
@@ -31,14 +31,9 @@ export const GroupNameWithTooltip = ({
       <span id={target} style={{ whiteSpace: "nowrap" }}>
         {useDisplayName ? group.displayName : group.name}
       </span>
-      <UncontrolledTooltip
-        placement="left"
-        style={{ backgroundColor: "rgb(233, 226, 237)" }}
-        target={target}
-        autohide={false}
-      >
+      <HipTooltip placement="left" target={target}>
         <GroupInfo group={group} showDetails={() => showDetails()} />
-      </UncontrolledTooltip>
+      </HipTooltip>
     </span>
   );
 };

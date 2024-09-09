@@ -6,7 +6,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
 import { HipTable } from "../../Shared/Table/HipTable";
 import { createColumnHelper } from "@tanstack/react-table";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipTitle from "../../Shared/Layout/HipTitle";

@@ -1,5 +1,5 @@
 "use client";
-import { Alert } from "reactstrap";
+import HipAlert from "../HipComponents/HipAlert";
 
 interface HipClientErrorProps {
   type: "text" | "alert";
@@ -37,7 +37,7 @@ export const HipClientError: React.FC<HipClientErrorProps> = ({
     </>
   );
   if (type === "alert") {
-    return <Alert color="danger">{errorContent}</Alert>;
+    return <HipAlert color="danger">{errorContent}</HipAlert>;
   }
   return <>{errorContent}</>;
 };

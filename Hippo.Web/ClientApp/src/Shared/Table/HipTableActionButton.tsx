@@ -1,5 +1,5 @@
 import React from "react";
-import HipButton from "../HipButton";
+import HipButton from "../HipComponents/HipButton";
 import { ButtonProps } from "reactstrap";
 
 interface HipTableActionButtonProps extends ButtonProps {

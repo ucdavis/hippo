@@ -12,7 +12,7 @@ import { notEmptyOrFalsey } from "../../util/ValueChecks";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipBody from "../../Shared/Layout/HipBody";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 import HipErrorBoundary from "../../Shared/LoadingAndErrors/HipErrorBoundary";
 import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 import HipLoadingTable from "../../Shared/LoadingAndErrors/HipLoadingTable";

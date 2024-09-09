@@ -229,7 +229,8 @@ hr {
   padding-left: 8px;
 }
 
-.group-info-baseline {
+.group-info-baseline,
+.hip-tooltip {
   margin: 0;
   padding: 4px;
   text-align: left;
@@ -238,13 +239,17 @@ hr {
     text-transform: uppercase;
     font-size: 0.8rem;
   }
-  .group-info-header {
+  .group-info-header,
+  .hip-tooltip-header {
     font-weight: bold;
     margin-bottom: 0;
   }
   .btn-link {
     padding: 0px !important;
     font-size: 14px;
+  }
+  .tooltip {
+    margin-bottom: 10px;
   }
 }
 .data-table-prolog {
@@ -258,6 +263,28 @@ hr {
 }
 .tooltip-inner {
   max-width: 100% !important;
+  background-color: $primary-color;
+  p {
+    max-width: 450px;
+    color: #fff;
+  }
+  .text-muted {
+    color: #fff !important;
+  }
+  .card-subtitle {
+    color: #fff;
+  }
+}
+.tooltip.show {
+  opacity: 1 !important;
+}
+.bs-tooltip-top .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: $primary-color;
+}
+.bs-tooltip-end .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+  border-right-color: $primary-color;
 }
 .dotted-underline {
   border-bottom: 1px dotted $primary-color;
@@ -359,8 +386,18 @@ hr {
   }
 }
 
+.hip-text-primary {
+  color: $primary-color;
+  font-weight: 600;
+}
+
 .hip-text-danger {
   color: $bs-danger;
+}
+
+.hip-text-danger-dark {
+  color: $merlot;
+  font-weight: 600;
 }
 
 .skeleton {

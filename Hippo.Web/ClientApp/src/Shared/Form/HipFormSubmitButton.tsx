@@ -2,7 +2,7 @@ import React from "react";
 import { ButtonProps } from "reactstrap";
 import { OrderModel } from "../../types";
 import { useFormContext } from "react-hook-form";
-import HipButton from "../HipButton";
+import HipButton from "../HipComponents/HipButton";
 
 interface HipFormSubmitButtonProps extends ButtonProps {}
 

@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { convertToPacificTime } from "../../util/DateHelper";
 import { HipTable } from "../../Shared/Table/HipTable";
-import HipButton from "../../Shared/HipButton";
+import HipButton from "../../Shared/HipComponents/HipButton";
 
 interface PaymentTableProps {
   numberOfRows: number;
