@@ -137,14 +137,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
   if (isRecurring !== localIsRecurring) {
     setLocalIsRecurring(isRecurring);
     if (!isRecurring) {
+      methods.setValue("installmentType", "Monthly");
       methods.setValue("lifeCycle", 60);
-      if (installmentType === "Monthly") {
-        methods.setValue("installments", 60);
-      }
-      if (installmentType === "Yearly") {
-        methods.setValue("installments", 5);
-      }
+      methods.setValue("installments", 60);
     } else {
+      methods.setValue("installmentType", "Monthly");
       methods.setValue("lifeCycle", 0);
       methods.setValue("installments", 0);
     }
