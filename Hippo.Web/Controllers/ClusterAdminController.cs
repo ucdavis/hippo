@@ -132,6 +132,10 @@ namespace Hippo.Web.Controllers
                 .ToListAsync();
             cluster.AccessTypes = accessTypes;
 
+            //Don't update the name of the cluster, would break things?
+            cluster.Description = clusterModel.Description;
+            cluster.Email = clusterModel.Email;
+
             _dbContext.Clusters.Update(cluster);
             await _dbContext.SaveChangesAsync();
 
