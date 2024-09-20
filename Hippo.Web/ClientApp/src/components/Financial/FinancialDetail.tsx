@@ -29,7 +29,7 @@ export const FinancialDetail = () => {
     const fetchFinancialDetail = async () => {
       try {
         const response = await fetch(
-          `/api/${clusterName}/admin/FinancialDetails`,
+          `/api/${clusterName}/financial/FinancialDetails`,
         ); // Replace with your API endpoint
         const data = await response.json();
         setFinancialDetail(data);
@@ -53,7 +53,7 @@ export const FinancialDetail = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const request = authenticatedFetch(
-      `/api/${clusterName}/admin/UpdateFinancialDetails`,
+      `/api/${clusterName}/financial/UpdateFinancialDetails`,
       {
         method: "POST",
         body: JSON.stringify(financialDetail),
