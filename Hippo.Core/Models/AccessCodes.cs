@@ -12,5 +12,6 @@ namespace Hippo.Core.Models
         public const string ClusterAdminAccess  =  "ClusterAdminAccess";
         public const string GroupAdminAccess  =  "GroupAdminAccess";
         public const string FinancialAdminAccess = "FinancialAdminAccess";
+        public const string ClusterAdminOrFinancialAdminAccess = "ClusterAdminOrFinancialAdminAccess";
     }
 }

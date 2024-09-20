@@ -20,6 +20,7 @@ namespace Hippo.Web.Extensions
                 AccessCodes.SystemAccess => new[] { Role.Codes.System },
                 // ClusterAdmin requirement can be fulfilled by a system user or a cluster admin
                 AccessCodes.ClusterAdminAccess => new[] { Role.Codes.System, Role.Codes.ClusterAdmin },
+                AccessCodes.ClusterAdminOrFinancialAdminAccess => new[] { Role.Codes.System, Role.Codes.ClusterAdmin, Role.Codes.FinancialAdmin },
                 // FinanceAdmin requirement can be fulfilled by a system user or a finance admin
                 AccessCodes.FinancialAdminAccess => new[] { Role.Codes.System, Role.Codes.FinancialAdmin },
                 // GroupAdmin requirement can be fulfilled by a system user, cluster admin, or group admin

@@ -502,7 +502,10 @@ export const Products = () => {
           <ShowFor condition={row.original.isHiddenFromPublic}>
             <span className="badge bg-danger">Hidden</span>{" "}
           </ShowFor>
-          <ShowFor condition={!row.original.isUnavailable}>
+          <ShowFor
+            condition={!row.original.isUnavailable}
+            roles={["ClusterAdmin", "GroupAdmin"]}
+          >
             <Link
               className="btn btn-primary"
               to={`/${cluster}/order/create/${row.original.id}`}
@@ -510,7 +513,7 @@ export const Products = () => {
               Order
             </Link>{" "}
           </ShowFor>{" "}
-          <ShowFor roles={["ClusterAdmin"]}>
+          <ShowFor roles={["ClusterAdmin", "FinancialAdmin"]}>
             <HipButton onClick={() => handleEdit(row.original.id)}>
               Edit
             </HipButton>{" "}
@@ -543,20 +546,22 @@ export const Products = () => {
           title="Order Products"
           subtitle="Products"
           buttons={
-            <ShowFor roles={["ClusterAdmin"]}>
+            <ShowFor roles={["ClusterAdmin", "FinancialAdmin"]}>
               <>
                 <HipErrorBoundary>
                   <HipButton className="btn btn-primary" onClick={handleCreate}>
                     {" "}
                     Add Product{" "}
                   </HipButton>{" "}
-                  <Link
-                    className="btn btn-primary"
-                    to={`/${cluster}/order/create`}
-                  >
-                    {" "}
-                    Adhoc Order{" "}
-                  </Link>{" "}
+                  <ShowFor roles={["ClusterAdmin"]}>
+                    <Link
+                      className="btn btn-primary"
+                      to={`/${cluster}/order/create`}
+                    >
+                      {" "}
+                      Adhoc Order{" "}
+                    </Link>{" "}
+                  </ShowFor>
                 </HipErrorBoundary>
               </>
             </ShowFor>
