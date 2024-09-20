@@ -129,6 +129,7 @@ namespace Hippo.Web
             { 
                 options.AddAccessPolicy(AccessCodes.SystemAccess);
                 options.AddAccessPolicy(AccessCodes.ClusterAdminAccess);
+                options.AddAccessPolicy(AccessCodes.ClusterAdminOrFinancialAdminAccess);
                 options.AddAccessPolicy(AccessCodes.GroupAdminAccess);
                 options.AddAccessPolicy(AccessCodes.FinancialAdminAccess);
             });

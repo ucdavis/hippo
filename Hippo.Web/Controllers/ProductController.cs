@@ -42,7 +42,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+        [Authorize(Policy = AccessCodes.ClusterAdminOrFinancialAdminAccess)]
         public async Task<IActionResult> CreateProduct([FromBody] Product model)
         {
             var cluster = await _dbContext.Clusters.FirstAsync(a => a.Name == Cluster);
@@ -108,7 +108,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+        [Authorize(Policy = AccessCodes.ClusterAdminOrFinancialAdminAccess)]
         public async Task<IActionResult> UpdateProduct([FromBody] Product model)
         {
             var product = await _dbContext.Products.FirstOrDefaultAsync(a => a.Id == model.Id && a.Cluster.Name == Cluster);
@@ -159,7 +159,7 @@ namespace Hippo.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = AccessCodes.ClusterAdminAccess)]
+        [Authorize(Policy = AccessCodes.ClusterAdminOrFinancialAdminAccess)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _dbContext.Products.FirstOrDefaultAsync(a => a.Id == id && a.Cluster.Name == Cluster);
