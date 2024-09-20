@@ -85,6 +85,7 @@ namespace Hippo.Web.Controllers
                 LifeCycle = model.LifeCycle,
                 IsRecurring = model.IsRecurring,
                 IsUnavailable = model.IsUnavailable,
+                IsHiddenFromPublic = model.IsHiddenFromPublic,
             };
             if(product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
@@ -125,6 +126,7 @@ namespace Hippo.Web.Controllers
             product.InstallmentType = model.InstallmentType;
             product.LifeCycle = model.LifeCycle;
             product.IsUnavailable = model.IsUnavailable;
+            product.IsHiddenFromPublic = model.IsHiddenFromPublic;
             product.IsRecurring = model.IsRecurring;
             if (product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
