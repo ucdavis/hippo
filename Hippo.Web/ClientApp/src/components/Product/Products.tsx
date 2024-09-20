@@ -29,6 +29,7 @@ const defaultProduct: ProductModel = {
   lifeCycle: 60,
   isRecurring: false,
   isUnavailable: false,
+  isHiddenFromPublic: false,
 };
 
 export const Products = () => {
@@ -170,6 +171,22 @@ export const Products = () => {
                 const model: ProductModel = {
                   ...editProductModel,
                   isUnavailable: e.target.checked,
+                };
+                setEditProductModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldIsHiddenFromPublic">Is Hidden</label>{" "}
+            <input
+              id="fieldIsHiddenFromPublic"
+              type="checkbox"
+              checked={editProductModel.isHiddenFromPublic}
+              onChange={(e) => {
+                const model: ProductModel = {
+                  ...editProductModel,
+                  isHiddenFromPublic: e.target.checked,
                 };
                 setEditProductModel(model);
                 setReturn(model);
@@ -481,6 +498,9 @@ export const Products = () => {
         <div>
           <ShowFor condition={row.original.isUnavailable}>
             <span className="badge bg-danger">Unavailable</span>{" "}
+          </ShowFor>
+          <ShowFor condition={row.original.isHiddenFromPublic}>
+            <span className="badge bg-danger">Hidden</span>{" "}
           </ShowFor>
           <ShowFor condition={!row.original.isUnavailable}>
             <Link

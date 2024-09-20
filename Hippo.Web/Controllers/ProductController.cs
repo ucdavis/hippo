@@ -1,6 +1,7 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Models;
+using Hippo.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,16 +12,32 @@ namespace Hippo.Web.Controllers
     public class ProductController : SuperController
     {
         private readonly AppDbContext _dbContext;
+        private IUserService _userService;
 
-        public ProductController(AppDbContext dbContext)
+        public ProductController(AppDbContext dbContext, IUserService userService)
         {
             _dbContext = dbContext;
+            _userService = userService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var products = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster).ToListAsync(); //Filters out inactive products
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+            var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster);
+
+            List<Product> products = null;
+            if (!isClusterOrSystemAdmin && !isFinancialAdmin)
+            {
+                products = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster && !a.IsHiddenFromPublic).ToListAsync();
+            }
+            else
+            {
+                products = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster).ToListAsync(); //Filters out inactive products
+            }
+            
             return Ok(products);
         }
 
@@ -68,6 +85,7 @@ namespace Hippo.Web.Controllers
                 LifeCycle = model.LifeCycle,
                 IsRecurring = model.IsRecurring,
                 IsUnavailable = model.IsUnavailable,
+                IsHiddenFromPublic = model.IsHiddenFromPublic,
             };
             if(product.InstallmentType == Product.InstallmentTypes.OneTime)
             {
@@ -108,6 +126,7 @@ namespace Hippo.Web.Controllers
             product.InstallmentType = model.InstallmentType;
             product.LifeCycle = model.LifeCycle;
             product.IsUnavailable = model.IsUnavailable;
+            product.IsHiddenFromPublic = model.IsHiddenFromPublic;
             product.IsRecurring = model.IsRecurring;
             if (product.InstallmentType == Product.InstallmentTypes.OneTime)
             {

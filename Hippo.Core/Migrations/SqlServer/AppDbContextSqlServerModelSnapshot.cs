@@ -637,6 +637,9 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsHiddenFromPublic")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsRecurring")
                         .HasColumnType("bit");
 

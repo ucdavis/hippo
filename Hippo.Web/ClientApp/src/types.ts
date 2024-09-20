@@ -269,6 +269,7 @@ export interface ProductModel extends Partial<ProductBase> {
   id: number;
   name: string;
   isUnavailable: boolean;
+  isHiddenFromPublic: boolean;
 }
 
 export interface OrderMetadataModel {

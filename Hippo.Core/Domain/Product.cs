@@ -10,6 +10,7 @@ namespace Hippo.Core.Domain
         public bool IsActive { get; set; }
 
         public bool IsUnavailable { get; set; } = false;
+        public bool IsHiddenFromPublic { get; set; } = false;
 
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
