@@ -64,7 +64,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     RequestedAction = request.Action.SplitCamelCase(),
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
@@ -112,7 +112,7 @@ namespace Hippo.Core.Services
 
                 var model = new NewRequestModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
@@ -148,7 +148,7 @@ namespace Hippo.Core.Services
         {
             if (string.IsNullOrWhiteSpace(simpleNotificationModel.UcdLogoUrl))
             {
-                simpleNotificationModel.UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png";
+                simpleNotificationModel.UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png";
             }
             try
             {
@@ -186,7 +186,7 @@ namespace Hippo.Core.Services
 
                 var model = new DecisionModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     GroupName = group.DisplayName,
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
@@ -240,7 +240,7 @@ namespace Hippo.Core.Services
 
                 var model = new OrderNotificationModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     Subject = "Payment failed",
                     Header = "Order Payment Failed",
                     Paragraphs = new List<string>(),
@@ -279,7 +279,7 @@ namespace Hippo.Core.Services
 
                 var model = new OrderNotificationModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
                     Subject = "Payment failed",
                     Header = "Order Payment Failed",
@@ -320,7 +320,7 @@ namespace Hippo.Core.Services
 
                 var model = new OrderNotificationModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
                     Subject = simpleNotificationModel.Subject,
                     Header = simpleNotificationModel.Header,
@@ -355,7 +355,7 @@ namespace Hippo.Core.Services
                 var message = "Payment Processed";
                 var model = new EmailOrderPaymentModel()
                 {
-                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
                     Subject = orderPaymentModel.Subject,
                     Header = orderPaymentModel.Header,

@@ -47,7 +47,7 @@ namespace Hippo.Web.Controllers
         {
             var model = new SampleModel
             {
-                UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/caes-logo-gray.png",
+                UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                 Name = "Some Name, really.",
                 SomeText = "This is some replaced text.",
                 SomeText2 = "Even More replaced text"
