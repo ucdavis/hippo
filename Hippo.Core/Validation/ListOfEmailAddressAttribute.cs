@@ -11,8 +11,6 @@ public class ListOfEmailAddressAttribute : ValidationAttribute
 {
     private readonly bool _nonEmpty;
     private readonly EmailAddressAttribute _emailAddressAttribute;
-    private const string invalidError = "'{0}' contains an invalid email address.";
-    private const string emptyError = "'{0}' requires at least 1 email address";
 
     public ListOfEmailAddressAttribute(bool nonEmpty = false)
         : base()
@@ -24,8 +22,8 @@ public class ListOfEmailAddressAttribute : ValidationAttribute
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         var list = value as IList<string>;
-        if (_nonEmpty && list == null || !list.Any())
-            return new ValidationResult(emptyError);
+        if (_nonEmpty && (list == null || !list.Any()))
+            return new ValidationResult($"'{validationContext.MemberName}' requires at least 1 email address");
 
         if (list == null)
             return ValidationResult.Success;
@@ -33,14 +31,9 @@ public class ListOfEmailAddressAttribute : ValidationAttribute
         foreach (var email in list)
         {
             if (!_emailAddressAttribute.IsValid(email))
-                return new ValidationResult(invalidError);
+                return new ValidationResult($"'{validationContext.MemberName}' contains an invalid email address.");
         }
 
         return ValidationResult.Success;
-    }
-
-    public override string FormatErrorMessage(string name)
-    {
-        return String.Format(ErrorMessageString, name);
     }
 }
