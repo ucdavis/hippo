@@ -8,16 +8,24 @@ using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
+using Hippo.Core.Validation;
 
 namespace Hippo.Core.Services
 {
     public class EmailModel
     {
+        [Required]
+        [ListOfEmailAddress]
         public string[] Emails { get; set; } = Array.Empty<string>();
+        [Required]
+        [ListOfEmailAddress]
         public string[] CcEmails { get; set; } = Array.Empty<string>();
+        [Required]
+        public string Subject { get; set; } = "";
+        [Required]
         public string TextBody { get; set; } = "";
         public string HtmlBody { get; set; } = "";
-        public string Subject { get; set; } = "";
     }
 
     public interface IEmailService

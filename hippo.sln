@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Email", "Hippo.Email\Hippo.Email.csproj", "{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.Core", "Hippo.Jobs.Core\Hippo.Jobs.Core.csproj", "{A209A012-28D5-4022-AFEF-8BC7415234C0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.PuppetSync", "Hippo.Jobs.PuppetSync\Hippo.Jobs.PuppetSync.csproj", "{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}"
@@ -44,10 +42,6 @@ Global
 		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F7FF414-EC7A-4006-849C-5A8804DF6FCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8297C36-9223-4E04-A8FD-9D2E3EFA0AC2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A209A012-28D5-4022-AFEF-8BC7415234C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A209A012-28D5-4022-AFEF-8BC7415234C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A209A012-28D5-4022-AFEF-8BC7415234C0}.Release|Any CPU.ActiveCfg = Release|Any CPU

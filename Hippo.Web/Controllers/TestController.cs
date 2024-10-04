@@ -3,7 +3,7 @@ using Hippo.Core.Extensions;
 using Hippo.Core.Models;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Hippo.Email.Models;
+using Hippo.Core.Models.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.KeyVault.Models;

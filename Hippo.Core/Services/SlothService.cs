@@ -15,7 +15,7 @@ using System.Net.Http;
 using Hippo.Core.Domain;
 using Serilog;
 using System.Net;
-using Hippo.Email.Models;
+using Hippo.Core.Models.Email;
 
 
 namespace Hippo.Core.Services

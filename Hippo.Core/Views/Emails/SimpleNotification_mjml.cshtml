@@ -1,5 +1,5 @@
-﻿@using Hippo.Email.Models
-@model Hippo.Email.Models.SimpleNotificationModel
+﻿@using Hippo.Core.Models.Email
+@model Hippo.Core.Models.Email.SimpleNotificationModel
 
 @{
     ViewData["EmailTitle"] = "Testing";
@@ -13,7 +13,7 @@
         @if (!string.IsNullOrWhiteSpace(@Model.Header))
         {
             <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="#1F1F1F">
-                <p>Software request received</p>
+                <p>@Model.Header</p>
             </mj-text>
         }
         <mj-text padding-top="0px" padding-bottom="0px" font-size="20px" color="rgba(31,31,31,0.8)">

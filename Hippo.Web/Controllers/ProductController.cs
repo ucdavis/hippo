@@ -28,7 +28,7 @@ namespace Hippo.Web.Controllers
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
             var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster);
 
-            List<Product> products = null;
+            List<Product> products = null!;
             if (!isClusterOrSystemAdmin && !isFinancialAdmin)
             {
                 products = await _dbContext.Products.Where(a => a.Cluster.Name == Cluster && !a.IsHiddenFromPublic).ToListAsync();

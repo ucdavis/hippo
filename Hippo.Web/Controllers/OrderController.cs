@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using static Hippo.Core.Domain.Product;
 using static Hippo.Core.Models.SlothModels.TransferViewModel;
 using Serilog;
-using Hippo.Email.Models;
+using Hippo.Core.Models.Email;
 
 namespace Hippo.Web.Controllers
 {
