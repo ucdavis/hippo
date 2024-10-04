@@ -23,7 +23,7 @@ public class ApiKeyAuthFilter : IAuthorizationFilter
         string userApiKey = context.HttpContext.Request.Headers[ApiKeyConstants.ApiKeyHeaderName].ToString();
         if (string.IsNullOrWhiteSpace(userApiKey))
         {
-            context.Result = new BadRequestResult();
+            context.Result = new BadRequestObjectResult(new { message = "No api key specified" });
             return;
         }
         if (!IsValidApiKey(userApiKey))
