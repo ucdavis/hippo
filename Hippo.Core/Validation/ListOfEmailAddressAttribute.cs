@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Hippo.Core.Validation;
 
 /// <summary>
-/// Validates that all elements of a list of strings matches one of the options specified in a regular expression
+/// Validates that all elements of a list are email addresses
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
 public class ListOfEmailAddressAttribute : ValidationAttribute
