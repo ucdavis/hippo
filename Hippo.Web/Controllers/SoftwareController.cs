@@ -2,7 +2,7 @@ using Hippo.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hippo.Core.Models;
-using Hippo.Email.Models;
+using Hippo.Core.Models.Email;
 using Hippo.Core.Data;
 
 namespace Hippo.Web.Controllers;
@@ -83,8 +83,9 @@ Additional Information: {softwareRequestModel.AdditionalInformation}
                 "Thank you for submitting your request. We appreciate your interest and will begin evaluating the details provided. Our team will review your submission thoroughly and respond as soon as possible.",
                 "If we need any further information, we will contact you directly.",
                 "Thank you for your patience."
-            }
-        }, new string[] { currentUser.Email });
+            },
+            Emails = new string[] { currentUser.Email }
+        });
 
         return Ok();
     }

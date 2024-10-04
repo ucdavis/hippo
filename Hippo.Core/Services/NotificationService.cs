@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog;
-using Hippo.Email.Models;
+using Hippo.Core.Models.Email;
 using Hippo.Core.Extensions;
 using Razor.Templating.Core;
 using Mjml.Net;
@@ -22,7 +22,7 @@ namespace Hippo.Core.Services
         Task<bool> AccountRequest(Request request);
         Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy , string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
-        Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null);
+        Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel);
 
         Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
@@ -144,7 +144,7 @@ namespace Hippo.Core.Services
             }
         }
 
-        public async Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel, string[] emails, string[] ccEmails = null)
+        public async Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel)
         {
             if (string.IsNullOrWhiteSpace(simpleNotificationModel.UcdLogoUrl))
             {
@@ -154,8 +154,8 @@ namespace Hippo.Core.Services
             {
                 var emailModel = new EmailModel
                 {
-                    Emails = emails,
-                    CcEmails = ccEmails ?? Array.Empty<string>(),
+                    Emails = simpleNotificationModel.Emails,
+                    CcEmails = simpleNotificationModel.CcEmails ?? Array.Empty<string>(),
                     Subject = "HPC Software Install Request",
                     TextBody = string.Join($"{Environment.NewLine}{Environment.NewLine}", simpleNotificationModel.Paragraphs),
                     HtmlBody = await _mjmlRenderer.RenderView("/Views/Emails/SimpleNotification_mjml.cshtml", simpleNotificationModel)
