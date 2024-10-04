@@ -156,7 +156,7 @@ namespace Hippo.Core.Services
                 {
                     Emails = simpleNotificationModel.Emails,
                     CcEmails = simpleNotificationModel.CcEmails ?? Array.Empty<string>(),
-                    Subject = "HPC Software Install Request",
+                    Subject = simpleNotificationModel.Subject,
                     TextBody = string.Join($"{Environment.NewLine}{Environment.NewLine}", simpleNotificationModel.Paragraphs),
                     HtmlBody = await _mjmlRenderer.RenderView("/Views/Emails/SimpleNotification_mjml.cshtml", simpleNotificationModel)
                 };
@@ -166,7 +166,7 @@ namespace Hippo.Core.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Error acknowledging software request", ex);
+                Log.Error("Error sending email", ex);
                 return false;
             }
 
