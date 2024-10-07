@@ -72,7 +72,7 @@ export const Products = () => {
               id="fieldName"
               required
               maxLength={50}
-              value={editProductModel.name}
+              defaultValue={editProductModel.name}
               onChange={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
@@ -88,7 +88,7 @@ export const Products = () => {
             <textarea
               className="form-control"
               id="fieldDescription"
-              value={editProductModel.description}
+              defaultValue={editProductModel.description}
               required
               maxLength={250}
               rows={3}
@@ -109,7 +109,7 @@ export const Products = () => {
               id="fieldCategory"
               required
               maxLength={50}
-              value={editProductModel.category}
+              defaultValue={editProductModel.category}
               onChange={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
@@ -127,7 +127,7 @@ export const Products = () => {
               id="fieldUnitPrice"
               type="decimal"
               required
-              value={editProductModel.unitPrice}
+              defaultValue={editProductModel.unitPrice}
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
@@ -150,7 +150,7 @@ export const Products = () => {
               id="fieldUnits"
               required
               maxLength={50}
-              value={editProductModel.units}
+              defaultValue={editProductModel.units}
               onChange={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
@@ -290,7 +290,7 @@ export const Products = () => {
                 className="form-control"
                 id="lifeCycle"
                 required
-                value={editProductModel.lifeCycle}
+                defaultValue={editProductModel.lifeCycle}
                 onChange={(e) => {
                   const model: ProductModel = {
                     ...editProductModel,
