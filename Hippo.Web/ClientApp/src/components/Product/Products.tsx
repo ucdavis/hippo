@@ -73,7 +73,7 @@ export const Products = () => {
               required
               maxLength={50}
               defaultValue={editProductModel.name}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   name: e.target.value,
@@ -92,7 +92,7 @@ export const Products = () => {
               required
               maxLength={250}
               rows={3}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   description: e.target.value,
@@ -110,7 +110,7 @@ export const Products = () => {
               required
               maxLength={50}
               defaultValue={editProductModel.category}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   category: e.target.value,
@@ -128,7 +128,7 @@ export const Products = () => {
               type="decimal"
               required
               defaultValue={editProductModel.unitPrice}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const value = e.target.value;
                 if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
                   // This regex checks for a valid decimal or integer
@@ -151,7 +151,7 @@ export const Products = () => {
               required
               maxLength={50}
               defaultValue={editProductModel.units}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   units: e.target.value,
@@ -291,7 +291,7 @@ export const Products = () => {
                 id="lifeCycle"
                 required
                 defaultValue={editProductModel.lifeCycle}
-                onChange={(e) => {
+                onBlur={(e) => {
                   const model: ProductModel = {
                     ...editProductModel,
                     lifeCycle: parseInt(e.target.value),
