@@ -72,8 +72,8 @@ export const Products = () => {
               id="fieldName"
               required
               maxLength={50}
-              value={editProductModel.name}
-              onChange={(e) => {
+              defaultValue={editProductModel.name}
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   name: e.target.value,
@@ -88,11 +88,11 @@ export const Products = () => {
             <textarea
               className="form-control"
               id="fieldDescription"
-              value={editProductModel.description}
+              defaultValue={editProductModel.description}
               required
               maxLength={250}
               rows={3}
-              onChange={(e) => {
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   description: e.target.value,
@@ -109,8 +109,8 @@ export const Products = () => {
               id="fieldCategory"
               required
               maxLength={50}
-              value={editProductModel.category}
-              onChange={(e) => {
+              defaultValue={editProductModel.category}
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   category: e.target.value,
@@ -127,8 +127,8 @@ export const Products = () => {
               id="fieldUnitPrice"
               type="decimal"
               required
-              value={editProductModel.unitPrice}
-              onChange={(e) => {
+              defaultValue={editProductModel.unitPrice}
+              onBlur={(e) => {
                 const value = e.target.value;
                 if (/^\d*\.?\d*$/.test(value) || /^\d*\.$/.test(value)) {
                   // This regex checks for a valid decimal or integer
@@ -150,8 +150,8 @@ export const Products = () => {
               id="fieldUnits"
               required
               maxLength={50}
-              value={editProductModel.units}
-              onChange={(e) => {
+              defaultValue={editProductModel.units}
+              onBlur={(e) => {
                 const model: ProductModel = {
                   ...editProductModel,
                   units: e.target.value,
@@ -290,8 +290,8 @@ export const Products = () => {
                 className="form-control"
                 id="lifeCycle"
                 required
-                value={editProductModel.lifeCycle}
-                onChange={(e) => {
+                defaultValue={editProductModel.lifeCycle}
+                onBlur={(e) => {
                   const model: ProductModel = {
                     ...editProductModel,
                     lifeCycle: parseInt(e.target.value),
