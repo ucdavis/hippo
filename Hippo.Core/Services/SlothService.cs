@@ -174,7 +174,7 @@ namespace Hippo.Core.Services
         {
             var slothTransaction = new TransactionViewModel
             {
-                AutoApprove = financialDetail.AutoApprove,
+                AutoApprove = false, //financialDetail.AutoApprove,
                 MerchantTrackingNumber = $"{payment.OrderId}-{payment.Id}",
                 ProcessorTrackingNumber = $"{payment.OrderId}-{payment.Id}",
                 ValidateFinancialSegmentStrings = true,

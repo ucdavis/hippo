@@ -42,7 +42,7 @@ public class FinancialController : SuperController
             FinancialSystemApiKey = string.Empty,
             FinancialSystemApiSource = existingFinancialDetail?.FinancialSystemApiSource,
             ChartString = existingFinancialDetail?.ChartString,
-            AutoApprove = existingFinancialDetail?.AutoApprove ?? false,
+            AutoApprove = false, // existingFinancialDetail?.AutoApprove ?? false,
             MaskedApiKey = "NOT SET"
         };
 
@@ -103,7 +103,7 @@ public class FinancialController : SuperController
         //var xxx = await _secretsService.GetSecret(existingFinancialDetail.SecretAccessKey);
         existingFinancialDetail.FinancialSystemApiSource = model.FinancialSystemApiSource;
         existingFinancialDetail.ChartString = validateChartString.ChartString;
-        existingFinancialDetail.AutoApprove = model.AutoApprove;
+        existingFinancialDetail.AutoApprove = false; // model.AutoApprove;
 
         if (existingFinancialDetail.Id == 0)
         {
@@ -121,7 +121,7 @@ public class FinancialController : SuperController
             FinancialSystemApiKey = string.Empty,
             FinancialSystemApiSource = existingFinancialDetail?.FinancialSystemApiSource,
             ChartString = existingFinancialDetail?.ChartString,
-            AutoApprove = existingFinancialDetail?.AutoApprove ?? false,
+            AutoApprove = false, //existingFinancialDetail?.AutoApprove ?? false,
             MaskedApiKey = "NOT SET"
         };
         var apiKey = await _secretsService.GetSecret(existingFinancialDetail?.SecretAccessKey);
