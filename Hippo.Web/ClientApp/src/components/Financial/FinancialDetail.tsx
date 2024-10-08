@@ -164,21 +164,6 @@ export const FinancialDetail = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="autoApprove">Auto Approve:</label>{" "}
-            <input
-              type="checkbox"
-              id="autoApprove"
-              name="autoApprove"
-              checked={financialDetail.autoApprove}
-              onChange={(e) =>
-                setFinancialDetail((prevFinancialDetail) => ({
-                  ...prevFinancialDetail,
-                  autoApprove: e.target.checked,
-                }))
-              }
-            />
-          </div>
-          <div className="form-group">
             <label htmlFor="chartString">Chart String:</label>{" "}
             {financialDetail.chartString && (
               <a

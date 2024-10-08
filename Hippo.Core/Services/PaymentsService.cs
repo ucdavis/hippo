@@ -235,20 +235,18 @@ namespace Hippo.Core.Services
                 }
                 if (invalidOrderIdsInCluster.Count > 0)
                 {
-                    //Get lists of cluster admins
-                    //Send email to cluster admins with list of orders that have failed payments
-                    //https://localhost:44371/caesfarm/order/details/46
+                    //Send email to cluster admins / financial admins with list of orders that have failed payments
 
-                    var clusterAdmins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == orderGroup.Key && p.Role.Name == Role.Codes.ClusterAdmin)).Select(a => a.Email).ToArrayAsync();
-                    //TODO: Notify the cluster admins with a single email
+                    var notificationList = await _dbContext.Users.AsNoTracking().Where(a => a.Permissions.Any(p => p.Cluster.Id == orderGroup.Key && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
 
                     try
                     {
-                        await _notificationService.AdminPaymentFailureNotification(clusterAdmins, cluster.Name, invalidOrderIdsInCluster.ToArray());
+                        await _notificationService.AdminPaymentFailureNotification(notificationList, cluster.Name, invalidOrderIdsInCluster.ToArray());
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Failed to notify cluster admins for cluster {0}", cluster.Id);
+
+                        Log.Error(ex, "Failed to notify cluster admins/financial for cluster {0}", cluster.Id);
                     }
 
                 }
