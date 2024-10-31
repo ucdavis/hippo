@@ -32,6 +32,8 @@ namespace Hippo.Core.Domain
         public int? CreatedById { get; set; }
         public User CreatedBy { get; set; }
 
+        public DateTime? CompletedOn { get; set; } //Date the payment was completed in Sloth
+
         public class Statuses
         {
             public const string Created = "Created";

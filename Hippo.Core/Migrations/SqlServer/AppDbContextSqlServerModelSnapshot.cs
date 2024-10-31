@@ -539,6 +539,9 @@ namespace Hippo.Core.Migrations.SqlServer
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime?>("CompletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
 

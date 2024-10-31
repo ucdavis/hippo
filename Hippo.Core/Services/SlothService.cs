@@ -283,6 +283,7 @@ namespace Hippo.Core.Services
                         {
                             case SlothStatuses.Completed:
                                 payment.Status = Payment.Statuses.Completed;
+                                payment.CompletedOn = DateTime.UtcNow;
 
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 order.BalanceRemaining -= Math.Round(payment.Amount, 2); //I'm going to do all the updates of this here
