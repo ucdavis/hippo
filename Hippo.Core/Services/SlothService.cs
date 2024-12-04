@@ -207,10 +207,11 @@ namespace Hippo.Core.Services
                 slothTransaction.AddMetadata(meta.Name, meta.Value);
             }
 
+            //Transfer desc has max 40 characters
             var transfer = new TransferViewModel
             {
                 Amount = Math.Round(payment.Amount, 2),
-                Description = $"Order: {payment.OrderId} Name: {order.Name}",
+                Description = $"Order: {payment.OrderId}-{payment.Id}",
                 FinancialSegmentString = financialDetail.ChartString,
                 Direction = TransferViewModel.Directions.Credit,
             };
