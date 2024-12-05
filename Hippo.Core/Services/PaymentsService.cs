@@ -46,7 +46,7 @@ namespace Hippo.Core.Services
                     Log.Error("Order {0} still has a negative balance. Setting to 0", order.Id);
                     order.BalanceRemaining = 0;
                     //Posibly set to completed? Or notify someone that there appears to be an over payment?
-                    await _historyService.OrderUpdated(order, null, "Negative balance detected. Setting Ballance to 0");
+                    await _historyService.OrderUpdated(order, null, "Negative balance detected. Setting Balance to 0");
                 }
                 _dbContext.Orders.Update(order);
                 await _dbContext.SaveChangesAsync();
@@ -93,7 +93,7 @@ namespace Hippo.Core.Services
                     if (order.BalanceRemaining <= 0)
                     {
                         SetNextPaymentDate(order);
-                        //if for some reason the ballance is a negative, it is probably because of an over payment, so it makes sense to just add the next payment ammount
+                        //if for some reason the balance is a negative, it is probably because of an over payment, so it makes sense to just add the next payment ammount
                         order.BalanceRemaining += order.Total;
                         _dbContext.Orders.Update(order);
                         await _dbContext.SaveChangesAsync();
@@ -155,7 +155,7 @@ namespace Hippo.Core.Services
 
                 if(order.IsRecurring) //If the payment above gets rejected/canceled we should test this
                 {
-                    //The next payment date should be set now, so add the the BallanceRemaining
+                    //The next payment date should be set now, so add the the BalanceRemaining
                     order.BalanceRemaining += order.Total;
                 }
 
