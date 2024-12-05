@@ -222,7 +222,7 @@ namespace Hippo.Core.Services
                 var debitTransfer = new TransferViewModel
                 {
                     Amount = Math.Round(payment.Amount * (billing.Percentage / 100m), 2),
-                    Description = $"Order: {payment.OrderId} Name: {order.Name}",
+                    Description = $"Order: {payment.OrderId}-{payment.Id}",
                     FinancialSegmentString = billing.ChartString,
                     Direction = TransferViewModel.Directions.Debit,
                 };
