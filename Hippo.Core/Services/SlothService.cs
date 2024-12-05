@@ -211,7 +211,7 @@ namespace Hippo.Core.Services
             var transfer = new TransferViewModel
             {
                 Amount = Math.Round(payment.Amount, 2),
-                Description = $"Order: {payment.OrderId}-{payment.Id}",
+                Description = $"Order: {payment.OrderId}-{payment.Id}".SafeTruncate(40),
                 FinancialSegmentString = financialDetail.ChartString,
                 Direction = TransferViewModel.Directions.Credit,
             };
@@ -222,7 +222,7 @@ namespace Hippo.Core.Services
                 var debitTransfer = new TransferViewModel
                 {
                     Amount = Math.Round(payment.Amount * (billing.Percentage / 100m), 2),
-                    Description = $"Order: {payment.OrderId}-{payment.Id}",
+                    Description = $"Order: {payment.OrderId}-{payment.Id}".SafeTruncate(40),
                     FinancialSegmentString = billing.ChartString,
                     Direction = TransferViewModel.Directions.Debit,
                 };

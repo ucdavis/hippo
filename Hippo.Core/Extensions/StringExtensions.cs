@@ -70,4 +70,18 @@ public static class StringExtensions
         var i = 0;
         return Regex.Replace(messageTemplate, "{.*?}", _ => objects[i++]?.ToString() ?? string.Empty);
     }
+    public static string SafeTruncate(this string value, int max)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length <= max)
+        {
+            return value;
+        }
+
+        if (max <= 0)
+        {
+            return String.Empty;
+        }
+
+        return value.Substring(0, max);
+    }
 }
