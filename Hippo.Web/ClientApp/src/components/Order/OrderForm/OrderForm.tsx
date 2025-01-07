@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { OrderModel } from "../../../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { faDollarSign, faSearch } from "@fortawesome/free-solid-svg-icons";
 import HipFormSubmitButton from "../../../Shared/Form/HipFormSubmitButton";
 import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
@@ -258,6 +258,15 @@ const OrderForm: React.FC<OrderFormProps> = ({
                       name="piUser.name"
                       label="Sponsor"
                       canEditConditions={false}
+                      inputAppend={
+                        <a
+                          href={`https://who.ucdavis.edu/detail/${orderProp.piUser.kerberos}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          <FontAwesomeIcon icon={faSearch} />
+                        </a>
+                      }
                     />
                     <OrderFormField
                       name="status"
