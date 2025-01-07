@@ -7,7 +7,6 @@ import HipFormSubmitButton from "../../../Shared/Form/HipFormSubmitButton";
 import MetaDataFields from "./MetaDataFields";
 import OrderFormField from "./OrderFormField";
 import OrderFormTotalFields from "./OrderFormTotalFields";
-import { authenticatedFetch } from "../../../util/api";
 import BillingsFields from "../BillingsFields";
 import { ShowFor } from "../../../Shared/ShowFor";
 import { HipForm } from "../../../Shared/Form/HipForm";
@@ -333,6 +332,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   <br />
                   <BillingsFields readOnly={isDetailsPage} />
                   <br />
+                </>
+              </ShowFor>
+              <ShowFor condition={isAdmin && !isDetailsPage && limitedEditing}>
+                <>
+                  <br />
+                  <MetaDataFields readOnly={false} />
                 </>
               </ShowFor>
               {(orderProp.status !== OrderStatus.Draft || isAdmin) && (
