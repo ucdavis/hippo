@@ -1060,6 +1060,8 @@ namespace Hippo.Web.Controllers
                 }
                 existingOrder.AdminNotes = model.AdminNotes;
                 existingOrder.ExternalReference = model.ExternalReference;
+
+                ProcessMetaData(model, existingOrder); //Allow admin to update meta data
             }
 
 
