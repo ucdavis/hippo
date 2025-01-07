@@ -28,7 +28,7 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
         <HipFormFieldReadOnly
           name="balanceRemaining"
           label={
-            isRecurring ? "Ballance Remaining this Cycle" : "Ballance Remaining"
+            isRecurring ? "Balance Remaining this Cycle" : "Balance Remaining"
           }
           type="number"
           readOnly

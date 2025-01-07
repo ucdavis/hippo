@@ -603,7 +603,7 @@ namespace Hippo.Web.Controllers
 
             if (order.IsRecurring)
             {
-                //I'm assumbing that the ballance remaing is set when the payment completes. For recurring, this will also get updated with the next payment date.
+                //I'm assumbing that the balance remaing is set when the payment completes. For recurring, this will also get updated with the next payment date.
                 var totalPayments = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount);
                 if (amount > order.BalanceRemaining || amount > (order.BalanceRemaining - totalPayments))
                 {
