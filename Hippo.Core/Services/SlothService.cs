@@ -289,7 +289,7 @@ namespace Hippo.Core.Services
 
                                 try
                                 {
-                                    payment.Details = Serialize(slothResponse.Transfers); //This should fit, but to be safe, need to make it bigger.
+                                    payment.Details = Serialize(slothResponse.Transfers); 
                                 }
                                 catch(Exception ex)
                                 {
@@ -412,7 +412,7 @@ namespace Hippo.Core.Services
                         {
                             try
                             {
-                                payment.Details = Serialize(slothResponse.Transfers); //This should fit, but to be safe, need to make it bigger.
+                                payment.Details = Serialize(slothResponse.Transfers); 
                                 await _dbContext.SaveChangesAsync();
                             }
                             catch (Exception ex)
