@@ -27,11 +27,13 @@ namespace Hippo.Web.Controllers
         private readonly IMjmlRenderer _mjmlRenderer;
         private readonly EmailSettings _emailSettings;
 
+        public ISlothService _slothService { get; }
+
 
         public IAggieEnterpriseService _aggieEnterpriseService { get; }
 
         public TestController(IEmailService emailService, ISshService sshService, INotificationService notificationService, AppDbContext dbContext,
-            ISecretsService secretsService, IMjmlRenderer mjmlRenderer, IAggieEnterpriseService aggieEnterpriseService, IOptions<EmailSettings> emailSettings)
+            ISecretsService secretsService, IMjmlRenderer mjmlRenderer, IAggieEnterpriseService aggieEnterpriseService, IOptions<EmailSettings> emailSettings, ISlothService slothService)
         {
             _emailService = emailService;
             _sshService = sshService;
@@ -41,6 +43,13 @@ namespace Hippo.Web.Controllers
             _mjmlRenderer = mjmlRenderer;
             _aggieEnterpriseService = aggieEnterpriseService;
             _emailSettings = emailSettings.Value;
+            _slothService = slothService;
+        }
+
+        public async Task<IActionResult> UpdateMissingPaymentDetails()
+        {
+            var model = await _slothService.UpdateMissingPaymentDetails();
+            return Content(model.ToString());
         }
 
         public async Task<IActionResult> TestEmail()
