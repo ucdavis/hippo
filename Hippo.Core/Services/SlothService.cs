@@ -286,6 +286,15 @@ namespace Hippo.Core.Services
                                 payment.Status = Payment.Statuses.Completed;
                                 payment.CompletedOn = DateTime.UtcNow;
 
+                                try
+                                {
+                                    payment.Details = Serialize(slothResponse.Transfers); //This should fit, but to be safe, need to make it bigger.
+                                }
+                                catch(Exception ex)
+                                {
+                                    Log.Error(ex, "Error tring to searialize sloth transfers");
+                                }
+
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 order.BalanceRemaining -= Math.Round(payment.Amount, 2); //I'm going to do all the updates of this here
 
@@ -325,6 +334,7 @@ namespace Hippo.Core.Services
                                         Transfers = emailDebits,
                                     };
                                     await _notificationService.OrderPaymentNotification(order, new string[] { order.PrincipalInvestigator.Email }, emailModel);
+
                                 }
                                 catch (Exception ex)
                                 {
@@ -369,6 +379,11 @@ namespace Hippo.Core.Services
             }
 
             return !wereThereErrors;
+        }
+
+        private static string Serialize(object obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }
