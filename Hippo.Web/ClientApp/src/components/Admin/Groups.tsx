@@ -40,8 +40,8 @@ export const Groups = () => {
                   className="form-control"
                   id="displayNameLookup"
                   placeholder="Group name or description here"
-                  value={editGroupDisplayName}
-                  onChange={(e) => {
+                  defaultValue={editGroupDisplayName}
+                  onBlur={(e) => {
                     setEditGroupDisplayName(e.target.value);
                     setReturn(e.target.value);
                   }}

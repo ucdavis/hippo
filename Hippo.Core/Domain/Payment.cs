@@ -20,7 +20,7 @@ namespace Hippo.Core.Domain
         public decimal Amount { get; set; }
         [MaxLength(20)]
         public string Status { get; set; }
-        [MaxLength(250)]
+
         public string Details { get; set; } //chart strings, credit/debit, and amounts
 
 

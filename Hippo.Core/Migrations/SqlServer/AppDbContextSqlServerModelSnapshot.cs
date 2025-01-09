@@ -549,8 +549,7 @@ namespace Hippo.Core.Migrations.SqlServer
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FinancialSystemId")
                         .HasMaxLength(128)

@@ -28,6 +28,7 @@ namespace Hippo.Core.Services
         Task<bool> TestApiKey(int clusterId);
         Task<bool> ProcessPayments(); //All clusters?
         Task<bool> UpdatePayments(); //All clusters?
+        Task<bool> UpdateMissingPaymentDetails(); //All clusters
     }
     public class SlothService : ISlothService
     {
@@ -286,6 +287,15 @@ namespace Hippo.Core.Services
                                 payment.Status = Payment.Statuses.Completed;
                                 payment.CompletedOn = DateTime.UtcNow;
 
+                                try
+                                {
+                                    payment.Details = Serialize(slothResponse.Transfers); 
+                                }
+                                catch(Exception ex)
+                                {
+                                    Log.Error(ex, "Error tring to searialize sloth transfers");
+                                }
+
                                 await _historyService.OrderUpdated(order, null, $"Payment completed. Amount: {Math.Round(payment.Amount, 2).ToString("C")}");
                                 order.BalanceRemaining -= Math.Round(payment.Amount, 2); //I'm going to do all the updates of this here
 
@@ -325,6 +335,7 @@ namespace Hippo.Core.Services
                                         Transfers = emailDebits,
                                     };
                                     await _notificationService.OrderPaymentNotification(order, new string[] { order.PrincipalInvestigator.Email }, emailModel);
+
                                 }
                                 catch (Exception ex)
                                 {
@@ -369,6 +380,58 @@ namespace Hippo.Core.Services
             }
 
             return !wereThereErrors;
+        }
+
+        public async Task<bool> UpdateMissingPaymentDetails()
+        {
+            var wereThereErrors = false;
+            var allPayments = await _dbContext.Payments.Include(a => a.Order).ThenInclude(a => a.Cluster).Where(a => a.Status == Payment.Statuses.Completed && string.IsNullOrWhiteSpace(a.Details)).ToListAsync();
+            var paymentGroups = allPayments.GroupBy(a => a.Order.ClusterId);
+            foreach (var group in paymentGroups)
+            {
+                var clusterId = group.Key;
+                var financialDetail = await _dbContext.FinancialDetails.SingleAsync(a => a.ClusterId == clusterId);
+                var apiKey = await _secretsService.GetSecret(financialDetail.SecretAccessKey);
+                using var client = _clientFactory.CreateClient();
+                client.BaseAddress = new Uri($"{_slothSettings.ApiUrl}Transactions/");
+                client.DefaultRequestHeaders.Add("X-Auth-Token", apiKey);
+                foreach (var payment in group)
+                {
+                    if (string.IsNullOrWhiteSpace(payment.FinancialSystemId))
+                    {
+                        wereThereErrors = true;
+                        Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name} Error: Missing FinancialSystemId");
+                        continue;
+                    }
+                    var response = await client.GetAsync(payment.FinancialSystemId);
+                    if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var slothResponse = JsonSerializer.Deserialize<SlothResponseModel>(content, _serializerOptions);
+                        if (slothResponse.Status == SlothStatuses.Completed)
+                        {
+                            try
+                            {
+                                payment.Details = Serialize(slothResponse.Transfers); 
+                                await _dbContext.SaveChangesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, "Error tring to searialize sloth transfers");
+                                wereThereErrors = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return !wereThereErrors;
+        }
+
+
+        private static string Serialize(object obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }
