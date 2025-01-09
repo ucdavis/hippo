@@ -32,6 +32,7 @@ import { OrderHistories } from "./components/Order/OrderHistories";
 import { OrderPayments } from "./components/Order/OrderPayments";
 import NotAuthorized from "./Shared/LoadingAndErrors/NotAuthorized";
 import { FinancialAdmins } from "./components/Admin/FinancialAdmins";
+import { Payments } from "./components/Report/Payments";
 
 declare var Hippo: AppContextShape;
 
@@ -244,6 +245,17 @@ const App = () => {
                   alternative={<NotAuthorized />}
                 >
                   <CreateOrder />
+                </ShowFor>
+              }
+            />
+            <Route //Copied from Orders
+              path="/:cluster/report/Payments"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
+                  <Payments />
                 </ShowFor>
               }
             />

@@ -162,6 +162,22 @@ export const AppNav = () => {
                   Admin Orders
                 </NavLink>
               </ShowFor>
+              {/* TODO: make a index page to choose the reports when we have more? */}
+              <ShowFor
+                roles={["ClusterAdmin", "System", "FinancialAdmin"]}
+                condition={cluster.allowOrders}
+              >
+                <NavLink
+                  id="payments"
+                  to={`/${cluster.name}/report/payments`}
+                  className="nav-item nav-link"
+                  style={({ isActive }) =>
+                    isActive ? { fontWeight: "bold" } : {}
+                  }
+                >
+                  Reports
+                </NavLink>
+              </ShowFor>
             </nav>
           </div>
         </div>

@@ -51,7 +51,6 @@ namespace Hippo.Core.Models.ReportModels
         // Other product info
 
         public string OrderName { get; set; }
-        public string OrderDescription { get; set; }
         // Other order info
 
         public string MetaDataString { get; set; } //Metadata from the order.
@@ -75,12 +74,11 @@ namespace Hippo.Core.Models.ReportModels
                 CreatedOn = payment.CreatedOn,
                 Amount = payment.Amount,
                 Details = payment.Details,
-                CreatedBy = payment.CreatedBy != null ? payment.CreatedBy.Email : "System",
+                CreatedBy = payment.CreatedBy != null ? $"{payment.CreatedBy.Name} ({payment.CreatedBy.Email})" : "System",
                 OrderId = payment.OrderId,
                 ProductName = payment.Order.ProductName,
                 Description = payment.Order.Description,
                 OrderName = payment.Order.Name,
-                OrderDescription = payment.Order.Description,
                 MetaDataString = string.Join(", ", payment.Order.MetaData.Select(m => $"{m.Name}: {m.Value}")),
                 Sponsor = $"{payment.Order.PrincipalInvestigator.Name} ({payment.Order.PrincipalInvestigator.Email})"
             };
