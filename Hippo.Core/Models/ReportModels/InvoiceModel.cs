@@ -4,8 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Hippo.Core.Domain;
+using Hippo.Core.Models.SlothModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Models.ReportModels
@@ -20,11 +22,30 @@ namespace Hippo.Core.Models.ReportModels
 
         public string Details { get; set; } //chart strings, credit/debit, and amounts
 
-        public string BillingInfo { get; set; } //Billing info from the payment details. Need to deserialize it and then join that into a string
+        //Possibly could just do this in the Projection...
+        public string BillingInfo
+        {
+            get
+            {
+                if (Details == null)
+                {
+                    return "No billing info";
+                }
+                try
+                {
+                    return string.Join(", ", JsonSerializer.Deserialize<TransferResponseModel[]>(Details).Where(a => a.Direction == "Debit").Select(t => $"Chart: {t.FinancialSegmentString} Amount: {t.Amount}"));
+                }
+                catch (Exception)
+                {
+                    return "Err";
+                }
+            }
+        }
+
         public string CreatedBy { get; set; } //User who created the payment or Null if System created
 
         public int OrderId { get; set; }
-        
+
         public string ProductName { get; set; }
         public string Description { get; set; }
         // Other product info
@@ -34,6 +55,8 @@ namespace Hippo.Core.Models.ReportModels
         // Other order info
 
         public string MetaDataString { get; set; } //Metadata from the order.
+
+        public string Sponsor { get; set; } //Principal Investigator
 
 
 
@@ -52,14 +75,14 @@ namespace Hippo.Core.Models.ReportModels
                 CreatedOn = payment.CreatedOn,
                 Amount = payment.Amount,
                 Details = payment.Details,
-                BillingInfo = payment.Details,
                 CreatedBy = payment.CreatedBy != null ? payment.CreatedBy.Email : "System",
                 OrderId = payment.OrderId,
                 ProductName = payment.Order.ProductName,
                 Description = payment.Order.Description,
                 OrderName = payment.Order.Name,
                 OrderDescription = payment.Order.Description,
-                MetaDataString = string.Join(", ", payment.Order.MetaData.Select(m => $"{m.Name}: {m.Value}"))
+                MetaDataString = string.Join(", ", payment.Order.MetaData.Select(m => $"{m.Name}: {m.Value}")),
+                Sponsor = $"{payment.Order.PrincipalInvestigator.Name} ({payment.Order.PrincipalInvestigator.Email})"
             };
 
         }
