@@ -11,6 +11,7 @@ import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 
 import HipLoadingTable from "../../Shared/LoadingAndErrors/HipLoadingTable";
 import { PaymentsTable } from "./Tables/PaymentsTable";
+import ReportFilter from "./ReportFilter";
 
 export const Payments = () => {
   const [payments, setPayments] = useState<PaymentReportModel[]>();
@@ -56,11 +57,16 @@ export const Payments = () => {
     setRunningReport(false);
   };
 
+  const onFilterChange = (startDate: string, endDate: string) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
+    fetchPayments();
+  };
+
   const Title = <HipTitle title={"Payments - With related Order Info "} />;
   if (runningReport) {
     return (
       <>
-        <button onClick={() => fetchPayments()}>Run Report</button>
         <HipMainWrapper>
           {Title}
           <HipBody>
@@ -73,7 +79,7 @@ export const Payments = () => {
   if (payments === undefined) {
     return (
       <>
-        <input
+        {/* <input
           type="date"
           onChange={(e) => setStartDate(e.target.value)}
           placeholder="Start Date"
@@ -82,14 +88,15 @@ export const Payments = () => {
           type="date"
           onChange={(e) => setEndDate(e.target.value)}
           placeholder="End Date"
-        />
-        <button onClick={() => fetchPayments()}>Run Report</button>
+        /> */}
+        <ReportFilter onFilterChange={onFilterChange} />
+        {/* <button onClick={() => fetchPayments()}>Run Report</button> */}
       </>
     );
   } else {
     return (
       <>
-        <button onClick={() => fetchPayments()}>Run Report</button>
+        <ReportFilter onFilterChange={onFilterChange} />
         <HipMainWrapper>
           {Title}
           <HipBody>
