@@ -19,6 +19,7 @@ export const Payments = () => {
   const [runningReport, setRunningReport] = useState(false);
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
+  const [filterType, setFilterType] = useState<string>("PaymentDate");
 
   useEffect(() => {
     setPayments(undefined);
@@ -45,7 +46,7 @@ export const Payments = () => {
   const fetchPayments = async () => {
     setRunningReport(true);
     const response = await authenticatedFetch(
-      `/api/${cluster}/report/payments?filterType=PaymentDate&start=${startDate}&end=${endDate}`,
+      `/api/${cluster}/report/payments?filterType=${filterType}&start=${startDate}&end=${endDate}`,
     );
 
     if (response.ok) {
@@ -78,30 +79,27 @@ export const Payments = () => {
   }
   if (payments === undefined) {
     return (
-      <>
-        {/* <input
-          type="date"
-          onChange={(e) => setStartDate(e.target.value)}
-          placeholder="Start Date"
-        />
-        <input
-          type="date"
-          onChange={(e) => setEndDate(e.target.value)}
-          placeholder="End Date"
-        /> */}
-        <ReportFilter
-          onFilterChange={onFilterChange}
-          defaultStartDate={startDate}
-        />
-        {/* <button onClick={() => fetchPayments()}>Run Report</button> */}
-      </>
+      <ReportFilter
+        onFilterChange={onFilterChange}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        filterType={filterType}
+        setFilterType={setFilterType}
+      />
     );
   } else {
     return (
       <>
         <ReportFilter
           onFilterChange={onFilterChange}
-          defaultStartDate={startDate}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          filterType={filterType}
+          setFilterType={setFilterType}
         />
         <HipMainWrapper>
           {Title}

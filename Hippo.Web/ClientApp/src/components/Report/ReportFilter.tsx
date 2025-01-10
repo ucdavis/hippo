@@ -2,15 +2,23 @@ import React, { useState } from "react";
 
 interface ReportFilterProps {
   onFilterChange: (startDate: string, endDate: string, option: string) => void;
-  defaultStartDate?: string;
+  startDate?: string;
+  setStartDate: React.Dispatch<React.SetStateAction<string>>;
+  endDate?: string;
+  setEndDate: React.Dispatch<React.SetStateAction<string>>;
+  filterType: string;
+  setFilterType: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ReportFilter: React.FC<ReportFilterProps> = ({
   onFilterChange,
-  defaultStartDate,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  filterType,
+  setFilterType,
 }) => {
-  const [startDate, setStartDate] = useState(defaultStartDate || "");
-  const [endDate, setEndDate] = useState("");
   const [option, setOption] = useState("");
 
   const handleFilterChange = async () => {
@@ -36,12 +44,14 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
         />
       </div>
       <div>
-        <label>Options:</label>
-        <select value={option} onChange={(e) => setOption(e.target.value)}>
-          <option value="">Select an option</option>
+        <label>FIlter Type:</label>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+        >
           <option value="PaymentDate">Payment Date</option>
-          <option value="option2">Option 2</option>
-          <option value="option3">Option 3</option>
+          <option value="OrderExpiryDate">Order Expiry Date</option>
+          <option value="OrderInstallmentDate">Order Installment Date</option>
         </select>
       </div>
       <button onClick={handleFilterChange}>Run Report</button>
