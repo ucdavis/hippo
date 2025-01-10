@@ -2,10 +2,14 @@ import React, { useState } from "react";
 
 interface ReportFilterProps {
   onFilterChange: (startDate: string, endDate: string, option: string) => void;
+  defaultStartDate?: string;
 }
 
-const ReportFilter: React.FC<ReportFilterProps> = ({ onFilterChange }) => {
-  const [startDate, setStartDate] = useState("");
+const ReportFilter: React.FC<ReportFilterProps> = ({
+  onFilterChange,
+  defaultStartDate,
+}) => {
+  const [startDate, setStartDate] = useState(defaultStartDate || "");
   const [endDate, setEndDate] = useState("");
   const [option, setOption] = useState("");
 

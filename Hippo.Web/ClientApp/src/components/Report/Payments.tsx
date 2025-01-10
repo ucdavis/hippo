@@ -89,14 +89,20 @@ export const Payments = () => {
           onChange={(e) => setEndDate(e.target.value)}
           placeholder="End Date"
         /> */}
-        <ReportFilter onFilterChange={onFilterChange} />
+        <ReportFilter
+          onFilterChange={onFilterChange}
+          defaultStartDate={startDate}
+        />
         {/* <button onClick={() => fetchPayments()}>Run Report</button> */}
       </>
     );
   } else {
     return (
       <>
-        <ReportFilter onFilterChange={onFilterChange} />
+        <ReportFilter
+          onFilterChange={onFilterChange}
+          defaultStartDate={startDate}
+        />
         <HipMainWrapper>
           {Title}
           <HipBody>
