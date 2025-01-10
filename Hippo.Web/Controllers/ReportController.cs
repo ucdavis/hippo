@@ -45,11 +45,40 @@ namespace Hippo.Web.Controllers
                 return BadRequest("You do not have permission to view this page.");
             }
 
+            var query = _dbContext.Payments.Include(a => a.Order.PrincipalInvestigator).Include(a => a.Order.MetaData).Where(a => a.Order.Cluster.Name == Cluster && a.Status == Payment.Statuses.Completed && a.CompletedOn != null);
+            if(start != null && start != "undefined")
+            {
+                try
+                {
+                    var date = DateTime.Parse(start).ToUniversalTime();
+                    query = query.Where(a => a.CompletedOn >= date);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error parsing start date");
+                }
+                
+            }
+            if (end != null && end != "undefined")
+            {
+                try
+                {
+                    var date = DateTime.Parse(end).ToUniversalTime();
+                    query = query.Where(a => a.CompletedOn <= date);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error parsing end date");
+                }
+
+            }
+
             //var payments = await _dbContext.Payments.Include(a => a.Order.PrincipalInvestigator).Include(a => a.Order.MetaData).Where(a => a.Order.Cluster.Name == Cluster && a.Status == Payment.Statuses.Completed && ids.Contains(a.OrderId)).Select(InvoiceModel.Projection()).ToListAsync();
             //var payments2 = await _dbContext.Payments.Include(a => a.Order.PrincipalInvestigator).Include(a => a.Order.MetaData).Where(a => a.Status == Payment.Statuses.Completed).Select(InvoiceModel.Projection()).ToListAsync();
 
-            var model = await _dbContext.Payments.Include(a => a.Order.PrincipalInvestigator).Include(a => a.Order.MetaData).Where(a => a.Order.Cluster.Name == Cluster && a.Status == Payment.Statuses.Completed).Select(InvoiceModel.Projection()).ToListAsync();
+            //var model = await _dbContext.Payments.Include(a => a.Order.PrincipalInvestigator).Include(a => a.Order.MetaData).Where(a => a.Order.Cluster.Name == Cluster && a.Status == Payment.Statuses.Completed).Select(InvoiceModel.Projection()).ToListAsync();
 
+            var model = await query.Select(InvoiceModel.Projection()).ToListAsync();
 
             return Ok(model);
         }

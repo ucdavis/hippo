@@ -16,6 +16,8 @@ export const Payments = () => {
   const [payments, setPayments] = useState<PaymentReportModel[]>();
   const { cluster } = useParams();
   const [runningReport, setRunningReport] = useState(false);
+  const [startDate, setStartDate] = useState<string>();
+  const [endDate, setEndDate] = useState<string>();
 
   useEffect(() => {
     setPayments(undefined);
@@ -42,7 +44,7 @@ export const Payments = () => {
   const fetchPayments = async () => {
     setRunningReport(true);
     const response = await authenticatedFetch(
-      `/api/${cluster}/report/payments`,
+      `/api/${cluster}/report/payments?filterType=PaymentDate&start=${startDate}&end=${endDate}`,
     );
 
     if (response.ok) {
@@ -71,6 +73,16 @@ export const Payments = () => {
   if (payments === undefined) {
     return (
       <>
+        <input
+          type="date"
+          onChange={(e) => setStartDate(e.target.value)}
+          placeholder="Start Date"
+        />
+        <input
+          type="date"
+          onChange={(e) => setEndDate(e.target.value)}
+          placeholder="End Date"
+        />
         <button onClick={() => fetchPayments()}>Run Report</button>
       </>
     );
