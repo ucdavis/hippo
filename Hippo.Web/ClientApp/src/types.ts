@@ -354,3 +354,18 @@ export interface OrderTotalCalculationModel extends Partial<OrderModel> {
   subTotal: string;
   total: string;
 }
+
+export interface PaymentReportModel {
+  id: number;
+  trackingNumber: string;
+  createdOn: string;
+  amount: string;
+  billingInfo: string;
+  createdBy: string;
+  orderId: number;
+  productName: string;
+  description: string;
+  orderName: string;
+  metaDataString: string;
+  sponsor: string;
+}
