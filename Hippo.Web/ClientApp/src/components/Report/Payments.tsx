@@ -15,57 +15,86 @@ import { PaymentsTable } from "./Tables/PaymentsTable";
 export const Payments = () => {
   const [payments, setPayments] = useState<PaymentReportModel[]>();
   const { cluster } = useParams();
+  const [runningReport, setRunningReport] = useState(false);
 
   useEffect(() => {
     setPayments(undefined);
   }, []);
 
-  useEffect(() => {
-    const fetchPayments = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/report/payments`,
-      );
+  // useEffect(() => {
+  //   //preload?
+  //   const fetchPayments = async () => {
+  //     const response = await authenticatedFetch(
+  //       `/api/${cluster}/report/payments`,
+  //     );
 
-      if (response.ok) {
-        const data = await response.json();
-        setPayments(data);
-      } else {
-        alert("Error fetching payments");
-      }
-    };
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setPayments(data);
+  //     } else {
+  //       alert("Error fetching payments");
+  //     }
+  //   };
 
-    fetchPayments();
-  }, [cluster]);
+  //   fetchPayments();
+  // }, [cluster]);
 
-  // RH TODO: handle loading/error states
+  const fetchPayments = async () => {
+    setRunningReport(true);
+    const response = await authenticatedFetch(
+      `/api/${cluster}/report/payments`,
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      setPayments(data);
+    } else {
+      alert("Error fetching payments");
+    }
+    setRunningReport(false);
+  };
+
   const Title = <HipTitle title={"Payments - With related Order Info "} />;
+  if (runningReport) {
+    return (
+      <>
+        <button onClick={() => fetchPayments()}>Run Report</button>
+        <HipMainWrapper>
+          {Title}
+          <HipBody>
+            <HipLoadingTable />
+          </HipBody>
+        </HipMainWrapper>
+      </>
+    );
+  }
   if (payments === undefined) {
     return (
-      <HipMainWrapper>
-        {Title}
-        <HipBody>
-          <HipLoadingTable />
-        </HipBody>
-      </HipMainWrapper>
+      <>
+        <button onClick={() => fetchPayments()}>Run Report</button>
+      </>
     );
   } else {
     return (
-      <HipMainWrapper>
-        {Title}
-        <HipBody>
-          <HipErrorBoundary
-            fallback={
-              <HipClientError
-                type="alert"
-                thereWasAnErrorLoadingThe="Payments Table"
-                contactLink={true}
-              />
-            }
-          >
-            <PaymentsTable payments={payments} cluster={cluster} />
-          </HipErrorBoundary>
-        </HipBody>
-      </HipMainWrapper>
+      <>
+        <button onClick={() => fetchPayments()}>Run Report</button>
+        <HipMainWrapper>
+          {Title}
+          <HipBody>
+            <HipErrorBoundary
+              fallback={
+                <HipClientError
+                  type="alert"
+                  thereWasAnErrorLoadingThe="Payments Table"
+                  contactLink={true}
+                />
+              }
+            >
+              <PaymentsTable payments={payments} cluster={cluster} />
+            </HipErrorBoundary>
+          </HipBody>
+        </HipMainWrapper>
+      </>
     );
   }
 };
