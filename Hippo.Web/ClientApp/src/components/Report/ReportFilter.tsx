@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 interface ReportFilterProps {
   runReport: () => void;
@@ -50,6 +50,7 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
           <option value="PaymentDate">Payment Date</option>
           <option value="OrderExpiryDate">Order Expiry Date</option>
           <option value="OrderInstallmentDate">Order Installment Date</option>
+          <option value="OrderCreationDate">Order Creation Date</option>
         </select>
       </div>
       <button onClick={handelRun}>Run Report</button>
