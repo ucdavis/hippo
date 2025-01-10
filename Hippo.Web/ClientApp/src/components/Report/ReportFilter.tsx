@@ -13,8 +13,8 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
   const [endDate, setEndDate] = useState("");
   const [option, setOption] = useState("");
 
-  const handleFilterChange = () => {
-    onFilterChange(startDate, endDate, option);
+  const handleFilterChange = async () => {
+    await onFilterChange(startDate, endDate, option);
   };
 
   return (

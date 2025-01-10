@@ -57,10 +57,10 @@ export const Payments = () => {
     setRunningReport(false);
   };
 
-  const onFilterChange = (startDate: string, endDate: string) => {
+  const onFilterChange = async (startDate: string, endDate: string) => {
     setStartDate(startDate);
     setEndDate(endDate);
-    fetchPayments();
+    await fetchPayments();
   };
 
   const Title = <HipTitle title={"Payments - With related Order Info "} />;
