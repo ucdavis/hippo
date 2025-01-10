@@ -58,12 +58,6 @@ export const Payments = () => {
     setRunningReport(false);
   };
 
-  const onFilterChange = async (startDate: string, endDate: string) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
-    await fetchPayments();
-  };
-
   const Title = <HipTitle title={"Payments - With related Order Info "} />;
   if (runningReport) {
     return (
@@ -80,7 +74,7 @@ export const Payments = () => {
   if (payments === undefined) {
     return (
       <ReportFilter
-        onFilterChange={onFilterChange}
+        runReport={fetchPayments}
         startDate={startDate}
         setStartDate={setStartDate}
         endDate={endDate}
@@ -93,7 +87,7 @@ export const Payments = () => {
     return (
       <>
         <ReportFilter
-          onFilterChange={onFilterChange}
+          runReport={fetchPayments}
           startDate={startDate}
           setStartDate={setStartDate}
           endDate={endDate}

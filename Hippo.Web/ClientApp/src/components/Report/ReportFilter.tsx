@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface ReportFilterProps {
-  onFilterChange: (startDate: string, endDate: string, option: string) => void;
+  runReport: () => void;
   startDate?: string;
   setStartDate: React.Dispatch<React.SetStateAction<string>>;
   endDate?: string;
@@ -11,7 +11,7 @@ interface ReportFilterProps {
 }
 
 const ReportFilter: React.FC<ReportFilterProps> = ({
-  onFilterChange,
+  runReport,
   startDate,
   setStartDate,
   endDate,
@@ -19,10 +19,8 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
   filterType,
   setFilterType,
 }) => {
-  const [option, setOption] = useState("");
-
-  const handleFilterChange = async () => {
-    await onFilterChange(startDate, endDate, option);
+  const handelRun = async () => {
+    await runReport();
   };
 
   return (
@@ -54,7 +52,7 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
           <option value="OrderInstallmentDate">Order Installment Date</option>
         </select>
       </div>
-      <button onClick={handleFilterChange}>Run Report</button>
+      <button onClick={handelRun}>Run Report</button>
     </div>
   );
 };
