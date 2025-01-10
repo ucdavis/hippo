@@ -17,8 +17,8 @@ export const Payments = () => {
   const [payments, setPayments] = useState<PaymentReportModel[]>();
   const { cluster } = useParams();
   const [runningReport, setRunningReport] = useState(false);
-  const [startDate, setStartDate] = useState<string>();
-  const [endDate, setEndDate] = useState<string>();
+  const [startDate, setStartDate] = useState<string>(null);
+  const [endDate, setEndDate] = useState<string>(null);
   const [filterType, setFilterType] = useState<string>("PaymentDate");
 
   useEffect(() => {

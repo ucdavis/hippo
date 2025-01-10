@@ -42,7 +42,7 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
         />
       </div>
       <div>
-        <label>FIlter Type:</label>
+        <label>Filter Type:</label>
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
