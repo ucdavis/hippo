@@ -369,4 +369,21 @@ export interface PaymentReportModel {
   metaDataString: string;
   sponsor: string;
   completedOn: string;
+  category: string;
+  units: string;
+  unitPrice: string;
+  installments: number;
+  installmentType: string;
+  isRecurring: boolean;
+  externalReference: string;
+  quantity: number;
+  total: string;
+  balanceRemaining: string;
+  notes: string;
+  adminNotes: string;
+  orderStatus: string;
+  installmentDate: string;
+  expirationDate: string;
+  nextPaymentDate: string;
+  orderCreatedOn: string;
 }
