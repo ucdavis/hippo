@@ -1,4 +1,7 @@
 import React from "react";
+import HipButton from "../../Shared/HipComponents/HipButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRunning } from "@fortawesome/free-solid-svg-icons";
 
 interface ReportFilterProps {
   runReport: () => void;
@@ -25,25 +28,31 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
 
   return (
     <div>
-      <div>
-        <label>Start Date:</label>
+      <div className="form-group">
+        <label htmlFor="fieldStartDate">Start Date:</label>
         <input
+          className="form-control"
+          id="fieldStartDate"
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
         />
       </div>
-      <div>
-        <label>End Date:</label>
+      <div className="form-group">
+        <label htmlFor="fieldEndDate">End Date:</label>
         <input
+          className="form-control"
+          id="fieldEndDate"
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
         />
       </div>
-      <div>
-        <label>Filter Type:</label>
+      <div className="form-group">
+        <label htmlFor="fieldFilterType">Filter Type:</label>
         <select
+          className="form-control form-select"
+          id="fieldFilterType"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
         >
@@ -53,7 +62,10 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
           <option value="OrderCreationDate">Order Creation Date</option>
         </select>
       </div>
-      <button onClick={handelRun}>Run Report</button>
+      <br />
+      <HipButton onClick={handelRun} className="btn btn-primary">
+        Run Report <FontAwesomeIcon icon={faRunning} />
+      </HipButton>
     </div>
   );
 };
