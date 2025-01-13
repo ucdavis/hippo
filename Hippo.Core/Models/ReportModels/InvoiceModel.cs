@@ -49,7 +49,6 @@ namespace Hippo.Core.Models.ReportModels
         public bool IsRecurring { get; set; }
 
         public string OrderName { get; set; }
-        // Other order info
 
         public string MetaDataString { get; set; } //Metadata from the order.
 
