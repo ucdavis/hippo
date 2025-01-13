@@ -25,24 +25,6 @@ export const Payments = () => {
     setPayments(undefined);
   }, []);
 
-  // useEffect(() => {
-  //   //preload?
-  //   const fetchPayments = async () => {
-  //     const response = await authenticatedFetch(
-  //       `/api/${cluster}/report/payments`,
-  //     );
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setPayments(data);
-  //     } else {
-  //       alert("Error fetching payments");
-  //     }
-  //   };
-
-  //   fetchPayments();
-  // }, [cluster]);
-
   const fetchPayments = async () => {
     setRunningReport(true);
     const response = await authenticatedFetch(
