@@ -58,7 +58,12 @@ export const Payments = () => {
     setRunningReport(false);
   };
 
-  const Title = <HipTitle title={"Payments - With related Order Info "} />;
+  const Title = (
+    <HipTitle
+      title={"Payments - With related Order Info "}
+      subtitle="This will only show payments that have completed in sloth."
+    />
+  );
   if (runningReport) {
     return (
       <>

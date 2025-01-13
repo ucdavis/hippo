@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Hippo.Core.Domain;
 using Hippo.Core.Models.SlothModels;
-using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Hippo.Core.Models.ReportModels
 {

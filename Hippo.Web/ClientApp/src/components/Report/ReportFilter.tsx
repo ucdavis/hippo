@@ -2,6 +2,7 @@ import React from "react";
 import HipButton from "../../Shared/HipComponents/HipButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRunning } from "@fortawesome/free-solid-svg-icons";
+import HipTitle from "../../Shared/Layout/HipTitle";
 
 interface ReportFilterProps {
   runReport: () => void;
@@ -27,7 +28,8 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
   };
 
   return (
-    <div>
+    <div style={{ marginBottom: "20px" }}>
+      <HipTitle title={"Report Filter"}></HipTitle>
       <div className="row col-12 col-md-3">
         <div className="form-group">
           <label htmlFor="fieldStartDate">Start Date:</label>
