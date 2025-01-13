@@ -28,7 +28,7 @@ const ReportFilter: React.FC<ReportFilterProps> = ({
 
   return (
     <div>
-      <div className="row col-3">
+      <div className="row col-12 col-md-3">
         <div className="form-group">
           <label htmlFor="fieldStartDate">Start Date:</label>
           <input
