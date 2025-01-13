@@ -110,7 +110,11 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       initialState={{
         sorting: [
           {
-            id: "id",
+            id: "orderId",
+            desc: true,
+          },
+          {
+            id: "completedOn",
             desc: true,
           },
         ],
