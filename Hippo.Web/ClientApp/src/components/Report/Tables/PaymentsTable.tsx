@@ -96,6 +96,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
     const unitPrice = columnHelper.accessor("unitPrice", {
       header: "Unit Price",
       id: "unitPrice",
+      cell: (value) => `$${value.row.original.unitPrice}`,
     });
     const installments = columnHelper.accessor("installments", {
       header: "Installments",
@@ -120,10 +121,12 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
     const total = columnHelper.accessor("total", {
       header: "Total",
       id: "total",
+      cell: (value) => `$${value.row.original.total}`,
     });
     const balanceRemaining = columnHelper.accessor("balanceRemaining", {
       header: "Balance Remaining",
       id: "balanceRemaining",
+      cell: (value) => `$${value.row.original.balanceRemaining}`,
     });
     const notes = columnHelper.accessor("notes", {
       header: "Notes",
