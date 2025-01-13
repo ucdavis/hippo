@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -48,7 +48,12 @@ namespace Hippo.Core.Models.ReportModels
 
         public string ProductName { get; set; }
         public string Description { get; set; }
-        // Other product info
+        public string Category { get; set; }
+        public string Units { get; set; }
+        public decimal UnitPrice { get; set; }
+        public int Installments { get; set; }
+        public string InstallmentType { get; set; }
+        public bool IsRecurring { get; set; }
 
         public string OrderName { get; set; }
         // Other order info
@@ -58,8 +63,18 @@ namespace Hippo.Core.Models.ReportModels
         public string Sponsor { get; set; } //Principal Investigator
         public DateTime? CompletedOn { get; set; } //Date the payment was completed in Sloth
 
+        public string ExternalReference { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal Total { get; set; }
+        public decimal BalanceRemaining { get; set; }
+        public string Notes { get; set; }
+        public string AdminNotes { get; set; }
+        public string OrderStatus { get; set; }
+        public DateTime? InstallmentDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public DateTime? NextPaymentDate { get; set; }
 
-
+        public DateTime OrderCreatedOn { get; set; }
 
         /// <summary>
         /// Need to include the user, order, and the metadata for the order
@@ -82,7 +97,25 @@ namespace Hippo.Core.Models.ReportModels
                 Description = payment.Order.Description,
                 OrderName = payment.Order.Name,
                 MetaDataString = string.Join(", ", payment.Order.MetaData.Select(m => $"{m.Name}: {m.Value}")),
-                Sponsor = $"{payment.Order.PrincipalInvestigator.Name} ({payment.Order.PrincipalInvestigator.Email})"
+                Sponsor = $"{payment.Order.PrincipalInvestigator.Name} ({payment.Order.PrincipalInvestigator.Email})",
+                Category = payment.Order.Category,
+                Units = payment.Order.Units,
+                UnitPrice = payment.Order.UnitPrice,
+                Installments = payment.Order.Installments,
+                InstallmentType = payment.Order.InstallmentType,
+                IsRecurring = payment.Order.IsRecurring,
+                ExternalReference = payment.Order.ExternalReference,
+                Quantity = payment.Order.Quantity,
+                Total = payment.Order.Total,
+                BalanceRemaining = payment.Order.BalanceRemaining,
+                Notes = payment.Order.Notes,
+                AdminNotes = payment.Order.AdminNotes,
+                OrderStatus = payment.Order.Status,
+                InstallmentDate = payment.Order.InstallmentDate,
+                ExpirationDate = payment.Order.ExpirationDate,
+                NextPaymentDate = payment.Order.NextPaymentDate,
+                OrderCreatedOn = payment.Order.CreatedOn,
+
             };
 
         }
