@@ -38,6 +38,16 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
         return dateA.getTime() - dateB.getTime();
       },
     });
+    const completedOn = columnHelper.accessor("createdOn", {
+      header: "Payment Completed On",
+      id: "completedOn",
+      cell: (value) => convertToPacificDate(value.row.original.completedOn),
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.getValue("completedOn"));
+        const dateB = new Date(rowB.getValue("completedOn"));
+        return dateA.getTime() - dateB.getTime();
+      },
+    });
     const createdBy = columnHelper.accessor("createdBy", {
       header: "Created By",
       id: "createdBy",
@@ -82,6 +92,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
     cols.push(trackingNumber);
     cols.push(createdBy);
     cols.push(createdOn);
+    cols.push(completedOn);
     cols.push(sponsor);
     cols.push(amount);
     cols.push(orderName);

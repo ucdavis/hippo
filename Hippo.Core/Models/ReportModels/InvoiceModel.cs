@@ -56,6 +56,7 @@ namespace Hippo.Core.Models.ReportModels
         public string MetaDataString { get; set; } //Metadata from the order.
 
         public string Sponsor { get; set; } //Principal Investigator
+        public DateTime? CompletedOn { get; set; } //Date the payment was completed in Sloth
 
 
 
@@ -72,6 +73,7 @@ namespace Hippo.Core.Models.ReportModels
                 Id = payment.Id,
                 TrackingNumber = payment.TrackingNumber,
                 CreatedOn = payment.CreatedOn,
+                CompletedOn = payment.CompletedOn,
                 Amount = payment.Amount,
                 Details = payment.Details,
                 CreatedBy = payment.CreatedBy != null ? $"{payment.CreatedBy.Name} ({payment.CreatedBy.Email})" : "System",

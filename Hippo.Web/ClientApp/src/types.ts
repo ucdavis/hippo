@@ -368,4 +368,5 @@ export interface PaymentReportModel {
   orderName: string;
   metaDataString: string;
   sponsor: string;
+  completedOn: string;
 }
