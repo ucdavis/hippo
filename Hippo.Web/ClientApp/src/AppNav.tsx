@@ -4,6 +4,14 @@ import AppContext from "./Shared/AppContext";
 import HippoLogo from "./Shared/hippoLogo";
 import { ShowFor } from "./Shared/ShowFor";
 
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from "reactstrap";
+import PropTypes from "prop-types";
+
 export const AppNav = () => {
   const [{ clusters, accounts, lastPuppetSync }] = useContext(AppContext);
   const match = useMatch("/:cluster/*");
@@ -12,8 +20,26 @@ export const AppNav = () => {
   const accountInCluster =
     cluster && accounts.some((a) => a.cluster === cluster.name);
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggle = () => setDropdownOpen((prevState) => !prevState);
+
   return (
     <div>
+      <div className="d-flex p-5">
+      <Dropdown isOpen={dropdownOpen} toggle={toggle} direction={direction}>
+        <DropdownToggle caret>Dropdown</DropdownToggle>
+        <DropdownMenu {...args}>
+          <DropdownItem header>Header</DropdownItem>
+          <DropdownItem>Some Action</DropdownItem>
+          <DropdownItem text>Dropdown Item Text</DropdownItem>
+          <DropdownItem disabled>Action (disabled)</DropdownItem>
+          <DropdownItem divider />
+          <DropdownItem>Foo Action</DropdownItem>
+          <DropdownItem>Bar Action</DropdownItem>
+          <DropdownItem>Quo Action</DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
       <div className="row appheader justify-content-center">
         <div className="col-md-12 hippo">
           <NavLink to={cluster ? `/${cluster?.name}/` : "/clusters"}>
