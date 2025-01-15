@@ -150,11 +150,11 @@ export const ClusterAdmins = () => {
         <HipTitle
           title="Cluster Admins"
           subtitle="Admin"
-          buttons={
-            <Link to={`/${cluster}/admin/financialadmins`}>
-              <HipButton>Financial Admins</HipButton>
-            </Link>
-          }
+          // buttons={
+          //   <Link to={`/${cluster}/admin/financialadmins`}>
+          //     <HipButton>Financial Admins</HipButton>
+          //   </Link>
+          // }
         />
         <HipBody>
           <p>There are {users.length} users with admin access</p>

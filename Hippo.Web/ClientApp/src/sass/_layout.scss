@@ -41,14 +41,22 @@ header {
   display: flex;
   justify-content: center;
   padding-bottom: 2%;
-  a.nav-item {
+  .btn-secondary.btn:focus {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    color: #fff;
+  }
+  .nav-item {
     padding: 8px 16px;
     margin: 6px;
     color: $primary-font;
     border-bottom: 2px solid $primary-color;
+    border-radius: 2px;
+    background-color: #fff;
     box-shadow: $box-shadow;
     transition: background-color 0.5s ease;
-    &:first-child {
+    font-family: $sans-bold;
+    &.secondary &:first-child {
       margin-left: 0;
     }
     &:last-child {
@@ -57,9 +65,40 @@ header {
     &:hover {
       color: $primary-font;
       background-color: transparentize($primary-color, 0.9);
+      border-bottom: 2px solid $primary-color;
     }
   }
-  a.active {
+  .dropdown-item {
+    margin: 0;
+    padding: 0;
+  }
+  .nav-dropdown-item {
+    padding: 8px 16px;
+    color: $primary-font;
+    background-color: rgba(255, 255, 255, 0.99999);
+    font-family: $sans-reg;
+    &.secondary &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+    &:hover {
+      color: $primary-font;
+    }
+    &.active {
+      background-color: rgba(255, 255, 255, 0.99999);
+      color: $primary-color !important;
+      font-family: $sans-bold;
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.99999);
+      }
+    }
+    &.disabled {
+      color: $tertiary-font !important;
+    }
+  }
+  .active {
     background-color: $primary-color;
     color: #fff !important;
     &:hover {
