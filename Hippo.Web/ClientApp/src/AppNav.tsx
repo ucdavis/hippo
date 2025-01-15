@@ -81,7 +81,7 @@ export const AppNav = () => {
                     <NavLink
                       id="sponsorApprove"
                       to={`/${cluster.name}/approve`}
-                      className="nav-item nav-link"
+                      className="nav-dropdown-item nav-link"
                       style={({ isActive }) =>
                         isActive ? { fontWeight: "bold" } : {}
                       }
@@ -94,7 +94,7 @@ export const AppNav = () => {
                       <NavLink
                         id="activeAccounts"
                         to={`/${cluster.name}/activeaccounts`}
-                        className="nav-item nav-link"
+                        className="nav-dropdown-item nav-link"
                         style={({ isActive }) =>
                           isActive ? { fontWeight: "bold" } : {}
                         }
@@ -107,7 +107,7 @@ export const AppNav = () => {
                     <DropdownItem>
                       <NavLink
                         id="groups"
-                        className="nav-item nav-link"
+                        className="nav-dropdown-item nav-link"
                         to={`/${cluster.name}/admin/groups`}
                         style={({ isActive }) =>
                           isActive ? { fontWeight: "bold" } : {}
@@ -119,7 +119,7 @@ export const AppNav = () => {
                     <DropdownItem>
                       <NavLink
                         id="clusterAdmins"
-                        className="nav-item nav-link"
+                        className="nav-dropdown-item nav-link"
                         to={`/${cluster.name}/admin/clusteradmins`}
                         style={({ isActive }) =>
                           isActive ? { fontWeight: "bold" } : {}
