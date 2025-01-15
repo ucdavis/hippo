@@ -57,7 +57,7 @@ export const FinancialAdmins = () => {
       let isFinancial = true;
 
       const req = authenticatedFetch(
-        `/api/${cluster}/admin/RemoveFinancialAdmin?id=${request.id}&isFinancial=${isFinancial}`,
+        `/api/${cluster}/admin/RemoveClusterAdmin?id=${user.id}&isFinancial=${isFinancial}`,
         {
           method: "POST",
         },
@@ -152,11 +152,11 @@ export const FinancialAdmins = () => {
         <HipTitle
           title="Financial Cluster Admins"
           subtitle="Admin"
-          buttons={
-            <Link to={`/${cluster}/admin/clusteradmins`}>
-              <HipButton>Cluster Admins</HipButton>
-            </Link>
-          }
+          // buttons={
+          //   <Link to={`/${cluster}/admin/clusteradmins`}>
+          //     <HipButton>Cluster Admins</HipButton>
+          //   </Link>
+          // }
         />
         <HipBody>
           <p>There are {users.length} users with financial admin access</p>

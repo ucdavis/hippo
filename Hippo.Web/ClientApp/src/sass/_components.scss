@@ -9,7 +9,7 @@
   border-radius: 2px;
   font-size: 1rem;
   letter-spacing: 0.025em;
-  color: #fff !important;
+  color: #fff;
   text-decoration: none;
   transition: all 0.15s ease;
   border: none;
@@ -19,11 +19,11 @@
     background-color: darken($primary-color, 5);
   }
   &:hover {
-    color: #fff !important;
-    transform: translateY(-1px);
-    box-shadow:
-      0 -3px 0 rgba(0, 0, 0, 0.15) inset,
-      0 3px 6px rgba(0, 0, 0, 0.08);
+    color: #fff;
+    // transform: translateY(-1px);
+    // box-shadow:
+    //   0 -3px 0 rgba(0, 0, 0, 0.15) inset,
+    //   0 3px 6px rgba(0, 0, 0, 0.08);
     background-color: lighten($primary-color, 5);
     text-decoration: none;
   }

@@ -51,8 +51,18 @@ export const ShowFor = (props: Props) => {
 
   // cluster admins can access anything in their cluster
   if (
+    roles.some((r) => r === "ClusterAdmin") &&
     context.user.permissions.some(
       (p) => p.cluster === cluster && p.role === "ClusterAdmin",
+    )
+  ) {
+    return <>{children}</>;
+  }
+
+  if (
+    roles.some((r) => r === "FinancialAdmin") &&
+    context.user.permissions.some(
+      (p) => p.cluster === cluster && p.role === "FinancialAdmin",
     )
   ) {
     return <>{children}</>;
