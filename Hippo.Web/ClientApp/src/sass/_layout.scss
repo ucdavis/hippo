@@ -68,11 +68,14 @@ header {
       border-bottom: 2px solid $primary-color;
     }
   }
+  .dropdown-item {
+    margin: 0;
+    padding: 0;
+  }
   .nav-dropdown-item {
-    padding: 4px 8px;
-    margin: 6px;
+    padding: 8px 16px;
     color: $primary-font;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.99999);
     font-family: $sans-reg;
     &.secondary &:first-child {
       margin-left: 0;
@@ -82,14 +85,13 @@ header {
     }
     &:hover {
       color: $primary-font;
-      background-color: transparentize($primary-color, 0.9);
     }
     &.active {
-      background-color: #fff;
+      background-color: rgba(255, 255, 255, 0.99999);
       color: $primary-color !important;
       font-family: $sans-bold;
       &:hover {
-        background-color: #fff;
+        background-color: rgba(255, 255, 255, 0.99999);
       }
     }
     &.disabled {
