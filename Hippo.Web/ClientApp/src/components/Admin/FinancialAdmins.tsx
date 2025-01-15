@@ -57,7 +57,7 @@ export const FinancialAdmins = () => {
       let isFinancial = true;
 
       const req = authenticatedFetch(
-        `/api/${cluster}/admin/RemoveFinancialAdmin?id=${request.id}&isFinancial=${isFinancial}`,
+        `/api/${cluster}/admin/RemoveClusterAdmin?id=${user.id}&isFinancial=${isFinancial}`,
         {
           method: "POST",
         },
