@@ -137,64 +137,83 @@ export const AppNav = () => {
                   </ShowFor>
                 </DropdownMenu>
               </Dropdown>
+              <Dropdown
+                isOpen={dropdownOpenOrders}
+                toggle={toggleOrders}
+                id="ordersNav"
+              >
+                <DropdownToggle className="nav-item nav-link" caret>
+                  Orders
+                </DropdownToggle>
+                <DropdownMenu>
+                  <ShowFor roles={["System", "FinancialAdmin"]}>
+                    <DropdownItem>
+                      <NavLink
+                        id="financialDetails"
+                        className="nav-dropdown-item nav-link"
+                        to={`/${cluster.name}/financial/financialdetails`}
+                        style={({ isActive }) =>
+                          isActive ? { fontWeight: "bold" } : {}
+                        }
+                      >
+                        Financial
+                      </NavLink>
+                    </DropdownItem>
+                  </ShowFor>
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    condition={cluster.allowOrders}
+                  >
+                    <DropdownItem>
+                      <NavLink
+                        id="products"
+                        to={`/${cluster.name}/product/index`}
+                        className="nav-dropdown-item nav-link"
+                        style={({ isActive }) =>
+                          isActive ? { fontWeight: "bold" } : {}
+                        }
+                      >
+                        Products
+                      </NavLink>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <NavLink
+                        id="myorders"
+                        to={`/${cluster.name}/order/myorders`}
+                        className="nav-dropdown-item nav-link"
+                        style={({ isActive }) =>
+                          isActive ? { fontWeight: "bold" } : {}
+                        }
+                      >
+                        My Orders
+                      </NavLink>
+                    </DropdownItem>
+                  </ShowFor>
+                  <ShowFor
+                    roles={["ClusterAdmin", "System", "FinancialAdmin"]}
+                    condition={cluster.allowOrders}
+                  >
+                    <DropdownItem>
+                      <NavLink
+                        id="adminorders"
+                        to={`/${cluster.name}/order/adminorders`}
+                        className="nav-dropdown-item nav-link"
+                        style={({ isActive }) =>
+                          isActive ? { fontWeight: "bold" } : {}
+                        }
+                      >
+                        Admin Orders
+                      </NavLink>
+                    </DropdownItem>
+                  </ShowFor>
+                </DropdownMenu>
+              </Dropdown>
 
-              <ShowFor roles={["System", "FinancialAdmin"]}>
-                <NavLink
-                  id="financialDetails"
-                  className="nav-item nav-link"
-                  to={`/${cluster.name}/financial/financialdetails`}
-                  style={({ isActive }) =>
-                    isActive ? { fontWeight: "bold" } : {}
-                  }
-                >
-                  Financial
-                </NavLink>
-              </ShowFor>
-              <ShowFor
-                roles={[
-                  "System",
-                  "ClusterAdmin",
-                  "GroupAdmin",
-                  "FinancialAdmin",
-                ]}
-                condition={cluster.allowOrders}
-              >
-                <NavLink
-                  id="products"
-                  to={`/${cluster.name}/product/index`}
-                  className="nav-item nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { fontWeight: "bold" } : {}
-                  }
-                >
-                  Products
-                </NavLink>
-                <NavLink
-                  id="myorders"
-                  to={`/${cluster.name}/order/myorders`}
-                  className="nav-item nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { fontWeight: "bold" } : {}
-                  }
-                >
-                  My Orders
-                </NavLink>
-              </ShowFor>
-              <ShowFor
-                roles={["ClusterAdmin", "System", "FinancialAdmin"]}
-                condition={cluster.allowOrders}
-              >
-                <NavLink
-                  id="adminorders"
-                  to={`/${cluster.name}/order/adminorders`}
-                  className="nav-item nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { fontWeight: "bold" } : {}
-                  }
-                >
-                  Admin Orders
-                </NavLink>
-              </ShowFor>
               {/* TODO: make a index page to choose the reports when we have more? */}
               <ShowFor
                 roles={["ClusterAdmin", "System", "FinancialAdmin"]}
