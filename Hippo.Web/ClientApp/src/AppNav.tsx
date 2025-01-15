@@ -139,6 +139,18 @@ export const AppNav = () => {
                           Cluster Admins
                         </NavLink>
                       </DropdownItem>
+                      <DropdownItem>
+                        <NavLink
+                          id="financialAdmins"
+                          className="nav-dropdown-item nav-link"
+                          to={`/${cluster.name}/admin/financialadmins`}
+                          style={({ isActive }) =>
+                            isActive ? { fontWeight: "bold" } : {}
+                          }
+                        >
+                          Financial Admins
+                        </NavLink>
+                      </DropdownItem>
                     </ShowFor>
                   </DropdownMenu>
                 </Dropdown>
