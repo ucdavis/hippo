@@ -19,9 +19,11 @@ export const AppNav = () => {
   const accountInCluster =
     cluster && accounts.some((a) => a.cluster === cluster.name);
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpenAdmin, setDropdownOpen] = useState(false);
+  const [dropdownOpenOrders, setDropdownOpenOrders] = useState(false);
 
-  const toggle = () => setDropdownOpen((prevState) => !prevState);
+  const toggleAdmin = () => setDropdownOpen((prevState) => !prevState);
+  const toggleOrders = () => setDropdownOpenOrders((prevState) => !prevState);
 
   return (
     <div>
@@ -72,7 +74,11 @@ export const AppNav = () => {
                   My Account
                 </NavLink>
               )}
-              <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+              <Dropdown
+                isOpen={dropdownOpenAdmin}
+                toggle={toggleAdmin}
+                id="adminNav"
+              >
                 <DropdownToggle className="nav-item nav-link" caret>
                   Admin
                 </DropdownToggle>
