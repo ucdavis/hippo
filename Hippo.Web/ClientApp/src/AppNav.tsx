@@ -272,7 +272,7 @@ export const AppNav = () => {
                       </DropdownItem>
                     </ShowFor>
                     <ShowFor roles={["System", "ClusterAdmin"]}>
-                      <DropdownItem disabled>
+                      <DropdownItem>
                         <NavLink
                           id="expiringOrdersReport"
                           to={`/${cluster.name}/report/payments`}

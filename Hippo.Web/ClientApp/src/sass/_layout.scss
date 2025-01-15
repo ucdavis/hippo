@@ -65,6 +65,7 @@ header {
     &:hover {
       color: $primary-font;
       background-color: transparentize($primary-color, 0.9);
+      border-bottom: 2px solid $primary-color;
     }
   }
   .nav-dropdown-item {
@@ -90,6 +91,9 @@ header {
       &:hover {
         background-color: #fff;
       }
+    }
+    &.disabled {
+      color: $tertiary-font !important;
     }
   }
   .active {
