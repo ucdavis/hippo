@@ -141,7 +141,7 @@ namespace Hippo.Web.Controllers
 
             //TODO: Need to filter out recurring?
 
-            var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed, Order.Statuses.Processing };
+            var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed};
             var compareDate = DateTime.UtcNow.AddDays(31);
             var orders = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.MetaData).Where(a => a.Cluster.Name == Cluster && statuses.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate).Select(OrderListModel.Projection()).ToListAsync();
 

@@ -41,7 +41,9 @@ export const ReportOrders = () => {
     <HipTitle
       title={"Orders"}
       subtitle={
-        reportType === "ExpiringOrders" ? "Expiring Orders" : "Archived Orders"
+        reportType === "ExpiringOrders"
+          ? "Expired Orders and Expiring in 31 Days Orders"
+          : "Archived Orders"
       }
     />
   );
