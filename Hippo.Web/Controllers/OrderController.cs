@@ -705,7 +705,8 @@ namespace Hippo.Web.Controllers
 
             if (isClusterOrSystemAdmin)
             {
-                if (!string.IsNullOrWhiteSpace(model.ExpirationDate))
+                //Recurring orders should not have an expiration date
+                if (!model.IsRecurring && !string.IsNullOrWhiteSpace(model.ExpirationDate))
                 {
                     order.ExpirationDate = DateTime.Parse(model.ExpirationDate);
                     order.ExpirationDate = order.ExpirationDate.FromPacificTime();
