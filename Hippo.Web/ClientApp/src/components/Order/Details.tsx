@@ -97,6 +97,7 @@ export const Details = () => {
     if (order) {
       const nextStatus: UpdateOrderStatusModel = getNextStatus({
         status: order.status,
+        isRecurring: order.isRecurring,
       });
       setUpdateStatusModel(nextStatus);
     }
