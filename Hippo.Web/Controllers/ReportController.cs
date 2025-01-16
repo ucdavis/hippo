@@ -2,6 +2,7 @@
 using Hippo.Core.Domain;
 using Hippo.Core.Models.ReportModels;
 using Hippo.Core.Services;
+using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +27,6 @@ namespace Hippo.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Payments(string filterType, string start, string end)
         {
-            //TODO: use the parameters
-
             var currentUser = await _userService.GetCurrentUser();
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
@@ -126,6 +125,43 @@ namespace Hippo.Web.Controllers
             var model = await query.Select(InvoiceModel.Projection()).ToListAsync();
 
             return Ok(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExpiringOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+
+            //TODO: Need to filter out recurring?
+
+            var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed};
+            var compareDate = DateTime.UtcNow.AddDays(31);
+            var orders = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.MetaData).Where(a => a.Cluster.Name == Cluster && statuses.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate).Select(OrderListModel.Projection()).ToListAsync();
+
+            return Ok(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ArchivedOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+            var orders = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.MetaData).Where(a => a.Cluster.Name == Cluster && a.Status == Order.Statuses.Archived).Select(OrderListModel.Projection()).ToListAsync();
+
+            return Ok(orders);
         }
     }
 }

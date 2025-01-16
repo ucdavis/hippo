@@ -283,17 +283,33 @@ export const AppNav = () => {
                         </NavLink>
                       </DropdownItem>
                     </ShowFor>
-                    <ShowFor roles={["System", "ClusterAdmin"]}>
+                    <ShowFor
+                      roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                    >
                       <DropdownItem>
                         <NavLink
                           id="expiringOrdersReport"
-                          to={`/${cluster.name}/report/payments`}
+                          to={`/${cluster.name}/report/order/ExpiringOrders`}
                           className="nav-dropdown-item nav-link"
                           style={({ isActive }) =>
                             isActive ? { fontWeight: "bold" } : {}
                           }
                         >
-                          Expiring Orders (Comming Soon)
+                          Expiring Orders
+                        </NavLink>
+                      </DropdownItem>
+                    </ShowFor>
+                    <ShowFor roles={["System", "ClusterAdmin"]}>
+                      <DropdownItem>
+                        <NavLink
+                          id="archivedOrdersReport"
+                          to={`/${cluster.name}/report/order/ArchivedOrders`}
+                          className="nav-dropdown-item nav-link"
+                          style={({ isActive }) =>
+                            isActive ? { fontWeight: "bold" } : {}
+                          }
+                        >
+                          Archived Orders
                         </NavLink>
                       </DropdownItem>
                     </ShowFor>
