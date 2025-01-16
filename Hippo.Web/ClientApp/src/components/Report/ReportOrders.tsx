@@ -21,10 +21,6 @@ export const ReportOrders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      // const response = await authenticatedFetch(
-      //   `/api/${cluster}/report/${orderType}`,
-      // );
-
       const response = await authenticatedFetch(
         `/api/${cluster}/report/${reportType}`,
       );
