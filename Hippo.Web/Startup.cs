@@ -253,6 +253,15 @@ namespace Hippo.Web
 
             app.UseEndpoints(endpoints =>
             {
+#if DEBUG
+                // default for MVC server-side endpoints
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action}/{id?}",
+                    defaults: new { controller = "Home", action = "Index" },
+                    constraints: new { controller = "(home|system|test)" }
+                );
+#else
                 // default for MVC server-side endpoints
                 endpoints.MapControllerRoute(
                     name: "default",
@@ -260,7 +269,7 @@ namespace Hippo.Web
                     defaults: new { controller = "Home", action = "Index" },
                     constraints: new { controller = "(home|system)" }
                 );
-
+#endif
                 // API routes that don't include a {cluster} segment
                 endpoints.MapControllerRoute(
                     name: "clusteradminAPI",

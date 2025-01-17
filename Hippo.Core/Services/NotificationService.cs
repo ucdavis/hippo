@@ -28,6 +28,7 @@ namespace Hippo.Core.Services
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
+        Task<bool> OrderExpiredNotification(Order order, string[] emails);
     }
 
     public class NotificationService : INotificationService
@@ -381,6 +382,45 @@ namespace Hippo.Core.Services
                 Log.Error("Error emailing Order Payment Notification", ex);
                 return false;
             }
+        }
+        public async Task<bool> OrderExpiredNotification(Order order, string[] emails)
+        {
+            try
+            {
+                var emailModel = new EmailModel
+                {
+                    Emails = emails,
+                    Subject = "Hippo Order Expired",
+                    TextBody = @$"Category: Request
+
+Subcategory: New
+
+Caller: {order.PrincipalInvestigator.Name}
+
+ConfigurationItem: HPC Software
+
+Cluster Name: {order.Cluster.Name}
+
+Email: {order.PrincipalInvestigator.Email}
+
+Account Kerberos: {order.PrincipalInvestigator.Kerberos}
+
+order: {_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}
+
+Expiration Date: {order.ExpirationDate.ToPacificTime().Value.Date.Format("d")}
+
+"
+                };
+
+                await _emailService.SendEmail(emailModel); //Send without html body
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Expired Notification", ex);
+                return false;
+
+            }
+            return true;
         }
     }
 }

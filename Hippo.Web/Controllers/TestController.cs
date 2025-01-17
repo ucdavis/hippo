@@ -204,5 +204,16 @@ namespace Hippo.Web.Controllers
         {
             return Content("Success");
         }
+
+        public async Task<IActionResult> TestNotification()
+        {
+            var order = await _dbContext.Orders.Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).SingleAsync(a => a.Id == 41);
+
+            var emails = new string[] { "apprequests@caes.ucdavis.edu" };
+
+            var rtValue = await _notificationService.OrderExpiredNotification(order, emails);
+
+            return Content($"Notification sent {rtValue}");
+        }
     }
 }
