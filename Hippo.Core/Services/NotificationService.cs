@@ -248,7 +248,7 @@ namespace Hippo.Core.Services
                 };
                 foreach (var orderId in orderIds)
                 {
-                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}"); 
+                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}");
 
                 }
 
@@ -383,33 +383,34 @@ namespace Hippo.Core.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// This is for when the order has expired and we want to send a ticket to service now (or whereever the cluster email indicates)
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="emails">Get from Order.Cluster.Email</param>
+        /// <returns></returns>
         public async Task<bool> OrderExpiredNotification(Order order, string[] emails)
         {
             try
             {
+                var body = new List<string>();
+                body.Add("Category: Request");
+                body.Add("Subcategory: New");
+                body.Add($"Caller: {order.PrincipalInvestigator.Name}");
+                body.Add("ConfigurationItem: OOR HPC - High Performance Computing");
+                body.Add($"Cluster Name: {order.Cluster.Name}");
+                body.Add($"Email: {order.PrincipalInvestigator.Email}");
+                body.Add($"Account Kerberos: {order.PrincipalInvestigator.Kerberos}");
+                body.Add($"order: {_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}");
+                body.Add($"Expiration Date: {order.ExpirationDate.ToPacificTime().Value.Date.Format("d")}");
+
+
                 var emailModel = new EmailModel
                 {
                     Emails = emails,
                     Subject = "Hippo Order Expired",
-                    TextBody = @$"Category: Request
-
-Subcategory: New
-
-Caller: {order.PrincipalInvestigator.Name}
-
-ConfigurationItem: HPC Software
-
-Cluster Name: {order.Cluster.Name}
-
-Email: {order.PrincipalInvestigator.Email}
-
-Account Kerberos: {order.PrincipalInvestigator.Kerberos}
-
-order: {_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}
-
-Expiration Date: {order.ExpirationDate.ToPacificTime().Value.Date.Format("d")}
-
-"
+                    TextBody = string.Join(Environment.NewLine, body),
                 };
 
                 await _emailService.SendEmail(emailModel); //Send without html body
@@ -422,5 +423,6 @@ Expiration Date: {order.ExpirationDate.ToPacificTime().Value.Date.Format("d")}
             }
             return true;
         }
+
     }
 }
