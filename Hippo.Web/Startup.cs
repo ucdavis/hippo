@@ -200,6 +200,7 @@ namespace Hippo.Web
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<IAggieEnterpriseService, AggieEnterpriseService>();
             services.AddScoped<IPaymentsService, PaymentsService>();
+            services.AddScoped<IExpiringOrdersService, ExpiringOrdersService>();
             
 
             if (Configuration.GetValue<bool>("EventQueueEnabled"))

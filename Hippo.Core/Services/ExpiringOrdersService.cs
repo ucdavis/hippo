@@ -87,6 +87,7 @@ namespace Hippo.Core.Services
                             $"You may want to conact the cluster admin(s) to purchase new qquipment to avoid any downtime.",
                             $"Order ID: {order.Id}",
                             $"Product: {order.ProductName}",
+                            $"Cluster: {order.Cluster.Name}",
                         }
                     };
 
