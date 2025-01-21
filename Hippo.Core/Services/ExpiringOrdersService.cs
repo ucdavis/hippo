@@ -40,8 +40,9 @@ namespace Hippo.Core.Services
 
             foreach (var order in orders)
             {
+
                 //The next notification date should get set a month before it expires. 
-                if(utcNow >= order.ExpirationDate && order.NextNotificationDate.HasValue)
+                if (utcNow >= order.ExpirationDate && order.NextNotificationDate.HasValue)
                 {
                     try
                     {
@@ -80,10 +81,10 @@ namespace Hippo.Core.Services
                     var emailModel = new SimpleNotificationModel
                     {
                         Subject = "Hippo Order Expiring",
-                        Header = $"Hippo order expires on {order.ExpirationDate.Value.ToPacificTime().Date}.",
+                        Header = $"Hippo order expires on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
                         Paragraphs = new List<string>
                         {
-                            $"An order will reach the end of it's life span on {order.ExpirationDate.Value.ToPacificTime().Date}.",
+                            $"An order will reach the end of it's life span on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
                             $"You may want to conact the cluster admin(s) to purchase new qquipment to avoid any downtime.",
                             $"Order ID: {order.Id}",
                             $"Product: {order.ProductName}",

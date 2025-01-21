@@ -24,6 +24,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.PuppetSync", "Hi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.OrderProcess", "Hippo.Jobs.OrderProcess\Hippo.Jobs.OrderProcess.csproj", "{78FAF686-A9B2-4894-8275-9F1730056A62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.Notifications", "Hippo.Jobs.Notifications\Hippo.Jobs.Notifications.csproj", "{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{78FAF686-A9B2-4894-8275-9F1730056A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78FAF686-A9B2-4894-8275-9F1730056A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78FAF686-A9B2-4894-8275-9F1730056A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
