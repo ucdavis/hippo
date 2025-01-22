@@ -354,7 +354,8 @@ namespace Hippo.Core.Services
         {
             try
             {
-                var message = simpleNotificationModel.Paragraphs.FirstOrDefault();
+                //Join the simple notification paragraphs into a single string with new lines
+                var message = string.Join(Environment.NewLine, simpleNotificationModel.Paragraphs);
 
                 var model = new OrderNotificationModel()
                 {
