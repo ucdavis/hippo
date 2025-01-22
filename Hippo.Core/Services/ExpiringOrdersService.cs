@@ -85,14 +85,15 @@ namespace Hippo.Core.Services
                         Paragraphs = new List<string>
                         {
                             $"An order will reach the end of it's life span on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
-                            $"You may want to conact the cluster admin(s) to purchase new qquipment to avoid any downtime.",
+                            $"You may want to conact the cluster admin(s) to purchase new equipment to avoid any downtime. Or use the Order Replacement button below.",
                             $"Order ID: {order.Id}",
                             $"Product: {order.ProductName}",
+                            $"Category: {order.Category}",
                             $"Cluster: {order.Cluster.Name}",
                         }
                     };
 
-                    await _notificationService.OrderNotification(emailModel, order, clusterAdmins);
+                    await _notificationService.OrderNotificationTwoButton(emailModel, order, clusterAdmins);
                     Log.Information("Order {OrderId} notification sent.", order.Id);
                     order.NextNotificationDate = utcNow.AddDays(7);
                     _dbContext.Orders.Update(order);

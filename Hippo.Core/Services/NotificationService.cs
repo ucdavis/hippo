@@ -27,6 +27,7 @@ namespace Hippo.Core.Services
         Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
+        Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
         Task<bool> OrderExpiredNotification(Order order, string[] emails);
     }
@@ -330,6 +331,44 @@ namespace Hippo.Core.Services
 
 
                 var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotification_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = ccEmails,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = simpleNotificationModel.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Notification", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
+        {
+            try
+            {
+                var message = simpleNotificationModel.Paragraphs.FirstOrDefault();
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = simpleNotificationModel.Subject,
+                    Header = simpleNotificationModel.Header,
+                    Paragraphs = simpleNotificationModel.Paragraphs,
+                    ButtonTwoText = "Order Replacement",
+                    ButtonTwoUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/product/index",                    
+                };
+
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotificationTwoButton_mjml.cshtml", model);
 
                 await _emailService.SendEmail(new EmailModel
                 {

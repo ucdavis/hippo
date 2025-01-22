@@ -86,6 +86,25 @@ namespace Hippo.Web.Controllers
             return Content(results);
         }
 
+        public async Task<IActionResult> TestBody2()
+        {
+            var model = new OrderNotificationModel();
+            model.ButtonText = "Test Button";
+            model.ButtonUrl = "https://www.ucdavis.edu";
+            model.ButtonTwoText = "Test Button 2";
+            model.ButtonTwoUrl = "https://www.ucdavis.edu";
+            model.Subject = "Test Subject";
+            model.Header = "Test Header";
+            model.Paragraphs.Add("This is a test paragraph.");
+            model.Paragraphs.Add("This is another test paragraph.");
+
+
+
+            var results = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotificationTwoButton_mjml.cshtml", model);
+
+            return Content(results);
+        }
+
         public async Task<IActionResult> TestSsh()
         {
             if (Cluster == null)

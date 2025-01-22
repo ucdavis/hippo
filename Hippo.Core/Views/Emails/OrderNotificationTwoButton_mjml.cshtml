@@ -1,0 +1,41 @@
+﻿@using Hippo.Core.Models.Email
+@model Hippo.Core.Models.Email.OrderNotificationModel
+
+@{
+    ViewData["EmailTitle"] = "Order Notification";
+    Layout = "_EmailLayout_mjml";
+}
+
+
+<mj-section border-top="4px solid #481268" border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc"
+            background-color="#ffffff" padding-bottom="20px" padding-top="20px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="28px" color="#1F1F1F">
+            <p>@Model.Header</p>
+        </mj-text>
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
+            @foreach (var paragraph in @Model.Paragraphs)
+            {
+                <p>@paragraph</p>
+            }
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#E8E1EC"
+            border-top="1px solid #DEEEFF" border-bottom="1px solid #DEEEFF" padding-bottom="0px" padding-top="0px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text align="center" font-size="18px" line-height="1.5" color="#000000" padding-right="25px"
+                 padding-bottom="0px" padding-top="0">
+
+        </mj-text>
+        <mj-button background-color="#481268" color="#FFFFFF" font-size="15px" align="center" vertical-align="middle"
+                   border="none" padding="15px 30px" border-radius="3px" href="@Model!.ButtonUrl" padding-left="25px"
+                   padding-right="25px" padding-bottom="10px"> @Model!.ButtonText</mj-button>
+        <mj-button background-color="#481268" color="#FFFFFF" font-size="15px" align="center" vertical-align="middle"
+                   border="none" padding="15px 30px" border-radius="3px" href="@Model!.ButtonTwoUrl" padding-left="25px"
+                   padding-right="25px" padding-bottom="10px"> @Model!.ButtonTwoText</mj-button>
+    </mj-column>
+</mj-section>
+
+

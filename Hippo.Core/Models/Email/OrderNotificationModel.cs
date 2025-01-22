@@ -14,6 +14,9 @@ namespace Hippo.Core.Models.Email
         public string ButtonText { get; set; } = "View Order";
         public string ButtonUrl { get; set; } = "";
 
+        public string ButtonTwoText { get; set; } = String.Empty;
+        public string ButtonTwoUrl { get; set; } = "";
+
         public string Subject { get; set; } = "";
         public string Header { get; set; } = "";
         public List<string> Paragraphs { get; set; } = new();
