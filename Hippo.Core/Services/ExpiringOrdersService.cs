@@ -84,7 +84,7 @@ namespace Hippo.Core.Services
                         Header = $"Hippo order expires on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
                         Paragraphs = new List<string>
                         {
-                            $"Order {order.Id} {order.Name} of type {order.Category} will reach the end of it's life span on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
+                            $"Order {order.Id} {order.Name} of type {order.Category} will reach the end of its life span on {order.ExpirationDate.Value.ToPacificTime().Date.ToShortDateString()}.",
                             $"You may want to contact the cluster admin(s) to purchase new equipment to avoid any downtime. Or use the Order Replacement button below.",
                             $"Order ID: {order.Id}",
                             $"Product: {order.ProductName}",
