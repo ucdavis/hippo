@@ -27,7 +27,9 @@ namespace Hippo.Core.Services
         Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds);
         Task<bool> SponsorPaymentFailureNotification(string[] emails, Order order); //Could possibly just pass the order Id, but there might be more order info we want to include
         Task<bool> OrderNotification(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
+        Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
+        Task<bool> OrderExpiredNotification(Order order, string[] emails);
     }
 
     public class NotificationService : INotificationService
@@ -247,7 +249,7 @@ namespace Hippo.Core.Services
                 };
                 foreach (var orderId in orderIds)
                 {
-                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}"); 
+                    model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}");
 
                 }
 
@@ -348,6 +350,45 @@ namespace Hippo.Core.Services
             }
         }
 
+        public async Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null)
+        {
+            try
+            {
+                //Join the simple notification paragraphs into a single string with new lines
+                var message = string.Join(Environment.NewLine, simpleNotificationModel.Paragraphs);
+
+                var model = new OrderNotificationModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                    ButtonUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}",
+                    Subject = simpleNotificationModel.Subject,
+                    Header = simpleNotificationModel.Header,
+                    Paragraphs = simpleNotificationModel.Paragraphs,
+                    ButtonTwoText = "Order Replacement",
+                    ButtonTwoUrl = $"{_emailSettings.BaseUrl}/{order.Cluster.Name}/product/index",                    
+                };
+
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotificationTwoButton_mjml.cshtml", model);
+
+                await _emailService.SendEmail(new EmailModel
+                {
+                    Emails = emails,
+                    CcEmails = ccEmails,
+                    HtmlBody = htmlBody,
+                    TextBody = message,
+                    Subject = simpleNotificationModel.Subject,
+                });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Notification", ex);
+                return false;
+            }
+        }
+
         public async Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel)
         {
             try
@@ -382,5 +423,46 @@ namespace Hippo.Core.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// This is for when the order has expired and we want to send a ticket to service now (or whereever the cluster email indicates)
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="emails">Get from Order.Cluster.Email</param>
+        /// <returns></returns>
+        public async Task<bool> OrderExpiredNotification(Order order, string[] emails)
+        {
+            try
+            {
+                var body = new List<string>();
+                body.Add("Category: Request");
+                body.Add("Subcategory: New");
+                body.Add($"Caller: {order.PrincipalInvestigator.Name}");
+                body.Add("ConfigurationItem: OOR HPC - High Performance Computing");
+                body.Add($"Cluster Name: {order.Cluster.Name}");
+                body.Add($"Email: {order.PrincipalInvestigator.Email}");
+                body.Add($"Account Kerberos: {order.PrincipalInvestigator.Kerberos}");
+                body.Add($"order: {_emailSettings.BaseUrl}/{order.Cluster.Name}/order/details/{order.Id}");
+                body.Add($"Expiration Date: {order.ExpirationDate.ToPacificTime().Value.Date.Format("d")}");
+
+
+                var emailModel = new EmailModel
+                {
+                    Emails = emails,
+                    Subject = "Hippo Order Expired",
+                    TextBody = string.Join(Environment.NewLine, body),
+                };
+
+                await _emailService.SendEmail(emailModel); //Send without html body
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Order Expired Notification", ex);
+                return false;
+
+            }
+            return true;
+        }
+
     }
 }

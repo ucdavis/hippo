@@ -86,6 +86,25 @@ namespace Hippo.Web.Controllers
             return Content(results);
         }
 
+        public async Task<IActionResult> TestBody2()
+        {
+            var model = new OrderNotificationModel();
+            model.ButtonText = "Test Button";
+            model.ButtonUrl = "https://www.ucdavis.edu";
+            model.ButtonTwoText = "Test Button 2";
+            model.ButtonTwoUrl = "https://www.ucdavis.edu";
+            model.Subject = "Test Subject";
+            model.Header = "Test Header";
+            model.Paragraphs.Add("This is a test paragraph.");
+            model.Paragraphs.Add("This is another test paragraph.");
+
+
+
+            var results = await _mjmlRenderer.RenderView("/Views/Emails/OrderNotificationTwoButton_mjml.cshtml", model);
+
+            return Content(results);
+        }
+
         public async Task<IActionResult> TestSsh()
         {
             if (Cluster == null)
@@ -203,6 +222,17 @@ namespace Hippo.Web.Controllers
         public IActionResult TestAuth()
         {
             return Content("Success");
+        }
+
+        public async Task<IActionResult> TestNotification()
+        {
+            var order = await _dbContext.Orders.Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).SingleAsync(a => a.Id == 41);
+
+            var emails = new string[] { "apprequests@caes.ucdavis.edu" };
+
+            var rtValue = await _notificationService.OrderExpiredNotification(order, emails);
+
+            return Content($"Notification sent {rtValue}");
         }
     }
 }
