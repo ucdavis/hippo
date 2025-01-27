@@ -1,7 +1,7 @@
 import React from "react";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { convertToPacificDate } from "../../../util/DateHelper";
+import { convertDateTimeToDate } from "../../../util/DateHelper";
 import HipFormFieldReadOnly from "../../../Shared/Form/HipFormFieldReadOnly";
 
 interface OrderPaymentDetailsProps {
@@ -52,7 +52,7 @@ const OrderPaymentDetails: React.FC<OrderPaymentDetailsProps> = ({
               label="Next Payment Date"
               type="date"
               readOnly
-              value={convertToPacificDate(nextPaymentDate)}
+              value={convertDateTimeToDate(nextPaymentDate)}
             />
             <HipFormFieldReadOnly
               name="nextPaymentAmount"

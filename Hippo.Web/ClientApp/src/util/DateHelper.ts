@@ -21,3 +21,10 @@ export const convertToPacificDate = (str: string) => {
     timeZone: "America/Los_Angeles",
   });
 };
+
+export const convertDateTimeToDate = (str: string) => {
+  if (!str) {
+    return "";
+  }
+  return new Date(str).toDateString();
+};
