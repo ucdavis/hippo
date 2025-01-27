@@ -56,7 +56,7 @@ namespace Hippo.Core.Services
             //Do a check on all active orders that don't have a next payment date and a balance > 0 
             var orderCheck = await _dbContext.Orders.Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate == null && a.BalanceRemaining > 0).ToListAsync();
             foreach (var order in orderCheck)
-            {
+            {                
                 if (order.Payments.Any(a => a.CreatedById == null && (a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing)))
                 {
                     Log.Information("Skipping order {0} because it has a created or processing payment", order.Id);
@@ -175,7 +175,13 @@ namespace Hippo.Core.Services
             switch (order.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    order.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).Date.FromPacificTime();
+                    order.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date.FromPacificTime();
+                    //Think we need to check because this could have happened at the end of the month, so as a catch, we will check if we set it to before today
+                    //Add a buffer of 1 hour
+                    if (order.NextPaymentDate < now.AddHours(1))
+                    {
+                        order.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
+                    }
                     break;
                 case InstallmentTypes.Yearly:
                     order.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();

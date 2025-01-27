@@ -404,21 +404,7 @@ namespace Hippo.Web.Controllers
 
                     existingOrder.Status = Order.Statuses.Active;
 
-                    var now = DateTime.UtcNow;
-                    switch (existingOrder.InstallmentType)
-                    {
-                        case InstallmentTypes.Monthly:
-                            existingOrder.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).Date.FromPacificTime();
-                            break;
-                        case InstallmentTypes.Yearly:
-                            existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
-                            break;
-                        case InstallmentTypes.OneTime:
-                            existingOrder.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
-                            break;
-                    }
-
-
+                    SetNextPaymentDate(existingOrder);
 
                     await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Updated);
                     await _historyService.OrderUpdated(existingOrder, currentUser, "Order Activated.");
@@ -493,6 +479,30 @@ namespace Hippo.Web.Controllers
                 .SingleOrDefaultAsync();
 
             return Ok(model);
+        }
+
+        private void SetNextPaymentDate(Order existingOrder)
+        {
+            var now = DateTime.UtcNow;
+            switch (existingOrder.InstallmentType)
+            {
+                case InstallmentTypes.Monthly:
+                    existingOrder.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date.FromPacificTime();
+                    //Think we need to check because this could have happened at the end of the month, so as a catch, we will check if we set it to before today
+                    //Add a buffer of 1 hour
+                    if (existingOrder.NextPaymentDate < now.AddHours(1))
+                    {
+                        existingOrder.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
+                    }
+                    break;
+                case InstallmentTypes.Yearly:
+                    existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date.FromPacificTime();
+                    break;
+                case InstallmentTypes.OneTime:
+                    existingOrder.NextPaymentDate = now.AddDays(1).ToPacificTime().Date.FromPacificTime();
+                    break;
+            }
+
         }
 
         [HttpPost]
