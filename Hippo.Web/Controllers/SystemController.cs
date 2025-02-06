@@ -18,12 +18,15 @@ namespace Hippo.Web.Controllers
         private readonly AppDbContext _dbContext;
         private readonly IIdentityService _identityService;
         private readonly IUserService _userService;
+        private readonly IAccountSyncService _accountSyncService;
 
-        public SystemController(AppDbContext dbContext, IIdentityService identityService, IUserService userService)
+        public SystemController(AppDbContext dbContext, IIdentityService identityService,
+            IUserService userService, IAccountSyncService accountSyncService)
         {
             _dbContext = dbContext;
             _identityService = identityService;
             _userService = userService;
+            _accountSyncService = accountSyncService;
         }
 
         [Authorize(Policy = AccessCodes.SystemAccess)]
@@ -71,5 +74,25 @@ namespace Hippo.Web.Controllers
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
+        [Authorize(Policy = AccessCodes.SystemAccess)]
+        public async Task<IActionResult> SyncPuppetAccounts()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            Log.Information($"Account sync initiated by {currentUser.Name}");
+
+            var success = await _accountSyncService.Run();
+
+            if (success)
+            {
+                Log.Information("Account sync completed successfully.");
+            }
+            else
+            {
+                Log.Error("Account sync failed.");
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }
