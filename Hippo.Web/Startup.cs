@@ -190,6 +190,7 @@ namespace Hippo.Web
             services.Configure<AzureSettings>(Configuration.GetSection("Azure"));
             services.Configure<AggieEnterpriseSettings>(Configuration.GetSection("AggieEnterprise"));
             services.Configure<SlothSettings>(Configuration.GetSection("Sloth"));
+            services.Configure<PuppetSettings>(Configuration.GetSection("Puppet"));
 
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
             services.AddScoped<IEmailService, EmailService>();
@@ -218,6 +219,10 @@ namespace Hippo.Web
 
             services.AddHttpClient();
             services.AddScoped<ISlothService, SlothService>();
+
+            services.AddMemoryCache();
+            services.AddScoped<IPuppetService, PuppetService>();
+            services.AddScoped<IAccountSyncService, AccountSyncService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext, IOptions<MvcReactOptions> mvcReactOptions)
