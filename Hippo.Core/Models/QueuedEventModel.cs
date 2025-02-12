@@ -55,11 +55,22 @@ public class QueuedEventDataModel
             Cluster = request.Cluster.Name,
         };
     }
+
     public static QueuedEventDataModel FromAccountAndGroup(Account account, Group group)
     {
         return new QueuedEventDataModel
         {
             Groups = new List<QueuedEventGroupModel> { QueuedEventGroupModel.FromGroup(group) },
+            Accounts = new List<QueuedEventAccountModel> { QueuedEventAccountModel.FromAccount(account) },
+            Cluster = account.Cluster.Name,
+        };
+    }
+
+    public static QueuedEventDataModel FromAccountAndGroupName(Account account, string groupName)
+    {
+        return new QueuedEventDataModel
+        {
+            Groups = new List<QueuedEventGroupModel> { new QueuedEventGroupModel { Name = groupName } },
             Accounts = new List<QueuedEventAccountModel> { QueuedEventAccountModel.FromAccount(account) },
             Cluster = account.Cluster.Name,
         };

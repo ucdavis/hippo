@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog.Sinks.Elasticsearch;
 
 namespace Hippo.Web
@@ -38,7 +40,9 @@ namespace Hippo.Web
                 .Enrich.WithClientIp()
                 .Enrich.WithCorrelationId()
                 .Enrich.WithRequestHeader("User-Agent")
-                .Enrich.WithExceptionDetails()
+                .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+                    .WithDefaultDestructurers()
+                    .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
                 .Enrich.WithProperty("Application", loggingSection.GetValue<string>("AppName"))
                 .Enrich.WithProperty("AppEnvironment", loggingSection.GetValue<string>("Environment"))
                 .WriteTo.Console();

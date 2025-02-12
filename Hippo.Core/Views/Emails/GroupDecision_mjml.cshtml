@@ -1,0 +1,104 @@
+﻿@using Hippo.Core.Models.Email
+@model Hippo.Core.Models.Email.DecisionModel
+
+@{
+    ViewData["EmailTitle"] = "Testing";
+    Layout = "_EmailLayout_mjml";
+}
+
+
+<mj-section border-top="4px solid #481268" border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc"
+    background-color="#ffffff" padding-bottom="20px" padding-top="20px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="28px" color="#1F1F1F">
+            <p>Hi @Model?.RequesterName</p>
+        </mj-text>
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
+            @Model?.RequestedAction request for @Model?.ClusterName decision
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel(@Model!.ButtonText, @Model!.RequestUrl))
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>Your request has been</h2>
+        </mj-text>
+    </mj-column>
+</mj-section>
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="20px" padding-top="0px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid @Model?.DecisionColor" padding-left="10px">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="5px">
+            <h1>@Model?.Decision</h1>
+            @if (!string.IsNullOrWhiteSpace(Model?.DecisionDetails))
+            {
+                @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decision Details",
+                         Model!.DecisionDetails))
+            }
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>Additional Information</h2>
+        </mj-text>
+    </mj-column>
+</mj-section>
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="0px" padding-top="10px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
+        <mj-text line-height="1.5" padding-top="0px" padding-left="0px" padding-bottom="5px">
+            <p>
+                For common issues and questions, visit the link:<br />
+                <a href="https://hpc.ucdavis.edu/faq">
+                    https://hpc.ucdavis.edu/faq
+                </a>
+            </p>
+            <p>
+                To learn about Linux commands and scripts, see this link:<br />
+                <a href="https://hpc.ucdavis.edu/helpdocs">
+                    https://hpc.ucdavis.edu/helpdocs
+                </a>
+            </p>
+            <p>
+                Data Science Training tutorials:<br />
+                <a href="https://ngs-docs.github.io/2021-august-remote-computing/index.html">
+                    https://ngs-docs.github.io/2021-august-remote-computing/index.html
+                </a>
+            </p>
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>Request Details</h2>
+        </mj-text>
+    </mj-column>
+</mj-section>
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+    padding-bottom="20px" padding-top="0px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested By",
+                 @Model?.RequesterName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Requested On",
+                 @Model?.RequestDate ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided By",
+                 @Model?.AdminName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decided On",
+                 @Model?.DecisionDate ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Computing Cluster",
+                 @Model?.ClusterName ?? ""))
+        @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Group",
+                 @Model?.GroupName ?? ""))
+    </mj-column>
+</mj-section>

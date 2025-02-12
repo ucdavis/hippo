@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Hippo.Core.Models;
 using EFCore.BulkExtensions;
-using AccountRequest = Hippo.Core.Domain.Request;
+using HippoRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
 
 namespace Hippo.Web.Controllers;
@@ -132,20 +132,20 @@ public class GroupController : SuperController
             r.Cluster.Name == Cluster
             && r.Group == group.Name
             && r.Requester.Iam == currentUser.Iam
-            && r.Status != AccountRequest.Statuses.Rejected
-            && r.Status != AccountRequest.Statuses.Completed);
+            && r.Status != HippoRequest.Statuses.Rejected
+            && r.Status != HippoRequest.Statuses.Completed);
         if (alreadyRequested)
         {
             return BadRequest($"You have already requested access to this group.");
         }
 
-        var request = new AccountRequest
+        var request = new HippoRequest
         {
             Requester = currentUser,
             RequesterId = currentUser.Id,
             Group = group.Name,
-            Action = AccountRequest.Actions.AddAccountToGroup,
-            Status = AccountRequest.Statuses.PendingApproval,
+            Action = HippoRequest.Actions.AddAccountToGroup,
+            Status = HippoRequest.Statuses.PendingApproval,
             Cluster = group.Cluster,
             ClusterId = group.ClusterId,
         }
@@ -170,6 +170,89 @@ public class GroupController : SuperController
             .SelectRequestModel(_dbContext)
             .SingleAsync();
 
-        return Ok(requestModel);        
+        return Ok(requestModel);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> RequestCreation([FromBody] CreateGroupModel createGroupModel)
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(createGroupModel.DisplayName))
+        {
+            return BadRequest("Group display name is required");
+        }
+
+        var currentUser = await _userService.GetCurrentUser();
+        var currentAccount = await _dbContext.Accounts
+            .Include(a => a.Cluster)
+            .SingleOrDefaultAsync(a =>
+                a.Cluster.Name == Cluster
+                && a.Owner.Iam == currentUser.Iam);
+        if (currentAccount == null)
+        {
+            return BadRequest($"You must have an account before requesting group creation.");
+        }
+
+        var existingGroup = await _dbContext.Groups
+            .Where(g => g.Cluster.Name == Cluster)
+            .SingleOrDefaultAsync(g => g.Name == createGroupModel.Name);
+        if (existingGroup != null)
+        {
+            return BadRequest("A group with this name already exists in the cluster.");
+        }
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+        var alreadyRequested = await _dbContext.Requests.AnyAsync(r =>
+            r.Cluster.Name == Cluster
+            && r.Requester.Iam == currentUser.Iam
+            && r.Action == HippoRequest.Actions.CreateGroup
+            && HippoRequest.Statuses.Pending.Contains(r.Status)
+            // this ugly cast is an unfortunate side effect of automapping nvarchar to a JsonElement property
+            && CustomFunctions.JsonValue((string)(object)r.Data, "$.name") == createGroupModel.Name
+        );
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+        if (alreadyRequested)
+        {
+            return BadRequest("You have already requested creation of a group with this display name.");
+        }
+
+        var request = new HippoRequest
+        {
+            Requester = currentUser,
+            RequesterId = currentUser.Id,
+            Action = HippoRequest.Actions.CreateGroup,
+            Status = HippoRequest.Statuses.PendingApproval,
+            Cluster = currentAccount.Cluster,
+            ClusterId = currentAccount.ClusterId,
+        }
+        .WithCreateGroupRequestData(new GroupRequestDataModel
+        {
+            Name = createGroupModel.Name,
+            DisplayName = createGroupModel.DisplayName
+        });
+
+        await _dbContext.Requests.AddAsync(request);
+        await _historyService.RequestCreated(request);
+
+        await _dbContext.SaveChangesAsync();
+
+        var success = await _notificationService.GroupRequest(request);
+        if (!success)
+        {
+            Log.Error("Error creating Create Group Request email");
+        }
+
+        var requestModel = await _dbContext.Requests
+            .Where(r => r.Id == request.Id)
+            .SelectRequestModel(_dbContext)
+            .SingleAsync();
+
+        return Ok(requestModel);
+    }
+
 }

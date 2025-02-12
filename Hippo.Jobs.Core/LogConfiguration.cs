@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog.Sinks.Elasticsearch;
 
 namespace Hippo.Jobs.Core
@@ -30,7 +32,7 @@ namespace Hippo.Jobs.Core
                 .ForContext("jobname", jobName ?? Assembly.GetEntryAssembly()?.GetName().Name)
                 .ForContext("jobid", jobId ?? Guid.NewGuid());
 
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) => Log.Fatal(e.ExceptionObject as Exception, e.ExceptionObject.ToString());
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) => Log.Fatal(e.ExceptionObject as Exception, e.ExceptionObject?.ToString() ?? "");
 
             AppDomain.CurrentDomain.ProcessExit += (sender, e) => Log.CloseAndFlush();
 
@@ -56,7 +58,9 @@ namespace Hippo.Jobs.Core
                 // .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning) // uncomment this to hide EF core general info logs
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .Enrich.WithExceptionDetails();
+                .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+                    .WithDefaultDestructurers()
+                    .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }));
 
             // various sinks
             logConfig = logConfig

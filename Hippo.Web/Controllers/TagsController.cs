@@ -10,9 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
-using AccountRequest = Hippo.Core.Domain.Request;
-using Hippo.Core.Extensions;
-using System.Text.Json;
 
 namespace Hippo.Web.Controllers;
 

@@ -43,6 +43,7 @@ namespace Hippo.Core.Domain
         public string SupervisingPI { get; set; } = "";
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
+        [JsonIgnore]
         public List<QueuedEvent> QueuedEvents { get; set; } = new();
 
         internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
@@ -75,6 +76,7 @@ namespace Hippo.Core.Domain
         {
             public const string CreateAccount = "CreateAccount";
             public const string AddAccountToGroup = "AddAccountToGroup";
+            public const string CreateGroup = "CreateGroup";
         }
 
         public static class Statuses
@@ -84,6 +86,8 @@ namespace Hippo.Core.Domain
             public const string Processing = "Processing";
             public const string Completed = "Completed";
             public const string Canceled = "Canceled";
+
+            public static readonly string[] Pending = new[] { PendingApproval, Processing };
         }
     }
 }

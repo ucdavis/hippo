@@ -9,6 +9,7 @@ using Hippo.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using YamlDotNet.Serialization;
+using Hippo.Core.Extensions;
 
 namespace Hippo.Core.Services
 {
@@ -53,6 +54,7 @@ namespace Hippo.Core.Services
                     QueuedEvent.Actions.UpdateSshKey => await CompleteUpdateSshKey(queuedEvent.Data),
                     QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent.Data),
                     QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent.Data),
+                    QueuedEvent.Actions.CreateGroup => await CompleteCreateGroup(queuedEvent.Data),
                     _ => Result.Error("Unknown action: {Action}", queuedEvent.Action)
                 };
             }
@@ -177,6 +179,44 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
+        private async Task<Result> CompleteCreateGroup(QueuedEventDataModel data)
+        {
+            var accountModel = data.Accounts.FirstOrDefault();
+            var groupModel = data.Groups.FirstOrDefault();
+            var account = await _dbContext.Accounts
+                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+            var groupExists = await _dbContext.Groups
+                .AnyAsync(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name);
+
+            if (accountModel == null || groupModel == null)
+            {
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateAccount);
+            }
+
+            if (groupExists)
+            {
+                return Result.Error("Group already exists: {Name} on cluster {Cluster}", groupModel.Name, data.Cluster);
+            }
+
+            if (account == null)
+            {
+                return Result.Error("Account does not exist: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
+            }
+
+            var newGroup = new Group
+            {
+                Name = groupModel.Name,
+                DisplayName = data.Metadata?["DisplayName"] ?? groupModel.Name,
+                AdminAccounts = new () { account },
+                ClusterId = account.ClusterId
+            };
+            
+
+            await _dbContext.Groups.AddAsync(newGroup);
+            return Result.Ok();
+        }
+
         private async Task<Result> CompleteUpdateSshKey(QueuedEventDataModel data)
         {
             var accountModel = data.Accounts.FirstOrDefault();
@@ -235,6 +275,27 @@ namespace Hippo.Core.Services
                 Data = QueuedEventDataModel.FromAccount(account)
             };
             queuedEvent.Data.Accounts[0].Key = sshKey;
+
+            var result = await accountUpdateService.QueueEvent(queuedEvent);
+            return result;
+        }
+
+        public static async Task<Result> QueueCreateGroup(this IAccountUpdateService accountUpdateService, Account account, Request request)
+        {
+            if (request.Action != Request.Actions.CreateGroup)
+            {
+                throw new InvalidOperationException("Invalid action: request action must be CreateGroup");
+            }
+
+            var requestData = request.GetCreateGroupRequestData();
+            var queuedEvent = new QueuedEvent
+            {
+                Action = QueuedEvent.Actions.CreateGroup,
+                Status = QueuedEvent.Statuses.Pending,
+                Data = QueuedEventDataModel.FromAccountAndGroupName(account, requestData.Name),
+                Request = request
+            };
+            queuedEvent.Data.Metadata["DisplayName"] = requestData.DisplayName;
 
             var result = await accountUpdateService.QueueEvent(queuedEvent);
             return result;

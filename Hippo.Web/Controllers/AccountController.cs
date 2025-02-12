@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Serilog;
 using Hippo.Core.Models;
-using AccountRequest = Hippo.Core.Domain.Request;
+using HippoRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
 using System.Text.Json;
 
@@ -145,12 +145,12 @@ public class AccountController : SuperController
         }
 
         // AccountRequest is an alias for Hippo.Core.Domain.Request to avoid clash with ControllerBase.Request
-        var request = new AccountRequest
+        var request = new HippoRequest
         {
             Requester = currentUser,
             Group = await _dbContext.Groups.Where(g => g.Id == model.GroupId).Select(g => g.Name).SingleAsync(),
-            Action = AccountRequest.Actions.CreateAccount,
-            Status = AccountRequest.Statuses.PendingApproval,
+            Action = HippoRequest.Actions.CreateAccount,
+            Status = HippoRequest.Statuses.PendingApproval,
             Cluster = cluster
         }
         .WithAccountRequestData(new AccountRequestDataModel

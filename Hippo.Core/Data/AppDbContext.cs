@@ -71,6 +71,8 @@ namespace Hippo.Core.Data
             Payment.OnModelCreating(builder);
             TempGroup.OnModelCreating(builder);
             Domain.TempKerberos.OnModelCreating(builder);
+
+            CustomFunctions.AddCustomFunctions(builder);
         }
     }
 }

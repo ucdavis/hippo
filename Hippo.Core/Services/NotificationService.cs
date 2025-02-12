@@ -14,13 +14,16 @@ using Hippo.Core.Extensions;
 using Razor.Templating.Core;
 using Mjml.Net;
 using Hippo.Core.Models;
+using StrawberryShake.Json;
 
 namespace Hippo.Core.Services
 {
     public interface INotificationService
     {
         Task<bool> AccountRequest(Request request);
-        Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy , string reason = null);
+        Task<bool> GroupRequest(Request request);
+        Task<bool> AccountDecision(Request request, bool isApproved, string decidedBy, string reason = null);
+        Task<bool> GroupDecision(Request request, bool isApproved, string decidedBy, string reason = null);
         Task<bool> AdminOverrideDecision(Request request, bool isApproved, User adminUser, string reason = null);
         Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel);
 
@@ -57,8 +60,25 @@ namespace Hippo.Core.Services
                 var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}"; //TODO: Only have button if approved?
                 var emailTo = request.Requester.Email;
 
-                var group = await _dbContext.Groups.Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group).SingleAsync();
-                var requestData = request.GetAccountRequestData();
+                var accessTypes = new List<string>();
+                var supervisingPI = "";
+                var groupName = "";
+
+                switch (request.Action)
+                {
+                    case Request.Actions.CreateAccount:
+                    case Request.Actions.AddAccountToGroup:
+                        var accountData = request.GetAccountRequestData();
+                        accessTypes = accountData.AccessTypes;
+                        supervisingPI = accountData.SupervisingPI;
+                        groupName = await _dbContext.Groups
+                            .Where(g => g.ClusterId == request.ClusterId && g.Name == request.Group)
+                            .Select(g => g.Name == g.DisplayName ? g.DisplayName : $"{g.DisplayName} ({g.Name})")
+                            .SingleAsync();
+                        break;
+                }
+
+
                 var message = details;
                 if (!isApproved && string.IsNullOrWhiteSpace(message))
                     message = "Your account request has been rejected. If you believe this was done in error, please contact " +
@@ -68,7 +88,7 @@ namespace Hippo.Core.Services
                 {
                     UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
                     RequestedAction = request.Action.SplitCamelCase(),
-                    GroupName = group.DisplayName,
+                    GroupName = groupName,
                     RequesterName = request.Requester.Name,
                     RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
                     DecisionDate = request.UpdatedOn.ToPacificTime().Date.Format("d"),
@@ -78,8 +98,8 @@ namespace Hippo.Core.Services
                     DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
                     DecisionDetails = message,
                     ClusterName = request.Cluster.Name,
-                    AccessTypes = requestData.AccessTypes,
-                    SupervisingPI = requestData.SupervisingPI
+                    AccessTypes = accessTypes,
+                    SupervisingPI = supervisingPI
                 };
 
                 var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountDecision_mjml.cshtml", model);
@@ -98,7 +118,70 @@ namespace Hippo.Core.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Error emailing Account Request", ex);
+                Log.Error("Error emailing Account Request Decision", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> GroupDecision(Request request, bool isApproved, string decidedBy, string details = "")
+        {
+
+            try
+            {
+
+                var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}"; //TODO: Only have button if approved?
+                var emailTo = request.Requester.Email;
+
+                var groupName = "";
+
+                switch (request.Action)
+                {
+                    case Request.Actions.CreateGroup:
+                        var createGroupData = request.GetCreateGroupRequestData();
+                        groupName = createGroupData.Name == createGroupData.DisplayName
+                            ? createGroupData.Name
+                            : $"{createGroupData.DisplayName} ({createGroupData.Name})";
+                        break;
+                }
+
+                var message = details;
+                if (!isApproved && string.IsNullOrWhiteSpace(message))
+                    message = "Your group request has been rejected. If you believe this was done in error, please contact " +
+                              "your cluster admin.";
+
+                var model = new DecisionModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                    RequestedAction = request.Action.SplitCamelCase(),
+                    GroupName = groupName,
+                    RequesterName = request.Requester.Name,
+                    RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
+                    DecisionDate = request.UpdatedOn.ToPacificTime().Date.Format("d"),
+                    RequestUrl = requestUrl,
+                    Decision = isApproved ? "Approved" : "Rejected",
+                    AdminName = decidedBy,
+                    DecisionColor = isApproved ? DecisionModel.Colors.Approved : DecisionModel.Colors.Rejected,
+                    DecisionDetails = message,
+                    ClusterName = request.Cluster.Name,
+                };
+
+                var emailBody = await _mjmlRenderer.RenderView("/Views/Emails/GroupDecision_mjml.cshtml", model);
+
+                var emailModel = new EmailModel
+                {
+                    Emails = new[] { emailTo },
+                    HtmlBody = emailBody,
+                    TextBody = message,
+                    Subject = $"Hippo Request ({model.RequestedAction}) {model.Decision}"
+                };
+
+                await _emailService.SendEmail(emailModel);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Group Request Decision", ex);
                 return false;
             }
         }
@@ -122,7 +205,8 @@ namespace Hippo.Core.Services
                     ClusterName = request.Cluster.Name,
                     SupervisingPI = requestData.SupervisingPI,
                     Action = request.Action.SplitCamelCase(),
-                    AccessTypes = requestData.AccessTypes
+                    AccessTypes = requestData.AccessTypes,
+                    Instructions = "As a group admin who can sponsor new accounts and group memberships on this cluster, you have received this request. Please click on the View Request button to approve or deny this request."
                 };
 
                 var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/AccountRequest_mjml.cshtml", model);
@@ -145,6 +229,47 @@ namespace Hippo.Core.Services
                 return false;
             }
         }
+
+        public async Task<bool> GroupRequest(Request request)
+        {
+            try
+            {
+                var requestUrl = $"{_emailSettings.BaseUrl}/{request.Cluster.Name}/approve";
+                var emails = await GetClusterAdminEmails(request.ClusterId);
+                var requestData = request.GetCreateGroupRequestData();
+
+                var model = new NewRequestModel()
+                {
+                    UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                    GroupName = requestData.Name + $"(Display Name: {requestData.DisplayName})",
+                    RequesterName = request.Requester.Name,
+                    RequestDate = request.CreatedOn.ToPacificTime().Date.Format("d"),
+                    RequestUrl = requestUrl,
+                    ClusterName = request.Cluster.Name,
+                    Action = request.Action.SplitCamelCase(),
+                    Instructions = $"A user on cluster {request.Cluster.Name} has requested creation of a group."
+                };
+
+                var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/GroupRequest_mjml.cshtml", model);
+
+                var emailModel = new EmailModel
+                {
+                    Emails = emails,
+                    HtmlBody = htmlBody,
+                    TextBody = $"A new request ({model.Action}) is ready for your approval",
+                    Subject = $"Hippo Request ({model.Action}) Submitted"
+                };
+
+                await _emailService.SendEmail(emailModel);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error emailing Account Request", ex);
+                return false;
+            }
+        }
+
 
         public async Task<bool> SimpleNotification(SimpleNotificationModel simpleNotificationModel)
         {
@@ -232,6 +357,16 @@ namespace Hippo.Core.Services
                 .Where(e => e != null)
                 .ToArrayAsync();
             return groupAdminEmails;
+        }
+
+        private async Task<string[]> GetClusterAdminEmails(int clusterId)
+        {
+            var clusterAdminEmails = await _dbContext.Permissions
+                .Where(p => p.ClusterId == clusterId && p.Role.Name == Role.Codes.ClusterAdmin)
+                .Select(p => p.User.Email)
+                .Distinct()
+                .ToArrayAsync();
+            return clusterAdminEmails;
         }
 
         public async Task<bool> AdminPaymentFailureNotification(string[] emails, string clusterName, int[] orderIds)

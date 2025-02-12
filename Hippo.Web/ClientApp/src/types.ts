@@ -56,13 +56,24 @@ export interface AccountRequestDataModel {
   sshKey?: string;
   accessTypes: AccessType[];
 }
+
+export interface GroupRequestDataModel {
+  name: string;
+  displayName: string;
+}
+
 export type AccountRequestModel = RequestModelCommon & {
   action: "CreateAccount" | "AddAccountToGroup";
   data: AccountRequestDataModel;
 };
 
-// make RequestMode a union of all possible action-specific RequestModels (currently only one)
-export type RequestModel = AccountRequestModel;
+export type GroupRequestModel = RequestModelCommon & {
+  action: "CreateGroup";
+  data: GroupRequestDataModel;
+};
+
+// make RequestMode a union of all possible action-specific RequestModels
+export type RequestModel = AccountRequestModel | GroupRequestModel;
 
 export interface AccountModel {
   id: number;

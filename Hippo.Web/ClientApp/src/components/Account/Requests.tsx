@@ -14,6 +14,7 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
+import { getGroupModelFromRequest } from "../../Shared/requestUtils";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -91,27 +92,31 @@ export const Requests = () => {
     columnHelper.accessor("requesterEmail", {
       header: "Email",
     }),
-    columnHelper.accessor((row) => getGroupModelString(row.groupModel), {
-      header: "Group",
-      cell: (props) => (
-        <GroupNameWithTooltip
-          group={props.row.original.groupModel}
-          showDisplayName={false}
-        />
-      ),
-      meta: {
-        exportFn: (request) => request.groupModel.displayName,
-      },
-    }),
     columnHelper.accessor(
-      (request) => isAccountRequest(request) && request.data.supervisingPI,
+      (row) => getGroupModelString(getGroupModelFromRequest(row)),
+      {
+        header: "Group",
+        cell: (props) => {
+          const groupModel = getGroupModelFromRequest(props.row.original);
+          return (
+            <GroupNameWithTooltip group={groupModel} showDisplayName={false} />
+          );
+        },
+        meta: {
+          exportFn: (request) => request.groupModel.displayName,
+        },
+      },
+    ),
+    columnHelper.accessor(
+      (request) =>
+        isAccountRequest(request) ? request.data.supervisingPI : "",
       {
         header: "Supervising PI",
       },
     ),
     columnHelper.accessor(
       (request) =>
-        isAccountRequest(request) && request.data.accessTypes.join(", "),
+        isAccountRequest(request) ? request.data.accessTypes.join(", ") : "",
       {
         header: "Access Types",
         meta: {
