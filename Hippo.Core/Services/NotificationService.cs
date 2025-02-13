@@ -3,18 +3,11 @@ using Hippo.Core.Domain;
 using Hippo.Core.Models.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog;
 using Hippo.Core.Models.Email;
 using Hippo.Core.Extensions;
-using Razor.Templating.Core;
 using Mjml.Net;
-using Hippo.Core.Models;
-using StrawberryShake.Json;
+
 
 namespace Hippo.Core.Services
 {
