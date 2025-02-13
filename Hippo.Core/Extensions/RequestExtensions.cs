@@ -20,7 +20,7 @@ public static class RequestExtensions
     public static AccountRequestDataModel GetAccountRequestData(this Request request)
     {
         if (!AccountRequestDataModel.ValidActions.Contains(request.Action))
-            throw new InvalidOperationException($"Cannot get {nameof(AccountRequestDataModel.SshKey)} from {nameof(request.Data)} for action {request.Action}");
+            throw new InvalidOperationException($"Cannot get {nameof(AccountRequestDataModel)} from {nameof(request.Data)} for action {request.Action}");
 
         var data = request.Data == null
             ? new()
@@ -28,4 +28,27 @@ public static class RequestExtensions
 
         return data;
     }
+
+    public static Request WithCreateGroupRequestData(this Request request, GroupRequestDataModel data)
+    {
+        if (!GroupRequestDataModel.ValidActions.Contains(request.Action))
+            throw new ArgumentException($"Invalid data type ({nameof(GroupRequestDataModel)}) for action {request.Action}");
+
+        request.Data = JsonHelper.ConvertToJsonElement(data);
+
+        return request;
+    }
+
+    public static GroupRequestDataModel GetCreateGroupRequestData(this Request request)
+    {
+        if (!GroupRequestDataModel.ValidActions.Contains(request.Action))
+            throw new InvalidOperationException($"Cannot get {nameof(GroupRequestDataModel)} from {nameof(request.Data)} for action {request.Action}");
+
+        var data = request.Data == null
+            ? new()
+            : JsonHelper.ConvertFromJsonElement<GroupRequestDataModel>(request.Data);
+
+        return data;
+    }
+
 }

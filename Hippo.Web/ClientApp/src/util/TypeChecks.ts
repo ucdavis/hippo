@@ -1,4 +1,4 @@
-﻿import { AccountRequestModel } from "../types";
+﻿import { AccountRequestModel, GroupRequestModel, RequestModel } from "../types";
 
 export const isString = (value: any): value is string =>
   typeof value === "string";
@@ -11,10 +11,13 @@ export const isFunction = (value: unknown): value is Function =>
 export const isPromise = (value: any): value is Promise<any> =>
   value instanceof Promise;
 export const isAccountRequest = (
-  value: AccountRequestModel,
+  value: RequestModel,
 ): value is AccountRequestModel =>
   value &&
   (value.action === "CreateAccount" || value.action === "AddAccountToGroup");
+export const isGroupRequest = (
+  value: RequestModel,
+): value is GroupRequestModel => value && value.action === "CreateGroup";
 export const isNumber = (value: any): value is number =>
   typeof value === "number";
 export const isObject = (value: any): value is object =>

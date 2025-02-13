@@ -1,7 +1,12 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppContext from "../../Shared/AppContext";
-import { AddToGroupModel, GroupModel, RequestModel } from "../../types";
+import {
+  AddToGroupModel,
+  GroupRequestDataModel,
+  GroupModel,
+  RequestModel,
+} from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
 import { CardColumns } from "reactstrap";
@@ -16,6 +21,7 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { getGroupModelFromRequest } from "../../Shared/requestUtils";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -24,6 +30,7 @@ export const AccountInfo = () => {
   const account = context.accounts.find((a) => a.cluster === clusterName);
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const navigate = useNavigate();
+  const userGroupName = context.user.detail.kerberos + "grp";
 
   const memberOfGroups = useMemo(
     () => account?.memberOfGroups ?? [],
@@ -48,7 +55,7 @@ export const AccountInfo = () => {
             (g) =>
               !memberOfGroups.some((cg) => cg.id === g.id) &&
               !adminOfGroups.some((cg) => cg.id === g.id) &&
-              !currentOpenRequests.some((r) => r.groupModel.id === g.id),
+              !currentOpenRequests.some((r) => r.groupModel?.id === g.id),
           ),
         );
       } else {
@@ -59,7 +66,7 @@ export const AccountInfo = () => {
     fetchGroups();
   }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
 
-  const [getGroupConfirmation] = useConfirmationDialog<AddToGroupModel>(
+  const [getGroupAccessConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
       title: "Request Access to Group",
       message: (setReturn) => {
@@ -104,6 +111,42 @@ export const AccountInfo = () => {
     [availableGroups],
   );
 
+  const [getGroupCreationConfirmation] =
+    useConfirmationDialog<GroupRequestDataModel>(
+      {
+        title: "Request Group Creation",
+        message: (setReturn) => {
+          return (
+            <div className="row justify-content-center">
+              <div className="col-md-12">
+                <div className="form-group">
+                  <label className="form-label">Display Name</label>
+                  <input
+                    className="form-control"
+                    id="displayName"
+                    placeholder="Enter Display Name"
+                    onChange={(e) =>
+                      setReturn((model) => ({
+                        name: userGroupName,
+                        displayName: e.target.value,
+                      }))
+                    }
+                  ></input>
+                  <p className="form-helper">
+                    If approved, your group will be named <b>{userGroupName}</b>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        },
+        canConfirm: (returnValue) =>
+          (returnValue?.displayName ?? "").length >= 3,
+      },
+      [availableGroups],
+    );
+
   const [getSshKeyConfirmation] = useConfirmationDialog<string>(
     {
       title: "Update your SSH Key",
@@ -135,8 +178,8 @@ export const AccountInfo = () => {
     [],
   );
 
-  const handleRequestAccess = useCallback(async () => {
-    const [confirmed, addToGroupModel] = await getGroupConfirmation();
+  const handleRequestGroupAccess = useCallback(async () => {
+    const [confirmed, addToGroupModel] = await getGroupAccessConfirmation();
     if (confirmed) {
       const request = authenticatedFetch(
         `/api/${clusterName}/group/requestaccess/`,
@@ -168,7 +211,39 @@ export const AccountInfo = () => {
         );
       }
     }
-  }, [clusterName, getGroupConfirmation, setNotification, setContext]);
+  }, [clusterName, getGroupAccessConfirmation, setNotification, setContext]);
+
+  const handleRequestGroupCreation = useCallback(async () => {
+    const [confirmed, createGroupModel] = await getGroupCreationConfirmation();
+    if (confirmed) {
+      const request = authenticatedFetch(
+        `/api/${clusterName}/group/requestcreation/`,
+        {
+          method: "POST",
+          body: JSON.stringify(createGroupModel),
+        },
+      );
+
+      setNotification(request, "Sending Request", "Request Sent", async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(response);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      });
+
+      const response = await request;
+      if (response.ok) {
+        const requestModel = (await response.json()) as RequestModel;
+
+        setContext((c) => ({
+          ...c,
+          openRequests: [...c.openRequests, requestModel],
+        }));
+      }
+    }
+  }, [getGroupCreationConfirmation, clusterName, setNotification, setContext]);
 
   const handleUpdateSshKey = useCallback(async () => {
     const [confirmed, sshKey] = await getSshKeyConfirmation();
@@ -280,14 +355,17 @@ export const AccountInfo = () => {
             <p>You have pending requests for the following group(s):</p>
 
             <CardColumns>
-              {currentOpenRequests.map((r, i) => (
-                <div className="group-card-admin" key={i}>
-                  <GroupInfo
-                    group={r.groupModel}
-                    showDetails={() => handleShowGroup(r.groupModel)}
-                  />
-                </div>
-              ))}
+              {currentOpenRequests.map((r, i) => {
+                const groupModel = getGroupModelFromRequest(r);
+                return (
+                  <div className="group-card-admin" key={i}>
+                    <GroupInfo
+                      group={groupModel}
+                      showDetails={() => handleShowGroup(groupModel)}
+                    />
+                  </div>
+                );
+              })}
             </CardColumns>
             <br />
           </>
@@ -298,11 +376,24 @@ export const AccountInfo = () => {
           </HipButton>{" "}
           <HipButton
             disabled={notification.pending || availableGroups.length === 0}
-            onClick={() => handleRequestAccess()}
+            onClick={() => handleRequestGroupAccess()}
             size="sm"
           >
             Request Access to Another Group
           </HipButton>{" "}
+          {!adminOfGroups.some((g) => g.name === userGroupName) &&
+            !currentOpenRequests.some(
+              (r) =>
+                r.action === "CreateGroup" && r.data.name === userGroupName,
+            ) && (
+              <HipButton
+                disabled={notification.pending}
+                onClick={() => handleRequestGroupCreation()}
+                size="sm"
+              >
+                Request Group Creation
+              </HipButton>
+            )}{" "}
           {cluster.accessTypes.includes("SshKey") && (
             <HipButton
               disabled={notification.pending || availableGroups.length === 0}

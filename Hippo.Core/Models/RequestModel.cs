@@ -35,4 +35,16 @@ namespace Hippo.Core.Models
             Request.Actions.AddAccountToGroup 
         };
     }
+
+    public class GroupRequestDataModel {
+        [MaxLength(32)]
+        public string Name { get; set; } = "";
+        [MaxLength(100)]
+        public string DisplayName { get; set; } = "";
+
+        public static List<string> ValidActions = new List<string>
+        {
+            Request.Actions.CreateGroup,
+        };
+    }    
 }

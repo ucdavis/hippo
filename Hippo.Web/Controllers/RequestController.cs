@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Hippo.Core.Models;
-using AccountRequest = Hippo.Core.Domain.Request;
+using HippoRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
 
 namespace Hippo.Web.Controllers;
@@ -49,7 +49,7 @@ public class RequestController : SuperController
 
         var requests = await _dbContext.Requests
             .AsNoTracking()
-            .Where(r => r.Status == AccountRequest.Statuses.PendingApproval)
+            .Where(r => r.Status == HippoRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             // the projection is sorting groups by name, so we'll sort by the first group name
             .OrderBy(r => r.Group)
@@ -78,7 +78,7 @@ public class RequestController : SuperController
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
             .AsSplitQuery()
-            .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
+            .Where(r => r.Id == id && r.Status == HippoRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             .Include(r => r.Requester)
             .Include(r => r.Cluster)
@@ -91,15 +91,16 @@ public class RequestController : SuperController
 
         var result = request.Action switch
         {
-            AccountRequest.Actions.CreateAccount => await ApproveCreateAccount(request),
-            AccountRequest.Actions.AddAccountToGroup => await ApproveAddAccountToGroup(request),
+            HippoRequest.Actions.CreateAccount => await ApproveCreateAccount(request),
+            HippoRequest.Actions.AddAccountToGroup => await ApproveAddAccountToGroup(request),
+            HippoRequest.Actions.CreateGroup => await ApproveCreateGroup(request),
             _ => BadRequest("Invalid action")
         };
 
         return result;
     }
 
-    private async Task<ActionResult> ApproveCreateAccount(AccountRequest request)
+    private async Task<ActionResult> ApproveCreateAccount(HippoRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Group))
         {
@@ -125,7 +126,7 @@ public class RequestController : SuperController
             return BadRequest($"Error queuing {QueuedEvent.Actions.CreateAccount} request: {result.Message}");
         }
 
-        request.Status = AccountRequest.Statuses.Processing;
+        request.Status = HippoRequest.Statuses.Processing;
         request.UpdatedOn = DateTime.UtcNow;
 
         var success = await _notificationService.AccountDecision(request, true, decidedBy: currentUser.Name,
@@ -145,7 +146,51 @@ public class RequestController : SuperController
         return Ok();
     }
 
-    private async Task<ActionResult> ApproveAddAccountToGroup(AccountRequest request)
+    private async Task<ActionResult> ApproveCreateGroup(HippoRequest request)
+    {
+        var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+        if (!isClusterOrSystemAdmin)
+        {
+            return Forbid();
+        }
+
+        var account = await _dbContext.Accounts
+            .Where(a => a.ClusterId == request.ClusterId && a.OwnerId == request.RequesterId)
+            .SingleOrDefaultAsync();
+
+        if (account == null)
+        {
+            return BadRequest("No account found for this request");
+        }
+
+        var result = await _accountUpdateService.QueueCreateGroup(account, request);
+        if (result.IsError)
+        {
+            return BadRequest($"Error queuing {QueuedEvent.Actions.CreateAccount} request: {result.Message}");
+        }
+
+        request.Status = HippoRequest.Statuses.Processing;
+        request.UpdatedOn = DateTime.UtcNow;
+
+        var success = await _notificationService.GroupDecision(request, true, decidedBy: currentUser.Name,
+            reason: $"Your group creation request has been approved on {Cluster}. You will " +
+                    "receive another email with more details once your group is created.");
+        if (!success)
+        {
+            Log.Error("Error creating Account Decision email");
+        }
+
+        await _historyService.RequestApproved(request, true);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    private async Task<ActionResult> ApproveAddAccountToGroup(HippoRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Group))
         {
@@ -180,7 +225,7 @@ public class RequestController : SuperController
             return BadRequest($"Error queuing {QueuedEvent.Actions.AddAccountToGroup} request: {result.Message}");
         }
 
-        request.Status = AccountRequest.Statuses.Processing;
+        request.Status = HippoRequest.Statuses.Processing;
         request.UpdatedOn = DateTime.UtcNow;
 
         var success = await _notificationService.AccountDecision(request, true, currentUser.Name);
@@ -216,7 +261,7 @@ public class RequestController : SuperController
 
         var request = await _dbContext.Requests
             .IgnoreQueryFilters()
-            .Where(r => r.Id == id && r.Status == AccountRequest.Statuses.PendingApproval)
+            .Where(r => r.Id == id && r.Status == HippoRequest.Statuses.PendingApproval)
             .CanAccess(_dbContext, Cluster, currentUser.Iam, isClusterOrSystemAdmin)
             .Include(r => r.Requester)
             .Include(r => r.Cluster)
@@ -227,23 +272,42 @@ public class RequestController : SuperController
             return NotFound();
         }
 
-        var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
-        var isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
-            ga.GroupId == group.Id
-            && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
+        var isGroupAdmin = false;
 
-        if (!isClusterOrSystemAdmin && !isGroupAdmin)
+        switch (request.Action)
         {
-            return Forbid();
-        }
+            case HippoRequest.Actions.AddAccountToGroup:
+            case HippoRequest.Actions.CreateAccount:
+                var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == request.ClusterId && g.Name == request.Group);
+                isGroupAdmin = await _dbContext.GroupAdminAccount.AnyAsync(ga =>
+                    ga.GroupId == group.Id
+                    && ga.Group.AdminAccounts.Any(aa => aa.OwnerId == currentUser.Id));
 
-        request.Status = AccountRequest.Statuses.Rejected;
-        request.UpdatedOn = DateTime.UtcNow;
-
-        var success = await _notificationService.AccountDecision(request, false, decidedBy: currentUser.Name, reason: model.Reason);
-        if (!success)
-        {
-            Log.Error("Error creating Account Decision email");
+                if (!isClusterOrSystemAdmin && !isGroupAdmin)
+                {
+                    return Forbid();
+                }
+                request.Status = HippoRequest.Statuses.Rejected;
+                request.UpdatedOn = DateTime.UtcNow;
+                var success = await _notificationService.AccountDecision(request, false, decidedBy: currentUser.Name, reason: model.Reason);
+                if (!success)
+                {
+                    Log.Error("Error creating Account Decision email");
+                }
+                break;
+            case HippoRequest.Actions.CreateGroup:
+                if (!isClusterOrSystemAdmin)
+                {
+                    return Forbid();
+                }
+                request.Status = HippoRequest.Statuses.Rejected;
+                request.UpdatedOn = DateTime.UtcNow;
+                success = await _notificationService.GroupDecision(request, false, decidedBy: currentUser.Name, reason: model.Reason);
+                if (!success)
+                {
+                    Log.Error("Error creating Account Decision email");
+                }
+                break;
         }
 
         // safe to assume admin override if no GroupAdmin permission is found

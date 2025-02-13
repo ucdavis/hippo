@@ -155,7 +155,7 @@ namespace Hippo.Core.Services
             string iamId = GetCurrentUserId();
 
             var requests = await _dbContext.Requests
-                .Where(r => r.Requester.Iam == iamId && r.Status != Request.Statuses.Completed && r.Status != Request.Statuses.Rejected)
+                .Where(r => r.Requester.Iam == iamId && Request.Statuses.Pending.Contains(r.Status))
                 .SelectRequestModel(_dbContext)
                 .ToListAsync();
             return JsonSerializer.Serialize(requests, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
