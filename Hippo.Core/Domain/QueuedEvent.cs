@@ -39,11 +39,13 @@ public class QueuedEvent
         public const string UpdateSshKey = "UpdateSshKey";
         public const string AddAccountToGroup = "AddAccountToGroup";
         public const string CreateGroup = "CreateGroup";
+        public const string RemoveGroupMember = "RemoveGroupMember";
 
         public const string RegexPattern = CreateAccount
             + "|" + UpdateSshKey
             + "|" + AddAccountToGroup
-            + "|" + CreateGroup;
+            + "|" + CreateGroup
+            + "|" + RemoveGroupMember;
     }
 
     public static class Statuses

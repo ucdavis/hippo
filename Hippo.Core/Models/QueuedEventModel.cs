@@ -127,11 +127,12 @@ public class QueuedEventAccountModel
     {
         return new QueuedEventAccountModel
         {
-            Kerberos = account.Owner.Kerberos,
+            Kerberos = account.Kerberos,
             Name = account.Name,
-            Email = account.Owner.Email,
-            Iam = account.Owner.Iam,
-            Mothra = account.Owner.MothraId,
+            Email = account.Email,
+            // accounts won't have an owner if they've never logged into hippo
+            Iam = account.Owner?.Iam ?? "",
+            Mothra = account.Owner?.MothraId ?? "",
             Key = account.SshKey,
             AccessTypes = account.AccessTypes.Select(at => at.Name).ToList()
         };

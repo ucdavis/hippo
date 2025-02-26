@@ -13,6 +13,7 @@ using Hippo.Core.Models;
 using HippoRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
 using System.Text.Json;
+using Hippo.Core.Migrations.Sqlite;
 
 namespace Hippo.Web.Controllers;
 
@@ -77,6 +78,52 @@ public class AccountController : SuperController
             .ToArrayAsync());
     }
 
+    [HttpGet]
+    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
+    public async Task<ActionResult> GroupMembers([FromQuery] int groupId)
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+        var currentUser = await _userService.GetCurrentUser();
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+        var groupModel = await _dbContext.Groups
+            .Where(g => g.Cluster.Name == Cluster && g.Id == groupId)
+            .OrderBy(g => g.DisplayName)
+            .Select(GroupModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
+            .SingleOrDefaultAsync();
+
+        if (groupModel == null)
+        {
+            return NotFound();
+        }
+
+        var kerbsPendingRemoval = await _dbContext.QueuedEvents
+            .Where(qe =>
+                qe.Action == QueuedEvent.Actions.RemoveGroupMember
+                && qe.Status == QueuedEvent.Statuses.Pending
+                && CustomFunctions.JsonValue((string)(object)qe.Data, "$.cluster") == Cluster
+                && CustomFunctions.JsonValue((string)(object)qe.Data, "$.groups[0].name") == groupModel.Name
+            )
+            .Select(qe => CustomFunctions.JsonValue((string)(object)qe.Data, "$.accounts[0].kerberos"))
+            .ToListAsync();
+
+        var accounts = await _dbContext.Accounts
+            .AsSplitQuery()
+            .CanAccess(Cluster, currentUser.Iam, isClusterOrSystemAdmin)
+            .Where(a => a.MemberOfGroups.Any(g => g.Id == groupId))
+            // the projection is sorting groups by name, so we'll sort by the first group name
+            .OrderBy(a => a.MemberOfGroups.OrderBy(g => g.Name).First().Name)
+                .ThenBy(a => a.Name)
+            .Select(AccountModel.GetProjection(isClusterOrSystemAdmin, currentUser.Id))
+            .ToListAsync();
+
+
+        return Ok(new GroupMembersModel { Group = groupModel, Accounts = accounts, KerberosPendingRemoval = kerbsPendingRemoval });
+    }
 
 
     [HttpPost]

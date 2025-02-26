@@ -22,13 +22,16 @@ public class GroupController : SuperController
     private readonly IUserService _userService;
     private readonly INotificationService _notificationService;
     private readonly IHistoryService _historyService;
+    private readonly IAccountUpdateService _accountUpdateService;
 
-    public GroupController(AppDbContext dbContext, IUserService userService, IHistoryService historyService, INotificationService notificationService)
+    public GroupController(AppDbContext dbContext, IUserService userService, IHistoryService historyService,
+        INotificationService notificationService, IAccountUpdateService accountUpdateService)
     {
         _dbContext = dbContext;
         _userService = userService;
         _historyService = historyService;
         _notificationService = notificationService;
+        _accountUpdateService = accountUpdateService;
     }
 
     [HttpGet]
@@ -255,4 +258,52 @@ public class GroupController : SuperController
         return Ok(requestModel);
     }
 
+    [Authorize(Policy = AccessCodes.GroupAdminAccess)]
+    [HttpPost]
+    public async Task<IActionResult> RequestRemoveMember([FromBody] GroupMemberModel groupMemberModel)
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
+        var currentUser = await _userService.GetCurrentUser();
+        var group = await _dbContext.Groups
+            .AsSplitQuery()
+            //limit member accouts to just the one we're interested in...
+            .Include(g => g.MemberAccounts.Where(a => a.Id == groupMemberModel.AccountId))
+                .ThenInclude(a => a.Owner)
+            //it's ugly, but duplicate includes are the only way to do sibling ThenIncludes
+            .Include(g => g.MemberAccounts.Where(a => a.Id == groupMemberModel.AccountId))
+                .ThenInclude(a => a.Cluster)
+            .Include(g => g.AdminAccounts.Where(a => a.OwnerId == currentUser.Id))
+            .SingleOrDefaultAsync(g => g.Cluster.Name == Cluster && g.Id == groupMemberModel.GroupId);
+        if (group == null)
+        {
+            return BadRequest("Group does not exist");
+        }
+
+        // ensure user is a system, cluster or group admin
+        var permissions = await _userService.GetCurrentPermissionsAsync();
+        var isSystemOrClusterAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+        var isAdmin = isSystemOrClusterAdmin || group.AdminAccounts.Any(a => a.OwnerId == currentUser.Id);
+        if (!isAdmin)
+        {
+            return Forbid();
+        }
+
+        var accountToRemove = group.MemberAccounts.SingleOrDefault(a => a.Id == groupMemberModel.AccountId);
+        if (accountToRemove == null)
+        {
+            return BadRequest("Account is not a member of group");
+        }
+
+        var result = await _accountUpdateService.QueueRemoveGroupMember(accountToRemove, group);
+        if (result.IsError)
+        {
+            return BadRequest($"Error queuing {QueuedEvent.Actions.RemoveGroupMember} message: {result.Message}");
+        }
+
+        return Ok();
+    }
 }
