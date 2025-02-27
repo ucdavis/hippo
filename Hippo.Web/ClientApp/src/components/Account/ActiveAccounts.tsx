@@ -17,7 +17,7 @@ import { HipTable } from "../../Shared/Table/HipTable";
 import HipButton from "../../Shared/HipComponents/HipButton";
 
 export const ActiveAccounts = () => {
-  const [, setNotification] = usePromiseNotification();
+  const [_, setNotification] = usePromiseNotification();
   const [accounts, setAccounts] = useState<AccountModel[]>();
   const [viewing, setViewing] = useState<AccountModel>();
   const [editing, setEditing] = useState<AccountModel>();

@@ -23,7 +23,7 @@ const GroupMembers: React.FC = () => {
   const groupId = parseInt(groupIdStr);
   const [removing, setRemoving] = useState<AccountModel>();
   const [groupMembers, setGroupMembers] = useState<GroupMembersModel>();
-  const [, setNotification] = usePromiseNotification();
+  const [_, setNotification] = usePromiseNotification();
 
   useEffect(() => {
     const fetchAccounts = async () => {

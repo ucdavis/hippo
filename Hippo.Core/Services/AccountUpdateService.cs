@@ -55,7 +55,7 @@ namespace Hippo.Core.Services
                     QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent.Data),
                     QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent.Data),
                     QueuedEvent.Actions.CreateGroup => await CompleteCreateGroup(queuedEvent.Data),
-                    QueuedEvent.Actions.RemoveGroupMember => await CompleteRemoveGroupMember(queuedEvent.Data),
+                    QueuedEvent.Actions.RemoveAccountFromGroup => await CompleteRemoveAccountFromGroup(queuedEvent.Data),
                     _ => Result.Error("Unknown action: {Action}", queuedEvent.Action)
                 };
             }
@@ -243,7 +243,7 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result> CompleteRemoveGroupMember(QueuedEventDataModel data)
+        private async Task<Result> CompleteRemoveAccountFromGroup(QueuedEventDataModel data)
         {
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
@@ -341,7 +341,7 @@ namespace Hippo.Core.Services
         {
             var queuedEvent = new QueuedEvent
             {
-                Action = QueuedEvent.Actions.RemoveGroupMember,
+                Action = QueuedEvent.Actions.RemoveAccountFromGroup,
                 Status = QueuedEvent.Statuses.Pending,
                 Data = QueuedEventDataModel.FromAccountAndGroup(account, group)
             };
