@@ -103,7 +103,7 @@ public class AccountController : SuperController
 
         var kerbsPendingRemoval = await _dbContext.QueuedEvents
             .Where(qe =>
-                qe.Action == QueuedEvent.Actions.RemoveGroupMember
+                qe.Action == QueuedEvent.Actions.RemoveAccountFromGroup
                 && qe.Status == QueuedEvent.Statuses.Pending
                 && CustomFunctions.JsonValue((string)(object)qe.Data, "$.cluster") == Cluster
                 && CustomFunctions.JsonValue((string)(object)qe.Data, "$.groups[0].name") == groupModel.Name

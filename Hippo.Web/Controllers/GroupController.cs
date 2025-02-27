@@ -301,7 +301,7 @@ public class GroupController : SuperController
         var result = await _accountUpdateService.QueueRemoveGroupMember(accountToRemove, group);
         if (result.IsError)
         {
-            return BadRequest($"Error queuing {QueuedEvent.Actions.RemoveGroupMember} message: {result.Message}");
+            return BadRequest($"Error queuing {QueuedEvent.Actions.RemoveAccountFromGroup} message: {result.Message}");
         }
 
         return Ok();
