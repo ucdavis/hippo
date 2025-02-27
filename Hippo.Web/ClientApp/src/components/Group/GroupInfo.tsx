@@ -7,15 +7,26 @@ import { MouseEvent } from "react";
 export interface GroupInfoProps {
   group: GroupModel;
   showDetails?: () => void;
+  navigateToGroupMembers?: () => void;
 }
 
-export const GroupInfo = ({ group, showDetails }: GroupInfoProps) => {
-  const { canViewGroup } = usePermissions();
+export const GroupInfo = ({
+  group,
+  showDetails,
+  navigateToGroupMembers,
+}: GroupInfoProps) => {
+  const { canViewGroup, canManageGroup } = usePermissions();
 
   const handleShowDetails = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     showDetails();
+  };
+
+  const handleShowMembers = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    navigateToGroupMembers();
   };
 
   return (
@@ -39,6 +50,14 @@ export const GroupInfo = ({ group, showDetails }: GroupInfoProps) => {
       <ShowFor condition={() => !!showDetails && canViewGroup(group.name)}>
         <Button size="sm" color="link" onClick={handleShowDetails}>
           Details
+        </Button>
+      </ShowFor>
+      <ShowFor
+        condition={() => !!navigateToGroupMembers && canManageGroup(group.name)}
+      >
+        {" - "}
+        <Button size="sm" color="link" onClick={handleShowMembers}>
+          View Members
         </Button>
       </ShowFor>
     </div>

@@ -398,3 +398,9 @@ export interface PaymentReportModel {
   nextPaymentDate: string;
   orderCreatedOn: string;
 }
+
+export interface GroupMembersModel {
+  group: GroupModel;
+  accounts: AccountModel[];
+  kerberosPendingRemoval: string[];
+}

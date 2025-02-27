@@ -55,6 +55,7 @@ namespace Hippo.Core.Services
                     QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent.Data),
                     QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent.Data),
                     QueuedEvent.Actions.CreateGroup => await CompleteCreateGroup(queuedEvent.Data),
+                    QueuedEvent.Actions.RemoveGroupMember => await CompleteRemoveGroupMember(queuedEvent.Data),
                     _ => Result.Error("Unknown action: {Action}", queuedEvent.Action)
                 };
             }
@@ -241,6 +242,37 @@ namespace Hippo.Core.Services
             // _dbContext.SaveAsync() is handled elsewhere for this change
             return Result.Ok();
         }
+
+        private async Task<Result> CompleteRemoveGroupMember(QueuedEventDataModel data)
+        {
+            var accountModel = data.Accounts.FirstOrDefault();
+            var groupModel = data.Groups.FirstOrDefault();
+            var account = await _dbContext.Accounts
+                .Include(a => a.MemberOfGroups.Where(g => g.Name == groupModel.Name))
+                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+
+            if (accountModel == null || groupModel == null)
+            {
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.AddAccountToGroup);
+            }
+
+            if (account == null)
+            {
+                return Result.Error("Account not found: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
+            }
+
+            if (!account.MemberOfGroups.Any())
+            {
+                return Result.Error("Account {Kerberos} not a member of group {Name} on cluster {Cluster}", account.Kerberos, groupModel.Name, data.Cluster);
+            }
+
+            // We're only removing the one group that was included...
+            account.MemberOfGroups.Clear();
+
+            // _dbContext.SaveAsync() is handled elsewhere for this change
+            return Result.Ok();
+        }
     }
 
     public static class AccountUpdateServiceExtensions
@@ -304,5 +336,18 @@ namespace Hippo.Core.Services
             var result = await accountUpdateService.QueueEvent(queuedEvent);
             return result;
         }
+
+        public static async Task<Result> QueueRemoveGroupMember(this IAccountUpdateService accountUpdateService, Account account, Group group)
+        {
+            var queuedEvent = new QueuedEvent
+            {
+                Action = QueuedEvent.Actions.RemoveGroupMember,
+                Status = QueuedEvent.Statuses.Pending,
+                Data = QueuedEventDataModel.FromAccountAndGroup(account, group)
+            };
+            var result = await accountUpdateService.QueueEvent(queuedEvent);
+            return result;
+        }
+
     }
 }

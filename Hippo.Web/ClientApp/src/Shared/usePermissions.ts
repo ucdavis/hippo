@@ -21,11 +21,20 @@ export const usePermissions = () => {
     return false;
   };
 
+  const canManageGroup = (groupName: string) => {
+    if (isSystemAdmin || isClusterAdmin) return true;
+    if (!clusterName) return false;
+    const account = accounts.find((a) => a.cluster === clusterName);
+    if (!account) return false;
+    if (account.adminOfGroups.some((g) => g.name === groupName)) return true;
+    return false;
+  };
+
   const isClusterAdminForCluster = () => {
     if (!clusterName) return false;
     if (isSystemAdmin || isClusterAdmin) return true;
     return false;
   };
 
-  return { canViewGroup, isClusterAdminForCluster };
+  return { canViewGroup, canManageGroup, isClusterAdminForCluster };
 };

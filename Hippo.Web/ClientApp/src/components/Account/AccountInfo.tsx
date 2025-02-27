@@ -318,6 +318,10 @@ export const AccountInfo = () => {
     showGroupDetails();
   };
 
+  const handleNavigateToGroupMembers = (group: GroupModel) => {
+    navigate(`/${clusterName}/group/${group.id}`);
+  };
+
   return (
     <HipMainWrapper>
       <HipTitle title={`Welcome ${context.user.detail.firstName}`} />
@@ -342,7 +346,13 @@ export const AccountInfo = () => {
             <CardColumns>
               {adminOfGroups.map((g, i) => (
                 <div className="group-card-admin" key={i}>
-                  <GroupInfo group={g} showDetails={() => handleShowGroup(g)} />
+                  <GroupInfo
+                    group={g}
+                    showDetails={() => handleShowGroup(g)}
+                    navigateToGroupMembers={() =>
+                      handleNavigateToGroupMembers(g)
+                    }
+                  />
                 </div>
               ))}
             </CardColumns>
