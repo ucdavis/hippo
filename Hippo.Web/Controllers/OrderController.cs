@@ -481,6 +481,10 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        /// <summary>
+        /// Note, this is a little different the the method in the job. Don't confuse the two
+        /// </summary>
+        /// <param name="existingOrder"></param>
         private void SetNextPaymentDate(Order existingOrder)
         {
             var now = DateTime.UtcNow;
