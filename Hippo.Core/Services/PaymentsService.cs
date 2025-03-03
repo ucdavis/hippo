@@ -171,8 +171,8 @@ namespace Hippo.Core.Services
 
         private void SetNextPaymentDate(Order order)
         {
-            var now = DateTime.UtcNow;
-            var pacificNow = now.ToPacificTime();
+            var nowPlusADay = DateTime.UtcNow.AddDays(1); //Bump it up a day, so we are in the next month/year
+            var pacificNow = nowPlusADay.ToPacificTime();
 
             switch (order.InstallmentType)
             {
@@ -184,7 +184,7 @@ namespace Hippo.Core.Services
                     order.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    order.NextPaymentDate = pacificNow.AddDays(1).Date.ToUniversalTime();
+                    order.NextPaymentDate = pacificNow.Date.ToUniversalTime();
                     break;
             }
 
