@@ -484,16 +484,17 @@ namespace Hippo.Web.Controllers
         private void SetNextPaymentDate(Order existingOrder)
         {
             var now = DateTime.UtcNow;
+            var pacificNow = now.ToPacificTime();
             switch (existingOrder.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    existingOrder.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date;
+                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.Yearly:
-                    existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date;
+                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    existingOrder.NextPaymentDate = now.AddDays(1).Date;
+                    existingOrder.NextPaymentDate = pacificNow.AddDays(1).Date.ToUniversalTime();
                     break;
             }
 

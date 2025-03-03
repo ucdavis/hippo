@@ -172,16 +172,19 @@ namespace Hippo.Core.Services
         private void SetNextPaymentDate(Order order)
         {
             var now = DateTime.UtcNow;
+            var pacificNow = now.ToPacificTime();
+
             switch (order.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    order.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date;
+                    //This should be 7AM UTC, which is 12AM PST and the job runs at 2-3 PST or 10AM UTC
+                    order.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.Yearly:
-                    order.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date;
+                    order.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    order.NextPaymentDate = now.AddDays(1).Date;
+                    order.NextPaymentDate = pacificNow.AddDays(1).Date.ToUniversalTime();
                     break;
             }
 
