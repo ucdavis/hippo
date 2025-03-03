@@ -151,12 +151,12 @@ namespace Hippo.Core.Services
                 order.Payments.Add(payment);
                 //order.BalanceRemaining -= paymentAmount; //Should only get updated once payment is completed now
 
-                SetNextPaymentDate(order);
+                SetNextPaymentDate(order); //This "should" set it to next month/year
 
-                if(order.IsRecurring) //If the payment above gets rejected/canceled we should test this
+                if (order.IsRecurring) //If the payment above gets rejected/canceled we should test this
                 {
                     //The next payment date should be set now, so add the the BalanceRemaining
-                    order.BalanceRemaining += order.Total;
+                    order.BalanceRemaining += order.Total; //This should be ok, because the next payment date should be set to the next billing period
                 }
 
                 _dbContext.Orders.Update(order);
