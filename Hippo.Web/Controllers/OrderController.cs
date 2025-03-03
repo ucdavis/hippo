@@ -482,7 +482,7 @@ namespace Hippo.Web.Controllers
         }
 
         /// <summary>
-        /// Note, this is a little different the the method in the job. Don't confuse the two
+        /// Note, this is a little different than the method in the job. Don't confuse the two
         /// </summary>
         /// <param name="existingOrder"></param>
         private void SetNextPaymentDate(Order existingOrder)
