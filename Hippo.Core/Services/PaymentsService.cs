@@ -151,12 +151,12 @@ namespace Hippo.Core.Services
                 order.Payments.Add(payment);
                 //order.BalanceRemaining -= paymentAmount; //Should only get updated once payment is completed now
 
-                SetNextPaymentDate(order);
+                SetNextPaymentDate(order); //This "should" set it to next month/year
 
-                if(order.IsRecurring) //If the payment above gets rejected/canceled we should test this
+                if (order.IsRecurring) //If the payment above gets rejected/canceled we should test this
                 {
-                    //The next payment date should be set now, so add the the BalanceRemaining
-                    order.BalanceRemaining += order.Total;
+                    //The next payment date should be set now, so add the BalanceRemaining
+                    order.BalanceRemaining += order.Total; //This should be ok, because the next payment date should be set to the next billing period
                 }
 
                 _dbContext.Orders.Update(order);
@@ -171,17 +171,20 @@ namespace Hippo.Core.Services
 
         private void SetNextPaymentDate(Order order)
         {
-            var now = DateTime.UtcNow;
+            var nowPlusADay = DateTime.UtcNow.AddDays(1); //Bump it up a day, so we are in the next month/year
+            var pacificNow = nowPlusADay.ToPacificTime();
+
             switch (order.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    order.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date;
+                    //This should be 7AM UTC, which is 12AM PST and the job runs at 2-3 PST or 10AM UTC
+                    order.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.Yearly:
-                    order.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date;
+                    order.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    order.NextPaymentDate = now.AddDays(1).Date;
+                    order.NextPaymentDate = pacificNow.Date.ToUniversalTime();
                     break;
             }
 

@@ -124,7 +124,7 @@ namespace Hippo.Core.Services
                     {
                         var order = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
 
-                        //TODO: ? Check if the txn is already on sloth? To do this sloth would need to be changed, or I'd need to write the the processor tracking number
+                        //TODO: ? Check if the txn is already on sloth? To do this sloth would need to be changed, or I'd need to write the processor tracking number
 
                         var slothTransaction = CreateTransaction(financialDetail, order, payment);
                         Log.Information(JsonSerializer.Serialize(slothTransaction, _serializerOptions)); //MAybe don't need?

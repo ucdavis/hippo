@@ -481,19 +481,24 @@ namespace Hippo.Web.Controllers
             return Ok(model);
         }
 
+        /// <summary>
+        /// Note, this is a little different than the method in the job. Don't confuse the two
+        /// </summary>
+        /// <param name="existingOrder"></param>
         private void SetNextPaymentDate(Order existingOrder)
         {
             var now = DateTime.UtcNow;
+            var pacificNow = now.ToPacificTime();
             switch (existingOrder.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    existingOrder.NextPaymentDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1).Date;
+                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.Yearly:
-                    existingOrder.NextPaymentDate = new DateTime(now.Year, 1, 1).AddYears(1).Date;
+                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
                     break;
                 case InstallmentTypes.OneTime:
-                    existingOrder.NextPaymentDate = now.AddDays(1).Date;
+                    existingOrder.NextPaymentDate = pacificNow.AddDays(1).Date.ToUniversalTime();
                     break;
             }
 

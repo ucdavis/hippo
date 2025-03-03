@@ -542,7 +542,8 @@ export const Details = () => {
                 condition={
                   sponsorCanAddPaymentStatuses.includes(order.status) &&
                   order.piUser?.id === user.detail.id &&
-                  balanceRemaining > 0
+                  balanceRemaining > 0 &&
+                  !order.isRecurring
                 }
               >
                 <HipButton className="btn btn-secondary" onClick={makePayment}>
