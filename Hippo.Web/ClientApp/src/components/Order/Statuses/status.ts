@@ -102,6 +102,14 @@ export const getNextStatus = ({
         };
       }
       break;
+    case OrderStatus.Closed:
+      if (isRecurring) {
+        return {
+          currentStatus: status,
+          newStatus: OrderStatus.Archived,
+        };
+      }
+      break;
     case OrderStatus.Completed:
       return {
         currentStatus: status,
