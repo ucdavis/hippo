@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using static Hippo.Core.Models.SlothModels.TransferViewModel;
 
 //TODO: Remove unused usings
 
@@ -17,11 +18,13 @@ namespace Hippo.Web.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly IUserService _userService;
+        private readonly IAggieEnterpriseService _aggieEnterpriseService;
 
-        public ReportController(AppDbContext dbContext, IUserService userService)
+        public ReportController(AppDbContext dbContext, IUserService userService, IAggieEnterpriseService aggieEnterpriseService)
         {
             _dbContext = dbContext;
             _userService = userService;
+            _aggieEnterpriseService = aggieEnterpriseService;
         }
 
         [HttpGet]
@@ -163,5 +166,109 @@ namespace Hippo.Web.Controllers
 
             return Ok(orders);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ProblemOrders()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+
+            var orders = await _dbContext.Orders
+                .Include(a => a.Billings)
+                .Where(a => a.Cluster.Name == Cluster && a.Status == Order.Statuses.Active)
+                .ToListAsync();
+
+            var invalidChartStringOrWarnings = await ValidateChartStrings(orders);
+
+            var problemOrders = orders
+                .Where(a => a.Billings.Any(b => invalidChartStringOrWarnings.Any(c => c.ContainsKey(b.ChartString))))
+                .ToList();
+
+            var billingIssues = orders
+                .Where(a => a.NextPaymentDate <= DateTime.UtcNow.AddDays(5))
+                .ToList();
+
+            var orderIds = problemOrders.Select(a => a.Id).Union(billingIssues.Select(a => a.Id)).ToList();
+
+            var model = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator)
+                .Include(a => a.MetaData)
+                .Where(a => orderIds.Contains(a.Id))
+                .Select(OrderListModel.Projection())
+                .ToListAsync();
+
+            AddMessagesToModel(problemOrders, invalidChartStringOrWarnings, model);
+            AddBillingIssueMessages(billingIssues, model);
+
+            return Ok(model);
+        }
+
+        private async Task<List<Dictionary<string, string>>> ValidateChartStrings(List<Order> orders)
+        {
+            var uniqueChartStrings = orders
+                .SelectMany(a => a.Billings.Where(a => a.ChartString != null).Select(b => b.ChartString))
+                .Distinct()
+                .ToList();
+
+            var invalidChartStringOrWarnings = new List<Dictionary<string, string>>();
+
+            foreach (var chartString in uniqueChartStrings)
+            {
+                if (chartString == null)
+                {
+                    continue;
+                }
+
+                var chartStringValidation = await _aggieEnterpriseService.IsChartStringValid(chartString, Directions.Debit);
+
+                if (!chartStringValidation.IsValid)
+                {
+                    var invalidEntry = new Dictionary<string, string> { { chartString, chartStringValidation.Message } };
+                    invalidChartStringOrWarnings.Add(invalidEntry);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(chartStringValidation.Warning))
+                    {
+                        var invalidEntry = new Dictionary<string, string> { { chartString, chartStringValidation.Warning } };
+                        invalidChartStringOrWarnings.Add(invalidEntry);
+
+                    }
+                }
+            }
+
+            return invalidChartStringOrWarnings;
+        }
+
+        private void AddMessagesToModel(List<Order> problemOrders, List<Dictionary<string, string>> invalidChartStringOrWarnings, List<OrderListModel> model)
+        {
+            foreach (var order in problemOrders)
+            {
+                var messages = new List<string> { "Chart String Problem:" };
+                foreach (var billing in order.Billings)
+                {
+                    if (invalidChartStringOrWarnings.Any(a => a.ContainsKey(billing.ChartString)))
+                    {
+                        messages.Add(invalidChartStringOrWarnings.First(a => a.ContainsKey(billing.ChartString))[billing.ChartString]);
+                    }
+                }
+                model.First(a => a.Id == order.Id).Messages = string.Join(" ", messages);
+            }
+        }
+
+        private void AddBillingIssueMessages(List<Order> billingIssues, List<OrderListModel> model)
+        {
+            foreach (var order in billingIssues)
+            {
+                model.First(a => a.Id == order.Id).Messages = $"Stale Next Payment Date. {model.First(a => a.Id == order.Id).Messages}";
+            }
+        }
+
     }
 }

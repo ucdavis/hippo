@@ -24,6 +24,8 @@ namespace Hippo.Web.Models.OrderModels
 
         public string SponsorName { get; set; } = string.Empty;
 
+        public string Messages { get; set; } = string.Empty; //Specialty message for problematic orders
+
         public static Expression<Func<Core.Domain.Order, OrderListModel>> Projection()
         {
             return order => new OrderListModel

@@ -299,6 +299,22 @@ export const AppNav = () => {
                         </NavLink>
                       </DropdownItem>
                     </ShowFor>
+                    <ShowFor
+                      roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                    >
+                      <DropdownItem>
+                        <NavLink
+                          id="problemOrdersReport"
+                          to={`/${cluster.name}/report/order/ProblemOrders`}
+                          className="nav-dropdown-item nav-link"
+                          style={({ isActive }) =>
+                            isActive ? { fontWeight: "bold" } : {}
+                          }
+                        >
+                          Problem Orders
+                        </NavLink>
+                      </DropdownItem>
+                    </ShowFor>
                     <ShowFor roles={["System", "ClusterAdmin"]}>
                       <DropdownItem>
                         <NavLink

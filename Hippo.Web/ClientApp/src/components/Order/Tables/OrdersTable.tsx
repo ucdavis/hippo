@@ -11,12 +11,14 @@ interface OrdersTableProps {
   orders: OrderListModel[];
   cluster: string;
   isAdminOrders: boolean;
+  showTableMessages?: boolean;
 }
 
 export const OrdersTable: React.FC<OrdersTableProps> = ({
   orders,
   cluster,
   isAdminOrders,
+  showTableMessages,
 }) => {
   const columns = React.useMemo(() => {
     const columnHelper = createColumnHelper<OrderListModel>();
@@ -169,6 +171,11 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       ),
     });
 
+    const messages = columnHelper.accessor("messages", {
+      header: "Messages",
+      id: "messages",
+    });
+
     let cols = [];
 
     cols.push(nameAndId);
@@ -181,9 +188,12 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     cols.push(total);
     cols.push(balanceRemaining);
     cols.push(createdOn);
+    if (showTableMessages === true) {
+      cols.push(messages);
+    }
     cols.push(actions);
     return cols;
-  }, [cluster, isAdminOrders]);
+  }, [cluster, isAdminOrders, showTableMessages]);
 
   return (
     <HipTable
