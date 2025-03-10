@@ -74,6 +74,7 @@ export const ReportOrders = () => {
               orders={orders}
               cluster={cluster}
               isAdminOrders={true}
+              showTableMessages={true}
             />
           </HipErrorBoundary>
         </HipBody>

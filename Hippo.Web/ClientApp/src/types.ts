@@ -356,6 +356,7 @@ export interface OrderListModel {
   sponsorName: string;
   expirationDate: string;
   isRecurring: boolean;
+  messages: string;
 }
 
 export interface OrderTotalCalculationModel extends Partial<OrderModel> {
