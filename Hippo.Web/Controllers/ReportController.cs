@@ -210,8 +210,9 @@ namespace Hippo.Web.Controllers
             }
 
 
-            //Find all the orders that have a billing.ChartString this is in uniqueChartStrings
-            var problemOrders = orders.AsQueryable().Where(a => a.Billings.Any(b => uniqueChartStrings.Contains(b.ChartString))).ToList(); //TODO: Test this
+            //Find all orders that have a billing with a chart string that is in the invalidChartStringOrWarnings
+            var problemOrders = orders.Where(a => a.Billings.Any(b => invalidChartStringOrWarnings.Any(c => c.ContainsKey(b.ChartString)))).ToList();
+
 
             var billingIssues = orders.AsQueryable().Where(a => a.NextPaymentDate <= DateTime.UtcNow.AddDays(5)).ToList();
 
@@ -243,11 +244,11 @@ namespace Hippo.Web.Controllers
                 foreach (var order in billingIssues)
                 {
                     //get the order from the model and add the messages
-                    model.First(a => a.Id == order.Id).Messages = $"Stale Next Billing Date. {model.First(a => a.Id == order.Id).Messages}";
+                    model.First(a => a.Id == order.Id).Messages = $"Stale Next Payment Date. {model.First(a => a.Id == order.Id).Messages}";
                 }
             }
 
-            return Ok(orders);
+            return Ok(model);
         }
     }
 }

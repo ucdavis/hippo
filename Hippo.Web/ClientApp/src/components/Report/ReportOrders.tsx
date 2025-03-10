@@ -13,7 +13,7 @@ import HipLoadingTable from "../../Shared/LoadingAndErrors/HipLoadingTable";
 
 export const ReportOrders = () => {
   const [orders, setOrders] = useState<OrderListModel[]>();
-  const { cluster, reportType } = useParams(); //ExpiringOrders or ArchivedOrders
+  const { cluster, reportType } = useParams(); //ExpiringOrders or ArchivedOrders or ProblemOrders
 
   useEffect(() => {
     setOrders(undefined);
@@ -43,7 +43,9 @@ export const ReportOrders = () => {
       subtitle={
         reportType === "ExpiringOrders"
           ? "Expired Orders and Expiring in 31 Days Orders"
-          : "Archived Orders"
+          : reportType === "ProblemOrders"
+            ? "Problem Orders"
+            : "Archived Orders"
       }
     />
   );
@@ -74,7 +76,7 @@ export const ReportOrders = () => {
               orders={orders}
               cluster={cluster}
               isAdminOrders={true}
-              showTableMessages={true}
+              showTableMessages={reportType === "ProblemOrders"}
             />
           </HipErrorBoundary>
         </HipBody>
