@@ -46,7 +46,7 @@
     "vitest-trx-results-processor": "^1.0.3"
   },
   "scripts": {
-    "start": "echo Starting the development server && vite",
+    "start": "npx kill-port 3000 && echo Starting the development server && vite",
     "build": "tsc && cross-env VITEST_ENV=ci vite build",
     "test": "vitest",
     "citest": "cross-env VITEST_ENV=ci vitest run --coverage --reporter default --reporter vitest-trx-results-processor",

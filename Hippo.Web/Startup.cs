@@ -46,7 +46,6 @@ namespace Hippo.Web
             services.AddViteServices(options =>
             {
                 options.DevServerPort = 3000;
-                options.ViteDevServerEntry = "/src/index.tsx";
             });
 
             services.AddAuthentication(options =>
