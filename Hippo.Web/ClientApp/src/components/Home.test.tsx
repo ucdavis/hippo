@@ -32,11 +32,17 @@ describe("Basic render", () => {
       ok: true,
       json: () => Promise.resolve(fakeGroups),
     });
-    global.fetch = jest.fn().mockImplementation((x) =>
-      responseMap(x, {
-        [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
-      }),
-    );
+    global.fetch = vitest
+      .fn((url, options) => {
+        // allow mock fetch to handle relative urls
+        const absoluteUrl = new URL(url, "http://localhost");
+        return fetch(absoluteUrl.toString(), options);
+      })
+      .mockImplementation((x) =>
+        responseMap(x, {
+          [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
+        }),
+      );
     (global as any).Hippo = fakeGroupAdminAppContext;
   });
 
@@ -60,7 +66,7 @@ describe("Home Redirect when GroupAdmin", () => {
 
     (global as any).Hippo = fakeGroupAdminAppContext;
 
-    global.fetch = jest.fn().mockImplementation((x) =>
+    global.fetch = vitest.fn().mockImplementation((x) =>
       responseMap(x, {
         [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       }),
@@ -105,7 +111,7 @@ describe("Home Redirect no account", () => {
 
     (global as any).Hippo = fakeAppContextNoAccount;
 
-    global.fetch = jest.fn().mockImplementation((x) =>
+    global.fetch = vitest.fn().mockImplementation((x) =>
       responseMap(x, {
         [`/api/${fakeAccounts[0].cluster}/group/groups`]: groupsResponse,
       }),

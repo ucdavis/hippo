@@ -43,7 +43,11 @@ namespace Hippo.Web
             });
 
             // Init services for hybrid mvc/react app
-            services.AddMvcReact();
+            services.AddViteServices(options =>
+            {
+                options.DevServerPort = 3000;
+                options.ViteDevServerEntry = "/src/index.tsx";
+            });
 
             services.AddAuthentication(options =>
             {
