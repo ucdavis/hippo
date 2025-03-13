@@ -176,6 +176,17 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       id: "messages",
     });
 
+    const nextPaymentDate = columnHelper.accessor("nextPaymentDate", {
+      header: "Next Payment",
+      id: "nextPaymentDate",
+      cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.getValue("nextPaymentDate"));
+        const dateB = new Date(rowB.getValue("nextPaymentDate"));
+        return dateA.getTime() - dateB.getTime();
+      },
+    });
+
     let cols = [];
 
     cols.push(nameAndId);
@@ -189,6 +200,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     cols.push(balanceRemaining);
     cols.push(createdOn);
     if (showTableMessages === true) {
+      cols.push(nextPaymentDate);
       cols.push(messages);
     }
     cols.push(actions);

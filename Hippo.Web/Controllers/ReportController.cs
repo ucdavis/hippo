@@ -184,14 +184,14 @@ namespace Hippo.Web.Controllers
                 .Where(a => a.Cluster.Name == Cluster && a.Status == Order.Statuses.Active)
                 .ToListAsync();
 
-            var invalidChartStringOrWarnings = await ValidateChartStrings(orders);
+            var invalidChartStringOrWarnings = await ValidateChartStrings(orders.Where(a => a.NextPaymentDate != null && a.NextPaymentDate.Value <= DateTime.UtcNow.AddMonths(2)).ToList());
 
             var problemOrders = orders
-                .Where(a => a.Billings.Any(b => invalidChartStringOrWarnings.Any(c => c.ContainsKey(b.ChartString))))
+                .Where(a => a.NextPaymentDate != null && a.NextPaymentDate.Value <= DateTime.UtcNow.AddMonths(2) && a.Billings.Any(b => invalidChartStringOrWarnings.Any(c => c.ContainsKey(b.ChartString))))
                 .ToList();
 
             var billingIssues = orders
-                .Where(a => a.NextPaymentDate <= DateTime.UtcNow.AddDays(5))
+                .Where(a => a.NextPaymentDate <= DateTime.UtcNow.AddDays(-5))
                 .ToList();
 
             var orderIds = problemOrders.Select(a => a.Id).Union(billingIssues.Select(a => a.Id)).ToList();
