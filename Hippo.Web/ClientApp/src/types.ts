@@ -357,6 +357,7 @@ export interface OrderListModel {
   expirationDate: string;
   isRecurring: boolean;
   messages: string;
+  nextPaymentDate: string;
 }
 
 export interface OrderTotalCalculationModel extends Partial<OrderModel> {

@@ -22,6 +22,8 @@ namespace Hippo.Web.Models.OrderModels
         public DateTime? ExpirationDate { get; set; }
         public DateTime? InstallmentDate { get; set; }
 
+        public DateTime? NextPaymentDate { get; set; }
+
         public string SponsorName { get; set; } = string.Empty;
 
         public string Messages { get; set; } = string.Empty; //Specialty message for problematic orders
@@ -41,7 +43,8 @@ namespace Hippo.Web.Models.OrderModels
                 Total = order.IsRecurring ? (order.Payments.Where(a => a.Status == Payment.Statuses.Completed).Sum(a => a.Amount) + order.BalanceRemaining) : order.Total,
                 BalanceRemaining = order.BalanceRemaining,
                 PendingAmount = order.Payments.Where(a => a.Status == Payment.Statuses.Created || a.Status == Payment.Statuses.Processing).Sum(a => a.Amount),
-                SponsorName = order.PrincipalInvestigator.Name
+                SponsorName = order.PrincipalInvestigator.Name,
+                NextPaymentDate = order.NextPaymentDate,
             };
         }
     }
