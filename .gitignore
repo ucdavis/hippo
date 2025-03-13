@@ -355,3 +355,6 @@ MigrationBackup/
 
 .DS_Store
 /Hippo.Web/.DS_Store
+
+# VS Test results files
+*.trx

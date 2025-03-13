@@ -4,7 +4,7 @@
 
 namespace Hippo.Core.Migrations.SqlServer
 {
-    public partial class cluster : Migration
+    public partial class Cluster : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

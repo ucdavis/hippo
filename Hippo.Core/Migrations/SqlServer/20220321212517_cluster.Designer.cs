@@ -13,7 +13,7 @@ namespace Hippo.Core.Migrations.SqlServer
 {
     [DbContext(typeof(AppDbContextSqlServer))]
     [Migration("20220321212517_cluster")]
-    partial class cluster
+    partial class Cluster
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

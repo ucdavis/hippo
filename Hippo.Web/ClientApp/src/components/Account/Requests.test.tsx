@@ -38,13 +38,19 @@ beforeEach(() => {
 
   (global as any).Hippo = fakeGroupAdminAppContext;
 
-  global.fetch = jest.fn().mockImplementation((x) =>
-    responseMap(x, {
-      [`/api/${testCluster}/request/pending`]: requestResponse,
-      [`/api/${testCluster}/request/approve/2`]: approveResponse,
-      [`/api/${testCluster}/group/groups`]: groupsResponse,
-    }),
-  );
+  global.fetch = vitest
+    .fn((url, options) => {
+      // allow mock fetch to handle relative urls
+      const absoluteUrl = new URL(url, "http://localhost");
+      return fetch(absoluteUrl.toString(), options);
+    })
+    .mockImplementation((x) =>
+      responseMap(x, {
+        [`/api/${testCluster}/request/pending`]: requestResponse,
+        [`/api/${testCluster}/request/approve/2`]: approveResponse,
+        [`/api/${testCluster}/group/groups`]: groupsResponse,
+      }),
+    );
 });
 
 afterEach(() => {

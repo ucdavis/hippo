@@ -1,6 +1,6 @@
 import { AppContextShape, ModelState } from "../types";
 
-declare var Hippo: AppContextShape;
+declare let Hippo: AppContextShape;
 
 export const authenticatedFetch = async (
   url: string,
@@ -25,7 +25,7 @@ export const parseBadRequest = async (
 
   if (!responseText) return [];
 
-  var o = tryParseJSONObject(responseText) as ModelState;
+  const o = tryParseJSONObject(responseText) as ModelState;
 
   if (!o) return [responseText];
 
@@ -34,9 +34,11 @@ export const parseBadRequest = async (
 
 export const tryParseJSONObject = (val: string) => {
   try {
-    var o = JSON.parse(val);
+    const o = JSON.parse(val);
     if (o && typeof o === "object") return o;
-  } catch (e) {}
+  } catch (e) {
+    /* Yes, swallow the exception */
+  }
 
   return undefined;
 };

@@ -13,7 +13,7 @@ namespace Hippo.Core.Migrations.SqlServer
 {
     [DbContext(typeof(AppDbContextSqlServer))]
     [Migration("20220318202648_mothra")]
-    partial class mothra
+    partial class Mothra
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

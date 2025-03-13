@@ -4,7 +4,7 @@
 
 namespace Hippo.Core.Migrations.Sqlite
 {
-    public partial class mothra : Migration
+    public partial class Mothra : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
@@ -22,9 +22,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.Core", "Hippo.Jo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.PuppetSync", "Hippo.Jobs.PuppetSync\Hippo.Jobs.PuppetSync.csproj", "{8CC5F984-8298-4592-A1D9-CDA147A2D7C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.OrderProcess", "Hippo.Jobs.OrderProcess\Hippo.Jobs.OrderProcess.csproj", "{78FAF686-A9B2-4894-8275-9F1730056A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.OrderProcess", "Hippo.Jobs.OrderProcess\Hippo.Jobs.OrderProcess.csproj", "{78FAF686-A9B2-4894-8275-9F1730056A62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hippo.Jobs.Notifications", "Hippo.Jobs.Notifications\Hippo.Jobs.Notifications.csproj", "{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hippo.Jobs.Notifications", "Hippo.Jobs.Notifications\Hippo.Jobs.Notifications.csproj", "{FBE36608-84E7-47E2-AA3E-F382D78EC7A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
