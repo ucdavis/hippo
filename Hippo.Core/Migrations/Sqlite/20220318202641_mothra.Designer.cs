@@ -12,7 +12,7 @@ namespace Hippo.Core.Migrations.Sqlite
 {
     [DbContext(typeof(AppDbContextSqlite))]
     [Migration("20220318202641_mothra")]
-    partial class mothra
+    partial class Mothra
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

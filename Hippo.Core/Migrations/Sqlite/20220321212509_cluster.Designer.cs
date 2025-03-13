@@ -12,7 +12,7 @@ namespace Hippo.Core.Migrations.Sqlite
 {
     [DbContext(typeof(AppDbContextSqlite))]
     [Migration("20220321212509_cluster")]
-    partial class cluster
+    partial class Cluster
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
