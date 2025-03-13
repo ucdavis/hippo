@@ -179,8 +179,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     const nextPaymentDate = columnHelper.accessor("nextPaymentDate", {
       header: "Next Payment",
       id: "nextPaymentDate",
-      cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate), //TODO: It looks like this might be Pacific time already?
-      //cell: (value) => value.row.original.nextPaymentDate,
+      cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
       sortingFn: (rowA, rowB) => {
         const dateA = new Date(rowA.getValue("nextPaymentDate"));
         const dateB = new Date(rowB.getValue("nextPaymentDate"));
