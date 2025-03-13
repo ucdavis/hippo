@@ -490,18 +490,25 @@ namespace Hippo.Web.Controllers
         {
             var now = DateTime.UtcNow;
             var pacificNow = now.ToPacificTime();
+
+            DateTime nextPaymentPacific;
+
             switch (existingOrder.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
-                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
+                    nextPaymentPacific = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1);
                     break;
                 case InstallmentTypes.Yearly:
-                    existingOrder.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
+                    nextPaymentPacific = new DateTime(pacificNow.Year, 1, 1).AddYears(1);
                     break;
                 case InstallmentTypes.OneTime:
-                    existingOrder.NextPaymentDate = pacificNow.AddDays(1).Date.ToUniversalTime();
+                    nextPaymentPacific = pacificNow.AddDays(1).Date;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+            existingOrder.NextPaymentDate = nextPaymentPacific.FromPacificTime();
 
         }
 
