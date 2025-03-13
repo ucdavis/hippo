@@ -174,21 +174,26 @@ namespace Hippo.Core.Services
             var nowPlusADay = DateTime.UtcNow.AddDays(1); //Bump it up a day, so we are in the next month/year
             var pacificNow = nowPlusADay.ToPacificTime();
 
+            DateTime nextPaymentPacific;
+
             switch (order.InstallmentType)
             {
                 case InstallmentTypes.Monthly:
                     //This should be 7AM UTC, which is 12AM PST and the job runs at 2-3 PST or 10AM UTC
-                    order.NextPaymentDate = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1).Date.ToUniversalTime();
+                    nextPaymentPacific = new DateTime(pacificNow.Year, pacificNow.Month, 1).AddMonths(1).AddDays(-1);
                     break;
                 case InstallmentTypes.Yearly:
-                    order.NextPaymentDate = new DateTime(pacificNow.Year, 1, 1).AddYears(1).Date.ToUniversalTime();
+                    nextPaymentPacific = new DateTime(pacificNow.Year, 1, 1).AddYears(1);
                     break;
                 case InstallmentTypes.OneTime:
-                    order.NextPaymentDate = pacificNow.Date.ToUniversalTime();
+                    nextPaymentPacific = pacificNow.Date;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            
+            order.NextPaymentDate = nextPaymentPacific.FromPacificTime();
+
         }
 
         public async Task<bool> NotifyAboutFailedPayments()
