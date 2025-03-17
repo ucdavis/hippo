@@ -3,6 +3,7 @@ import { FormFeedback, FormText, Input, Label } from "reactstrap";
 import HipInputGroup from "./HipInputGroup";
 import { HipFormFieldProps } from "./formTypes";
 import { HipFormGroup } from "./HipFormGroup";
+import { Path, RegisterOptions } from "react-hook-form";
 
 /**
  * HipFormField component that combines react-hook-form register with reactstrap input.
@@ -61,7 +62,7 @@ const HipFormField = <T extends Record<string, any>>({
       message: `${label} must be greater than ${min}`,
     },
     ...options,
-  });
+  } as RegisterOptions<T, string & Path<T>>);
 
   const value = getValues ? getValues(name) : null;
   if (readOnly && disabled && hideIfEmpty && !value) {

@@ -14,6 +14,7 @@ import { ModalProvider } from "react-modal-hook";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
+import { act } from "react";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -62,22 +63,26 @@ afterEach(() => {
 });
 
 it("shows pending approvals count", async () => {
-  render(
-    <MemoryRouter initialEntries={[approveUrl]}>
-      <App />
-    </MemoryRouter>,
-  );
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
+    );
+  });
   expect(
     await screen.findByText("There are 2 request(s) awaiting approval"),
   ).toBeVisible();
 });
 
 it("shows approval button for each pending account", async () => {
-  render(
-    <MemoryRouter initialEntries={[approveUrl]}>
-      <App />
-    </MemoryRouter>,
-  );
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
+    );
+  });
 
   expect(
     await screen.findAllByRole("button", { name: "Approve" }),
@@ -85,54 +90,63 @@ it("shows approval button for each pending account", async () => {
 });
 
 it("shows reject button for each pending account", async () => {
-  render(
-    <MemoryRouter initialEntries={[approveUrl]}>
-      <App />
-    </MemoryRouter>,
-  );
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
+    );
+  });
 
   expect(await screen.findAllByRole("button", { name: "Reject" })).toHaveLength(
     2,
   );
 });
 
-// //Enable this when the test works
 it("displays dialog when reject is clicked", async () => {
   const user = userEvent.setup();
-  render(
-    <MemoryRouter initialEntries={[approveUrl]}>
-      <ModalProvider>
-        <Routes>
-          <Route path={"/:cluster/approve"} element={<Requests />} />
-        </Routes>
-      </ModalProvider>
-    </MemoryRouter>,
-  );
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <ModalProvider>
+          <Routes>
+            <Route path={"/:cluster/approve"} element={<Requests />} />
+          </Routes>
+        </ModalProvider>
+      </MemoryRouter>,
+    );
+  });
   expect(
     await screen.findByText("There are 2 request(s) awaiting approval"),
   ).toBeVisible();
 
-  await user.click(screen.getAllByRole("button", { name: "Reject" })[0]);
+  await act(async () => {
+    await user.click(screen.getAllByRole("button", { name: "Reject" })[0]);
+  });
 
   expect(await screen.findByText("Reject Request")).toBeVisible();
 });
 
 it("calls approve and filters list when approve is clicked", async () => {
   const user = userEvent.setup();
-  render(
-    <MemoryRouter initialEntries={[approveUrl]}>
-      <ModalProvider>
-        <Routes>
-          <Route path={"/:cluster/approve"} element={<Requests />} />
-        </Routes>
-      </ModalProvider>
-    </MemoryRouter>,
-  );
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <ModalProvider>
+          <Routes>
+            <Route path={"/:cluster/approve"} element={<Requests />} />
+          </Routes>
+        </ModalProvider>
+      </MemoryRouter>,
+    );
+  });
   expect(
     await screen.findByText("There are 2 request(s) awaiting approval"),
   ).toBeVisible();
 
-  await user.click(screen.getAllByRole("button", { name: "Approve" })[0]);
+  await act(async () => {
+    await user.click(screen.getAllByRole("button", { name: "Approve" })[0]);
+  });
 
   expect(global.fetch).toHaveBeenCalledTimes(2);
   expect(global.fetch).toHaveBeenCalledWith(

@@ -9,7 +9,7 @@ import {
 import { responseMap } from "../test/testHelpers";
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { act } from "react-dom/test-utils";
+import { act } from "react";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -47,12 +47,13 @@ describe("Basic render", () => {
   });
 
   it("renders without crashing", async () => {
-    await render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    );
-    await act(async () => await promise); //hack to prevent act warning
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+      );
+    });
   });
 });
 
@@ -74,29 +75,34 @@ describe("Home Redirect when GroupAdmin", () => {
   });
 
   it("renders without crashing", async () => {
-    await render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    );
-    await act(async () => await promise); //hack to prevent act warning
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+      );
+    });
   });
 
   it("Shows welcome message", async () => {
-    render(
-      <MemoryRouter initialEntries={[myAccountUrl]}>
-        <App />
-      </MemoryRouter>,
-    );
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={[myAccountUrl]}>
+          <App />
+        </MemoryRouter>,
+      );
+    });
     expect(await screen.findByText("Welcome Bob")).toBeVisible();
   });
 
-  it("Shows pending approvals buton", async () => {
-    render(
-      <MemoryRouter initialEntries={[myAccountUrl]}>
-        <App />
-      </MemoryRouter>,
-    );
+  it("Shows pending approvals button", async () => {
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={[myAccountUrl]}>
+          <App />
+        </MemoryRouter>,
+      );
+    });
     expect(await screen.findByText("Pending Approvals")).toBeVisible();
   });
 });
@@ -118,35 +124,38 @@ describe("Home Redirect no account", () => {
     );
   });
   it("Renders without crashing", async () => {
-    await render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    );
-    await act(async () => await promise); //hack to prevent act warning
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+      );
+    });
   });
 
   it("Shows welcome message", async () => {
-    render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    );
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+      );
+    });
     expect(
       await screen.findByText(/You don't seem to have an account/i),
     ).toBeVisible();
-    await act(async () => await promise); //hack to prevent act warning
   });
 
-  it("Does not shows pending approvals button", async () => {
-    render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    );
+  it("Does not show pending approvals button", async () => {
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <App />
+        </MemoryRouter>,
+      );
+    });
     await waitFor(() => {
       expect(screen.queryByText(/Pending Approvals/i)).not.toBeInTheDocument();
     });
-    await act(async () => await promise); //hack to prevent act warning
   });
 });

@@ -3,7 +3,7 @@ import App from "./App";
 import { fakeAccounts, fakeAppContext, fakeGroups } from "./test/mockData";
 import { render } from "@testing-library/react";
 import { responseMap } from "./test/testHelpers";
-//import { beforeEach, afterEach, it } from "vitest";
+import { act } from "react";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -36,8 +36,6 @@ afterEach(() => {
     (global.fetch as any).mockClear();
   }
 });
-
-import { act } from "react-dom/test-utils";
 
 it("renders without crashing", async () => {
   await act(async () => {
