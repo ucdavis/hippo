@@ -9,9 +9,9 @@ Onboarding and user management for High Performance Computing Clusters at UC Dav
 
 # Local Setup
 
-Requires .net 6 SDK from https://dotnet.microsoft.com/download
+Requires .net 8 SDK from https://dotnet.microsoft.com/download
 
-Requires nodeJS, recommended version 14.x
+Requires nodeJS, version 22.14.0 or higher
 
 In the `Hippo.Web/ClientApp` folder, run `npm install`.  Technically this step is optional but it's useful to do to get things started.
 
