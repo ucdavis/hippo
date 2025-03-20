@@ -183,8 +183,11 @@ export const RequestForm = () => {
             <br />
             <p className="form-helper">
               For information on generating a ssh key pair, see this link:{" "}
-              <a href="https://hpc.ucdavis.edu/faq#ssh-key" target={"blank"}>
-                https://hpc.ucdavis.edu/faq#ssh-key
+              <a
+                href="https://hpc.ucdavis.edu/faq/access-to-hpc#ssh-key"
+                target={"blank"}
+              >
+                https://hpc.ucdavis.edu/faq/access-to-hpc#ssh-key
               </a>
             </p>
             <p className="form-helper">
@@ -195,8 +198,11 @@ export const RequestForm = () => {
             </p>
             <p className="form-helper">
               To learn about Linux commands and scripts, see this link:{" "}
-              <a href="https://hpc.ucdavis.edu/helpdocs" target={"blank"}>
-                https://hpc.ucdavis.edu/helpdocs
+              <a
+                href="https://hpc.ucdavis.edu/linux-tutorials"
+                target={"blank"}
+              >
+                https://hpc.ucdavis.edu/linux-tutorials
               </a>
             </p>
             <p className="form-helper">
