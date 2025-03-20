@@ -14,6 +14,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupInfo } from "./GroupInfo";
 import { usePromiseNotification } from "../../util/Notifications";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 const GroupMembers: React.FC = () => {
   const { cluster: clusterName, groupId: groupIdStr } = useParams<{
@@ -131,11 +132,7 @@ const GroupMembers: React.FC = () => {
     columnHelper.accessor("updatedOn", {
       header: "Updated On",
       cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
-      sortingFn: (rowA, rowB, columnId) => {
-        const dateA = new Date(rowA.getValue(columnId)).getTime();
-        const dateB = new Date(rowB.getValue(columnId)).getTime();
-        return dateA - dateB; // Sort by raw timestamp
-      },
+      sortingFn: sortByDate,
     }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",

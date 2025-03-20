@@ -4,6 +4,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { HipTable } from "../../../Shared/Table/HipTable";
 import { PaymentReportModel } from "../../../types";
 import { convertToPacificDate } from "../../../util/DateHelper";
+import { sortByDate } from "../../../Shared/Table/HelperFunctions";
 
 interface PaymentsTableProps {
   payments: PaymentReportModel[];
@@ -32,21 +33,13 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       header: "Payment Created On",
       id: "createdOn",
       cell: (value) => convertToPacificDate(value.row.original.createdOn),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("createdOn"));
-        const dateB = new Date(rowB.getValue("createdOn"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
-    const completedOn = columnHelper.accessor("createdOn", {
+    const completedOn = columnHelper.accessor("completedOn", {
       header: "Payment Completed On",
       id: "completedOn",
       cell: (value) => convertToPacificDate(value.row.original.completedOn),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("completedOn"));
-        const dateB = new Date(rowB.getValue("completedOn"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
     const createdBy = columnHelper.accessor("createdBy", {
       header: "Created By",
@@ -144,44 +137,28 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       header: "Installment Date",
       id: "installmentDate",
       cell: (value) => convertToPacificDate(value.row.original.installmentDate),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("installmentDate"));
-        const dateB = new Date(rowB.getValue("installmentDate"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
     const expirationDate = columnHelper.accessor("expirationDate", {
       header: "Expiration Date",
       id: "expirationDate",
       cell: (value) => convertToPacificDate(value.row.original.expirationDate),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("expirationDate"));
-        const dateB = new Date(rowB.getValue("expirationDate"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
     const nextPaymentDate = columnHelper.accessor("nextPaymentDate", {
       header: "Next Payment Date",
       id: "nextPaymentDate",
       cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("nextPaymentDate"));
-        const dateB = new Date(rowB.getValue("nextPaymentDate"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
     const orderCreatedOn = columnHelper.accessor("orderCreatedOn", {
       header: "Order Created On",
       id: "orderCreatedOn",
       cell: (value) => convertToPacificDate(value.row.original.orderCreatedOn),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("orderCreatedOn"));
-        const dateB = new Date(rowB.getValue("orderCreatedOn"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
 
-    let cols = [];
+    const cols = [];
 
     cols.push(id);
     cols.push(orderId);

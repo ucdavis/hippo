@@ -15,6 +15,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import { HipTable } from "../../Shared/Table/HipTable";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 export const ActiveAccounts = () => {
   const [_, setNotification] = usePromiseNotification();
@@ -205,11 +206,7 @@ export const ActiveAccounts = () => {
     columnHelper.accessor("updatedOn", {
       header: "Updated On",
       cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
-      sortingFn: (rowA, rowB, columnId) => {
-        const dateA = new Date(rowA.getValue(columnId)).getTime();
-        const dateB = new Date(rowB.getValue(columnId)).getTime();
-        return dateA - dateB; // Sort by raw timestamp
-      },
+      sortingFn: sortByDate,
     }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",

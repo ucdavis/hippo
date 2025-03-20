@@ -6,6 +6,7 @@ import { OrderListModel } from "../../../types";
 import { convertToPacificDate } from "../../../util/DateHelper";
 import { Progress } from "reactstrap";
 import { OrderStatus, statusValue } from "../Statuses/status";
+import { sortByDate } from "../../../Shared/Table/HelperFunctions";
 
 interface OrdersTableProps {
   orders: OrderListModel[];
@@ -128,22 +129,14 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       header: "Created On",
       id: "createdOn",
       cell: (value) => convertToPacificDate(value.row.original.createdOn),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("createdOn"));
-        const dateB = new Date(rowB.getValue("createdOn"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
 
     const expirationDate = columnHelper.accessor("expirationDate", {
       header: "Expires On",
       id: "expirationDate",
       cell: (value) => convertToPacificDate(value.row.original.expirationDate),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("expirationDate"));
-        const dateB = new Date(rowB.getValue("expirationDate"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
 
     const isRecurring = columnHelper.accessor("isRecurring", {
@@ -180,11 +173,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       header: "Next Payment",
       id: "nextPaymentDate",
       cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.getValue("nextPaymentDate"));
-        const dateB = new Date(rowB.getValue("nextPaymentDate"));
-        return dateA.getTime() - dateB.getTime();
-      },
+      sortingFn: sortByDate,
     });
 
     let cols = [];

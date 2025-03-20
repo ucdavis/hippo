@@ -8,6 +8,7 @@ import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { convertToPacificTime } from "../../util/DateHelper";
 import { HipTable } from "../../Shared/Table/HipTable";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 interface PaymentTableProps {
   numberOfRows: number;
@@ -62,11 +63,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       cell: (value) => (
         <span>{convertToPacificTime(value.row.original.createdOn)}</span>
       ),
-      sortingFn: (rowA, rowB, columnId) => {
-        const dateA = new Date(rowA.getValue(columnId)).getTime();
-        const dateB = new Date(rowB.getValue(columnId)).getTime();
-        return dateA - dateB; // Sort by raw timestamp
-      },
+      sortingFn: sortByDate,
     }),
     paymentColumnHelper.accessor("createdBy", {
       header: "Created By",
