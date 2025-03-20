@@ -110,7 +110,10 @@ export const RequestForm = () => {
         </p>
         <hr />
         <div className="form-group">
-          <label>Who is sponsoring your account?</label>
+          <label>
+            Who is sponsoring your account? If you are the PI wanting your own
+            group, please select the 'Sponsors' group.
+          </label>
           <GroupLookup
             setSelection={(group) => {
               if (group) {
@@ -122,8 +125,7 @@ export const RequestForm = () => {
           <p className="form-helper">
             Your group is probably named after your PI or your Department. You
             can filter this list by typing in it. If you don't see your sponsor,
-            please contact your PI and ask them to request an account,
-            specifying "New Sponsor Onboarding" as the group.
+            please contact your PI and ask them to request an account.
           </p>
         </div>
         <div className="form-group">
