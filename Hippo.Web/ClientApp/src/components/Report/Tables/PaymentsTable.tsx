@@ -33,13 +33,13 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       header: "Payment Created On",
       id: "createdOn",
       cell: (value) => convertToPacificDate(value.row.original.createdOn),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
     const completedOn = columnHelper.accessor("completedOn", {
       header: "Payment Completed On",
       id: "completedOn",
       cell: (value) => convertToPacificDate(value.row.original.completedOn),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
     const createdBy = columnHelper.accessor("createdBy", {
       header: "Created By",
@@ -137,25 +137,25 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       header: "Installment Date",
       id: "installmentDate",
       cell: (value) => convertToPacificDate(value.row.original.installmentDate),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
     const expirationDate = columnHelper.accessor("expirationDate", {
       header: "Expiration Date",
       id: "expirationDate",
       cell: (value) => convertToPacificDate(value.row.original.expirationDate),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
     const nextPaymentDate = columnHelper.accessor("nextPaymentDate", {
       header: "Next Payment Date",
       id: "nextPaymentDate",
       cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
     const orderCreatedOn = columnHelper.accessor("orderCreatedOn", {
       header: "Order Created On",
       id: "orderCreatedOn",
       cell: (value) => convertToPacificDate(value.row.original.orderCreatedOn),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
 
     const cols = [];

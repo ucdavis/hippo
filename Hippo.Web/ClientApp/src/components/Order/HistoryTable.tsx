@@ -51,7 +51,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       cell: (value) => (
         <span>{convertToPacificTime(value.row.original.actedDate)}</span>
       ),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     }),
     historyColumnHelper.accessor("actedBy", {
       header: "Actor",

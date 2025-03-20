@@ -129,14 +129,14 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       header: "Created On",
       id: "createdOn",
       cell: (value) => convertToPacificDate(value.row.original.createdOn),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
 
     const expirationDate = columnHelper.accessor("expirationDate", {
       header: "Expires On",
       id: "expirationDate",
       cell: (value) => convertToPacificDate(value.row.original.expirationDate),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
 
     const isRecurring = columnHelper.accessor("isRecurring", {
@@ -173,10 +173,10 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
       header: "Next Payment",
       id: "nextPaymentDate",
       cell: (value) => convertToPacificDate(value.row.original.nextPaymentDate),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     });
 
-    let cols = [];
+    const cols = [];
 
     cols.push(nameAndId);
     cols.push(status);

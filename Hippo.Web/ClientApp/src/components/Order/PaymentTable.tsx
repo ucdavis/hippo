@@ -63,7 +63,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       cell: (value) => (
         <span>{convertToPacificTime(value.row.original.createdOn)}</span>
       ),
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     }),
     paymentColumnHelper.accessor("createdBy", {
       header: "Created By",

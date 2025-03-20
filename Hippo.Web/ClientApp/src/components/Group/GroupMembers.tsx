@@ -132,7 +132,7 @@ const GroupMembers: React.FC = () => {
     columnHelper.accessor("updatedOn", {
       header: "Updated On",
       cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
-      sortingFn: sortByDate,
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
