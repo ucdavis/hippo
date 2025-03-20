@@ -202,12 +202,15 @@ export const ActiveAccounts = () => {
     columnHelper.accessor("kerberos", {
       header: "Kerberos",
     }),
-    columnHelper.accessor(
-      (row) => new Date(row.updatedOn).toLocaleDateString(),
-      {
-        header: "Updated On",
+    columnHelper.accessor("updatedOn", {
+      header: "Updated On",
+      cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
+      sortingFn: (rowA, rowB, columnId) => {
+        const dateA = new Date(rowA.getValue(columnId)).getTime();
+        const dateB = new Date(rowB.getValue(columnId)).getTime();
+        return dateA - dateB; // Sort by raw timestamp
       },
-    ),
+    }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),

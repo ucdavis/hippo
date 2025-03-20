@@ -50,6 +50,11 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       cell: (value) => (
         <span>{convertToPacificTime(value.row.original.actedDate)}</span>
       ),
+      sortingFn: (rowA, rowB, columnId) => {
+        const dateA = new Date(rowA.getValue(columnId)).getTime();
+        const dateB = new Date(rowB.getValue(columnId)).getTime();
+        return dateA - dateB; // Sort by raw timestamp
+      },
     }),
     historyColumnHelper.accessor("actedBy", {
       header: "Actor",
