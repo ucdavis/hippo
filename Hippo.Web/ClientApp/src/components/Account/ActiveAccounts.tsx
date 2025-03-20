@@ -15,6 +15,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import { HipTable } from "../../Shared/Table/HipTable";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 export const ActiveAccounts = () => {
   const [_, setNotification] = usePromiseNotification();
@@ -202,12 +203,11 @@ export const ActiveAccounts = () => {
     columnHelper.accessor("kerberos", {
       header: "Kerberos",
     }),
-    columnHelper.accessor(
-      (row) => new Date(row.updatedOn).toLocaleDateString(),
-      {
-        header: "Updated On",
-      },
-    ),
+    columnHelper.accessor("updatedOn", {
+      header: "Updated On",
+      cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
+    }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),

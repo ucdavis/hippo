@@ -7,6 +7,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { authenticatedFetch } from "../../util/api";
 import { useParams } from "react-router-dom";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 interface HistoryTableProps {
   numberOfRows: number;
@@ -50,6 +51,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       cell: (value) => (
         <span>{convertToPacificTime(value.row.original.actedDate)}</span>
       ),
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
     }),
     historyColumnHelper.accessor("actedBy", {
       header: "Actor",

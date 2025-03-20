@@ -14,6 +14,7 @@ import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupInfo } from "./GroupInfo";
 import { usePromiseNotification } from "../../util/Notifications";
+import { sortByDate } from "../../Shared/Table/HelperFunctions";
 
 const GroupMembers: React.FC = () => {
   const { cluster: clusterName, groupId: groupIdStr } = useParams<{
@@ -128,12 +129,11 @@ const GroupMembers: React.FC = () => {
     columnHelper.accessor("kerberos", {
       header: "Kerberos",
     }),
-    columnHelper.accessor(
-      (row) => new Date(row.updatedOn).toLocaleDateString(),
-      {
-        header: "Updated On",
-      },
-    ),
+    columnHelper.accessor("updatedOn", {
+      header: "Updated On",
+      cell: (info) => new Date(info.getValue()).toLocaleDateString(), // Display formatted date
+      sortingFn: (rowA, rowB, columnId) => sortByDate(rowA, rowB, columnId),
+    }),
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),
