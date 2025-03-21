@@ -38,6 +38,7 @@ const HipFormField = <T extends Record<string, any>>({
   size,
   colSize,
   disabled, // select out disabled and don't pass it to register or it will set the value to undefined
+  valueAsNumber,
   ...options
 }: HipFormFieldProps<T>) => {
   const { ref, ...rest } = register(name, {
@@ -63,6 +64,27 @@ const HipFormField = <T extends Record<string, any>>({
     },
     ...options,
   } as RegisterOptions<T, string & Path<T>>);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    // prevent entering nonnumeric characters if valueAsNumber is true
+    if (
+      valueAsNumber &&
+      !/[\d.-]/.test(event.key) &&
+      event.key !== "Backspace"
+    ) {
+      event.preventDefault();
+    }
+  };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    // prevent pasting nonnumeric characters if valueAsNumber is true
+    if (valueAsNumber) {
+      const pasteData = event.clipboardData.getData("text");
+      if (!/^[\d.-]+$/.test(pasteData)) {
+        event.preventDefault();
+      }
+    }
+  };
 
   const value = getValues ? getValues(name) : null;
   if (readOnly && disabled && hideIfEmpty && !value) {
@@ -94,6 +116,8 @@ const HipFormField = <T extends Record<string, any>>({
           plaintext={readOnly}
           disabled={disabled}
           autoComplete="none"
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           {...rest}
         >
           {!readOnly ? children : null}
