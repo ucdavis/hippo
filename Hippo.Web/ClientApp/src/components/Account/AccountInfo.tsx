@@ -162,10 +162,10 @@ export const AccountInfo = () => {
                 <p className="form-helper">
                   To generate a ssh key pair please see this link:{" "}
                   <a
-                    href="https://hpc.ucdavis.edu/faq#ssh-key"
+                    href="https://hpc.ucdavis.edu/faq/access-to-hpc#ssh-key"
                     target={"blank"}
                   >
-                    https://hpc.ucdavis.edu/faq#ssh-key
+                    https://hpc.ucdavis.edu/faq/access-to-hpc#ssh-key
                   </a>
                 </p>
               </div>
