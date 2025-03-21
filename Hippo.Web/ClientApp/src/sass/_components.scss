@@ -247,6 +247,11 @@ hr {
   .btn-link {
     padding: 0px !important;
     font-size: 14px;
+    text-decoration: underline;
+    color: #be95ca !important;
+    &:hover {
+      color: #f5d5ff !important;
+    }
   }
   .tooltip {
     margin-bottom: 10px;
