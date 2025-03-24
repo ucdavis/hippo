@@ -9,6 +9,7 @@ using Hippo.Core.Extensions;
 using Mjml.Net;
 
 
+
 namespace Hippo.Core.Services
 {
     public interface INotificationService
@@ -26,6 +27,9 @@ namespace Hippo.Core.Services
         Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
         Task<bool> OrderExpiredNotification(Order order, string[] emails);
+
+        Task<string> ProcessOrdersInCreatedStatus(DayOfWeek dayOfWeekToRun);
+        Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek dayOfWeekToRun);
     }
 
     public class NotificationService : INotificationService
@@ -592,5 +596,79 @@ namespace Hippo.Core.Services
             return true;
         }
 
+        public async Task<string> ProcessOrdersInCreatedStatus(DayOfWeek dayOfWeekToRun)
+        {
+            if (DateTime.UtcNow.DayOfWeek != dayOfWeekToRun)
+            {
+                return "Not the correct day of the week to run this process";
+            }
+
+            //Get all orders in created status across all clusters, group them by cluster and by sponsor
+            var orders = await _dbContext.Orders
+                .Include(o => o.Cluster)
+                .Include(o => o.PrincipalInvestigator)
+                
+                .Where(o => o.Status == Order.Statuses.Created)
+                .ToListAsync();
+
+            if (orders.Count == 0)
+            {
+                return "No orders in created status today";
+            }
+
+
+            var groupedOrders = orders.GroupBy(o => new { o.ClusterId, o.PrincipalInvestigatorId });
+            foreach (var group in groupedOrders)
+            {
+                var cluster = group.First().Cluster;
+                var sponsor = group.First().PrincipalInvestigator;
+                var sponsorEmail = sponsor.Email;
+                var sponsorName = sponsor.Name;
+                var orderIds = group.Select(o => o.Id).ToArray();
+                var clusterName = cluster.Name;
+                var emails = new[] { sponsorEmail };
+
+                //TODO: The notification
+
+                //email sponsor, list each order that is in created status
+                //https://hippo-test.azurewebsites.net/caesfarm/order/details/32 
+
+            }
+
+            return "Success";
+        }
+
+        public async Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek dayOfWeekToRun)
+        {
+            //https://hippo.ucdavis.edu/Peloton/approve
+
+            //get all the pending approvals for accounts, group by cluser and "group"
+            //send an email to the sponsor with a list of pending approvals
+            //https://hippo.ucdavis.edu/Peloton/approve
+
+            //Get all the pending account requests
+            var requests = await _dbContext.Requests
+                .Include(r => r.Cluster)
+                .Where(r => r.Status == Request.Statuses.PendingApproval)
+                .ToListAsync();
+
+            if (requests.Count == 0)
+            {
+                return "No pending account requests today";
+            }
+            foreach (var request in requests.GroupBy(a => new { a.Cluster, a.Group }))
+            {
+                var cluster = request.First().Cluster;
+
+                //Looks like I can't include the group in the Request call and have to specifically get it
+                var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == cluster.Id && g.Name == request.Key.Group);
+                var groupAdmins = await GetGroupAdminEmails(group);
+
+
+            }
+            return "Success";
+
+
+        }
     }
 }
