@@ -30,10 +30,16 @@ namespace Hippo.Jobs.Notifications
                 var provider = ConfigureServices();
 
                 var expiringOrdersService = provider.GetRequiredService<IExpiringOrdersService>();
+                var notificationService = provider.GetRequiredService<INotificationService>(); //For nagging
 
                 var result = expiringOrdersService.ProcessExpiringOrderNotifications().GetAwaiter().GetResult();
-
                 Log.Information("Expiring Orders Service ran successfully. {result}", result);
+
+                result = notificationService.ProcessOrdersInCreatedStatus([DayOfWeek.Monday]).GetAwaiter().GetResult();
+                Log.Information("ProcessOrdersInCreatedStatus Service ran successfully. {result}", result);
+
+                result = notificationService.NagSponsorsAboutPendingAccounts([DayOfWeek.Monday]).GetAwaiter().GetResult();
+                Log.Information("NagSponsorsAboutPendingAccounts Service ran successfully. {result}", result);
 
             }
             catch (Exception ex) //Maybe have a try catch for each service call?

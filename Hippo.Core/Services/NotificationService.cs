@@ -619,6 +619,8 @@ namespace Hippo.Core.Services
                 return "No orders in created status today";
             }
 
+            var exceptionsEncountered = false;
+
 
             var groupedOrders = orders.GroupBy(o => new { o.ClusterId, o.PrincipalInvestigatorId });
             foreach (var group in groupedOrders)
@@ -665,12 +667,12 @@ namespace Hippo.Core.Services
                 catch (Exception ex)
                 {
                     Log.Error("Error emailing Sponsor Nag email", ex);
-
+                    exceptionsEncountered = true;
                 }
 
             }
 
-            return "Success";
+            return exceptionsEncountered ? "Exceptions Encountered" : "Success";
         }
 
         public async Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek[] daysOfWeekToRun)
@@ -680,14 +682,6 @@ namespace Hippo.Core.Services
             {
                 return "Not the correct day of the week to run this process";
             }
-
-
-            //https://hippo.ucdavis.edu/Peloton/approve
-
-            //get all the pending approvals for accounts, group by cluser and "group"
-            //send an email to the sponsor with a list of pending approvals
-            //https://hippo.ucdavis.edu/Peloton/approve
-
             //Get all the pending account requests
             var requests = await _dbContext.Requests
                 .Include(r => r.Cluster)
@@ -698,6 +692,9 @@ namespace Hippo.Core.Services
             {
                 return "No pending account requests today";
             }
+
+            var exceptionsEncountered = false;
+
             foreach (var request in requests.GroupBy(a => new { a.Cluster, a.Group }))
             {
                 try
@@ -734,10 +731,10 @@ namespace Hippo.Core.Services
                 catch (Exception ex)
                 {
                     Log.Error("Error emailing Pending Requests Nag email", ex);
-
+                    exceptionsEncountered = true;
                 }
             }
-            return "Success"; //TODO: Check if there were exceptions
+            return exceptionsEncountered ? "Exceptions Encountered" : "Success";
 
         }
     }
