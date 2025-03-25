@@ -15,7 +15,6 @@
         </mj-text>
         <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
             <p>You have one or more orders in the Created status awaiting your action to proceed.</p>
-            <p>You may also view all your orders and filter them to the Created status to view them in Hippo.</p>
         </mj-text>
     </mj-column>
 </mj-section>
@@ -41,6 +40,15 @@
     </mj-column>
 </mj-section>
 
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+            padding-bottom="0px" padding-top="10px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
+            <p>You may also view all your orders and filter them to the Created status to view them in Hippo.</p>
+            <p></p>
+        </mj-text>
+    </mj-column>
+</mj-section>
 
 @await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel(@Model!.ButtonText, @Model!.ButtonUrl))
 
