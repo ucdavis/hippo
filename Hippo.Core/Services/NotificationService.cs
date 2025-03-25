@@ -7,6 +7,7 @@ using Serilog;
 using Hippo.Core.Models.Email;
 using Hippo.Core.Extensions;
 using Mjml.Net;
+using Renci.SshNet.Messages;
 
 
 
@@ -699,16 +700,44 @@ namespace Hippo.Core.Services
             }
             foreach (var request in requests.GroupBy(a => new { a.Cluster, a.Group }))
             {
-                var cluster = request.First().Cluster;
+                try
+                {
 
-                //Looks like I can't include the group in the Request call and have to specifically get it
-                var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == cluster.Id && g.Name == request.Key.Group);
-                var groupAdmins = await GetGroupAdminEmails(group);
+                    var cluster = request.First().Cluster;
 
+                    //Looks like I can't include the group in the Request call and have to specifically get it
+                    var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == cluster.Id && g.Name == request.Key.Group);
+                    var groupAdmins = await GetGroupAdminEmails(group);
 
+                    var model = new PendingDecisionsModel()
+                    {
+                        UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                        Subject = "Pending Account Requests",
+                        Header = "Pending Account Requests",
+                        ButtonText = "View Requests",
+                        ButtonUrl = $"{_emailSettings.BaseUrl}/{cluster.Name}/approve",
+                        GroupName = group.DisplayName,
+                        ClusterName = cluster.Name,
+                    };
+
+                    var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/PendingDecisions_mjml.cshtml", model);
+
+                    await _emailService.SendEmail(new EmailModel
+                    {
+                        Emails = groupAdmins,
+                        CcEmails = null,
+                        HtmlBody = htmlBody,
+                        TextBody = $"You have pending account requests in {cluster.Name}, please review them.",
+                        Subject = model.Subject,
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error emailing Pending Requests Nag email", ex);
+
+                }
             }
-            return "Success";
-
+            return "Success"; //TODO: Check if there were exceptions
 
         }
     }
