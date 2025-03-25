@@ -68,7 +68,7 @@ namespace Hippo.Web.Controllers
             {
                 Emails = new string[] { "jsylvestre@ucdavis.edu" },
                 HtmlBody = htmlBody,
-                TextBody="Test",
+                TextBody = "Test",
                 Subject = "Test 2"
             });
 
@@ -233,6 +233,17 @@ namespace Hippo.Web.Controllers
             var rtValue = await _notificationService.OrderExpiredNotification(order, emails);
 
             return Content($"Notification sent {rtValue}");
+        }
+
+        public async Task<IActionResult> TestNotification2()
+        {
+            return Content(await _notificationService.ProcessOrdersInCreatedStatus([DayOfWeek.Monday, DayOfWeek.Tuesday ]));
+        }
+
+        public async Task<IActionResult> TestNotification3()
+        {
+
+            return Content(await _notificationService.NagSponsorsAboutPendingAccounts([ DayOfWeek.Monday, DayOfWeek.Tuesday ]));
         }
     }
 }

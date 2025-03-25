@@ -1,0 +1,54 @@
+﻿@using Hippo.Core.Models.Email
+@model Hippo.Core.Models.Email.OrderNotificationModel
+
+@{
+    ViewData["EmailTitle"] = "Order Notification";
+    Layout = "_EmailLayout_mjml";
+}
+
+
+<mj-section border-top="4px solid #481268" border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc"
+            background-color="#ffffff" padding-bottom="20px" padding-top="20px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="28px" color="#1F1F1F">
+            <p>@Model.Header</p>
+        </mj-text>
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
+            <p>You have one or more orders in the Created status awaiting your action to proceed.</p>
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+            padding-bottom="0px" padding-top="20px">
+    <mj-column width="90%" vertical-align="top">
+        <mj-text padding-top="0px" padding-left="0px" padding-bottom="0px">
+            <h2>Orders awaiting your action</h2>
+        </mj-text>
+    </mj-column>
+</mj-section>
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+            padding-bottom="0px" padding-top="10px">
+    <mj-column width="90%" vertical-align="top" border-left="4px solid #481268" padding-left="10px">
+        <mj-text line-height="1.5" padding-top="0px" padding-left="0px" padding-bottom="5px">
+            @foreach (var paragraph in @Model.Paragraphs)
+            {
+                <p><a href="@paragraph">@paragraph</a></p>
+            }
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+<mj-section border-left="1px solid #c7c8cc" border-right="1px solid #c7c8cc" background-color="#ffffff"
+            padding-bottom="0px" padding-top="10px">
+    <mj-column width="100%" vertical-align="top">
+        <mj-text padding-top="0px" padding-bottom="0px" font-size="24px" color="rgba(31,31,31,0.8)">
+            <p>You may also view all your orders and filter them to the Created status to view them in Hippo.</p>
+            <p></p>
+        </mj-text>
+    </mj-column>
+</mj-section>
+
+@await Html.PartialAsync("_EmailButton_mjml", new EmailButtonModel(@Model!.ButtonText, @Model!.ButtonUrl))
+

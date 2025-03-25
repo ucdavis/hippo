@@ -9,6 +9,7 @@ using Hippo.Core.Extensions;
 using Mjml.Net;
 
 
+
 namespace Hippo.Core.Services
 {
     public interface INotificationService
@@ -26,6 +27,9 @@ namespace Hippo.Core.Services
         Task<bool> OrderNotificationTwoButton(SimpleNotificationModel simpleNotificationModel, Order order, string[] emails, string[] ccEmails = null);
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
         Task<bool> OrderExpiredNotification(Order order, string[] emails);
+
+        Task<string> ProcessOrdersInCreatedStatus(DayOfWeek[] daysOfWeekToRun);
+        Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek[] daysOfWeekToRun);
     }
 
     public class NotificationService : INotificationService
@@ -592,5 +596,145 @@ namespace Hippo.Core.Services
             return true;
         }
 
+        public async Task<string> ProcessOrdersInCreatedStatus(DayOfWeek[] daysOfWeekToRun)
+        {
+            //if daysOfWeekToRun isn't today, return
+            if (!daysOfWeekToRun.Contains(DateTime.UtcNow.DayOfWeek))
+            {
+                return "Not the correct day of the week to run this process";
+            }
+
+
+            //Get all orders in created status across all clusters, group them by cluster and by sponsor
+            var orders = await _dbContext.Orders
+                .Include(o => o.Cluster)
+                .Include(o => o.PrincipalInvestigator)
+                
+                .Where(o => o.Status == Order.Statuses.Created)
+                .ToListAsync();
+
+            if (orders.Count == 0)
+            {
+                return "No orders in created status today";
+            }
+
+            var exceptionsEncountered = false;
+
+
+            var groupedOrders = orders.GroupBy(o => new { o.ClusterId, o.PrincipalInvestigatorId });
+            foreach (var group in groupedOrders)
+            {
+                var cluster = group.First().Cluster;
+                var sponsor = group.First().PrincipalInvestigator;
+                var sponsorEmail = sponsor.Email;
+                var sponsorName = sponsor.Name;
+                var orderIds = group.Select(o => o.Id).ToArray();
+                var clusterName = cluster.Name;
+                var emails = new[] { sponsorEmail };
+
+                try
+                {
+                    var message = "You have one or more orders in the Created status awaiting your action.";
+
+                    var model = new OrderNotificationModel()
+                    {
+                        UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                        Subject = "Orders awaiting your action",
+                        Header = "Orders in Created Status",
+                        ButtonText = "View Orders",
+                        ButtonUrl = $"{_emailSettings.BaseUrl}/{clusterName}/order/myorders",
+                        Paragraphs = new List<string>(),
+                    };
+                    foreach (var orderId in orderIds)
+                    {
+                        model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}");
+
+                    }
+
+                    var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrdersInCreated_mjml.cshtml", model);
+
+                    await _emailService.SendEmail(new EmailModel
+                    {
+                        Emails = emails,
+                        CcEmails = null,
+                        HtmlBody = htmlBody,
+                        TextBody = message,
+                        Subject = model.Subject,
+                    });
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error emailing Sponsor Nag email", ex);
+                    exceptionsEncountered = true;
+                }
+
+            }
+
+            return exceptionsEncountered ? "Exceptions Encountered" : "Success";
+        }
+
+        public async Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek[] daysOfWeekToRun)
+        {
+            //if daysOfWeekToRun isn't today, return
+            if (!daysOfWeekToRun.Contains(DateTime.UtcNow.DayOfWeek))
+            {
+                return "Not the correct day of the week to run this process";
+            }
+            //Get all the pending account requests
+            var requests = await _dbContext.Requests
+                .Include(r => r.Cluster)
+                .Where(r => r.Status == Request.Statuses.PendingApproval)
+                .ToListAsync();
+
+            if (requests.Count == 0)
+            {
+                return "No pending account requests today";
+            }
+
+            var exceptionsEncountered = false;
+
+            foreach (var request in requests.GroupBy(a => new { a.Cluster, a.Group }))
+            {
+                try
+                {
+
+                    var cluster = request.First().Cluster;
+
+                    //Looks like I can't include the group in the Request call and have to specifically get it
+                    var group = await _dbContext.Groups.SingleAsync(g => g.ClusterId == cluster.Id && g.Name == request.Key.Group);
+                    var groupAdmins = await GetGroupAdminEmails(group);
+
+                    var model = new PendingDecisionsModel()
+                    {
+                        UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                        Subject = "Pending Account Requests",
+                        Header = "Pending Account Requests",
+                        ButtonText = "View Requests",
+                        ButtonUrl = $"{_emailSettings.BaseUrl}/{cluster.Name}/approve",
+                        GroupName = group.DisplayName,
+                        ClusterName = cluster.Name,
+                    };
+
+                    var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/PendingDecisions_mjml.cshtml", model);
+
+                    await _emailService.SendEmail(new EmailModel
+                    {
+                        Emails = groupAdmins,
+                        CcEmails = null,
+                        HtmlBody = htmlBody,
+                        TextBody = $"You have pending account requests in {cluster.Name}, please review them.",
+                        Subject = model.Subject,
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error emailing Pending Requests Nag email", ex);
+                    exceptionsEncountered = true;
+                }
+            }
+            return exceptionsEncountered ? "Exceptions Encountered" : "Success";
+
+        }
     }
 }
