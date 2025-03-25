@@ -237,12 +237,13 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestNotification2()
         {
-            return Content(await _notificationService.ProcessOrdersInCreatedStatus(dayOfWeekToRun: DayOfWeek.Monday));
+            return Content(await _notificationService.ProcessOrdersInCreatedStatus([DayOfWeek.Monday, DayOfWeek.Tuesday ]));
         }
 
         public async Task<IActionResult> TestNotification3()
         {
-            return Content(await _notificationService.NagSponsorsAboutPendingAccounts(DayOfWeek.Monday));
+
+            return Content(await _notificationService.NagSponsorsAboutPendingAccounts([ DayOfWeek.Monday, DayOfWeek.Tuesday ]));
         }
     }
 }

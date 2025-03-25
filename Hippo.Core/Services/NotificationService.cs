@@ -28,8 +28,8 @@ namespace Hippo.Core.Services
         Task<bool> OrderPaymentNotification(Order order, string[] emails, EmailOrderPaymentModel orderPaymentModel);
         Task<bool> OrderExpiredNotification(Order order, string[] emails);
 
-        Task<string> ProcessOrdersInCreatedStatus(DayOfWeek dayOfWeekToRun);
-        Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek dayOfWeekToRun);
+        Task<string> ProcessOrdersInCreatedStatus(DayOfWeek[] daysOfWeekToRun);
+        Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek[] daysOfWeekToRun);
     }
 
     public class NotificationService : INotificationService
@@ -596,12 +596,14 @@ namespace Hippo.Core.Services
             return true;
         }
 
-        public async Task<string> ProcessOrdersInCreatedStatus(DayOfWeek dayOfWeekToRun)
+        public async Task<string> ProcessOrdersInCreatedStatus(DayOfWeek[] daysOfWeekToRun)
         {
-            if (DateTime.UtcNow.DayOfWeek != dayOfWeekToRun)
+            //if daysOfWeekToRun isn't today, return
+            if (!daysOfWeekToRun.Contains(DateTime.UtcNow.DayOfWeek))
             {
                 return "Not the correct day of the week to run this process";
             }
+
 
             //Get all orders in created status across all clusters, group them by cluster and by sponsor
             var orders = await _dbContext.Orders
@@ -628,18 +630,57 @@ namespace Hippo.Core.Services
                 var clusterName = cluster.Name;
                 var emails = new[] { sponsorEmail };
 
-                //TODO: The notification
+                try
+                {
+                    var message = "You have one or more orders in the Created status awaiting your action.";
 
-                //email sponsor, list each order that is in created status
-                //https://hippo-test.azurewebsites.net/caesfarm/order/details/32 
+                    var model = new OrderNotificationModel()
+                    {
+                        UcdLogoUrl = $"{_emailSettings.BaseUrl}/media/hpcLogo.png",
+                        Subject = "Orders awaiting your action",
+                        Header = "Orders in Created Status",
+                        ButtonText = "View Orders",
+                        ButtonUrl = $"{_emailSettings.BaseUrl}/{clusterName}/order/myorders",
+                        Paragraphs = new List<string>(),
+                    };
+                    foreach (var orderId in orderIds)
+                    {
+                        model.Paragraphs.Add($"{_emailSettings.BaseUrl}/{clusterName}/order/details/{orderId}");
+
+                    }
+
+                    var htmlBody = await _mjmlRenderer.RenderView("/Views/Emails/OrdersInCreated_mjml.cshtml", model);
+
+                    await _emailService.SendEmail(new EmailModel
+                    {
+                        Emails = emails,
+                        CcEmails = null,
+                        HtmlBody = htmlBody,
+                        TextBody = message,
+                        Subject = model.Subject,
+                    });
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error emailing Sponsor Nag email", ex);
+
+                }
 
             }
 
             return "Success";
         }
 
-        public async Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek dayOfWeekToRun)
+        public async Task<string> NagSponsorsAboutPendingAccounts(DayOfWeek[] daysOfWeekToRun)
         {
+            //if daysOfWeekToRun isn't today, return
+            if (!daysOfWeekToRun.Contains(DateTime.UtcNow.DayOfWeek))
+            {
+                return "Not the correct day of the week to run this process";
+            }
+
+
             //https://hippo.ucdavis.edu/Peloton/approve
 
             //get all the pending approvals for accounts, group by cluser and "group"
