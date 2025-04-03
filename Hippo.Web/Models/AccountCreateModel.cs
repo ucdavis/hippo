@@ -6,6 +6,7 @@ namespace Hippo.Web.Models
 {
     public class AccountCreateModel
     {
+        public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
         public int GroupId { get; set; }
         public string SshKey { get; set; } = String.Empty;
         [MaxLength(100)]

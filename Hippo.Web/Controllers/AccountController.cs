@@ -202,6 +202,7 @@ public class AccountController : SuperController
         }
         .WithAccountRequestData(new AccountRequestDataModel
         {
+            AcceptableUsePolicyAgreedOn = model.AcceptableUsePolicyAgreedOn,
             SupervisingPI = model.SupervisingPI,
             SshKey = model.SshKey,
             AccessTypes = model.AccessTypes

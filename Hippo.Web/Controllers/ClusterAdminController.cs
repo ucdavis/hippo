@@ -136,6 +136,9 @@ namespace Hippo.Web.Controllers
             cluster.Description = clusterModel.Description;
             cluster.Email = clusterModel.Email;
 
+            cluster.AcceptableUsePolicyUrl = clusterModel.AcceptableUsePolicyUrl;
+            cluster.AcceptableUsePolicyUpdatedOn = clusterModel.AcceptableUsePolicyUpdatedOn;
+
             _dbContext.Clusters.Update(cluster);
             await _dbContext.SaveChangesAsync();
 

@@ -51,11 +51,11 @@ namespace Hippo.Core.Services
                 // Update account and/or group data based on the completed action
                 result = queuedEvent.Action switch
                 {
-                    QueuedEvent.Actions.UpdateSshKey => await CompleteUpdateSshKey(queuedEvent.Data),
-                    QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent.Data),
-                    QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent.Data),
-                    QueuedEvent.Actions.CreateGroup => await CompleteCreateGroup(queuedEvent.Data),
-                    QueuedEvent.Actions.RemoveAccountFromGroup => await CompleteRemoveAccountFromGroup(queuedEvent.Data),
+                    QueuedEvent.Actions.UpdateSshKey => await CompleteUpdateSshKey(queuedEvent),
+                    QueuedEvent.Actions.CreateAccount => await CompleteCreateAccount(queuedEvent),
+                    QueuedEvent.Actions.AddAccountToGroup => await CompleteAddAccountToGroup(queuedEvent),
+                    QueuedEvent.Actions.CreateGroup => await CompleteCreateGroup(queuedEvent),
+                    QueuedEvent.Actions.RemoveAccountFromGroup => await CompleteRemoveAccountFromGroup(queuedEvent),
                     _ => Result.Error("Unknown action: {Action}", queuedEvent.Action)
                 };
             }
@@ -94,8 +94,9 @@ namespace Hippo.Core.Services
             return result;
         }
 
-        private async Task<Result> CompleteAddAccountToGroup(QueuedEventDataModel data)
+        private async Task<Result> CompleteAddAccountToGroup(QueuedEvent queuedEvent)
         {
+            var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
@@ -130,8 +131,9 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result> CompleteCreateAccount(QueuedEventDataModel data)
+        private async Task<Result> CompleteCreateAccount(QueuedEvent queuedEvent)
         {
+            var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
@@ -164,6 +166,7 @@ namespace Hippo.Core.Services
                 return Result.Error("Account already exists: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
 
+            var accountRequestData = queuedEvent.Request.GetAccountRequestData();
             account = new Account
             {
                 Owner = user,
@@ -174,7 +177,8 @@ namespace Hippo.Core.Services
                     .Where(c => c.Name == data.Cluster)
                     .SingleAsync(),
                 SshKey = accountModel.Key,
-                MemberOfGroups = new List<Group> { group }
+                MemberOfGroups = new List<Group> { group },
+                AcceptableUsePolicyAgreedOn = accountRequestData.AcceptableUsePolicyAgreedOn
             };
 
             await _dbContext.Accounts.AddAsync(account);
@@ -182,8 +186,9 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result> CompleteCreateGroup(QueuedEventDataModel data)
+        private async Task<Result> CompleteCreateGroup(QueuedEvent queuedEvent)
         {
+            var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
@@ -221,8 +226,9 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result> CompleteUpdateSshKey(QueuedEventDataModel data)
+        private async Task<Result> CompleteUpdateSshKey(QueuedEvent queuedEvent)
         {
+            var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var account = await _dbContext.Accounts
                 .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
@@ -243,8 +249,9 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result> CompleteRemoveAccountFromGroup(QueuedEventDataModel data)
+        private async Task<Result> CompleteRemoveAccountFromGroup(QueuedEvent queuedEvent)
         {
+            var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts

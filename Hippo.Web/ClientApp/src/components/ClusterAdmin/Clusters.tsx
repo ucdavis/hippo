@@ -180,6 +180,47 @@ export const Clusters = () => {
               id="selectAccessTypes"
             />
           </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="fieldAcceptableUsePolicyUrl">
+              Acceptable Use Policy URL
+            </label>
+            <input
+              className="form-control"
+              id="fieldAcceptableUsePolicyUrl"
+              value={editClusterModel.acceptableUsePolicyUrl}
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  acceptableUsePolicyUrl: e.target.value,
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldAcceptableUsePolicyUpdatedOn">
+              Acceptable Use Policy Updated On
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fieldAcceptableUsePolicyUpdatedOn"
+              value={
+                editClusterModel.acceptableUsePolicyUpdatedOn
+                  ? editClusterModel.acceptableUsePolicyUpdatedOn.split("T")[0]
+                  : ""
+              }
+              onChange={(e) => {
+                const model: ClusterModel = {
+                  ...editClusterModel,
+                  acceptableUsePolicyUpdatedOn: e.target.value,
+                };
+                setEditClusterModel(model);
+                setReturn(model);
+              }}
+            />
+          </div>
         </>
       ),
       canConfirm:
@@ -266,6 +307,33 @@ export const Clusters = () => {
               disabled={true}
               placeHolder="none selected"
               id="selectedAccessTypes"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="fieldAcceptableUsePolicyUrl">
+              Acceptable Use Policy URL
+            </label>
+            <input
+              className="form-control"
+              id="fieldAcceptableUsePolicyUrl"
+              value={editClusterModel.acceptableUsePolicyUrl}
+              readOnly
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="fieldAcceptableUsePolicyUpdatedOn">
+              Acceptable Use Policy Updated On
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fieldAcceptableUsePolicyUpdatedOn"
+              value={
+                editClusterModel.acceptableUsePolicyUpdatedOn
+                  ? editClusterModel.acceptableUsePolicyUpdatedOn.split("T")[0]
+                  : ""
+              }
+              readOnly
             />
           </div>
         </>

@@ -170,9 +170,46 @@ export const RequestForm = () => {
               />
             </div>
           )}
+        {cluster.acceptableUsePolicyUpdatedOn &&
+          cluster.acceptableUsePolicyUrl && (
+            <>
+              <div className="form-group">
+                <label htmlFor="fieldHasAgreedToAUP">
+                  I have read and agree to abide by the{" "}
+                  <a
+                    href={cluster.acceptableUsePolicyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Acceptable Use Policy
+                  </a>
+                </label>{" "}
+                <input
+                  id="fieldHasAgreedToAUP"
+                  type="checkbox"
+                  checked={!!request.acceptableUsePolicyAgreedOn}
+                  onChange={(e) => {
+                    setRequest((r) => ({
+                      ...r,
+                      acceptableUsePolicyAgreedOn: e.target.checked
+                        ? new Date().toISOString()
+                        : undefined,
+                    }));
+                  }}
+                />
+              </div>
+            </>
+          )}
         <br />
         <HipButton
-          disabled={notification.pending || !request.accessTypes.length}
+          disabled={
+            notification.pending ||
+            !request.accessTypes.length ||
+            // if cluster has a AUP, then requester must agree
+            (cluster.acceptableUsePolicyUpdatedOn &&
+              cluster.acceptableUsePolicyUrl &&
+              !request.acceptableUsePolicyAgreedOn)
+          }
           onClick={handleSubmit}
         >
           Submit
