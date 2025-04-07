@@ -174,7 +174,7 @@ export const RequestForm = () => {
           cluster.acceptableUsePolicyUrl && (
             <>
               <div className="form-group">
-                <label htmlFor="fieldHasAgreedToAUP">
+                <label htmlFor="fieldHasAgreedToAup">
                   I have read and agree to abide by the{" "}
                   <a
                     href={cluster.acceptableUsePolicyUrl}
@@ -185,7 +185,7 @@ export const RequestForm = () => {
                   </a>
                 </label>{" "}
                 <input
-                  id="fieldHasAgreedToAUP"
+                  id="fieldHasAgreedToAup"
                   type="checkbox"
                   checked={!!request.acceptableUsePolicyAgreedOn}
                   onChange={(e) => {

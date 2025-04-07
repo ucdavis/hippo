@@ -191,7 +191,8 @@ export const Clusters = () => {
               onChange={(e) => {
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  acceptableUsePolicyUrl: e.target.value,
+                  acceptableUsePolicyUrl:
+                    e.target.value === "" ? undefined : e.target.value, // server-side validation doesn't like empty strings
                 };
                 setEditClusterModel(model);
                 setReturn(model);

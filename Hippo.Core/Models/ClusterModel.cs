@@ -35,7 +35,7 @@ public class ClusterModel
     public List<string> AccessTypes { get; set; } = new();
     [MaxLength(250)]
     [Url]
-    public string AcceptableUsePolicyUrl { get; set; } = String.Empty;
+    public string AcceptableUsePolicyUrl { get; set; } = null;
     public DateTime? AcceptableUsePolicyUpdatedOn { get; set; }
     public bool AllowOrders { get; set; } = false;
 

@@ -294,4 +294,29 @@ public class AccountController : SuperController
 
         return Ok(new AccountModel(existingAccount));
     }
+
+    [HttpPost]
+    public async Task<ActionResult> AgreeToAup()
+    {
+        if (string.IsNullOrWhiteSpace(Cluster))
+        {
+            return BadRequest("Cluster is required");
+        }
+
+        var currentUser = await _userService.GetCurrentUser();
+        var account = await _dbContext.Accounts
+            .SingleOrDefaultAsync(a => a.OwnerId == currentUser.Id && a.Cluster.Name == Cluster);
+
+        if (account == null)
+        {
+            return NotFound("Account not found for the current user in the specified cluster");
+        }
+
+        account.AcceptableUsePolicyAgreedOn = DateTime.UtcNow;
+
+        await _historyService.AccountUpdated(account, isAdminOverride: false);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { Message = "Acceptable Use Policy agreement recorded successfully" });
+    }    
 }
