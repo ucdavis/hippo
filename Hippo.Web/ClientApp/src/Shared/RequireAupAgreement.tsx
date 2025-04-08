@@ -1,7 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 
 import AppContext from "./AppContext";
-import { useMatch } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import HipBody from "./Layout/HipBody";
 import HipMainWrapper from "./Layout/HipMainWrapper";
 import HipTitle from "./Layout/HipTitle";
@@ -16,11 +16,12 @@ interface Props {
 export const RequireAupAgreement = (props: Props) => {
   const { children } = props;
   const [context, setContext] = useContext(AppContext);
-  const match = useMatch("/:cluster/*");
-  const clusterName = match?.params.cluster;
+  const { cluster: clusterName } = useParams();
   const [hasAgreedToAup, setHasAgreedToAup] = useState(false);
   const [notification, setNotification] = usePromiseNotification();
-
+  const hasSystemPermission = context.user.permissions.some(
+    (p) => p.role === "System",
+  );
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const account = context.accounts.find((a) => a.cluster === clusterName);
 
@@ -66,7 +67,13 @@ export const RequireAupAgreement = (props: Props) => {
     }
   };
 
+  if (!clusterName || !cluster) {
+    // route params are never available on first render
+    return null;
+  }
+
   if (
+    hasSystemPermission ||
     !cluster.acceptableUsePolicyUrl ||
     !cluster.acceptableUsePolicyUpdatedOn
   ) {
@@ -86,7 +93,7 @@ export const RequireAupAgreement = (props: Props) => {
   }
 
   if (
-    !account.acceptableUsePolicyAgreedOn ||
+    !account?.acceptableUsePolicyAgreedOn ||
     new Date(account.acceptableUsePolicyAgreedOn) <
       new Date(cluster.acceptableUsePolicyUpdatedOn)
   ) {

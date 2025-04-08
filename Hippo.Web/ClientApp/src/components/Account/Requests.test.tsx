@@ -5,6 +5,7 @@ import {
   fakeGroupAdminAppContext,
   fakeGroups,
   fakeRequests,
+  fakeSetContext,
 } from "../../test/mockData";
 import { responseMap } from "../../test/testHelpers";
 
@@ -15,6 +16,8 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
+import { RequireAupAgreement } from "../../Shared/RequireAupAgreement";
+import AppContext from "../../Shared/AppContext";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -106,14 +109,17 @@ it("shows reject button for each pending account", async () => {
 it("displays dialog when reject is clicked", async () => {
   const user = userEvent.setup();
   await act(async () => {
+    console.log("approveUrl", approveUrl);
     render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <ModalProvider>
-          <Routes>
-            <Route path={"/:cluster/approve"} element={<Requests />} />
-          </Routes>
-        </ModalProvider>
-      </MemoryRouter>,
+      <AppContext.Provider value={[fakeGroupAdminAppContext, fakeSetContext]}>
+        <MemoryRouter initialEntries={[approveUrl]}>
+          <ModalProvider>
+            <Routes>
+              <Route path={"/:cluster/approve"} element={<Requests />} />
+            </Routes>
+          </ModalProvider>
+        </MemoryRouter>
+      </AppContext.Provider>,
     );
   });
   expect(
@@ -131,13 +137,15 @@ it("calls approve and filters list when approve is clicked", async () => {
   const user = userEvent.setup();
   await act(async () => {
     render(
-      <MemoryRouter initialEntries={[approveUrl]}>
-        <ModalProvider>
-          <Routes>
-            <Route path={"/:cluster/approve"} element={<Requests />} />
-          </Routes>
-        </ModalProvider>
-      </MemoryRouter>,
+      <AppContext.Provider value={[fakeGroupAdminAppContext, fakeSetContext]}>
+        <MemoryRouter initialEntries={[approveUrl]}>
+          <ModalProvider>
+            <Routes>
+              <Route path={"/:cluster/approve"} element={<Requests />} />
+            </Routes>
+          </ModalProvider>
+        </MemoryRouter>
+      </AppContext.Provider>,
     );
   });
   expect(
