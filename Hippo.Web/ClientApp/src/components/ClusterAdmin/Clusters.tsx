@@ -213,9 +213,11 @@ export const Clusters = () => {
                   : ""
               }
               onChange={(e) => {
+                const newValue = e.target.value;
                 const model: ClusterModel = {
                   ...editClusterModel,
-                  acceptableUsePolicyUpdatedOn: e.target.value,
+                  acceptableUsePolicyUpdatedOn:
+                    newValue === "" ? undefined : newValue,
                 };
                 setEditClusterModel(model);
                 setReturn(model);
