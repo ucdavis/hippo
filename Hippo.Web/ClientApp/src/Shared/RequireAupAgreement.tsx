@@ -22,6 +22,9 @@ export const RequireAupAgreement = (props: Props) => {
   const hasSystemPermission = context.user.permissions.some(
     (p) => p.role === "System",
   );
+  const hasFinancialAdminPermission = context.user.permissions.some(
+    (p) => p.role === "FinancialAdmin",
+  );
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const account = context.accounts.find((a) => a.cluster === clusterName);
 
@@ -85,9 +88,11 @@ export const RequireAupAgreement = (props: Props) => {
     const request = currentOpenRequests.find(
       (r) => r.cluster === clusterName && r.action === "CreateAccount",
     );
-    if (request) {
+    if (request || hasFinancialAdminPermission) {
       // A pending account creation request implies the AUP has already
       // been agreed to, so it's okay to show the child components
+
+      // A financialAdmin without an account does not need to agree to the AUP
       return <>{children}</>;
     }
   }
