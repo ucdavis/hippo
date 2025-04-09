@@ -52,6 +52,8 @@ namespace Hippo.Core.Domain
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
+        public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
+
         [JsonIgnore]
         public List<Group> MemberOfGroups { get; set; } = new();
 

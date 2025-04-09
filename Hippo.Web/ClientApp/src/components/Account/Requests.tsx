@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useContext } from "react";
 import { RequestModel } from "../../types";
 import { RejectRequest } from "../../Shared/RejectRequest";
 import { authenticatedFetch } from "../../util/api";
@@ -15,6 +15,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
 import { getGroupModelFromRequest } from "../../Shared/requestUtils";
+import AppContext from "../../Shared/AppContext";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -24,12 +25,14 @@ export const Requests = () => {
   const [requestApproving, setRequestApproving] = useState<number>();
   const [notification, setNotification] = usePromiseNotification();
 
-  const { cluster } = useParams();
+  const { cluster: clusterName } = useParams();
+  const [context, _] = useContext(AppContext);
+  const cluster = context.clusters.find((c) => c.name === clusterName);
 
   useEffect(() => {
     const fetchRequests = async () => {
       const response = await authenticatedFetch(
-        `/api/${cluster}/request/pending`,
+        `/api/${clusterName}/request/pending`,
       );
 
       if (response.ok) {
@@ -38,14 +41,14 @@ export const Requests = () => {
     };
 
     fetchRequests();
-  }, [cluster]);
+  }, [clusterName]);
 
   const handleApprove = useCallback(
     async (request: RequestModel) => {
       setRequestApproving(request.id);
 
       const req = authenticatedFetch(
-        `/api/${cluster}/request/approve/${request.id}`,
+        `/api/${clusterName}/request/approve/${request.id}`,
         {
           method: "POST",
         },
@@ -65,7 +68,7 @@ export const Requests = () => {
         setRequests(requests?.filter((a) => a.id !== request.id));
       }
     },
-    [requests, cluster, setNotification],
+    [requests, clusterName, setNotification],
   );
 
   const handleReject = useCallback(
@@ -78,20 +81,27 @@ export const Requests = () => {
 
   const columnHelper = createColumnHelper<RequestModel>();
 
-  const columns = [
+  const columns = [];
+  columns.push(
     columnHelper.accessor((request) => SplitCamelCase(request.action), {
       header: "Request",
       meta: {
         filterVariant: "select",
       },
     }),
+  );
+  columns.push(
     columnHelper.accessor("requesterName", {
       header: "Name",
       id: "Name", // id required for only this column for some reason
     }),
+  );
+  columns.push(
     columnHelper.accessor("requesterEmail", {
       header: "Email",
     }),
+  );
+  columns.push(
     columnHelper.accessor(
       (row) => getGroupModelString(getGroupModelFromRequest(row)),
       {
@@ -107,6 +117,8 @@ export const Requests = () => {
         },
       },
     ),
+  );
+  columns.push(
     columnHelper.accessor(
       (request) =>
         isAccountRequest(request) ? request.data.supervisingPI : "",
@@ -114,6 +126,8 @@ export const Requests = () => {
         header: "Supervising PI",
       },
     ),
+  );
+  columns.push(
     columnHelper.accessor(
       (request) =>
         isAccountRequest(request) ? request.data.accessTypes.join(", ") : "",
@@ -124,6 +138,39 @@ export const Requests = () => {
         },
       },
     ),
+  );
+  columns.push(
+    columnHelper.accessor(
+      (request) =>
+        isAccountRequest(request) ? request.data.accessTypes.join(", ") : "",
+      {
+        header: "Access Types",
+        meta: {
+          filterVariant: "select",
+        },
+      },
+    ),
+  );
+  // only show this column if cluster has an AUP
+  if (cluster.acceptableUsePolicyUrl && cluster.acceptableUsePolicyUpdatedOn) {
+    columns.push(
+      columnHelper.accessor(
+        (request) =>
+          isAccountRequest(request)
+            ? request.data.acceptableUsePolicyAgreedOn
+            : "n/a",
+        {
+          header: "AUP Agreed On",
+          cell: (props) => {
+            const value = props.getValue();
+            if (value === "n/a") return value;
+            return new Date(value).toLocaleDateString();
+          },
+        },
+      ),
+    );
+  }
+  columns.push(
     columnHelper.display({
       id: "actions",
       header: "Action",
@@ -142,14 +189,14 @@ export const Requests = () => {
             <RejectRequest
               request={props.row.original}
               removeAccount={() => handleReject(props.row.original)}
-              updateUrl={`/api/${cluster}/request/reject/`}
+              updateUrl={`/api/${clusterName}/request/reject/`}
               disabled={notification.pending}
             ></RejectRequest>
           )}
         </>
       ),
     }),
-  ];
+  );
 
   const accountsData = useMemo(() => requests ?? [], [requests]);
 

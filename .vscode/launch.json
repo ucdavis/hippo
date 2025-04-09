@@ -10,7 +10,7 @@
       "request": "launch",
       "preLaunchTask": "buildWeb",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/Hippo.Web/bin/Debug/net6.0/Hippo.Web.dll",
+      "program": "${workspaceFolder}/Hippo.Web/bin/Debug/net8.0/Hippo.Web.dll",
       "args": [],
       "cwd": "${workspaceFolder}/Hippo.Web",
       "stopAtEntry": false,
@@ -36,7 +36,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "buildPuppetSync",
-      "program": "${workspaceFolder}/Hippo.Jobs.PuppetSync/bin/Debug/net6.0/Hippo.Jobs.PuppetSync.dll",
+      "program": "${workspaceFolder}/Hippo.Jobs.PuppetSync/bin/Debug/net8.0/Hippo.Jobs.PuppetSync.dll",
       "args": [],
       "cwd": "${workspaceFolder}/Hippo.Jobs.PuppetSync",
       "stopAtEntry": false,

@@ -20,6 +20,8 @@ public static class ClusterExtensions
             IsActive = model.IsActive,
             Domain = model.Domain,
             Email = model.Email,
+            AcceptableUsePolicyUrl = model.AcceptableUsePolicyUrl,
+            AcceptableUsePolicyUpdatedOn = model.AcceptableUsePolicyUpdatedOn,
             AccessTypes = model.AccessTypes.Any() 
                 ? await dbContext.AccessTypes.Where(at => model.AccessTypes.Contains(at.Name)).ToListAsync() 
                 : new()

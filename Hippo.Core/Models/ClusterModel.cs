@@ -33,7 +33,10 @@ public class ClusterModel
     public string SshKey { get; set; } = String.Empty;
     [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
     public List<string> AccessTypes { get; set; } = new();
-
+    [MaxLength(250)]
+    [Url]
+    public string AcceptableUsePolicyUrl { get; set; } = null;
+    public DateTime? AcceptableUsePolicyUpdatedOn { get; set; }
     public bool AllowOrders { get; set; } = false;
 
     public ClusterModel()
@@ -54,6 +57,8 @@ public class ClusterModel
         Email = cluster.Email;
         AccessTypes = cluster.AccessTypes.Select(at => at.Name).ToList();
         SshKey = sshKey;
+        AcceptableUsePolicyUrl = cluster.AcceptableUsePolicyUrl;
+        AcceptableUsePolicyUpdatedOn = cluster.AcceptableUsePolicyUpdatedOn;
     }
 
     public static Expression<Func<Cluster, ClusterModel>> Projection
@@ -72,8 +77,9 @@ public class ClusterModel
                 Domain = c.Domain,
                 Email = c.Email,
                 AllowOrders = c.FinancialDetail != null,
-                AccessTypes = c.AccessTypes.Select(at => at.Name).ToList()
-            
+                AccessTypes = c.AccessTypes.Select(at => at.Name).ToList(),
+                AcceptableUsePolicyUrl = c.AcceptableUsePolicyUrl,
+                AcceptableUsePolicyUpdatedOn = c.AcceptableUsePolicyUpdatedOn
             };
         }
     }

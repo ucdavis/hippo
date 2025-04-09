@@ -52,6 +52,7 @@ export enum RequestStatus {
 
 // action-specific RequestModel fields defined here...
 export interface AccountRequestDataModel {
+  acceptableUsePolicyAgreedOn?: string;
   supervisingPI: string;
   sshKey?: string;
   accessTypes: AccessType[];
@@ -89,6 +90,7 @@ export interface AccountModel {
   accessTypes: AccessType[];
   data: PuppetUserRecord;
   tags: string[];
+  acceptableUsePolicyAgreedOn?: string;
 }
 
 export interface AccountTagsModel {
@@ -97,6 +99,7 @@ export interface AccountTagsModel {
 }
 
 export interface AccountCreateModel {
+  acceptableUsePolicyAgreedOn?: string;
   groupId: number;
   sshKey: string;
   supervisingPI: string;
@@ -142,6 +145,8 @@ export interface ClusterModel {
   accessTypes: AccessType[];
   sshKey?: string;
   allowOrders: boolean;
+  acceptableUsePolicyUrl?: string;
+  acceptableUsePolicyUpdatedOn?: string;
 }
 
 export type ModelState = Record<string, string>;

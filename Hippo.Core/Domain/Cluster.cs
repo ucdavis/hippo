@@ -32,6 +32,9 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         [EmailAddress]
         public string Email { get; set; } = String.Empty;
+        [MaxLength(250)]
+        public string AcceptableUsePolicyUrl { get; set; } = String.Empty;
+        public DateTime? AcceptableUsePolicyUpdatedOn { get; set; }
 
 
         [JsonIgnore]

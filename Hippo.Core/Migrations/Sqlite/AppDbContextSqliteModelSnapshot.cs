@@ -15,7 +15,7 @@ namespace Hippo.Core.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.19");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.14");
 
             modelBuilder.Entity("AccessTypeAccount", b =>
                 {
@@ -86,6 +86,9 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("AcceptableUsePolicyAgreedOn")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ClusterId")
                         .HasColumnType("INTEGER");
@@ -168,6 +171,13 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("AcceptableUsePolicyUpdatedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AcceptableUsePolicyUrl")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()

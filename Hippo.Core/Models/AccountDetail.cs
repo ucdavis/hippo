@@ -10,6 +10,7 @@ namespace Hippo.Core.Models
         public string Owner { get; set; }
         public string Cluster { get; set; }
         public JsonElement? Data { get; set; }
+        public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
         public List<GroupModel> MemberOfGroups { get; set; } = new();
         public List<GroupModel> AdminOfGroups { get; set; } = new();
     }

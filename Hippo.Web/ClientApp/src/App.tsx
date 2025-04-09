@@ -35,8 +35,9 @@ import { FinancialAdmins } from "./components/Admin/FinancialAdmins";
 import { Payments } from "./components/Report/Payments";
 import { ReportOrders } from "./components/Report/ReportOrders";
 import GroupMembers from "./components/Group/GroupMembers";
+import { RequireAupAgreement } from "./Shared/RequireAupAgreement";
 
-declare var Hippo: AppContextShape;
+declare let Hippo: AppContextShape;
 
 const App = () => {
   const [context, setContext] = useState<AppContextShape>(Hippo);
@@ -61,14 +62,23 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/clusters" element={<Clusters />} />
             <Route path="/:cluster" element={<ClusterHome />} />
-            <Route path="/:cluster/myaccount" element={<AccountInfo />} />
+            <Route
+              path="/:cluster/myaccount"
+              element={
+                <RequireAupAgreement>
+                  <AccountInfo />
+                </RequireAupAgreement>
+              }
+            />
             <Route path="/:cluster/accountstatus" element={<AccountStatus />} />
             <Route path="/:cluster/create" element={<RequestForm />} />
             <Route
               path="/:cluster/approve"
               element={
                 <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
-                  <Requests />
+                  <RequireAupAgreement>
+                    <Requests />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -76,7 +86,9 @@ const App = () => {
               path="/:cluster/activeaccounts"
               element={
                 <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
-                  <ActiveAccounts />
+                  <RequireAupAgreement>
+                    <ActiveAccounts />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -87,7 +99,9 @@ const App = () => {
                   roles={["ClusterAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <Groups />
+                  <RequireAupAgreement>
+                    <Groups />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -98,7 +112,9 @@ const App = () => {
                   roles={["ClusterAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <ClusterAdmins />
+                  <RequireAupAgreement>
+                    <ClusterAdmins />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -109,7 +125,9 @@ const App = () => {
                   roles={["ClusterAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <FinancialAdmins />
+                  <RequireAupAgreement>
+                    <FinancialAdmins />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -128,7 +146,9 @@ const App = () => {
                   roles={["System", "FinancialAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <FinancialDetail />
+                  <RequireAupAgreement>
+                    <FinancialDetail />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -144,7 +164,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <Products />
+                  <RequireAupAgreement>
+                    <Products />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -160,7 +182,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <Orders />
+                  <RequireAupAgreement>
+                    <Orders />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -176,7 +200,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <Details />
+                  <RequireAupAgreement>
+                    <Details />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -192,7 +218,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <OrderHistories />
+                  <RequireAupAgreement>
+                    <OrderHistories />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -208,7 +236,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <OrderPayments />
+                  <RequireAupAgreement>
+                    <OrderPayments />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -219,7 +249,9 @@ const App = () => {
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <EditOrder />
+                  <RequireAupAgreement>
+                    <EditOrder />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -235,7 +267,9 @@ const App = () => {
                   ]}
                   alternative={<NotAuthorized />}
                 >
-                  <UpdateChartStrings />
+                  <RequireAupAgreement>
+                    <UpdateChartStrings />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -246,7 +280,9 @@ const App = () => {
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <CreateOrder />
+                  <RequireAupAgreement>
+                    <CreateOrder />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -257,7 +293,9 @@ const App = () => {
                   roles={["System", "ClusterAdmin", "FinancialAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <Payments />
+                  <RequireAupAgreement>
+                    <Payments />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -268,7 +306,9 @@ const App = () => {
                   roles={["System", "ClusterAdmin", "FinancialAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <ReportOrders />
+                  <RequireAupAgreement>
+                    <ReportOrders />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />
@@ -279,7 +319,9 @@ const App = () => {
                   roles={["System", "ClusterAdmin", "GroupAdmin"]}
                   alternative={<NotAuthorized />}
                 >
-                  <GroupMembers />
+                  <RequireAupAgreement>
+                    <GroupMembers />
+                  </RequireAupAgreement>
                 </ShowFor>
               }
             />

@@ -23,6 +23,7 @@ namespace Hippo.Core.Models
 
     public class AccountRequestDataModel
     {
+        public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
         [MaxLength(100)]
         public string SupervisingPI { get; set; } = "";
         public string SshKey { get; set; } = "";

@@ -126,7 +126,7 @@ export const AccountInfo = () => {
                     id="displayName"
                     placeholder="Enter Display Name"
                     onChange={(e) =>
-                      setReturn((model) => ({
+                      setReturn((_) => ({
                         name: userGroupName,
                         displayName: e.target.value,
                       }))

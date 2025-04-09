@@ -20,6 +20,7 @@ namespace Hippo.Web.Models
         public DateTime UpdatedOn { get; set; }
         public JsonElement? Data { get; set; }
         public List<string> Tags { get; set; } = new();
+        public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
 
         public AccountModel()
         {
@@ -35,6 +36,7 @@ namespace Hippo.Web.Models
             CreatedOn = account.CreatedOn;
             Cluster = account.Cluster.Name;
             Owner = account.Owner;
+            AcceptableUsePolicyAgreedOn = account.AcceptableUsePolicyAgreedOn;
             MemberOfGroups = account.MemberOfGroups.Select(g => new GroupModel
             {
                 Id = g.Id,
@@ -82,6 +84,7 @@ namespace Hippo.Web.Models
                 CreatedOn = a.CreatedOn,
                 Cluster = a.Cluster.Name,
                 Owner = a.Owner,
+                AcceptableUsePolicyAgreedOn = a.AcceptableUsePolicyAgreedOn,
                 MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
                 {
                     Id = g.Id,

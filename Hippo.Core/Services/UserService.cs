@@ -118,6 +118,7 @@ namespace Hippo.Core.Services
                     Owner = a.Owner.Name,
                     Cluster = a.Cluster.Name,
                     Data = a.Data,
+                    AcceptableUsePolicyAgreedOn = a.AcceptableUsePolicyAgreedOn,
                     MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
                     {
                         Id = g.Id,

@@ -62,6 +62,9 @@ export const fakeAccounts: AccountModel[] = [
     accessTypes: ["OpenOnDemand", "SshKey"],
     data: {} as PuppetUserRecord,
     tags: [],
+    acceptableUsePolicyAgreedOn: new Date(
+      new Date().setHours(0, 0, 0, 0),
+    ).toISOString(),
   },
   {
     id: 2,
@@ -76,6 +79,9 @@ export const fakeAccounts: AccountModel[] = [
     accessTypes: ["OpenOnDemand", "SshKey"],
     data: {} as PuppetUserRecord,
     tags: [],
+    acceptableUsePolicyAgreedOn: new Date(
+      new Date().setHours(0, 0, 0, 0),
+    ).toISOString(),
   },
 ];
 
@@ -119,6 +125,10 @@ const fakeCluster: ClusterModel = {
   email: "an-email@address.com",
   accessTypes: ["OpenOnDemand", "SshKey"],
   allowOrders: false,
+  acceptableUsePolicyUrl: "https://aup-for-some-cluster.com",
+  acceptableUsePolicyUpdatedOn: new Date(
+    new Date().setMonth(new Date().getMonth() - 1),
+  ).toISOString(),
 };
 
 export const fakeAppContext: AppContextShape = {
@@ -156,6 +166,8 @@ export const fakeGroupAdminAppContext: AppContextShape = {
   clusters: [fakeCluster],
   openRequests: fakeRequests,
 };
+
+export const fakeSetContext = vi.fn();
 
 export const fakeAdminUsers: User[] = [
   fakeAdminUser,
