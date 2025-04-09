@@ -108,8 +108,8 @@ namespace Hippo.Core.Services
                 });
                 await _dbContext.BulkInsertOrUpdateAsync(desiredAccounts, new BulkConfig
                 {
-                    PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey), nameof(Account.CreatedOn) },
-                    PropertiesToExcludeOnCompare = new List<string> { nameof(Account.UpdatedOn), nameof(Account.CreatedOn) },
+                    PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey), nameof(Account.CreatedOn), nameof(Account.AcceptableUsePolicyAgreedOn) },
+                    PropertiesToExcludeOnCompare = new List<string> { nameof(Account.UpdatedOn), nameof(Account.CreatedOn), nameof(Account.AcceptableUsePolicyAgreedOn) },
                     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },
                     BatchSize = 500
                 });
