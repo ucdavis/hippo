@@ -7,6 +7,7 @@ using EFCore.BulkExtensions;
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Extensions;
+using Hippo.Core.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -73,7 +74,8 @@ namespace Hippo.Core.Services
                         ClusterId = x.Key,
                         CreatedOn = now,
                         UpdatedOn = now,
-                        Data = ExpandQosReferences(u.Data, x.Value)
+                        // Ensure consistent formatting of Data to allow simple equality comparisons in the db
+                        Data = JsonHelper.NormalizeJson(ExpandQosReferences(u.Data, x.Value))
                     }))
                     .Where(a => IsValid(a))
                     .ToArray();
@@ -88,15 +90,18 @@ namespace Hippo.Core.Services
                     .Where(g => IsValid(g))
                     .ToArray();
 
-                // Determine what groups and accounts need to be deleted.
-                // We can't use BulkInsertOrUpdateOrDeleteAsync because operations against GroupMemberAccount and GroupAdminAccount must occur
-                // between inserts and deletes of groups and accounts.
-                var deleteGroups = await _dbContext.Groups
-                    .Where(g => !_dbContext.TempGroups.Any(tg => tg.ClusterId == g.ClusterId && tg.Group == g.Name))
-                    .ToArrayAsync();
-                var deleteAccounts = await _dbContext.Accounts
-                    .Where(a => !_dbContext.TempKerberos.Any(tk => tk.ClusterId == a.ClusterId && tk.Kerberos == a.Kerberos))
-                    .ToArrayAsync();
+                // TODO: reenable accout/group deletions after soft delete refactor
+                // // Determine what groups and accounts need to be deleted.
+                // // We can't use BulkInsertOrUpdateOrDeleteAsync because operations against GroupMemberAccount and GroupAdminAccount must occur
+                // // between inserts and deletes of groups and accounts.
+                // var deleteGroups = await _dbContext.Groups
+                //     .AsNoTracking()
+                //     .Where(g => !_dbContext.TempGroups.Any(tg => tg.ClusterId == g.ClusterId && tg.Group == g.Name))
+                //     .ToArrayAsync();
+                // var deleteAccounts = await _dbContext.Accounts
+                //     .AsNoTracking()
+                //     .Where(a => !_dbContext.TempKerberos.Any(tk => tk.ClusterId == a.ClusterId && tk.Kerberos == a.Kerberos))
+                //     .ToArrayAsync();
 
                 // insert/update groups and accounts
                 Log.Information("Inserting/Updating {GroupQuantity} groups and {AccountQuantity} accounts",
@@ -108,8 +113,16 @@ namespace Hippo.Core.Services
                 });
                 await _dbContext.BulkInsertOrUpdateAsync(desiredAccounts, new BulkConfig
                 {
-                    PropertiesToExcludeOnUpdate = new List<string> { nameof(Account.SshKey), nameof(Account.CreatedOn), nameof(Account.AcceptableUsePolicyAgreedOn) },
-                    PropertiesToExcludeOnCompare = new List<string> { nameof(Account.UpdatedOn), nameof(Account.CreatedOn), nameof(Account.AcceptableUsePolicyAgreedOn) },
+                    PropertiesToExcludeOnUpdate = new List<string> {
+                        nameof(Account.SshKey),
+                        nameof(Account.CreatedOn),
+                        nameof(Account.AcceptableUsePolicyAgreedOn) },
+                    // PropertiesToIncludeOnCompare is more explicit than PropertiesToExcludeOnCompare on what differences
+                    // can be used to trigger an update. We're only interested when Name, Email or Data changes...
+                    PropertiesToIncludeOnCompare = new List<string> {
+                        nameof(Account.Name),
+                        nameof(Account.Email),
+                        nameof(Account.Data) },
                     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },
                     BatchSize = 500
                 });
@@ -117,9 +130,11 @@ namespace Hippo.Core.Services
                 // get ids for groups and accounts
                 // NOTE: this must occur after the accounts have been inserted/updated to guarantee presence of ids
                 var mapClusterIdAndGroupNameToId = await _dbContext.Groups
+                    .AsNoTracking()
                     .ToDictionaryAsync(g => (g.ClusterId, g.Name), g => g.Id);
 
                 var mapClusterIdAndKerberosToAccountId = await _dbContext.Accounts
+                    .AsNoTracking()
                     .Where(a => a.Kerberos != null)
                     .ToDictionaryAsync(a => (a.ClusterId, a.Kerberos), a => a.Id);
 
@@ -148,16 +163,17 @@ namespace Hippo.Core.Services
                 await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAccounts);
                 await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAdminAccounts);
 
-                // delete groups and accounts
-                Log.Information("Deleting {GroupQuantity} groups and {AccountQuantity} accounts", deleteGroups.Length, deleteAccounts.Length);
-                await _dbContext.BulkDeleteAsync(deleteGroups, new BulkConfig
-                {
-                    UpdateByProperties = new List<string> { nameof(Group.ClusterId), nameof(Group.Name) }
-                });
-                await _dbContext.BulkDeleteAsync(deleteAccounts, new BulkConfig
-                {
-                    UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) }
-                });
+                // TODO: reenable accout/group deletions after soft delete refactor
+                // // delete groups and accounts
+                // Log.Information("Deleting {GroupQuantity} groups and {AccountQuantity} accounts", deleteGroups.Length, deleteAccounts.Length);
+                // await _dbContext.BulkDeleteAsync(deleteGroups, new BulkConfig
+                // {
+                //     UpdateByProperties = new List<string> { nameof(Group.ClusterId), nameof(Group.Name) }
+                // });
+                // await _dbContext.BulkDeleteAsync(deleteAccounts, new BulkConfig
+                // {
+                //     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) }
+                // });
 
                 // clear temp table data
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempGroups]");
@@ -179,6 +195,7 @@ namespace Hippo.Core.Services
                 Log.Information("Marked {RequestsCompleted} requests 'Completed'", requestsCompleted);
 
                 await _historyService.PuppetDataSynced();
+                // _dbContext.SaveChangesAsync() is only necessary for saving _historyService updates
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
