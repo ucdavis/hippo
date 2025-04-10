@@ -90,7 +90,7 @@ namespace Hippo.Core.Services
                     .Where(g => IsValid(g))
                     .ToArray();
 
-                // TODO: reenable accout/group deletions after soft delete refactor
+                // TODO: reenable account/group deletions after soft delete refactor
                 // // Determine what groups and accounts need to be deleted.
                 // // We can't use BulkInsertOrUpdateOrDeleteAsync because operations against GroupMemberAccount and GroupAdminAccount must occur
                 // // between inserts and deletes of groups and accounts.
