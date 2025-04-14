@@ -27,6 +27,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<OrderMetaData>().HasQueryFilter(omd => omd.Order.Cluster.IsActive);
             modelBuilder.Entity<OrderMetaData>().HasIndex(a => a.OrderId);
             modelBuilder.Entity<OrderMetaData>().HasIndex(a => new {a.OrderId, a.Name, a.Value });
         }

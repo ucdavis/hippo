@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain;
 
@@ -13,4 +14,10 @@ public class Tag
     public Cluster Cluster { get; set; }
 
     public List<Account> Accounts { get; set; } = new();
+
+    internal static void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Tag>().HasQueryFilter(t => t.Cluster.IsActive);
+    }
 }
+

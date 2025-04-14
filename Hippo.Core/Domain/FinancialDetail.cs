@@ -21,6 +21,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<FinancialDetail>().HasQueryFilter(fd => fd.Cluster.IsActive);
             modelBuilder.Entity<FinancialDetail>().Property(a => a.AutoApprove).HasDefaultValue(true);
         }
     }
