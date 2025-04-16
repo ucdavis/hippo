@@ -19,6 +19,8 @@ namespace Hippo.Core.Domain
         [MaxLength(250)]
         public string DisplayName { get; set; } = "";
 
+        public bool IsActive { get; set; } = true;
+
         [Required]
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
@@ -34,7 +36,8 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
         {
-            modelBuilder.Entity<Group>().HasQueryFilter(g => g.Cluster.IsActive);
+            modelBuilder.Entity<Group>().HasQueryFilter(g => g.IsActive && g.Cluster.IsActive);
+            modelBuilder.Entity<Group>().Property(g => g.IsActive).HasDefaultValue(true);
             modelBuilder.Entity<Group>().HasIndex(g => new { g.ClusterId, g.Name }).IsUnique();
             modelBuilder.Entity<Group>().Property(g => g.Data).HasJsonConversion(dbContext);
 
