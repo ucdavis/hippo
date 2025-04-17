@@ -202,7 +202,13 @@ namespace Hippo.Core.Services
             //This should be a list of all payments that have a bad chart string, but it is possible there is some other issue, so we will want to validate the chart string before notifying sponsors.
             var orderIdsWithFailedPayments = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created && a.CreatedOn <= yesterday).Select(a => a.OrderId).Distinct().ToListAsync();
 
-            var allOrders = await _dbContext.Orders.Include(a => a.Billings).Include(a => a.PrincipalInvestigator).Where(a => orderIdsWithFailedPayments.Contains(a.Id)).ToListAsync();
+            var allOrders = await _dbContext.Orders
+                .Include(a => a.Billings)
+                .Include(a => a.PrincipalInvestigator)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .Where(a => orderIdsWithFailedPayments.Contains(a.Id))
+                .ToListAsync();
             var orderGrouping = allOrders.GroupBy(a => a.ClusterId);
 
 

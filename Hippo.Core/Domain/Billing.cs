@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hippo.Core.Domain
 {
@@ -16,5 +17,10 @@ namespace Hippo.Core.Domain
         [JsonIgnore]
         public Order Order { get; set; }
         public DateTime Updated { get; set; } = DateTime.UtcNow;
+
+        internal static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Billing>().HasQueryFilter(b => b.Order.Cluster.IsActive);
+        }
     }
 }

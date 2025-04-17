@@ -103,6 +103,11 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(300)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Kerberos")
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
@@ -271,6 +276,11 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("DisplayName")
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()

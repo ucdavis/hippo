@@ -52,6 +52,7 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Payment>().HasQueryFilter(p => p.Order.Cluster.IsActive);
             modelBuilder.Entity<Payment>().HasIndex(p => p.OrderId);
             modelBuilder.Entity<Payment>().HasIndex(p => p.Status);
             //DOn't think I need this one

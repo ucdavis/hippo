@@ -95,7 +95,7 @@ namespace Hippo.Core.Domain
         }
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Order>().HasQueryFilter(o => o.Cluster.IsActive);
+            modelBuilder.Entity<Order>().HasQueryFilter(o => o.PrincipalInvestigator.IsActive && o.Cluster.IsActive);
             modelBuilder.Entity<Order>().HasIndex(o => o.PrincipalInvestigatorId);
             modelBuilder.Entity<Order>().HasIndex(o => o.ClusterId);
             modelBuilder.Entity<Order>().HasIndex(o => o.Status);

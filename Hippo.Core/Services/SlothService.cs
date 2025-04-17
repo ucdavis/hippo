@@ -273,7 +273,15 @@ namespace Hippo.Core.Services
                         Log.Error($"Error processing payment: {payment.Id} for Order: {payment.OrderId} Name: {payment.Order.Name} Error: Missing FinancialSystemId");
                         continue;
                     }
-                    var order = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Payments).Include(a => a.Billings).Include(a => a.MetaData).Include(a => a.Cluster).SingleAsync(a => a.Id == payment.OrderId);
+                    var order = await _dbContext.Orders
+                        .Include(a => a.PrincipalInvestigator)
+                        .Include(a => a.Payments)
+                        .Include(a => a.Billings)
+                        .Include(a => a.MetaData)
+                        .Include(a => a.Cluster)
+                        // We don't want to filter on inactive PIs, we still do on inactive clusters
+                        .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                        .SingleAsync(a => a.Id == payment.OrderId);
 
                     var response = await client.GetAsync(payment.FinancialSystemId);
                     if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)

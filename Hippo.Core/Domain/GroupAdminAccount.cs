@@ -18,7 +18,8 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<GroupAdminAccount>().HasQueryFilter(ga => ga.Account.Cluster.IsActive);
+            // The duplicate check on Cluster.IsActive from both Group and Account is necessary for how EF Core handles navigating relationships
+            modelBuilder.Entity<GroupAdminAccount>().HasQueryFilter(ga => ga.Group.IsActive && ga.Group.Cluster.IsActive && ga.Account.IsActive && ga.Account.Cluster.IsActive);
         }
     }
 }

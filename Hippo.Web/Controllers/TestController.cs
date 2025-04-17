@@ -226,7 +226,12 @@ namespace Hippo.Web.Controllers
 
         public async Task<IActionResult> TestNotification()
         {
-            var order = await _dbContext.Orders.Include(a => a.Cluster).Include(a => a.PrincipalInvestigator).SingleAsync(a => a.Id == 41);
+            var order = await _dbContext.Orders
+                .Include(a => a.Cluster)
+                .Include(a => a.PrincipalInvestigator)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .SingleAsync(a => a.Id == 41);
 
             var emails = new string[] { "apprequests@caes.ucdavis.edu" };
 

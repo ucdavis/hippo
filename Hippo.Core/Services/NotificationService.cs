@@ -609,7 +609,8 @@ namespace Hippo.Core.Services
             var orders = await _dbContext.Orders
                 .Include(o => o.Cluster)
                 .Include(o => o.PrincipalInvestigator)
-                
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
                 .Where(o => o.Status == Order.Statuses.Created)
                 .ToListAsync();
 

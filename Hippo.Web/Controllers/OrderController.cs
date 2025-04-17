@@ -292,7 +292,13 @@ namespace Hippo.Web.Controllers
 
             //TODO: Validation
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == model.Id);
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
+                .Include(a => a.Billings)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstAsync(a => a.Id == model.Id);
             if (existingOrder.PrincipalInvestigator.Owner.Id != currentUser.Id && !isClusterOrSystemAdmin && !isFinancialAdmin) //Do we want admins to be able to make these chanegs?
             {
                 return BadRequest("You do not have permission to update the billing information on this order.");
@@ -339,7 +345,13 @@ namespace Hippo.Web.Controllers
             var permissions = await _userService.GetCurrentPermissionsAsync();
             var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).FirstAsync(a => a.Id == id);
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
+                .Include(a => a.Billings)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstAsync(a => a.Id == id);
             var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
 
 
@@ -519,7 +531,12 @@ namespace Hippo.Web.Controllers
             //var permissions = await _userService.GetCurrentPermissionsAsync();
             //var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
 
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).FirstAsync(a => a.Id == id);
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstAsync(a => a.Id == id);
             var isPi = existingOrder.PrincipalInvestigator.Owner.Id == currentUser.Id;
 
             if (!isPi)
@@ -558,7 +575,12 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("You do not have permission to reject this order.");
             }
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.Cluster).FirstOrDefaultAsync(a => a.Id == id);
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator)
+                .Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstOrDefaultAsync(a => a.Id == id);
             if (existingOrder == null)
             {
                 return NotFound();
@@ -595,7 +617,13 @@ namespace Hippo.Web.Controllers
 
             amount = Math.Round(amount, 2);
 
-            var order = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Payments).Include(a => a.Cluster).FirstAsync(a => a.Id == id && a.Cluster.Name == Cluster);
+            var order = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Payments)
+                .Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstAsync(a => a.Id == id && a.Cluster.Name == Cluster);
             if (order == null)
             {
                 return NotFound();
@@ -909,7 +937,14 @@ namespace Hippo.Web.Controllers
             var rtValue = new ProcessingResult();
 
             //Updating an existing order without changing the status.
-            var existingOrder = await _dbContext.Orders.Include(a => a.PrincipalInvestigator.Owner).Include(a => a.Cluster).Include(a => a.Billings).Include(a => a.MetaData).FirstAsync(a => a.Id == model.Id);            
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
+                .Include(a => a.Billings)
+                .Include(a => a.MetaData)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .FirstAsync(a => a.Id == model.Id);            
 
             switch (existingOrder.Status)
             {

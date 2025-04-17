@@ -35,8 +35,12 @@ namespace Hippo.Core.Services
             //Filter out by next notification date too? grab when null or less that now?
 
             var orders = await _dbContext.Orders
-                .Include(a => a.PrincipalInvestigator).Include(a => a.Cluster)
-                .Where(a => orderStatus.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate).ToListAsync();
+                .Include(a => a.PrincipalInvestigator)
+                .Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .Where(a => orderStatus.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate)
+                .ToListAsync();
 
             foreach (var order in orders)
             {
