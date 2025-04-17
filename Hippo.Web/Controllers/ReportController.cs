@@ -146,7 +146,14 @@ namespace Hippo.Web.Controllers
 
             var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed};
             var compareDate = DateTime.UtcNow.AddDays(31);
-            var orders = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.MetaData).Where(a => a.Cluster.Name == Cluster && statuses.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate).Select(OrderListModel.Projection()).ToListAsync();
+            var orders = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator)
+                .Include(a => a.MetaData)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .Where(a => a.Cluster.Name == Cluster && statuses.Contains(a.Status) && a.ExpirationDate != null && a.ExpirationDate <= compareDate)
+                .Select(OrderListModel.Projection())
+                .ToListAsync();
 
             return Ok(orders);
         }
@@ -162,7 +169,13 @@ namespace Hippo.Web.Controllers
             {
                 return BadRequest("You do not have permission to view this page.");
             }
-            var orders = await _dbContext.Orders.Include(a => a.PrincipalInvestigator).Include(a => a.MetaData).Where(a => a.Cluster.Name == Cluster && a.Status == Order.Statuses.Archived).Select(OrderListModel.Projection()).ToListAsync();
+            var orders = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator)
+                .Include(a => a.MetaData)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .Where(a => a.Cluster.Name == Cluster && a.Status == Order.Statuses.Archived)
+                .Select(OrderListModel.Projection()).ToListAsync();
 
             return Ok(orders);
         }
@@ -199,6 +212,8 @@ namespace Hippo.Web.Controllers
             var model = await _dbContext.Orders
                 .Include(a => a.PrincipalInvestigator)
                 .Include(a => a.MetaData)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
                 .Where(a => orderIds.Contains(a.Id))
                 .Select(OrderListModel.Projection())
                 .ToListAsync();
