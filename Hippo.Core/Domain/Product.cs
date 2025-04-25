@@ -7,7 +7,7 @@ namespace Hippo.Core.Domain
     {
         //Other fields in Product Base   
 
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public bool IsUnavailable { get; set; } = false;
         public bool IsHiddenFromPublic { get; set; } = false;
