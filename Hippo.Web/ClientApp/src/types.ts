@@ -103,12 +103,14 @@ export interface AccountCreateModel {
   groupId: number;
   sshKey: string;
   supervisingPI: string;
+  supervisingPIIamId: string;
   accessTypes: AccessType[];
 }
 
 export interface AddToGroupModel {
   groupId: number;
   supervisingPI: string;
+  supervisingPIIamId: string;
 }
 
 export interface AppContextShape {

@@ -48,13 +48,16 @@ namespace Hippo.Core.Domain
         public int? OwnerId { get; set; }
         public User Owner { get; set; }
 
+        public int? SupervisingPIId { get; set; }
+        public User SupervisingPI { get; set; }
+
         [Required]
         public int ClusterId { get; set; }
         public Cluster Cluster { get; set; }
 
         public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public DateTime? DeactivatedOn { get; set; } = null;
 
         [JsonIgnore]
         public List<Group> MemberOfGroups { get; set; } = new();
@@ -73,8 +76,8 @@ namespace Hippo.Core.Domain
 
         internal static void OnModelCreating(ModelBuilder modelBuilder, DbContext dbContext)
         {
-            modelBuilder.Entity<Account>().HasQueryFilter(a => a.IsActive && a.Cluster.IsActive);
-            modelBuilder.Entity<Account>().Property(a => a.IsActive).HasDefaultValue(true);
+            modelBuilder.Entity<Account>().HasQueryFilter(a => a.DeactivatedOn == null && a.Cluster.IsActive);
+            modelBuilder.Entity<Account>().HasIndex(a => a.DeactivatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.CreatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.UpdatedOn);
             modelBuilder.Entity<Account>().HasIndex(a => a.OwnerId);

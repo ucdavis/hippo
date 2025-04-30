@@ -99,14 +99,12 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("Data")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeactivatedOn")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(300)
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
 
                     b.Property<string>("Kerberos")
                         .HasMaxLength(20)
@@ -122,6 +120,9 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<string>("SshKey")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("SupervisingPIId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("TEXT");
 
@@ -131,6 +132,8 @@ namespace Hippo.Core.Migrations.Sqlite
 
                     b.HasIndex("CreatedOn");
 
+                    b.HasIndex("DeactivatedOn");
+
                     b.HasIndex("Email");
 
                     b.HasIndex("Kerberos");
@@ -138,6 +141,8 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.HasIndex("Name");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("SupervisingPIId");
 
                     b.HasIndex("UpdatedOn");
 
@@ -318,9 +323,14 @@ namespace Hippo.Core.Migrations.Sqlite
                     b.Property<int>("GroupId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("RevokedOn")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("AccountId", "GroupId");
 
                     b.HasIndex("GroupId");
+
+                    b.HasIndex("RevokedOn");
 
                     b.ToTable("GroupMemberAccount");
                 });
@@ -937,9 +947,15 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Hippo.Core.Domain.User", "SupervisingPI")
+                        .WithMany()
+                        .HasForeignKey("SupervisingPIId");
+
                     b.Navigation("Cluster");
 
                     b.Navigation("Owner");
+
+                    b.Navigation("SupervisingPI");
                 });
 
             modelBuilder.Entity("Hippo.Core.Domain.Billing", b =>

@@ -11,6 +11,7 @@ namespace Hippo.Web.Models
         public string SshKey { get; set; } = String.Empty;
         [MaxLength(100)]
         public string SupervisingPI { get; set; } = String.Empty;
+        public string SupervisingPIIamId { get; set; } = String.Empty;
         [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
         public List<string> AccessTypes { get; set; } = new();
     }

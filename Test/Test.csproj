@@ -22,4 +22,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Hippo.Core\Hippo.Core.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <!-- eliminate warning about rid alpine-x64 -->
+    <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
+  </PropertyGroup>
 </Project>

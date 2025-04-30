@@ -18,6 +18,7 @@ namespace Hippo.Core.Services
     public interface IUserService
     {
         Task<User> GetUser(Claim[] userClaims);
+        Task<User> GetUserByIam(string iamId);
         Task<User> GetCurrentUser();
         Task<string> GetCurrentUserJsonAsync();
         Task<IEnumerable<Permission>> GetCurrentPermissionsAsync();
@@ -217,6 +218,30 @@ namespace Hippo.Core.Services
                 return newUser;
             }
         }
+
+        // Get a user by their IAM ID, creating if necessary
+        public async Task<User> GetUserByIam(string iamId)
+        {
+            var user = await _dbContext.Users            
+                .SingleOrDefaultAsync(u => u.Iam == iamId);
+
+            if (user != null)
+            {
+                return user;
+            }
+
+            // not in the db yet, create new user and return
+            user = await _identityService.GetByIamId(iamId);
+            if (user != null)
+            {
+                await _dbContext.Users.AddAsync(user);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return user;
+        }
+
+
 
         public async Task<string> GetAvailableClustersJsonAsync()
         {

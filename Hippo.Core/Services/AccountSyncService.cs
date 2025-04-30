@@ -77,7 +77,7 @@ namespace Hippo.Core.Services
                         UpdatedOn = now,
                         // Ensure consistent formatting of Data to allow simple equality comparisons in the db
                         Data = JsonHelper.NormalizeJson(ExpandQosReferences(u.Data, x.Value)),
-                        IsActive = true
+                        DeactivatedOn = null
                     }))
                     .Where(a => IsValid(a))
                     .ToList();
@@ -102,12 +102,12 @@ namespace Hippo.Core.Services
                 var deleteAccounts = await _dbContext.Accounts
                     .AsNoTracking()
                     .IgnoreQueryFilters()
-                    .Where(a => a.IsActive && !_dbContext.TempKerberos.Any(tk => tk.ClusterId == a.ClusterId && tk.Kerberos == a.Kerberos))
+                    .Where(a => a.DeactivatedOn == null && !_dbContext.TempKerberos.Any(tk => tk.ClusterId == a.ClusterId && tk.Kerberos == a.Kerberos))
                     .ToListAsync();
 
                 // Add soft-deletes to desired accounts and groups
                 deleteGroups.ForEach(g => g.IsActive = false);
-                deleteAccounts.ForEach(a => a.IsActive = false);
+                deleteAccounts.ForEach(a => a.DeactivatedOn = now);
                 desiredGroups = desiredGroups
                     // ensure we don't have any duplicates
                     .Where(g => !deleteGroups.Any(dg => dg.ClusterId == g.ClusterId && dg.Name == g.Name))
@@ -141,7 +141,7 @@ namespace Hippo.Core.Services
                         nameof(Account.Name),
                         nameof(Account.Email),
                         nameof(Account.Data),
-                        nameof(Account.IsActive) },
+                        nameof(Account.DeactivatedOn) },
                     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },
                     BatchSize = 500
                 });
@@ -172,8 +172,39 @@ namespace Hippo.Core.Services
                         .SelectMany(u => u.Groups.Select(g => new GroupMemberAccount
                         {
                             GroupId = mapClusterIdAndGroupNameToId[(x.Key, g)],
-                            AccountId = mapClusterIdAndKerberosToAccountId[(x.Key, u.Kerberos)]
+                            AccountId = mapClusterIdAndKerberosToAccountId[(x.Key, u.Kerberos)],
+                            RevokedOn = null
                         })));
+                // identify group memberships that need to be soft-deleted
+                var mapClusterIdAndKerberosToUserExists = mapClusterIdsToPuppetData
+                    .SelectMany(x => x.Value.PuppetData.Users.Select(u => (x.Key, u.Kerberos)))
+                    .ToHashSet();
+                var deleteGroupAccounts = (await _dbContext.GroupMemberAccount
+                    .AsNoTracking()
+                    .IgnoreQueryFilters()
+                    .Where(gma => gma.RevokedOn == null)
+                    .Select(gma => new
+                    {
+                        gma.GroupId,
+                        gma.AccountId,
+                        gma.Group.ClusterId,
+                        gma.Account.Kerberos
+                    })
+                    .ToListAsync()) // Some filtering done locally to avoid a sending too many parameters to db
+                    .Where(gma => !mapClusterIdAndKerberosToUserExists.Contains((gma.ClusterId, gma.Kerberos)))
+                    .Select(gma => new GroupMemberAccount
+                    {
+                        GroupId = gma.GroupId,
+                        AccountId = gma.AccountId,
+                        RevokedOn = now
+                    })
+                    .ToList();
+                desiredGroupAccounts = desiredGroupAccounts
+                    // ensure we don't have any duplicates
+                    .Where(gma => !deleteGroupAccounts.Any(dgma => dgma.GroupId == gma.GroupId && dgma.AccountId == gma.AccountId))
+                    .Concat(deleteGroupAccounts)
+                    .ToList();
+
 
                 var desiredGroupAdminAccounts = mapClusterIdsToPuppetData
                     .SelectMany(x => x.Value.PuppetData.Users
@@ -185,9 +216,14 @@ namespace Hippo.Core.Services
                         })));
 
                 // insert/update/delete group memberships
-                Log.Information("Inserting/Updating/Deleting {GroupMembershipQuantity} group memberships and {GroupAdminMembershipQuantity} group admin memberships",
-                    desiredGroupAccounts.Count(), desiredGroupAdminAccounts.Count());
-                await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAccounts);
+                Log.Information("Inserting/Updating/Revoking {GroupMembershipQuantity} group memberships",
+                    desiredGroupAccounts.Count());
+                await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAccounts, new BulkConfig
+                {
+                    UpdateByProperties = new List<string> { nameof(GroupMemberAccount.GroupId), nameof(GroupMemberAccount.AccountId) }
+                });
+                Log.Information("Inserting/Updating/Deleting {GroupAdminMembershipQuantity} group admin memberships",
+                    desiredGroupAdminAccounts.Count());
                 await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAdminAccounts);
 
                 // clear temp table data

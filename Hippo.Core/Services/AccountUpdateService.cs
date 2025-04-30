@@ -178,7 +178,8 @@ namespace Hippo.Core.Services
                     .SingleAsync(),
                 SshKey = accountModel.Key,
                 MemberOfGroups = new List<Group> { group },
-                AcceptableUsePolicyAgreedOn = accountRequestData.AcceptableUsePolicyAgreedOn
+                AcceptableUsePolicyAgreedOn = accountRequestData.AcceptableUsePolicyAgreedOn,
+                SupervisingPIId = accountRequestData.SupervisingPIUserId ?? null,
             };
 
             await _dbContext.Accounts.AddAsync(account);

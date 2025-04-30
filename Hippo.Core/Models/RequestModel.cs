@@ -26,6 +26,7 @@ namespace Hippo.Core.Models
         public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
         [MaxLength(100)]
         public string SupervisingPI { get; set; } = "";
+        public int? SupervisingPIUserId { get; set; }
         public string SshKey { get; set; } = "";
         [ListOfStringsOptions(AccessType.Codes.RegexPattern, nonEmpty: true)]
         public List<string> AccessTypes { get; set; } = new();
