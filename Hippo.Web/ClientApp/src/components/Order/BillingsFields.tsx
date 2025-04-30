@@ -202,7 +202,7 @@ const BillingsFields: React.FC<BillingsFieldsProps> = ({ readOnly }) => {
         <tbody>
           {fields.map((field, index) => {
             return (
-              <tr key={field.id}>
+              <tr key={`row_${field.id}`}>
                 <td width={"40%"}>
                   <HipFormField
                     size="lg"
