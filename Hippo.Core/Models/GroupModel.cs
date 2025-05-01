@@ -10,6 +10,10 @@ namespace Hippo.Core.Models
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
         public JsonElement? Data { get; set; }
+        // RevokedOn only used for AccountDeactivation report. It's being shoved here because the Account model's
+        // MemberOfGroups navigation property skips the GroupMemberAccount model, and it would take significant 
+        // refactoring to change that.
+        public DateTime? RevokedOn { get; set; } 
 
         public List<GroupAccountModel> Admins { get; set; } = new();
 

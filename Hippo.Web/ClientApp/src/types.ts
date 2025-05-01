@@ -32,6 +32,7 @@ export interface GroupModel {
   displayName: string;
   admins: GroupAccountModel[];
   data: PuppetGroupRecord;
+  revokedOn?: string;
 }
 
 export interface RequestModelCommon {
@@ -91,6 +92,7 @@ export interface AccountModel {
   data: PuppetUserRecord;
   tags: string[];
   acceptableUsePolicyAgreedOn?: string;
+  deactivatedOn?: string;
 }
 
 export interface AccountTagsModel {

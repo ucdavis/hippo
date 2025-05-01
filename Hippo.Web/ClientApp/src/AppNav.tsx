@@ -329,6 +329,20 @@ export const AppNav = () => {
                         </NavLink>
                       </DropdownItem>
                     </ShowFor>
+                    <ShowFor roles={["System", "ClusterAdmin"]}>
+                      <DropdownItem>
+                        <NavLink
+                          id="accountDeactivationsReport"
+                          to={`/${cluster.name}/report/accountdeactivations`}
+                          className="nav-dropdown-item nav-link"
+                          style={({ isActive }) =>
+                            isActive ? { fontWeight: "bold" } : {}
+                          }
+                        >
+                          Account Deactivations
+                        </NavLink>
+                      </DropdownItem>
+                    </ShowFor>
                   </DropdownMenu>
                 </Dropdown>
               </ShowFor>

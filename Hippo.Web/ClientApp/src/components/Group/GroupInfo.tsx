@@ -59,6 +59,12 @@ export const GroupInfo = ({
         <Button size="sm" color="link" onClick={handleShowMembers}>
           View Members
         </Button>
+        {group.revokedOn && (
+          <>
+            {" - "}
+            <strong>Revoked on {new Date(group.revokedOn).toLocaleDateString()}</strong>
+          </>
+        )}
       </ShowFor>
     </div>
   );

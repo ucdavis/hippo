@@ -36,6 +36,7 @@ import { Payments } from "./components/Report/Payments";
 import { ReportOrders } from "./components/Report/ReportOrders";
 import GroupMembers from "./components/Group/GroupMembers";
 import { RequireAupAgreement } from "./Shared/RequireAupAgreement";
+import { AccountDeactivations } from "./components/Report/AccountDeactivations";
 
 declare let Hippo: AppContextShape;
 
@@ -308,6 +309,19 @@ const App = () => {
                 >
                   <RequireAupAgreement>
                     <ReportOrders />
+                  </RequireAupAgreement>
+                </ShowFor>
+              }
+            />
+            <Route
+              path="/:cluster/report/accountdeactivations"
+              element={
+                <ShowFor
+                  roles={["System", "ClusterAdmin"]}
+                  alternative={<NotAuthorized />}
+                >
+                  <RequireAupAgreement>
+                    <AccountDeactivations />
                   </RequireAupAgreement>
                 </ShowFor>
               }
