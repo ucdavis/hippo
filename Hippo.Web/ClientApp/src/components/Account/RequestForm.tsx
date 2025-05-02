@@ -7,6 +7,7 @@ import {
   AccountCreateModel,
   AccessType,
   RequestModel,
+  User,
 } from "../../types";
 import { authenticatedFetch, parseBadRequest } from "../../util/api";
 import { usePromiseNotification } from "../../util/Notifications";
@@ -17,6 +18,7 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipButton from "../../Shared/HipComponents/HipButton";
+import { SearchPerson } from "../../Shared/SearchPerson";
 
 export const RequestForm = () => {
   const [context, setContext] = useContext(AppContext);
@@ -30,8 +32,10 @@ export const RequestForm = () => {
     groupId: 0,
     sshKey: "",
     supervisingPI: "",
+    supervisingPIIamId: "",
     accessTypes: [...cluster.accessTypes],
   });
+  const [supervisingPI, setSupervisingPI] = useState<User>();
 
   // load up possible groups
   useEffect(() => {
@@ -130,15 +134,17 @@ export const RequestForm = () => {
         </div>
         <div className="form-group">
           <label className="form-label">Who is your supervising PI?</label>
-          <input
-            className="form-control"
-            id="supervisingPI"
-            placeholder="Supervising PI"
-            value={request.supervisingPI}
-            onChange={(e) =>
-              setRequest((r) => ({ ...r, supervisingPI: e.target.value }))
-            }
-          ></input>
+          <SearchPerson
+            user={supervisingPI}
+            onChange={(user) => {
+              setRequest((r) => ({
+                ...r,
+                supervisingPI: user?.name,
+                supervisingPIIamId: user?.iam,
+              }));
+              setSupervisingPI(user);
+            }}
+          />                
           <p className="form-helper">
             Some clusters may require additional clarification on who your
             supervising PI will be. If you are unsure, please ask your sponsor.

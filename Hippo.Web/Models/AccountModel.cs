@@ -21,6 +21,7 @@ namespace Hippo.Web.Models
         public JsonElement? Data { get; set; }
         public List<string> Tags { get; set; } = new();
         public DateTime? AcceptableUsePolicyAgreedOn { get; set; }
+        public DateTime? DeactivatedOn { get; set; }
 
         public AccountModel()
         {

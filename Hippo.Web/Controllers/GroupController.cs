@@ -142,6 +142,19 @@ public class GroupController : SuperController
             return BadRequest($"You have already requested access to this group.");
         }
 
+        // Get user Id of the Supervising PI
+        var supervisingPIUserId = 0;
+        if (!string.IsNullOrWhiteSpace(addToGroupModel.SupervisingPIIamId))
+        {
+            var user = await _userService.GetUserByIam(addToGroupModel.SupervisingPIIamId);
+
+            if (user == null)
+            {
+                return BadRequest("Supervising PI not found");
+            }
+            supervisingPIUserId = user.Id;
+        }
+
         var request = new HippoRequest
         {
             Requester = currentUser,
@@ -155,6 +168,7 @@ public class GroupController : SuperController
         .WithAccountRequestData(new AccountRequestDataModel
         {
             SupervisingPI = addToGroupModel.SupervisingPI,
+            SupervisingPIUserId = supervisingPIUserId
         });
 
         await _dbContext.Requests.AddAsync(request);

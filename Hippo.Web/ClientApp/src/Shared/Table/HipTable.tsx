@@ -172,10 +172,10 @@ export const HipTable = <T extends object>({
       )}
       <HipDumbTable>
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map((headerGroup, index) => (
             <React.Fragment key={headerGroup.id}>
-              <tr className="table-row">
-                {headerGroup.headers.map((header) => {
+              <tr className="table-row" key={headerGroup.id + "_" + index}>
+                {headerGroup.headers.map((header, index) => {
                   const context = header.getContext();
                   const isSorted = context.column.getIsSorted();
                   const sortIndex = context.column.getSortIndex();
@@ -184,7 +184,7 @@ export const HipTable = <T extends object>({
                   return (
                     <th
                       colSpan={header.colSpan}
-                      key={header.id}
+                      key={header.id + "_" + index}
                       className={`sort-${
                         isSorted ? (isDesc ? "desc" : "asc") : "none"
                       }`}
@@ -220,8 +220,8 @@ export const HipTable = <T extends object>({
                 header.column.getCanFilter(),
               ) && (
                 <tr>
-                  {headerGroup.headers.map((header) => (
-                    <th colSpan={header.colSpan} key={header.id}>
+                  {headerGroup.headers.map((header, index) => (
+                    <th colSpan={header.colSpan} key={header.id + '_' + index}>
                       {header.column.getCanFilter() && (
                         <div>
                           <Filter column={header.column} />
@@ -235,10 +235,10 @@ export const HipTable = <T extends object>({
           ))}
         </thead>
         <tbody>
-          {page.rows.map((row) => (
-            <tr className="rt-tr-group" key={row.id}>
-              {row.getAllCells().map((cell) => (
-                <td key={cell.id}>
+          {page.rows.map((row, index) => (
+            <tr className="rt-tr-group" key={row.id + "_" + index}>
+              {row.getAllCells().map((cell, index) => (
+                <td key={cell.id + "_" + index} className="rt-td">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -386,9 +386,9 @@ const Filter = ({ column }: { column: Column<any, unknown> }) => {
       value={columnFilterValue?.toString()}
     >
       <option value="">All</option>
-      {sortedUniqueValues.map((value) => (
+      {sortedUniqueValues.map((value, index) => (
         //dynamically generated select options from faceted values feature
-        <option value={value} key={value}>
+        <option value={value} key={value + "_" + index}>
           {value}
         </option>
       ))}

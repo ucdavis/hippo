@@ -50,7 +50,7 @@ const MetaDataFields: React.FC<MetaDataFieldsProps> = ({ readOnly }) => {
         <tbody>
           {fields.map((field, index) => {
             return (
-              <tr key={field.id}>
+              <tr key={`row_${field.id}`}>
                 <td width={"45%"}>
                   <HipFormField
                     size="lg"

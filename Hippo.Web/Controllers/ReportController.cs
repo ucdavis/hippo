@@ -1,7 +1,10 @@
 ﻿using Hippo.Core.Data;
 using Hippo.Core.Domain;
+using Hippo.Core.Extensions;
+using Hippo.Core.Models;
 using Hippo.Core.Models.ReportModels;
 using Hippo.Core.Services;
+using Hippo.Web.Models;
 using Hippo.Web.Models.OrderModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -144,7 +147,7 @@ namespace Hippo.Web.Controllers
 
             //TODO: Need to filter out recurring?
 
-            var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed};
+            var statuses = new string[] { Order.Statuses.Active, Order.Statuses.Completed };
             var compareDate = DateTime.UtcNow.AddDays(31);
             var orders = await _dbContext.Orders
                 .Include(a => a.PrincipalInvestigator)
@@ -156,6 +159,81 @@ namespace Hippo.Web.Controllers
                 .ToListAsync();
 
             return Ok(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AccountDeactivations()
+        {
+            if (string.IsNullOrWhiteSpace(Cluster))
+            {
+                return BadRequest("Cluster is required");
+            }
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+
+            if (!isClusterOrSystemAdmin)
+            {
+                return BadRequest("You do not have permission to view this page.");
+            }
+
+            // Some of the filtering is more convoluted because Account.MemberOfGroups skips the GroupMemberAccount model
+            var accounts = await _dbContext.Accounts
+                .IgnoreQueryFilters()
+                .Where(a => a.Cluster.Name == Cluster && a.DeactivatedOn != null || _dbContext.GroupMemberAccount
+                    .IgnoreQueryFilters()
+                    .Any(g => g.AccountId == a.Id && g.RevokedOn != null))
+                .Select(a => new
+                {
+                    Account = a,
+                    MemberOfGroups = _dbContext.GroupMemberAccount
+                        .IgnoreQueryFilters()
+                        .Where(g => g.AccountId == a.Id)
+                        .Select(g => new
+                        {
+                            Group = g.Group,
+                            g.RevokedOn
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            var accountModels = accounts.Select(a => new AccountModel
+            {
+                Id = a.Account.Id,
+                Name = a.Account.Name,
+                Email = a.Account.Email,
+                Kerberos = a.Account.Kerberos,
+                CreatedOn = a.Account.CreatedOn,
+                Cluster = a.Account.Cluster.Name,
+                Owner = a.Account.Owner,
+                AcceptableUsePolicyAgreedOn = a.Account.AcceptableUsePolicyAgreedOn,
+                MemberOfGroups = a.MemberOfGroups.Select(g => new GroupModel
+                {
+                    Id = g.Group.Id,
+                    DisplayName = g.Group.DisplayName,
+                    Name = g.Group.Name,
+                    Admins = g.Group.AdminAccounts
+                        .Select(admin => new GroupAccountModel
+                        {
+                            Kerberos = admin.Kerberos,
+                            Name = admin.Name,
+                            Email = admin.Email
+                        }).ToList(),
+                    Data = g.Group.Data,
+                    RevokedOn = g.RevokedOn
+                }).ToList(),
+                UpdatedOn = a.Account.UpdatedOn,
+                AccessTypes = a.Account.AccessTypes.Select(at => at.Name).ToList(),
+                Data = a.Account.Data,
+                Tags = a.Account.Tags.Select(t => t.Name).ToList(),
+                DeactivatedOn = a.Account.DeactivatedOn,
+            })
+            .OrderByDescending(x => x.DeactivatedOn)
+            .ThenByDescending(x => x.MemberOfGroups.FirstOrDefault(y => y.RevokedOn != null)?.RevokedOn)
+            .ToList();
+
+            return Ok(accountModels);
         }
 
         [HttpGet]

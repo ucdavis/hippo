@@ -10,6 +10,7 @@ namespace Hippo.Core.Services
     {
         Task<User> GetByEmail(string email);
         Task<User> GetByKerberos(string kerb);
+        Task<User> GetByIamId(string iamId);
     }
 
     public class IdentityService : IIdentityService
@@ -88,6 +89,41 @@ namespace Hippo.Core.Services
 
             return rtValue;
         }
+
+        public async Task<User> GetByIamId(string iamId)
+        {
+            var clientws = new IetClient(_authSettings.IamKey);
+            var ucdKerbResult = await clientws.Kerberos.Search(KerberosSearchField.iamId, iamId);
+
+            if (ucdKerbResult.ResponseData.Results.Length == 0)
+            {
+                return null;
+            }
+
+            var ucdKerbPerson = ucdKerbResult.ResponseData.Results.First();
+
+            // find their email
+            var ucdContactResult = await clientws.Contacts.Get(ucdKerbPerson.IamId);
+
+            if (ucdContactResult.ResponseData.Results.Length == 0)
+            {
+                return null;
+            }
+
+            var ucdContact = ucdContactResult.ResponseData.Results.First();
+            var rtValue = CreateUser(ucdContact.Email, ucdKerbPerson, iamId);
+
+            if (string.IsNullOrWhiteSpace(rtValue.Email))
+            {
+                if (!string.IsNullOrWhiteSpace(ucdKerbPerson.UserId))
+                {
+                    rtValue.Email = $"{ucdKerbPerson.UserId}@ucdavis.edu";
+                }
+            }
+
+            return rtValue;
+        }
+
 
         private User CreateUser(string email, KerberosResult ucdKerbPerson, string iamId)
         {

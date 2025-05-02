@@ -6,6 +6,7 @@ import {
   GroupRequestDataModel,
   GroupModel,
   RequestModel,
+  User,
 } from "../../types";
 import { GroupInfo } from "../Group/GroupInfo";
 import { GroupLookup } from "../Group/GroupLookup";
@@ -22,6 +23,7 @@ import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipButton from "../../Shared/HipComponents/HipButton";
 import { getGroupModelFromRequest } from "../../Shared/requestUtils";
+import { SearchPerson } from "../../Shared/SearchPerson";
 
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
@@ -31,6 +33,7 @@ export const AccountInfo = () => {
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const navigate = useNavigate();
   const userGroupName = context.user.detail.kerberos + "grp";
+  const [supervisingPI, setSupervisingPI] = useState<User>();
 
   const memberOfGroups = useMemo(
     () => account?.memberOfGroups ?? [],
@@ -85,17 +88,17 @@ export const AccountInfo = () => {
                 <label className="form-label">
                   Who is your supervising PI?
                 </label>
-                <input
-                  className="form-control"
-                  id="supervisingPI"
-                  placeholder="Supervising PI"
-                  onChange={(e) =>
+                <SearchPerson
+                  user={supervisingPI}
+                  onChange={(user) => {
                     setReturn((model) => ({
                       ...model,
-                      supervisingPI: e.target.value,
-                    }))
-                  }
-                ></input>
+                      supervisingPI: user?.name,
+                      supervisingPIIamId: user?.iam,
+                    }));
+                    setSupervisingPI(user);
+                  }}
+                />                
                 <p className="form-helper">
                   Some clusters may require additional clarification on who your
                   supervising PI will be for this group. If you are unsure,
@@ -108,7 +111,7 @@ export const AccountInfo = () => {
       },
       canConfirm: (returnValue) => returnValue !== undefined,
     },
-    [availableGroups],
+    [availableGroups, supervisingPI],
   );
 
   const [getGroupCreationConfirmation] =

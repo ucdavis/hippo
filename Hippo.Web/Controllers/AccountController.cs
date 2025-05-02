@@ -191,6 +191,19 @@ public class AccountController : SuperController
             return BadRequest("You already have an account for this cluster");
         }
 
+        // Get user Id of the Supervising PI
+        var supervisingPIUserId = 0;
+        if (!string.IsNullOrWhiteSpace(model.SupervisingPIIamId))
+        {
+            var user = await _userService.GetUserByIam(model.SupervisingPIIamId);
+
+            if (user == null)
+            {
+                return BadRequest("Supervising PI not found");
+            }
+            supervisingPIUserId = user.Id;
+        }
+
         // AccountRequest is an alias for Hippo.Core.Domain.Request to avoid clash with ControllerBase.Request
         var request = new HippoRequest
         {
@@ -204,6 +217,7 @@ public class AccountController : SuperController
         {
             AcceptableUsePolicyAgreedOn = model.AcceptableUsePolicyAgreedOn,
             SupervisingPI = model.SupervisingPI,
+            SupervisingPIUserId = supervisingPIUserId,
             SshKey = model.SshKey,
             AccessTypes = model.AccessTypes
         });
@@ -318,5 +332,5 @@ public class AccountController : SuperController
         await _dbContext.SaveChangesAsync();
 
         return Ok(new { Message = "Acceptable Use Policy agreement recorded successfully" });
-    }    
+    }
 }
