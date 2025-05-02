@@ -218,7 +218,7 @@ namespace Hippo.Core.Services
                 // insert/update/delete group memberships
                 Log.Information("Inserting/Updating/Revoking {GroupMembershipQuantity} group memberships",
                     desiredGroupAccounts.Count());
-                await _dbContext.BulkInsertOrUpdateOrDeleteAsync(desiredGroupAccounts, new BulkConfig
+                await _dbContext.BulkInsertOrUpdateAsync(desiredGroupAccounts, new BulkConfig
                 {
                     UpdateByProperties = new List<string> { nameof(GroupMemberAccount.GroupId), nameof(GroupMemberAccount.AccountId) }
                 });
