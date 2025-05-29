@@ -238,15 +238,15 @@ try
     builder.Services.AddScoped<IPaymentsService, PaymentsService>();
     builder.Services.AddScoped<IExpiringOrdersService, ExpiringOrdersService>();
 
-
-    if (builder.Configuration.GetValue<bool>("EventQueueEnabled"))
-    {
+    // AccountUpdateYamlService is deprecated and will be removed in a future release.
+    // if (builder.Configuration.GetValue<bool>("EventQueueEnabled"))
+    // {
         builder.Services.AddScoped<IAccountUpdateService, AccountUpdateService>();
-    }
-    else
-    {
-        builder.Services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
-    }
+    // }
+    // else
+    // {
+    //     builder.Services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
+    // }
     builder.Services.AddSingleton<ISecretsService, SecretsService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<IMjmlRenderer, MjmlRenderer>();

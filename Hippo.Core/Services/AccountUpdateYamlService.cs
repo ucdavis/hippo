@@ -9,6 +9,7 @@ namespace Hippo.Core.Services;
 /// <summary>
 /// Temporary implementation of IAccountUpdateService that sends yaml files for backwards compatibility
 /// </summary>
+[Obsolete("AccountUpdateYamlService is deprecated and will be removed in a future release.")]
 public class AccountUpdateYamlService : IAccountUpdateService
 {
     private readonly ISshService _sshService;
