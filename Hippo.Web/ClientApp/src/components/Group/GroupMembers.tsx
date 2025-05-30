@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ObjectTree from "../../Shared/ObjectTree";
 import { AccountModel, GroupMembersModel } from "../../types";
 import { useParams } from "react-router-dom";
@@ -15,6 +15,7 @@ import { useConfirmationDialog } from "../../Shared/ConfirmationDialog";
 import { GroupInfo } from "./GroupInfo";
 import { usePromiseNotification } from "../../util/Notifications";
 import { sortByDate } from "../../Shared/Table/HelperFunctions";
+import AppContext from "../../Shared/AppContext";
 
 const GroupMembers: React.FC = () => {
   const { cluster: clusterName, groupId: groupIdStr } = useParams<{
@@ -25,6 +26,7 @@ const GroupMembers: React.FC = () => {
   const [removing, setRemoving] = useState<AccountModel>();
   const [groupMembers, setGroupMembers] = useState<GroupMembersModel>();
   const [_, setNotification] = usePromiseNotification();
+  const [context] = useContext(AppContext);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -118,7 +120,7 @@ const GroupMembers: React.FC = () => {
 
   const columnHelper = createColumnHelper<AccountModel>();
 
-  const columns = [
+  let columns: any[] = [
     columnHelper.accessor("name", {
       header: "Name",
       id: "Name", // id required for only this column for some reason
@@ -137,30 +139,35 @@ const GroupMembers: React.FC = () => {
     columnHelper.accessor((row) => row.tags?.join(", "), {
       header: "Tags",
     }),
-    columnHelper.display({
-      id: "actions",
-      header: "Action",
-      cell: (props) => {
-        const removalPending = groupMembers.kerberosPendingRemoval.some(
-          (kerb) => props.row.original.kerberos === kerb,
-        );
-        return (
-          <>
-            <HipButton
-              disabled={removalPending}
-              onClick={() => handleRemove(props.row.original)}
-            >
-              {removalPending
-                ? "Removal Pending"
-                : removing?.id === props.row.original.id
-                  ? "Requesting Removal..."
-                  : "Remove from Group"}
-            </HipButton>
-          </>
-        );
-      },
-    }),
   ];
+
+  if (context.featureFlags.removeAccountFromGroup) {
+    columns.push(
+      columnHelper.display({
+        id: "actions",
+        header: "Action",
+        cell: (props) => {
+          const removalPending = groupMembers.kerberosPendingRemoval.some(
+            (kerb) => props.row.original.kerberos === kerb,
+          );
+          return (
+            <>
+              <HipButton
+                disabled={removalPending}
+                onClick={() => handleRemove(props.row.original)}
+              >
+                {removalPending
+                  ? "Removal Pending"
+                  : removing?.id === props.row.original.id
+                    ? "Requesting Removal..."
+                    : "Remove from Group"}
+              </HipButton>
+            </>
+          );
+        },
+      })
+    );
+  }
 
   const Title = (
     <HipTitle title="Group Member Accounts" subtitle="Administration" />

@@ -7,6 +7,7 @@ using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Handlers;
 using Hippo.Web.Middleware;
+using Hippo.Web.Models.Settings;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -226,6 +227,7 @@ try
     builder.Services.Configure<AggieEnterpriseSettings>(builder.Configuration.GetSection("AggieEnterprise"));
     builder.Services.Configure<SlothSettings>(builder.Configuration.GetSection("Sloth"));
     builder.Services.Configure<PuppetSettings>(builder.Configuration.GetSection("Puppet"));
+    builder.Services.Configure<FeatureFlagSettings>(builder.Configuration.GetSection("FeatureFlags"));
 
     builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
     builder.Services.AddScoped<IEmailService, EmailService>();
@@ -238,15 +240,15 @@ try
     builder.Services.AddScoped<IPaymentsService, PaymentsService>();
     builder.Services.AddScoped<IExpiringOrdersService, ExpiringOrdersService>();
 
-
-    if (builder.Configuration.GetValue<bool>("EventQueueEnabled"))
-    {
+    // AccountUpdateYamlService is deprecated and will be removed in a future release.
+    // if (builder.Configuration.GetValue<bool>("EventQueueEnabled"))
+    // {
         builder.Services.AddScoped<IAccountUpdateService, AccountUpdateService>();
-    }
-    else
-    {
-        builder.Services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
-    }
+    // }
+    // else
+    // {
+    //     builder.Services.AddScoped<IAccountUpdateService, AccountUpdateYamlService>();
+    // }
     builder.Services.AddSingleton<ISecretsService, SecretsService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<IMjmlRenderer, MjmlRenderer>();

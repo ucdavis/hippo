@@ -6,6 +6,7 @@ import {
   User,
   Permission,
   RequestModel,
+  FeatureFlagsModel,
 } from "../types";
 
 const AppContext = React.createContext<
@@ -20,6 +21,10 @@ const AppContext = React.createContext<
     accounts: [] as AccountModel[],
     clusters: [] as ClusterModel[],
     openRequests: [] as RequestModel[],
+    featureFlags: {
+      createGroup: false,
+      removeAccountFromGroup: false,
+    } as FeatureFlagsModel,
   },
   () => {},
 ]);
