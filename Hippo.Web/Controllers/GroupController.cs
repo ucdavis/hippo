@@ -12,6 +12,8 @@ using Hippo.Core.Models;
 using EFCore.BulkExtensions;
 using HippoRequest = Hippo.Core.Domain.Request;
 using Hippo.Core.Extensions;
+using Microsoft.Extensions.Options;
+using Hippo.Web.Models.Settings;
 
 namespace Hippo.Web.Controllers;
 
@@ -23,15 +25,17 @@ public class GroupController : SuperController
     private readonly INotificationService _notificationService;
     private readonly IHistoryService _historyService;
     private readonly IAccountUpdateService _accountUpdateService;
+    private readonly FeatureFlagSettings _featureFlagSettings;
 
     public GroupController(AppDbContext dbContext, IUserService userService, IHistoryService historyService,
-        INotificationService notificationService, IAccountUpdateService accountUpdateService)
+        INotificationService notificationService, IAccountUpdateService accountUpdateService, IOptions<FeatureFlagSettings> featureFlagSettings)
     {
         _dbContext = dbContext;
         _userService = userService;
         _historyService = historyService;
         _notificationService = notificationService;
         _accountUpdateService = accountUpdateService;
+        _featureFlagSettings = featureFlagSettings.Value;
     }
 
     [HttpGet]
@@ -193,6 +197,11 @@ public class GroupController : SuperController
     [HttpPost]
     public async Task<IActionResult> RequestCreation([FromBody] CreateGroupModel createGroupModel)
     {
+        if (!_featureFlagSettings.CreateGroup)
+        {
+            return BadRequest("This feature is not enabled.");
+        }
+        
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("Cluster is required");
@@ -276,6 +285,11 @@ public class GroupController : SuperController
     [HttpPost]
     public async Task<IActionResult> RequestRemoveMember([FromBody] GroupMemberModel groupMemberModel)
     {
+        if (!_featureFlagSettings.RemoveAccountFromGroup)
+        {
+            return BadRequest("This feature is not enabled.");
+        }
+
         if (string.IsNullOrWhiteSpace(Cluster))
         {
             return BadRequest("Cluster is required");

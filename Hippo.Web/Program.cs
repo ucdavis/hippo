@@ -7,6 +7,7 @@ using Hippo.Core.Services;
 using Hippo.Web.Extensions;
 using Hippo.Web.Handlers;
 using Hippo.Web.Middleware;
+using Hippo.Web.Models.Settings;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -226,6 +227,7 @@ try
     builder.Services.Configure<AggieEnterpriseSettings>(builder.Configuration.GetSection("AggieEnterprise"));
     builder.Services.Configure<SlothSettings>(builder.Configuration.GetSection("Sloth"));
     builder.Services.Configure<PuppetSettings>(builder.Configuration.GetSection("Puppet"));
+    builder.Services.Configure<FeatureFlagSettings>(builder.Configuration.GetSection("FeatureFlags"));
 
     builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
     builder.Services.AddScoped<IEmailService, EmailService>();
