@@ -484,6 +484,26 @@ export const Details = () => {
             </HipErrorBoundary>
             <HipErrorBoundary>
               <ShowFor
+                roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                condition={
+                  order.isRecurring && order.status === OrderStatus.Active
+                }
+              >
+                {/*TODO: fix what it does */}
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={updateStatus}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Created)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Change Rate
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
                 roles={["System", "ClusterAdmin"]}
                 condition={
                   adminCanArchiveStatuses.includes(order.status) &&

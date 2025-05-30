@@ -338,6 +338,73 @@ namespace Hippo.Web.Controllers
 
         }
 
+        /// <summary>
+        /// An active Recurring order can change the recurring rate.
+        /// This sets it back to created for the PI to approve, and logs the change in history.
+        /// </summary>
+        /// <param name="id">Order ID</param>
+        /// <param name="newRate"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ChangeRecurringRate(int id, decimal newRate)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+            var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster); //Probably want financial admins to be able to change the rate
+
+            if(!isClusterOrSystemAdmin && !isFinancialAdmin)
+            {
+                return BadRequest("You do not have permission to change the recurring rate on this order.");
+            }
+
+            var existingOrder = await _dbContext.Orders
+                //.Include(a => a.PrincipalInvestigator.Owner)
+                //.Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .SingleOrDefaultAsync(a => a.Id == id);
+
+            if (existingOrder == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            if(existingOrder.Status != Order.Statuses.Active || !existingOrder.IsRecurring)
+            {
+                return BadRequest("You can only change the recurring rate on an active order.");
+            }
+
+            if(newRate <= 0)
+            {
+                return BadRequest("The new rate must be greater than zero.");
+            }
+
+            var oldRate = existingOrder.UnitPrice;
+
+            //Want to make sure this is to 2 decimal places
+            existingOrder.UnitPrice = Math.Round(newRate, 2, MidpointRounding.AwayFromZero);
+            existingOrder.WasRateAdjusted = true; //This will be used to indicate that the rate was changed after it was activated.
+            existingOrder.SubTotal = existingOrder.Quantity * existingOrder.UnitPrice;
+            existingOrder.Total = existingOrder.SubTotal + existingOrder.Adjustment;
+            //don't think we want to change the balance remaining, probably wait for next billing cycle
+
+            existingOrder.Status = Order.Statuses.Created;
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Created);
+            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: {oldRate} New Unit Price: {existingOrder.UnitPrice}");
+
+            await _dbContext.SaveChangesAsync();
+
+            //TODO: Need to generate appropriate emails
+
+            //To make sure the model has all the info needed to update the UI
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+
+            return Ok(model);
+        }
+
         [HttpPost]
         public async Task<IActionResult> ChangeStatus(int id, string expectedStatus)
         {
@@ -604,6 +671,7 @@ namespace Hippo.Web.Controllers
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
+
 
             return Ok(model);
         }
