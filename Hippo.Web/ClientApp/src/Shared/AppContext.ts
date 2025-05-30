@@ -21,7 +21,10 @@ const AppContext = React.createContext<
     accounts: [] as AccountModel[],
     clusters: [] as ClusterModel[],
     openRequests: [] as RequestModel[],
-    featureFlags: {} as FeatureFlagsModel,
+    featureFlags: {
+      createGroup: false,
+      removeAccountFromGroup: false,
+    } as FeatureFlagsModel,
   },
   () => {},
 ]);
