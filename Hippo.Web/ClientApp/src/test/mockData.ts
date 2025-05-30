@@ -131,6 +131,12 @@ const fakeCluster: ClusterModel = {
   ).toISOString(),
 };
 
+
+export const fakeFeatureFlags = {
+  createGroup: true,
+  removeAccountFromGroup: true,
+};
+
 export const fakeAppContext: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",
   user: {
@@ -147,6 +153,7 @@ export const fakeAppContext: AppContextShape = {
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
   openRequests: fakeRequests,
+  featureFlags: fakeFeatureFlags,
 };
 
 export const fakeGroupAdminAppContext: AppContextShape = {
@@ -165,6 +172,7 @@ export const fakeGroupAdminAppContext: AppContextShape = {
   accounts: [fakeAccounts[0]],
   clusters: [fakeCluster],
   openRequests: fakeRequests,
+  featureFlags: fakeFeatureFlags,
 };
 
 export const fakeSetContext = vi.fn();
@@ -193,4 +201,5 @@ export const fakeAppContextNoAccount: AppContextShape = {
   accounts: [],
   clusters: [fakeCluster],
   openRequests: [],
+  featureFlags: fakeFeatureFlags,
 };
