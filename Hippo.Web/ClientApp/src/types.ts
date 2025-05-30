@@ -125,6 +125,12 @@ export interface AppContextShape {
   clusters: ClusterModel[];
   openRequests: RequestModel[];
   lastPuppetSync?: string;
+  featureFlags: FeatureFlagsModel;
+}
+
+export interface FeatureFlagsModel {
+    createGroup: boolean;
+    removeAccountFromGroup: boolean;
 }
 
 export interface Permission {

@@ -1,8 +1,12 @@
+@using Hippo.Web.Models.Settings
 @using Microsoft.Extensions.Configuration
 @using Hippo.Core.Services
+@using Microsoft.Extensions.Options
+@using System.Text.Json
 @inject IConfiguration Configuration
 @inject IUserService UserService
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@inject IOptions<FeatureFlagSettings> FeatureFlags
 
 <!DOCTYPE html>
 <html>
@@ -59,6 +63,7 @@
         Hippo.clusters = @Html.Raw(await UserService.GetAvailableClustersJsonAsync());
         Hippo.antiForgeryToken = "@Xsrf.GetAndStoreTokens(Context).RequestToken";
         Hippo.lastPuppetSync = @Html.Raw(await UserService.GetLastPuppetSync());
+        Hippo.featureFlags = @Html.Raw(JsonSerializer.Serialize(FeatureFlags.Value, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
     </script>
 
 

@@ -394,7 +394,7 @@ export const AccountInfo = () => {
           >
             Request Access to Another Group
           </HipButton>{" "}
-          {!adminOfGroups.some((g) => g.name === userGroupName) &&
+          {context.featureFlags.createGroup && !adminOfGroups.some((g) => g.name === userGroupName) &&
             !currentOpenRequests.some(
               (r) =>
                 r.action === "CreateGroup" && r.data.name === userGroupName,
