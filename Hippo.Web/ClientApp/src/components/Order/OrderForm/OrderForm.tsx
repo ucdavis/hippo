@@ -273,6 +273,12 @@ const OrderForm: React.FC<OrderFormProps> = ({
                       label="Status"
                       canEditConditions={false}
                     />
+                    {/* <OrderFormField
+                      name="wasRateAdjusted"
+                      label="Rate Changed"
+                      type="checkbox"
+                      canEditConditions={false}
+                    /> */}
                   </>
                 )}
                 <OrderFormField
