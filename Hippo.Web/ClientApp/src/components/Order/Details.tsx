@@ -346,8 +346,6 @@ export const Details = () => {
     const [confirmed, newUnitPrice] = await changeRateConfirmation();
     alert(newUnitPrice);
     if (!confirmed) {
-      //refresh the page
-      window.location.reload();
       return;
     }
   };
