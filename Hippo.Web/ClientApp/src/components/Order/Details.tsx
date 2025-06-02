@@ -287,7 +287,7 @@ export const Details = () => {
     }
   };
 
-  const [changeRateConfirmation] = useConfirmationDialog<string>(
+  const [changeRateConfirmation] = useConfirmationDialog<number>(
     {
       title: "Change Rate",
       message: (setReturn) => {
@@ -312,9 +312,6 @@ export const Details = () => {
                 Current Unit Price{" "}
                 <span className={"hip-text-primary"}>${order.unitPrice}</span>
               </h3>
-              {/* <h4 className="form-label">
-                Current Unit Price: ${order.unitPrice}
-              </h4> */}
               <h4 className="form-label">New Unit Price</h4>
               <input
                 className="form-control"
@@ -326,10 +323,14 @@ export const Details = () => {
                 pattern="^\d*\.?\d*$"
                 placeholder="Enter new unit price"
                 onChange={(e) => {
-                  // Only allow valid decimal input
                   const value = e.target.value;
-                  if (/^\d*\.?\d*$/.test(value) || value === "") {
-                    setReturn(value);
+                  const num = parseFloat(value);
+                  // Allow only numbers with up to 2 decimal places
+                  if (
+                    (/^\d*\.?\d{0,2}$/.test(value) || value === "") &&
+                    (!value || !isNaN(num))
+                  ) {
+                    setReturn(num);
                   }
                 }}
               />
@@ -337,7 +338,8 @@ export const Details = () => {
           </StatusDialog>
         );
       },
-      canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
+      canConfirm: (returnValue) =>
+        typeof returnValue === "number" && returnValue >= 0.01,
     },
     [order],
   );
