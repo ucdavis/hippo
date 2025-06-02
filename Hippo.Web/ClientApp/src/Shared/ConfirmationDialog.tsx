@@ -28,20 +28,20 @@ export const useConfirmationDialog = <T extends any = undefined>(
   const resolveRef = useRef<(value: [boolean, T]) => void>();
   const [returnValue, setReturnValue] = useState<T>();
 
-  const confirm = () => {
-    resolveRef.current && resolveRef.current([true, returnValue as T]);
+  const resetState = () => {
     promiseRef.current = undefined;
     resolveRef.current = undefined;
-    // Restore to default state for next use
     setReturnValue(undefined);
+  };
+
+  const confirm = () => {
+    resolveRef.current && resolveRef.current([true, returnValue as T]);
+    resetState();
   };
 
   const dismiss = () => {
     resolveRef.current && resolveRef.current([false, undefined as T]);
-    promiseRef.current = undefined;
-    resolveRef.current = undefined;
-    // Restore to default state for next use
-    setReturnValue(undefined);
+    resetState();
   };
 
   const buttons = props.buttons ?? ["Confirm", "Cancel"];
