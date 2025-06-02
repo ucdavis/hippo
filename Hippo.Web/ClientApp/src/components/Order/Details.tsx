@@ -287,6 +287,69 @@ export const Details = () => {
     }
   };
 
+  const [changeRateConfirmation] = useConfirmationDialog<string>(
+    {
+      title: "Change Rate",
+      message: (setReturn) => {
+        return (
+          <StatusDialog
+            newStatus={OrderStatus.Created}
+            currentStatus={order.status}
+            isAdmin={isClusterAdmin}
+            hideDescription={true}
+            newStatusDanger={false}
+          >
+            <HipFormGroup size="lg">
+              <h3>
+                This will set the recurring order back to created with a new
+                unit price. The PI will need to approve the order. Once the
+                order is approved, processed, and activated, it will begin
+                billing at the new unit price after the current billing cycle.
+              </h3>
+              <h3>Billing will not resume until this happens.</h3>
+              <br />
+              <h3>
+                Current Unit Price{" "}
+                <span className={"hip-text-primary"}>${order.unitPrice}</span>
+              </h3>
+              {/* <h4 className="form-label">
+                Current Unit Price: ${order.unitPrice}
+              </h4> */}
+              <h4 className="form-label">New Unit Price</h4>
+              <input
+                className="form-control"
+                id="newUnitPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                pattern="^\d*\.?\d*$"
+                placeholder="Enter new unit price"
+                onChange={(e) => {
+                  // Only allow valid decimal input
+                  const value = e.target.value;
+                  if (/^\d*\.?\d*$/.test(value) || value === "") {
+                    setReturn(value);
+                  }
+                }}
+              />
+            </HipFormGroup>
+          </StatusDialog>
+        );
+      },
+      canConfirm: (returnValue) => notEmptyOrFalsey(returnValue),
+    },
+    [order],
+  );
+
+  const changeRate = async () => {
+    const [confirmed, newUnitPrice] = await changeRateConfirmation();
+    alert(newUnitPrice);
+    if (!confirmed) {
+      return;
+    }
+  };
+
   const [rejectOrderConfirmation] = useConfirmationDialog<string>(
     {
       title: "Reject Order",
@@ -492,7 +555,7 @@ export const Details = () => {
                 {/*TODO: fix what it does */}
                 <HipButton
                   className="btn btn-primary"
-                  onClick={updateStatus}
+                  onClick={changeRate}
                   onMouseEnter={() => setHoverAction(OrderStatus.Created)}
                   onMouseLeave={() => setHoverAction(null)}
                 >
