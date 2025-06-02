@@ -320,7 +320,7 @@ export const Details = () => {
                 className="form-control"
                 id="newUnitPrice"
                 type="number"
-                min="0"
+                min="0.01"
                 step="0.01"
                 inputMode="decimal"
                 pattern="^\d*\.?\d*$"
