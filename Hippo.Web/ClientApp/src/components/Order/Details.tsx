@@ -346,9 +346,38 @@ export const Details = () => {
 
   const changeRate = async () => {
     const [confirmed, newUnitPrice] = await changeRateConfirmation();
-    alert(newUnitPrice);
+
     if (!confirmed) {
       return;
+    }
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/changeRecurringRate/${orderId}?newRate=${newUnitPrice}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(
+      req,
+      "Changing Rate",
+      "Rate Changed, set to Created",
+      async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(response);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      },
+    );
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      setOrder(data);
+      //just reget the whole order to update fields
+      window.location.reload();
     }
   };
 

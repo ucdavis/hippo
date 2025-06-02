@@ -390,7 +390,7 @@ namespace Hippo.Web.Controllers
 
             existingOrder.Status = Order.Statuses.Created;
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Created);
-            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: {oldRate} New Unit Price: {existingOrder.UnitPrice}");
+            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: {oldRate:F2} New Unit Price: {existingOrder.UnitPrice:F2}");
 
             await _dbContext.SaveChangesAsync();
 
