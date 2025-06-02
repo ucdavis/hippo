@@ -32,12 +32,16 @@ export const useConfirmationDialog = <T extends any = undefined>(
     resolveRef.current && resolveRef.current([true, returnValue as T]);
     promiseRef.current = undefined;
     resolveRef.current = undefined;
+    // Restore to default state for next use
+    setReturnValue(undefined);
   };
 
   const dismiss = () => {
     resolveRef.current && resolveRef.current([false, undefined as T]);
     promiseRef.current = undefined;
     resolveRef.current = undefined;
+    // Restore to default state for next use
+    setReturnValue(undefined);
   };
 
   const buttons = props.buttons ?? ["Confirm", "Cancel"];
