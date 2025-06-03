@@ -273,12 +273,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
                       label="Status"
                       canEditConditions={false}
                     />
-                    {/* <OrderFormField
-                      name="wasRateAdjusted"
-                      label="Rate Changed"
-                      type="checkbox"
-                      canEditConditions={false}
-                    /> */}
+                    {orderProp.wasRateAdjusted && (
+                      <OrderFormField
+                        name="wasRateAdjusted"
+                        label="Unit Price Adjusted"
+                        type="checkbox"
+                        canEditConditions={false}
+                        inputAppend={
+                          <p
+                            className="text-muted"
+                            style={{ marginTop: "-1rem" }}
+                          >
+                            (View history for details)
+                          </p>
+                        }
+                      />
+                    )}
                   </>
                 )}
                 <OrderFormField
