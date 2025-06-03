@@ -339,7 +339,7 @@ namespace Hippo.Web.Controllers
         }
 
         /// <summary>
-        /// An active Recurring order can change the recurring rate.
+        /// An active Recurring order can change the recurring rate (Unit Price).
         /// This sets it back to created for the PI to approve, and logs the change in history.
         /// </summary>
         /// <param name="id">Order ID</param>
@@ -358,8 +358,8 @@ namespace Hippo.Web.Controllers
             }
 
             var existingOrder = await _dbContext.Orders
-                //.Include(a => a.PrincipalInvestigator.Owner)
-                //.Include(a => a.Cluster)
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
                 // We don't want to filter on inactive PIs, we still do on inactive clusters
                 .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
                 .SingleOrDefaultAsync(a => a.Id == id);
@@ -390,11 +390,12 @@ namespace Hippo.Web.Controllers
 
             existingOrder.Status = Order.Statuses.Created;
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Created);
-            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: {oldRate:F2} New Unit Price: {existingOrder.UnitPrice:F2}");
+            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: ${oldRate:F2} New Unit Price: ${existingOrder.UnitPrice:F2}");
 
             await _dbContext.SaveChangesAsync();
 
             //TODO: Need to generate appropriate emails
+            await NotifySponsorOrderRateChange(existingOrder, oldRate);
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
@@ -997,6 +998,32 @@ namespace Hippo.Web.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderRateChange(Order order, decimal oldRate)
+        {
+            try
+            {
+                var adminsToCc = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Order Rate Changed",
+                    Header = "Your order rate has been changed. (Unit Price)",
+                    Paragraphs = new List<string>
+                    {
+                        $"The rate for your order has been changed from ${oldRate:F2} to ${order.UnitPrice:F2}.",
+                        "Please review the order and approve it for processing.",
+                        "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
+                        "NOTE! Failure to approve the order in a timely manner may result in interruptions to the service."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, new string[] { order.PrincipalInvestigator.Email }, adminsToCc);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to sponsor for order rate change.");
             }
         }
 
