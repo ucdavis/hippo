@@ -937,6 +937,20 @@ namespace Hippo.Web.Controllers
                         $"A new order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
                     }
                 };
+                if (order.IsRecurring && order.WasRateAdjusted)
+                {
+                    //TODO: DO we want to notify (CC) the financial admins as well?
+                    emailModel.Subject = "Recurring Rate Change Order Submitted";
+                    emailModel.Header = "Recurring Order with Rate Change has been submitted.";
+                    emailModel.Paragraphs = new List<string>
+                    {
+                        $"A existing recurring order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
+                        "",
+                        "The rate (Unit Price) for this order has been changed. Please review the order and approve it for processing.",
+                        "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
+                        "NOTE! Failure to approve the order in a timely manner may result in interruptions to billing."
+                    };
+                }
 
                 await _notificationService.OrderNotification(emailModel, order, clusterAdmins);
             }
