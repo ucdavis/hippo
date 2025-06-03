@@ -374,7 +374,7 @@ namespace Hippo.Web.Controllers
                 return BadRequest("You can only change the recurring rate on an active order.");
             }
 
-            if(newRate <= 0)
+            if(newRate < 0.01m)
             {
                 return BadRequest("The new rate must be greater than zero.");
             }
