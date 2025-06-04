@@ -618,11 +618,21 @@ namespace Hippo.Web.Controllers
                 return BadRequest("You cannot cancel an order that is not in the Created or Submitted status.");
             }
 
+            if(existingOrder.WasRateAdjusted ) 
+            {
+                await _historyService.OrderUpdated(existingOrder, currentUser, "Existing recurring order cancelled after Rate Adjustment!"); //Before Changes
+            }
+
             existingOrder.Status = Order.Statuses.Cancelled;
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Cancelled);
             await _historyService.OrderUpdated(existingOrder, currentUser, "Order Cancelled.");
 
             await _dbContext.SaveChangesAsync();
+
+            if (existingOrder.WasRateAdjusted)
+            {
+                await NotifyAdminsRateAdjustedOrderCancelled(existingOrder);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
@@ -1015,6 +1025,29 @@ namespace Hippo.Web.Controllers
             }
         }
 
+        private async Task NotifyAdminsRateAdjustedOrderCancelled(Order order)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Recurring Order Cancelled After Rate Adjustment",
+                    Header = "A recurring order was cancelled after the rate was adjusted (Unit Price).",
+                    Paragraphs = new List<string>
+                    {
+                        $"Order #{order.Id} - {order.Name} was cancelled after the rate was adjusted.",
+                        "",
+                        "Please review the order and take appropriate action as billing will no longer happen."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, admins, new string[] { order.PrincipalInvestigator.Email });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for order cancellation after rate adjustment.");
+            }
+        }
         private async Task NotifySponsorOrderRateChange(Order order, decimal oldRate)
         {
             try
