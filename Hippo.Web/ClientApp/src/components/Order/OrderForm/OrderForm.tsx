@@ -72,6 +72,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
       setLimitedEditing(false);
     }
 
+    // this means we don't want to allow general editing
+    if (orderProp.wasRateAdjusted) {
+      setLimitedEditing(true);
+    }
+
     const newInstallmentDate = orderProp.installmentDate;
     const newExpirationDate = orderProp.expirationDate;
     setValue("installmentDate", newInstallmentDate);
@@ -81,6 +86,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     orderProp.expirationDate,
     orderProp.installmentDate,
     orderProp.status,
+    orderProp.wasRateAdjusted,
   ]);
 
   const submitForm = async (data: OrderModel) => {
@@ -296,11 +302,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   label="Order Name"
                   required={true}
                   maxLength={50}
-                  canEditConditions={
-                    !isDetailsPage &&
-                    !limitedEditing &&
-                    !orderProp.wasRateAdjusted
-                  }
+                  canEditConditions={!isDetailsPage && !limitedEditing}
                 />
                 <OrderFormField
                   name="quantity"
@@ -309,11 +311,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   min={0.01}
                   valueAsNumber={true}
                   deps={"total"}
-                  canEditConditions={
-                    !isDetailsPage &&
-                    !limitedEditing &&
-                    !orderProp.wasRateAdjusted
-                  }
+                  canEditConditions={!isDetailsPage && !limitedEditing}
                 />
                 <OrderFormField
                   name="externalReference"
