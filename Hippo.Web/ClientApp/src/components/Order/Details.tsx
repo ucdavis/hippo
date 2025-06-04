@@ -250,7 +250,22 @@ export const Details = () => {
           isAdmin={isClusterAdmin}
           newStatusDanger={true}
           hideDescription={true}
-        />
+        >
+          <>
+            {order.wasRateAdjusted && (
+              <>
+                <hr />
+                <h1 className="hip-text-danger-dark">WARNING!!!</h1>
+                <p>
+                  Canceling an existing recurring order that has had it's Unit
+                  Price adjusted will result in interruption of your service.
+                  Please contact the admin(s) before Confirming this action.
+                </p>
+                <p>The Cancel button on this dialog will cancel this action.</p>
+              </>
+            )}
+          </>
+        </StatusDialog>
       ),
       canConfirm: !notification.pending,
     },
