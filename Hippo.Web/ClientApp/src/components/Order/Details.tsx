@@ -255,9 +255,9 @@ export const Details = () => {
             {order.wasRateAdjusted && (
               <>
                 <hr />
-                <h1 className="hip-text-danger-dark">WARNING!!!</h1>
+                <h1 className="hip-text-danger-dark">WARNING!</h1>
                 <p>
-                  Canceling an existing recurring order that has had it's Unit
+                  Cancelling an existing recurring order that has had it's Unit
                   Price adjusted will result in interruption of your service.
                   Please contact the admin(s) before Confirming this action.
                 </p>
