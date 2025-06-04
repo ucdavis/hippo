@@ -1104,7 +1104,7 @@ namespace Hippo.Web.Controllers
 
             if(existingOrder.Status == Order.Statuses.Created || existingOrder.Status == Order.Statuses.Submitted || existingOrder.Status == Order.Statuses.Processing)
             {
-                if (isClusterOrSystemAdmin)
+                if (isClusterOrSystemAdmin && !existingOrder.WasRateAdjusted) //We might want some editing if admin and the rate was adjusted.
                 {
                     existingOrder.Category = model.Category;
                     existingOrder.ProductName = model.ProductName;
@@ -1164,21 +1164,44 @@ namespace Hippo.Web.Controllers
                     }
                 }
 
-                existingOrder.Description = model.Description;
-                existingOrder.Name = model.Name;
-                existingOrder.Notes = model.Notes;
-                //existingOrder.Quantity = model.Quantity; //If quantity changes, we will need to update the total and balance remaining
-                if(existingOrder.Quantity != model.Quantity)
+                if (isClusterOrSystemAdmin && existingOrder.WasRateAdjusted )
                 {
-                    existingOrder.Quantity = model.Quantity;
-                    existingOrder.SubTotal = model.Quantity * existingOrder.UnitPrice;
-                    existingOrder.Total = model.Quantity * existingOrder.UnitPrice;
-                    existingOrder.BalanceRemaining = model.Quantity * existingOrder.UnitPrice;
-                    if(existingOrder.Adjustment != 0)
+                    existingOrder.AdminNotes = model.AdminNotes;
+                    existingOrder.ExternalReference = model.ExternalReference;
+
+                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
-                        existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
-                        existingOrder.BalanceRemaining = existingOrder.Total;
+                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
                     }
+                    else
+                    {
+                        existingOrder.InstallmentDate = null;
+                    }
+                }
+
+                if (!existingOrder.WasRateAdjusted)
+                {
+                    existingOrder.Description = model.Description;
+                    existingOrder.Name = model.Name;
+                    existingOrder.Notes = model.Notes;
+                    //existingOrder.Quantity = model.Quantity; //If quantity changes, we will need to update the total and balance remaining
+                    if (existingOrder.Quantity != model.Quantity)
+                    {
+                        existingOrder.Quantity = model.Quantity;
+                        existingOrder.SubTotal = model.Quantity * existingOrder.UnitPrice;
+                        existingOrder.Total = model.Quantity * existingOrder.UnitPrice;
+                        existingOrder.BalanceRemaining = model.Quantity * existingOrder.UnitPrice;
+                        if (existingOrder.Adjustment != 0)
+                        {
+                            existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
+                            existingOrder.BalanceRemaining = existingOrder.Total;
+                        }
+                    }
+                }
+                else
+                {
+                    existingOrder.Notes = model.Notes;
                 }
 
                 ProcessMetaData(model, existingOrder);
