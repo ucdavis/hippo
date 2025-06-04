@@ -296,7 +296,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   label="Order Name"
                   required={true}
                   maxLength={50}
-                  canEditConditions={!isDetailsPage && !limitedEditing}
+                  canEditConditions={
+                    !isDetailsPage &&
+                    !limitedEditing &&
+                    !orderProp.wasRateAdjusted
+                  }
                 />
                 <OrderFormField
                   name="quantity"
@@ -305,7 +309,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
                   min={0.01}
                   valueAsNumber={true}
                   deps={"total"}
-                  canEditConditions={!isDetailsPage && !limitedEditing}
+                  canEditConditions={
+                    !isDetailsPage &&
+                    !limitedEditing &&
+                    !orderProp.wasRateAdjusted
+                  }
                 />
                 <OrderFormField
                   name="externalReference"
