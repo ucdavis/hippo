@@ -1027,6 +1027,7 @@ namespace Hippo.Web.Controllers
                     Header = "Your order rate has been changed. (Unit Price)",
                     Paragraphs = new List<string>
                     {
+                        $"For recurring Order #{order.Id} - {order.Name}",
                         $"The rate for your order has been changed from ${oldRate:F2} to ${order.UnitPrice:F2}.",
                         "Please review the order and approve it for processing.",
                         "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
