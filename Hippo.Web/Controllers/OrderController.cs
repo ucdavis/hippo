@@ -676,13 +676,23 @@ namespace Hippo.Web.Controllers
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Rejected);
             await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rejected: {reason}");
 
+
+
             await _dbContext.SaveChangesAsync();
+
+            await NotifySponsorOrderRejected(existingOrder, reason);
+
+            if(existingOrder.WasRateAdjusted)
+            {
+                await NotifyAdminsRateAdjustedOrderRejected(existingOrder, reason);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
 
+            
 
             return Ok(model);
         }
@@ -990,6 +1000,55 @@ namespace Hippo.Web.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderRejected(Order order, string reason)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && p.Role.Name == Role.Codes.ClusterAdmin )).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Order Rejected",
+                    Header = "Your order has been rejected.",
+                    Paragraphs = new List<string>
+                    {
+                        $"Your order #{order.Id} - {order.Name} has been rejected by the cluster admins.",
+                        $"Reason: {reason}",
+                        "If you have any concerns, please contact the Admin(s)"
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, new string[] {order.PrincipalInvestigator.Email}, admins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to sponsor for order rejection.");
+            }
+        }
+
+        private async Task NotifyAdminsRateAdjustedOrderRejected(Order order, string reason)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Recurring Order Rejected After Rate Adjustment",
+                    Header = "A recurring order was rejected after the rate was adjusted (Unit Price).",
+                    Paragraphs = new List<string>
+                    {
+                        $"Order #{order.Id} - {order.Name} was rejected after the rate was adjusted.",
+                        $"Reason: {reason}",
+                        "",
+                        "Please review the order to make sure this was not done in error as billing will no longer happen."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, admins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for order rejection after rate adjustment.");
             }
         }
 

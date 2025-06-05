@@ -409,6 +409,19 @@ export const Details = () => {
             newStatusDanger={true}
           >
             <HipFormGroup size="lg">
+              {order.wasRateAdjusted && (
+                <>
+                  <hr />
+                  <h1 className="hip-text-danger-dark">WARNING!</h1>
+                  <p>
+                    Rejecting an existing recurring order that has had it's Unit
+                    Price adjusted will result in billing stopping. You probably
+                    don't want to do this.
+                  </p>
+                  <hr />
+                </>
+              )}
+
               <br />
               <h4 className="form-label">Reason</h4>
               <input
