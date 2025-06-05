@@ -357,6 +357,7 @@ export interface OrderModel extends Partial<ProductBase> {
   historyCount: number;
   paymentCount: number;
   totalPaid: string;
+  wasRateAdjusted: boolean;
 }
 
 export interface OrderListModel {

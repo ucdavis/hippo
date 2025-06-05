@@ -488,6 +488,9 @@ namespace Hippo.Core.Migrations.Sqlite
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("WasRateAdjusted")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClusterId");

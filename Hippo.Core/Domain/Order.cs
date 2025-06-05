@@ -57,6 +57,8 @@ namespace Hippo.Core.Domain
 
         public List<Billing> Billings { get; set; } = new();
 
+        public bool WasRateAdjusted { get; set; } = false; //If the rate was adjusted after it was activated, we will set this to true.
+
         public List<OrderMetaData> MetaData { get; set; } = new();
 
         public void AddMetaData(string key, string value)

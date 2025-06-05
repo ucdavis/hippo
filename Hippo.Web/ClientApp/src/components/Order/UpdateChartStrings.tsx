@@ -59,6 +59,7 @@ export const UpdateChartStrings: React.FC = () => {
       historyCount: updatedOrder.historyCount,
       paymentCount: updatedOrder.paymentCount,
       totalPaid: updatedOrder.totalPaid,
+      wasRateAdjusted: updatedOrder.wasRateAdjusted,
 
       // editable fields
       PILookup: updatedOrder.PILookup,

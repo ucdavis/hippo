@@ -35,6 +35,8 @@ namespace Hippo.Web.Models.OrderModels
 
         public string TotalPaid { get; set; } = "0";
 
+        public bool WasRateAdjusted { get; set; }
+
         public User? PiUser { get; set; }
 
         public List<OrderMetaData> MetaData { get; set; } = new();
@@ -76,7 +78,8 @@ namespace Hippo.Web.Models.OrderModels
                 MetaData = order.MetaData,
                 Billings = order.Billings,
                 HistoryCount = order.History.Count,
-                PaymentCount = order.Payments.Count
+                PaymentCount = order.Payments.Count,
+                WasRateAdjusted = order.WasRateAdjusted
             };
         }
 
