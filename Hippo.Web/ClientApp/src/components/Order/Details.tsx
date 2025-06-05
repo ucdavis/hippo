@@ -550,7 +550,8 @@ export const Details = () => {
               <ShowFor
                 condition={
                   order.piUser?.id === user.detail.id &&
-                  sponsorEditableStatuses.includes(order.status)
+                  sponsorEditableStatuses.includes(order.status) &&
+                  !order.wasRateAdjusted
                 }
               >
                 <Link
