@@ -26,6 +26,11 @@ namespace Hippo.Core.Services
         private readonly IAggieEnterpriseService _aggieEnterpriseService;
         private readonly INotificationService _notificationService;
 
+#if DEBUG 
+        private static DateTime RightNow => new DateTime(2025, 09, 3, 10, 0, 0, DateTimeKind.Utc); // DO NOT COMMIT THIS AS IT IS! This is just to test locally
+#else
+        private static DateTime RightNow => DateTime.UtcNow; // DO NOT COMMIT THIS AS IT IS! This is just to test locally
+#endif
         public PaymentsService(AppDbContext dbContext, IHistoryService historyService, IAggieEnterpriseService aggieEnterpriseService, INotificationService notificationService)
         {
             _dbContext = dbContext;
@@ -71,7 +76,7 @@ namespace Hippo.Core.Services
             //Next payment date should be a UTC date/Time, at 7AM UTC, which should be 12AM PST
 
             //If I add a history call here, I'll also need to get the cluster .Include(a => a.Cluster)
-            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value <= DateTime.UtcNow).ToListAsync();
+            var orders = await _dbContext.Orders.Include(a => a.Payments).Where(a => a.Status == Order.Statuses.Active && a.NextPaymentDate != null && a.NextPaymentDate.Value <= RightNow).ToListAsync();
             foreach (var order in orders) {
 
                 if (!order.IsRecurring)
@@ -145,7 +150,7 @@ namespace Hippo.Core.Services
                     Order = order,
                     Amount = paymentAmount,
                     Status = Payment.Statuses.Created,
-                    CreatedOn = DateTime.UtcNow
+                    CreatedOn = RightNow
                 };
 
                 order.Payments.Add(payment);
@@ -171,7 +176,7 @@ namespace Hippo.Core.Services
 
         private void SetNextPaymentDate(Order order)
         {
-            var nowPlusADay = DateTime.UtcNow.AddDays(1); //Bump it up a day, so we are in the next month/year
+            var nowPlusADay = RightNow.AddDays(1); //Bump it up a day, so we are in the next month/year
             var pacificNow = nowPlusADay.ToPacificTime();
 
             DateTime nextPaymentPacific;
@@ -198,7 +203,7 @@ namespace Hippo.Core.Services
 
         public async Task<bool> NotifyAboutFailedPayments()
         {
-            var yesterday = DateTime.UtcNow.AddDays(-1); //If this was run right after the sloth service, any in created probably failed, but will give it some slack to make sure
+            var yesterday = RightNow.AddDays(-1); //If this was run right after the sloth service, any in created probably failed, but will give it some slack to make sure
             //This should be a list of all payments that have a bad chart string, but it is possible there is some other issue, so we will want to validate the chart string before notifying sponsors.
             var orderIdsWithFailedPayments = await _dbContext.Payments.Where(a => a.Status == Payment.Statuses.Created && a.CreatedOn <= yesterday).Select(a => a.OrderId).Distinct().ToListAsync();
 
