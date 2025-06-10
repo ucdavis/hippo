@@ -100,57 +100,6 @@ namespace Hippo.Core.Data
 
             cluster = await _dbContext.Clusters.FirstAsync();
 
-            if (!(await _dbContext.Accounts.AnyAsync()))
-            {
-                var sampleSsh = "ABC123";
-
-                var ownerId = (await _dbContext.Users.FirstAsync(a => a.Iam == "1000029584")).Id;
-                var scottAccount = new Account()
-                {
-                    Owner = ScottUser,
-                    Name = "Scott's Account",
-                    SshKey = sampleSsh,
-                    Cluster = cluster,
-                };
-                await _dbContext.Accounts.AddAsync(scottAccount);
-
-                var owenAccount = new Account()
-                {
-                    Owner = OmenAdmin,
-                    Name = OmenAdmin.Name,
-                    SshKey = null,
-                    Cluster = cluster,
-                };
-                await _dbContext.Accounts.AddAsync(owenAccount);
-
-                var slupskyAccount = new Account()
-                {
-                    Owner = SlupskyUser,
-                    Name = "Slupsky",
-                    SshKey = sampleSsh,
-                    Cluster = cluster,
-                };
-                await _dbContext.Accounts.AddAsync(slupskyAccount);
-
-                var otherAccount = new Account()
-                {
-                    Owner = JasonUser,
-                    Name = "Jason's Account",
-                    SshKey = sampleSsh,
-                    Cluster = cluster,
-                };
-                await _dbContext.Accounts.AddAsync(otherAccount);
-
-                var pendingAccount = new Account()
-                {
-                    Owner = JamesUser,
-                    Name = "James' Account",
-                    SshKey = sampleSsh,
-                    Cluster = cluster,
-                };
-                await _dbContext.Accounts.AddAsync(pendingAccount);
-            }
-
             await _dbContext.SaveChangesAsync();
         }
 
