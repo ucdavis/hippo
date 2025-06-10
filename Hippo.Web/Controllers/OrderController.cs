@@ -955,6 +955,7 @@ namespace Hippo.Web.Controllers
                     Paragraphs = new List<string>
                     {
                         $"A new order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
+                        $"For Order #{order.Id} - {order.Name}",
                     }
                 };
                 if (order.IsRecurring && order.WasRateAdjusted)
@@ -965,7 +966,8 @@ namespace Hippo.Web.Controllers
                     emailModel.Paragraphs = new List<string>
                     {
                         $"A existing recurring order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
-                        "",
+                        $"",
+                        $"For recurring Order #{order.Id} - {order.Name}",
                         "The rate (Unit Price) for this order has been changed. Please review the order and approve it for processing.",
                         "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
                         "NOTE! Failure to approve the order in a timely manner may result in interruptions to billing."
@@ -991,7 +993,7 @@ namespace Hippo.Web.Controllers
                     Paragraphs = new List<string>
                     {
                         "A new order has been created for you. Please enter the billing information and approve it for processing.",
-                        "If you believe this was done in error, please contact the cluster admins before canceleing it."
+                        "If you believe this was done in error, please contact the cluster admins before cancelling it."
                     }
                 };
 
