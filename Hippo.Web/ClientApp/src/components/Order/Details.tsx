@@ -378,7 +378,7 @@ export const Details = () => {
       "Rate Changed, set to Created",
       async (r) => {
         if (r.status === 400) {
-          const errors = await parseBadRequest(response);
+          const errors = await parseBadRequest(r);
           return errors;
         } else {
           return "An error happened, please try again.";
