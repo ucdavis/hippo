@@ -257,7 +257,7 @@ export const Details = () => {
                 <hr />
                 <h1 className="hip-text-danger-dark">WARNING!</h1>
                 <p>
-                  Cancelling an existing recurring order that has had it's Unit
+                  Cancelling an existing recurring order that has had its Unit
                   Price adjusted will result in interruption of your service.
                   Please contact the admin(s) before Confirming this action.
                 </p>
