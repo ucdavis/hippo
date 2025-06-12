@@ -196,7 +196,7 @@ namespace Hippo.Web.Controllers
 
 
 
-            var currentAccount = await _dbContext.Accounts.FirstAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
+            var currentAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Cluster.Name == Cluster && a.OwnerId == currentUser.Id);
 
             Account? principalInvestigator = currentAccount;
 
@@ -214,7 +214,7 @@ namespace Hippo.Web.Controllers
             else
             {
                 principalInvestigator = currentAccount;
-                if (!isClusterOrSystemAdmin)
+                if (!isClusterOrSystemAdmin && principalInvestigator != null)
                 {
                     var isSponsor = await _dbContext.Accounts.Where(a => a.Cluster.Name == Cluster && a.Id == principalInvestigator.Id).Include(a => a.AdminOfGroups).ThenInclude(a => a.Cluster)
                         .Include(a => a.Owner).FirstOrDefaultAsync();
@@ -224,6 +224,11 @@ namespace Hippo.Web.Controllers
                         return BadRequest("User not a Sponsor/PI. Unable to continue");
                     }
                 }
+            }
+
+            if(principalInvestigator == null)
+            {
+                return BadRequest("Principal Investigator not found. Unable to continue.");
             }
 
             if (!ModelState.IsValid)
