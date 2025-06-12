@@ -72,6 +72,11 @@ const OrderForm: React.FC<OrderFormProps> = ({
       setLimitedEditing(false);
     }
 
+    // this means we don't want to allow general editing
+    if (orderProp.wasRateAdjusted) {
+      setLimitedEditing(true);
+    }
+
     const newInstallmentDate = orderProp.installmentDate;
     const newExpirationDate = orderProp.expirationDate;
     setValue("installmentDate", newInstallmentDate);
@@ -81,6 +86,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
     orderProp.expirationDate,
     orderProp.installmentDate,
     orderProp.status,
+    orderProp.wasRateAdjusted,
   ]);
 
   const submitForm = async (data: OrderModel) => {
@@ -273,6 +279,22 @@ const OrderForm: React.FC<OrderFormProps> = ({
                       label="Status"
                       canEditConditions={false}
                     />
+                    {orderProp.wasRateAdjusted && (
+                      <OrderFormField
+                        name="wasRateAdjusted"
+                        label="Unit Price Adjusted"
+                        type="checkbox"
+                        canEditConditions={false}
+                        inputAppend={
+                          <p
+                            className="text-muted"
+                            style={{ marginTop: "-1rem" }}
+                          >
+                            (View history for details)
+                          </p>
+                        }
+                      />
+                    )}
                   </>
                 )}
                 <OrderFormField

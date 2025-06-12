@@ -250,7 +250,22 @@ export const Details = () => {
           isAdmin={isClusterAdmin}
           newStatusDanger={true}
           hideDescription={true}
-        />
+        >
+          <>
+            {order.wasRateAdjusted && (
+              <>
+                <hr />
+                <h1 className="hip-text-danger-dark">WARNING!</h1>
+                <p>
+                  Cancelling an existing recurring order that has had its Unit
+                  Price adjusted will result in interruption of your service.
+                  Please contact the admin(s) before Confirming this action.
+                </p>
+                <p>The Cancel button on this dialog will cancel this action.</p>
+              </>
+            )}
+          </>
+        </StatusDialog>
       ),
       canConfirm: !notification.pending,
     },
@@ -287,6 +302,100 @@ export const Details = () => {
     }
   };
 
+  const [changeRateConfirmation] = useConfirmationDialog<number>(
+    {
+      title: "Change Rate",
+      message: (setReturn) => {
+        return (
+          <StatusDialog
+            newStatus={OrderStatus.Created}
+            currentStatus={order.status}
+            isAdmin={isClusterAdmin}
+            hideDescription={true}
+            newStatusDanger={false}
+          >
+            <HipFormGroup size="lg">
+              <h3>
+                This will set the recurring order back to created with a new
+                unit price. The PI will need to approve the order. Once the
+                order is approved, processed, and activated, it will begin
+                billing at the new unit price after the current billing cycle.
+              </h3>
+              <h3>Billing will not resume until this happens.</h3>
+              <br />
+              <h3>
+                Current Unit Price{" "}
+                <span className={"hip-text-primary"}>${order.unitPrice}</span>
+              </h3>
+              <h4 className="form-label">New Unit Price</h4>
+              <input
+                className="form-control"
+                id="newUnitPrice"
+                type="number"
+                min="0.01"
+                step="0.01"
+                inputMode="decimal"
+                pattern="^\d*\.?\d*$"
+                placeholder="Enter new unit price"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const num = parseFloat(value);
+                  // Allow only numbers with up to 2 decimal places
+                  if (
+                    (/^\d*\.?\d{0,2}$/.test(value) || value === "") &&
+                    (!value || !isNaN(num))
+                  ) {
+                    setReturn(num);
+                  }
+                }}
+              />
+            </HipFormGroup>
+          </StatusDialog>
+        );
+      },
+      canConfirm: (returnValue) =>
+        typeof returnValue === "number" && returnValue >= 0.01,
+    },
+    [order],
+  );
+
+  const changeRate = async () => {
+    const [confirmed, newUnitPrice] = await changeRateConfirmation();
+
+    if (!confirmed) {
+      return;
+    }
+
+    const req = authenticatedFetch(
+      `/api/${cluster}/order/changeRecurringRate/${orderId}?newRate=${newUnitPrice}`,
+      {
+        method: "POST",
+      },
+    );
+    setNotification(
+      req,
+      "Changing Rate",
+      "Rate Changed, set to Created",
+      async (r) => {
+        if (r.status === 400) {
+          const errors = await parseBadRequest(r);
+          return errors;
+        } else {
+          return "An error happened, please try again.";
+        }
+      },
+    );
+
+    const response = await req;
+
+    if (response.ok) {
+      const data = await response.json();
+      setOrder(data);
+      //just reget the whole order to update fields
+      window.location.reload();
+    }
+  };
+
   const [rejectOrderConfirmation] = useConfirmationDialog<string>(
     {
       title: "Reject Order",
@@ -300,6 +409,19 @@ export const Details = () => {
             newStatusDanger={true}
           >
             <HipFormGroup size="lg">
+              {order.wasRateAdjusted && (
+                <>
+                  <hr />
+                  <h1 className="hip-text-danger-dark">WARNING!</h1>
+                  <p>
+                    Rejecting an existing recurring order that has had it's Unit
+                    Price adjusted will result in billing stopping. You probably
+                    don't want to do this.
+                  </p>
+                  <hr />
+                </>
+              )}
+
               <br />
               <h4 className="form-label">Reason</h4>
               <input
@@ -428,7 +550,8 @@ export const Details = () => {
               <ShowFor
                 condition={
                   order.piUser?.id === user.detail.id &&
-                  sponsorEditableStatuses.includes(order.status)
+                  sponsorEditableStatuses.includes(order.status) &&
+                  !order.wasRateAdjusted
                 }
               >
                 <Link
@@ -479,6 +602,26 @@ export const Details = () => {
                   {" "}
                   <FontAwesomeIcon icon={faCheck} />
                   Close Recurring Order
+                </HipButton>{" "}
+              </ShowFor>
+            </HipErrorBoundary>
+            <HipErrorBoundary>
+              <ShowFor
+                roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                condition={
+                  order.isRecurring && order.status === OrderStatus.Active
+                }
+              >
+                {/*TODO: fix what it does */}
+                <HipButton
+                  className="btn btn-primary"
+                  onClick={changeRate}
+                  onMouseEnter={() => setHoverAction(OrderStatus.Created)}
+                  onMouseLeave={() => setHoverAction(null)}
+                >
+                  {" "}
+                  <FontAwesomeIcon icon={faCheck} />
+                  Change Rate
                 </HipButton>{" "}
               </ShowFor>
             </HipErrorBoundary>

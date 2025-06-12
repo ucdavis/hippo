@@ -338,6 +338,74 @@ namespace Hippo.Web.Controllers
 
         }
 
+        /// <summary>
+        /// An active Recurring order can change the recurring rate (Unit Price).
+        /// This sets it back to created for the PI to approve, and logs the change in history.
+        /// </summary>
+        /// <param name="id">Order ID</param>
+        /// <param name="newRate"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ChangeRecurringRate(int id, decimal newRate)
+        {
+            var currentUser = await _userService.GetCurrentUser();
+            var permissions = await _userService.GetCurrentPermissionsAsync();
+            var isClusterOrSystemAdmin = permissions.IsClusterOrSystemAdmin(Cluster);
+            var isFinancialAdmin = permissions.IsFinancialAdmin(Cluster); //Probably want financial admins to be able to change the rate
+
+            if(!isClusterOrSystemAdmin && !isFinancialAdmin)
+            {
+                return BadRequest("You do not have permission to change the recurring rate on this order.");
+            }
+
+            var existingOrder = await _dbContext.Orders
+                .Include(a => a.PrincipalInvestigator.Owner)
+                .Include(a => a.Cluster)
+                // We don't want to filter on inactive PIs, we still do on inactive clusters
+                .IgnoreQueryFilters().Where(o => o.Cluster.IsActive)
+                .SingleOrDefaultAsync(a => a.Id == id);
+
+            if (existingOrder == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            if(existingOrder.Status != Order.Statuses.Active || !existingOrder.IsRecurring)
+            {
+                return BadRequest("You can only change the recurring rate on an active order.");
+            }
+
+            if(newRate < 0.01m)
+            {
+                return BadRequest("The new rate must be greater than zero.");
+            }
+
+            var oldRate = existingOrder.UnitPrice;
+
+            //Want to make sure this is to 2 decimal places
+            existingOrder.UnitPrice = Math.Round(newRate, 2, MidpointRounding.AwayFromZero);
+            existingOrder.WasRateAdjusted = true; //This will be used to indicate that the rate was changed after it was activated.
+            existingOrder.SubTotal = existingOrder.Quantity * existingOrder.UnitPrice;
+            existingOrder.Total = existingOrder.SubTotal + existingOrder.Adjustment;
+            //don't think we want to change the balance remaining, probably wait for next billing cycle
+
+            existingOrder.Status = Order.Statuses.Created;
+            await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Created);
+            await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rate Changed. Old Unit Price: ${oldRate:F2} New Unit Price: ${existingOrder.UnitPrice:F2}");
+
+            await _dbContext.SaveChangesAsync();
+
+            //TODO: Need to generate appropriate emails
+            await NotifySponsorOrderRateChange(existingOrder, oldRate);
+
+            //To make sure the model has all the info needed to update the UI
+            var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
+                .Select(OrderDetailModel.Projection())
+                .SingleOrDefaultAsync();
+
+
+            return Ok(model);
+        }
+
         [HttpPost]
         public async Task<IActionResult> ChangeStatus(int id, string expectedStatus)
         {
@@ -550,11 +618,21 @@ namespace Hippo.Web.Controllers
                 return BadRequest("You cannot cancel an order that is not in the Created or Submitted status.");
             }
 
+            if(existingOrder.WasRateAdjusted ) 
+            {
+                await _historyService.OrderUpdated(existingOrder, currentUser, "Existing recurring order cancelled after Rate Adjustment!"); //Before Changes
+            }
+
             existingOrder.Status = Order.Statuses.Cancelled;
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Cancelled);
             await _historyService.OrderUpdated(existingOrder, currentUser, "Order Cancelled.");
 
             await _dbContext.SaveChangesAsync();
+
+            if (existingOrder.WasRateAdjusted)
+            {
+                await NotifyAdminsRateAdjustedOrderCancelled(existingOrder);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
@@ -598,12 +676,23 @@ namespace Hippo.Web.Controllers
             await _historyService.OrderSnapshot(existingOrder, currentUser, History.OrderActions.Rejected);
             await _historyService.OrderUpdated(existingOrder, currentUser, $"Order Rejected: {reason}");
 
+
+
             await _dbContext.SaveChangesAsync();
+
+            await NotifySponsorOrderRejected(existingOrder, reason);
+
+            if(existingOrder.WasRateAdjusted)
+            {
+                await NotifyAdminsRateAdjustedOrderRejected(existingOrder, reason);
+            }
 
             //To make sure the model has all the info needed to update the UI
             var model = await _dbContext.Orders.Where(a => a.Cluster.Name == Cluster && a.Id == id)
                 .Select(OrderDetailModel.Projection())
                 .SingleOrDefaultAsync();
+
+            
 
             return Ok(model);
         }
@@ -866,8 +955,24 @@ namespace Hippo.Web.Controllers
                     Paragraphs = new List<string>
                     {
                         $"A new order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
+                        $"For Order #{order.Id} - {order.Name}",
                     }
                 };
+                if (order.IsRecurring && order.WasRateAdjusted)
+                {
+                    //TODO: DO we want to notify (CC) the financial admins as well?
+                    emailModel.Subject = "Recurring Rate Change Order Submitted";
+                    emailModel.Header = "Recurring Order with Rate Change has been submitted.";
+                    emailModel.Paragraphs = new List<string>
+                    {
+                        $"A existing recurring order has been submitted by {order.PrincipalInvestigator.Owner.FirstName} {order.PrincipalInvestigator.Owner.LastName}.",
+                        $"",
+                        $"For recurring Order #{order.Id} - {order.Name}",
+                        "The rate (Unit Price) for this order has been changed. Please review the order and approve it for processing.",
+                        "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
+                        "NOTE! Failure to approve the order in a timely manner may result in interruptions to billing."
+                    };
+                }
 
                 await _notificationService.OrderNotification(emailModel, order, clusterAdmins);
             }
@@ -888,7 +993,7 @@ namespace Hippo.Web.Controllers
                     Paragraphs = new List<string>
                     {
                         "A new order has been created for you. Please enter the billing information and approve it for processing.",
-                        "If you believe this was done in error, please contact the cluster admins before canceleing it."
+                        "If you believe this was done in error, please contact the cluster admins before cancelling it."
                     }
                 };
 
@@ -897,6 +1002,55 @@ namespace Hippo.Web.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifySponsorOrderRejected(Order order, string reason)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && p.Role.Name == Role.Codes.ClusterAdmin )).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Order Rejected",
+                    Header = "Your order has been rejected.",
+                    Paragraphs = new List<string>
+                    {
+                        $"Your order #{order.Id} - {order.Name} has been rejected by the cluster admins.",
+                        $"Reason: {reason}",
+                        "If you have any concerns, please contact the Admin(s)"
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, new string[] {order.PrincipalInvestigator.Email}, admins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to sponsor for order rejection.");
+            }
+        }
+
+        private async Task NotifyAdminsRateAdjustedOrderRejected(Order order, string reason)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Recurring Order Rejected After Rate Adjustment",
+                    Header = "A recurring order was rejected after the rate was adjusted (Unit Price).",
+                    Paragraphs = new List<string>
+                    {
+                        $"Order #{order.Id} - {order.Name} was rejected after the rate was adjusted.",
+                        $"Reason: {reason}",
+                        "",
+                        "Please review the order to make sure this was not done in error as billing will no longer happen."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, admins);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for order rejection after rate adjustment.");
             }
         }
 
@@ -929,6 +1083,56 @@ namespace Hippo.Web.Controllers
             catch (Exception ex)
             {
                 Log.Error(ex, "Error sending email to admins for new order submission.");
+            }
+        }
+
+        private async Task NotifyAdminsRateAdjustedOrderCancelled(Order order)
+        {
+            try
+            {
+                var admins = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Recurring Order Cancelled After Rate Adjustment",
+                    Header = "A recurring order was cancelled after the rate was adjusted (Unit Price).",
+                    Paragraphs = new List<string>
+                    {
+                        $"Order #{order.Id} - {order.Name} was cancelled after the rate was adjusted.",
+                        "",
+                        "Please review the order and take appropriate action as billing will no longer happen."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, admins, new string[] { order.PrincipalInvestigator.Email });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to admins for order cancellation after rate adjustment.");
+            }
+        }
+        private async Task NotifySponsorOrderRateChange(Order order, decimal oldRate)
+        {
+            try
+            {
+                var adminsToCc = await _dbContext.Users.AsNoTracking().Where(u => u.Permissions.Any(p => p.Cluster.Id == order.ClusterId && (p.Role.Name == Role.Codes.ClusterAdmin || p.Role.Name == Role.Codes.FinancialAdmin))).Select(a => a.Email).Distinct().ToArrayAsync();
+
+                var emailModel = new SimpleNotificationModel
+                {
+                    Subject = "Order Rate Changed",
+                    Header = "Your order rate has been changed. (Unit Price)",
+                    Paragraphs = new List<string>
+                    {
+                        $"For recurring Order #{order.Id} - {order.Name}",
+                        $"The rate for your order has been changed from ${oldRate:F2} to ${order.UnitPrice:F2}.",
+                        "Please review the order and approve it for processing.",
+                        "The previous rate will go through for the next billing cycle, and the new rate will apply after that.",
+                        "NOTE! Failure to approve the order in a timely manner may result in interruptions to the service."
+                    }
+                };
+                await _notificationService.OrderNotification(emailModel, order, new string[] { order.PrincipalInvestigator.Email }, adminsToCc);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending email to sponsor for order rate change.");
             }
         }
 
@@ -994,7 +1198,7 @@ namespace Hippo.Web.Controllers
 
             if(existingOrder.Status == Order.Statuses.Created || existingOrder.Status == Order.Statuses.Submitted || existingOrder.Status == Order.Statuses.Processing)
             {
-                if (isClusterOrSystemAdmin)
+                if (isClusterOrSystemAdmin && !existingOrder.WasRateAdjusted) //We might want some editing if admin and the rate was adjusted.
                 {
                     existingOrder.Category = model.Category;
                     existingOrder.ProductName = model.ProductName;
@@ -1054,21 +1258,44 @@ namespace Hippo.Web.Controllers
                     }
                 }
 
-                existingOrder.Description = model.Description;
-                existingOrder.Name = model.Name;
-                existingOrder.Notes = model.Notes;
-                //existingOrder.Quantity = model.Quantity; //If quantity changes, we will need to update the total and balance remaining
-                if(existingOrder.Quantity != model.Quantity)
+                if (isClusterOrSystemAdmin && existingOrder.WasRateAdjusted )
                 {
-                    existingOrder.Quantity = model.Quantity;
-                    existingOrder.SubTotal = model.Quantity * existingOrder.UnitPrice;
-                    existingOrder.Total = model.Quantity * existingOrder.UnitPrice;
-                    existingOrder.BalanceRemaining = model.Quantity * existingOrder.UnitPrice;
-                    if(existingOrder.Adjustment != 0)
+                    existingOrder.AdminNotes = model.AdminNotes;
+                    existingOrder.ExternalReference = model.ExternalReference;
+
+                    if (!string.IsNullOrWhiteSpace(model.InstallmentDate))
                     {
-                        existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
-                        existingOrder.BalanceRemaining = existingOrder.Total;
+                        existingOrder.InstallmentDate = DateTime.Parse(model.InstallmentDate);
+                        existingOrder.InstallmentDate = existingOrder.InstallmentDate.FromPacificTime();
                     }
+                    else
+                    {
+                        existingOrder.InstallmentDate = null;
+                    }
+                }
+
+                if (!existingOrder.WasRateAdjusted)
+                {
+                    existingOrder.Description = model.Description;
+                    existingOrder.Name = model.Name;
+                    existingOrder.Notes = model.Notes;
+                    //existingOrder.Quantity = model.Quantity; //If quantity changes, we will need to update the total and balance remaining
+                    if (existingOrder.Quantity != model.Quantity)
+                    {
+                        existingOrder.Quantity = model.Quantity;
+                        existingOrder.SubTotal = model.Quantity * existingOrder.UnitPrice;
+                        existingOrder.Total = model.Quantity * existingOrder.UnitPrice;
+                        existingOrder.BalanceRemaining = model.Quantity * existingOrder.UnitPrice;
+                        if (existingOrder.Adjustment != 0)
+                        {
+                            existingOrder.Total = existingOrder.Adjustment + existingOrder.SubTotal;
+                            existingOrder.BalanceRemaining = existingOrder.Total;
+                        }
+                    }
+                }
+                else
+                {
+                    existingOrder.Notes = model.Notes;
                 }
 
                 ProcessMetaData(model, existingOrder);
