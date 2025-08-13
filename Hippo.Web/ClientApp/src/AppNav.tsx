@@ -151,6 +151,16 @@ export const AppNav = () => {
                           Financial Admins
                         </NavLink>
                       </DropdownItem>
+                      <DropdownItem>
+                        <a
+                          href="http://caeshelp.ucdavis.edu/?appname=Hippo"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="nav-dropdown-item nav-link"
+                        >
+                          Hippo Technical Support
+                        </a>
+                      </DropdownItem>
                     </ShowFor>
                   </DropdownMenu>
                 </Dropdown>
