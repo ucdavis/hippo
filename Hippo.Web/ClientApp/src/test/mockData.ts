@@ -9,6 +9,7 @@ import {
   RequestModel,
   AccountRequestDataModel,
   RequestStatus,
+  GroupAccountModel
 } from "../types";
 
 const fakeUser: User = {
@@ -21,7 +22,7 @@ const fakeUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
-const fakeAdminUser: User = {
+const fakeGroupAdminUser: User = {
   id: 1,
   firstName: "Bob",
   lastName: "Dobalina",
@@ -31,19 +32,38 @@ const fakeAdminUser: User = {
   name: "Mr Mr Mr Bob Dobalina",
 };
 
+export const fakeAdminUsers: User[] = [
+  fakeGroupAdminUser,
+  {
+    id: 4,
+    firstName: "Bobby",
+    lastName: "Dob",
+    email: "bdob@ucdavis.edu",
+    iam: "1000037199",
+    kerberos: "bdob",
+    name: "A Fake Admin User",
+  },
+];
+
+const fakeAdminGroupAccount: GroupAccountModel = {
+  name: fakeGroupAdminUser.kerberos,
+  email: fakeGroupAdminUser.email,
+  kerberos: fakeGroupAdminUser.kerberos,
+};
+
 export const fakeGroups: GroupModel[] = [
   {
     id: 1,
     name: "group1",
     displayName: "Group 1",
-    admins: [],
+    admins: [fakeAdminGroupAccount],
     data: {} as PuppetGroupRecord,
   },
   {
     id: 2,
     name: "group2",
     displayName: "Group 2",
-    admins: [],
+    admins: [fakeAdminGroupAccount],
     data: {} as PuppetGroupRecord,
   },
 ];
@@ -84,6 +104,27 @@ export const fakeAccounts: AccountModel[] = [
     ).toISOString(),
   },
 ];
+
+export const fakeGroupAdminAccounts: AccountModel[] = [
+  {
+    id: 3,
+    name: "Account 1",
+    email: fakeUser.email,
+    kerberos: fakeUser.kerberos,
+    cluster: "caesfarm",
+    createdOn: "2020-01-01T00:00:00.000Z",
+    updatedOn: "2020-01-01T00:00:00.000Z",
+    memberOfGroups: [...fakeGroups],
+    adminOfGroups: [...fakeGroups],
+    accessTypes: ["OpenOnDemand", "SshKey"],
+    data: {} as PuppetUserRecord,
+    tags: [],
+    acceptableUsePolicyAgreedOn: new Date(
+      new Date().setHours(0, 0, 0, 0),
+    ).toISOString(),
+  },
+];
+
 
 export const fakeRequests: RequestModel[] = [
   {
@@ -160,7 +201,7 @@ export const fakeGroupAdminAppContext: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",
   user: {
     detail: {
-      ...fakeAdminUser,
+      ...fakeGroupAdminUser,
     },
     permissions: [
       {
@@ -169,7 +210,7 @@ export const fakeGroupAdminAppContext: AppContextShape = {
       },
     ],
   },
-  accounts: [fakeAccounts[0]],
+  accounts: [fakeGroupAdminAccounts[0]],
   clusters: [fakeCluster],
   openRequests: fakeRequests,
   featureFlags: fakeFeatureFlags,
@@ -177,18 +218,6 @@ export const fakeGroupAdminAppContext: AppContextShape = {
 
 export const fakeSetContext = vi.fn();
 
-export const fakeAdminUsers: User[] = [
-  fakeAdminUser,
-  {
-    id: 4,
-    firstName: "Bobby",
-    lastName: "Dob",
-    email: "bdob@ucdavis.edu",
-    iam: "1000037199",
-    kerberos: "bdob",
-    name: "A Fake Admin User",
-  },
-];
 
 export const fakeAppContextNoAccount: AppContextShape = {
   antiForgeryToken: "fakeAntiForgeryToken",

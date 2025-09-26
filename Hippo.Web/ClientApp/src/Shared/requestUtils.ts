@@ -14,3 +14,7 @@ export const getGroupModelFromRequest = (r: RequestModel) => {
       } as GroupModel)
     : r.groupModel;
 };
+
+export const getGroupNameFromRequest = (r: RequestModel) => {
+  return r.action === "CreateGroup" ? r.data.name : r.groupModel.name;
+};

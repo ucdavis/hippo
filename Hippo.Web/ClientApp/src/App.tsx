@@ -76,7 +76,7 @@ const App = () => {
             <Route
               path="/:cluster/approve"
               element={
-                <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
+                <ShowFor roles={["GroupAdmin", "ClusterAdmin"]} alternative={<NotAuthorized />}>
                   <RequireAupAgreement>
                     <Requests />
                   </RequireAupAgreement>
@@ -86,7 +86,7 @@ const App = () => {
             <Route
               path="/:cluster/activeaccounts"
               element={
-                <ShowFor roles={["GroupAdmin"]} alternative={<NotAuthorized />}>
+                <ShowFor roles={["GroupAdmin", "ClusterAdmin"]} alternative={<NotAuthorized />}>
                   <RequireAupAgreement>
                     <ActiveAccounts />
                   </RequireAupAgreement>

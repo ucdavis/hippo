@@ -14,8 +14,9 @@ import HipMainWrapper from "../../Shared/Layout/HipMainWrapper";
 import HipTitle from "../../Shared/Layout/HipTitle";
 import HipBody from "../../Shared/Layout/HipBody";
 import HipLoading from "../../Shared/LoadingAndErrors/HipLoading";
-import { getGroupModelFromRequest } from "../../Shared/requestUtils";
+import { getGroupModelFromRequest, getGroupNameFromRequest } from "../../Shared/requestUtils";
 import AppContext from "../../Shared/AppContext";
+import { usePermissions } from "../../Shared/usePermissions";
 
 export const Requests = () => {
   // get all accounts that need approval and list them
@@ -78,6 +79,8 @@ export const Requests = () => {
     },
     [requests],
   );
+
+  const { canManageGroup } = usePermissions()
 
   const columnHelper = createColumnHelper<RequestModel>();
 
@@ -174,27 +177,33 @@ export const Requests = () => {
     columnHelper.display({
       id: "actions",
       header: "Action",
-      cell: (props) => (
-        <>
-          <HipButton
-            id="approveButton"
-            disabled={notification.pending}
-            onClick={() => handleApprove(props.row.original)}
-          >
-            {requestApproving === props.row.original.id
-              ? "Approving..."
-              : "Approve"}
-          </HipButton>
-          {requestApproving !== props.row.original.id && (
-            <RejectRequest
-              request={props.row.original}
-              removeAccount={() => handleReject(props.row.original)}
-              updateUrl={`/api/${clusterName}/request/reject/`}
+      cell: (props) => {
+        const groupName = getGroupNameFromRequest(props.row.original);
+        if (!canManageGroup(groupName)) {
+          return <></>; // user cannot approve or reject this request>;
+        }
+        return (
+          <>
+            <HipButton
+              id="approveButton"
               disabled={notification.pending}
-            ></RejectRequest>
-          )}
-        </>
-      ),
+              onClick={() => handleApprove(props.row.original)}
+            >
+              {requestApproving === props.row.original.id
+                ? "Approving..."
+                : "Approve"}
+            </HipButton>
+            {requestApproving !== props.row.original.id && (
+              <RejectRequest
+                request={props.row.original}
+                removeAccount={() => handleReject(props.row.original)}
+                updateUrl={`/api/${clusterName}/request/reject/`}
+                disabled={notification.pending}
+              ></RejectRequest>
+            )}
+          </>
+        );
+      },
     }),
   );
 
