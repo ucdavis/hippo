@@ -86,7 +86,7 @@ export const AppNav = () => {
                     Admin
                   </DropdownToggle>
                   <DropdownMenu>
-                    <ShowFor roles={["GroupAdmin"]}>
+                    <ShowFor roles={["GroupAdmin", "ClusterAdmin"]}>
                       <DropdownItem>
                         <NavLink
                           id="sponsorApprove"
@@ -100,7 +100,7 @@ export const AppNav = () => {
                         </NavLink>
                       </DropdownItem>
                     </ShowFor>
-                    <ShowFor roles={["GroupAdmin"]}>
+                    <ShowFor roles={["GroupAdmin", "ClusterAdmin"]}>
                       <DropdownItem>
                         <NavLink
                           id="activeAccounts"

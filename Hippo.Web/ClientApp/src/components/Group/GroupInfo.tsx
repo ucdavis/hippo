@@ -53,7 +53,7 @@ export const GroupInfo = ({
         </Button>
       </ShowFor>
       <ShowFor
-        condition={() => !!navigateToGroupMembers && canManageGroup(group.name)}
+        condition={() => !!navigateToGroupMembers && canViewGroup(group.name)}
       >
         {" - "}
         <Button size="sm" color="link" onClick={handleShowMembers}>

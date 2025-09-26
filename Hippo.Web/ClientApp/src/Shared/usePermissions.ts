@@ -22,7 +22,7 @@ export const usePermissions = () => {
   };
 
   const canManageGroup = (groupName: string) => {
-    if (isSystemAdmin || isClusterAdmin) return true;
+    if (isSystemAdmin) return true;
     if (!clusterName) return false;
     const account = accounts.find((a) => a.cluster === clusterName);
     if (!account) return false;
