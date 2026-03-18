@@ -101,7 +101,7 @@ namespace Hippo.Core.Services
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
                 .Include(a => a.MemberOfGroups)
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
             var group = await _dbContext.Groups
                 .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
@@ -137,7 +137,7 @@ namespace Hippo.Core.Services
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
             var user = await _dbContext.Users
                 .Where(u => u.Kerberos == accountModel.Kerberos)
@@ -193,14 +193,14 @@ namespace Hippo.Core.Services
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
             var groupExists = await _dbContext.Groups
                 .AnyAsync(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name);
 
             if (accountModel == null || groupModel == null)
             {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateAccount);
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateGroup);
             }
 
             if (groupExists)
@@ -232,7 +232,7 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
 
             if (accountModel == null || string.IsNullOrWhiteSpace(accountModel.Key))
@@ -257,12 +257,12 @@ namespace Hippo.Core.Services
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
                 .Include(a => a.MemberOfGroups.Where(g => g.Name == groupModel.Name))
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
 
             if (accountModel == null || groupModel == null)
             {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.AddAccountToGroup);
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.RemoveAccountFromGroup);
             }
 
             if (account == null)
