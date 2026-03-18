@@ -257,7 +257,7 @@ namespace Hippo.Core.Services
             var groupModel = data.Groups.FirstOrDefault();
             var account = await _dbContext.Accounts
                 .Include(a => a.MemberOfGroups.Where(g => g.Name == groupModel.Name))
-                .Where(a => a.Cluster.Name == data.Cluster && a.Owner.Kerberos == accountModel.Kerberos)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
 
             if (accountModel == null || groupModel == null)
