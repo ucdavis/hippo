@@ -169,7 +169,7 @@ public class RequestController : SuperController
         var result = await _accountUpdateService.QueueCreateGroup(account, request);
         if (result.IsError)
         {
-            return BadRequest($"Error queuing {QueuedEvent.Actions.CreateAccount} request: {result.Message}");
+            return BadRequest($"Error queuing {QueuedEvent.Actions.CreateGroup} request: {result.Message}");
         }
 
         request.Status = HippoRequest.Statuses.Processing;

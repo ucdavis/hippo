@@ -200,7 +200,7 @@ namespace Hippo.Core.Services
 
             if (accountModel == null || groupModel == null)
             {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateAccount);
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateGroup);
             }
 
             if (groupExists)
@@ -262,7 +262,7 @@ namespace Hippo.Core.Services
 
             if (accountModel == null || groupModel == null)
             {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.AddAccountToGroup);
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.RemoveAccountFromGroup);
             }
 
             if (account == null)
