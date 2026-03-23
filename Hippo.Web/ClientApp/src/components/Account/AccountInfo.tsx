@@ -98,7 +98,7 @@ export const AccountInfo = () => {
                     }));
                     setSupervisingPI(user);
                   }}
-                />                
+                />
                 <p className="form-helper">
                   Some clusters may require additional clarification on who your
                   supervising PI will be for this group. If you are unsure,
@@ -138,6 +138,13 @@ export const AccountInfo = () => {
                   <p className="form-helper">
                     If approved, your group will be named <b>{userGroupName}</b>
                     .
+                  </p>
+                  <p>
+                    Qualifying faculty and staff may request the creation of a
+                    group for which they become the sponsor. Once the group is
+                    approved, the sponsor will be eligible to purchase resources
+                    for the group, as well as approve user access to the
+                    sponsor's resources.
                   </p>
                 </div>
               </div>
@@ -394,7 +401,8 @@ export const AccountInfo = () => {
           >
             Request Access to Another Group
           </HipButton>{" "}
-          {context.featureFlags.createGroup && !adminOfGroups.some((g) => g.name === userGroupName) &&
+          {context.featureFlags.createGroup &&
+            !adminOfGroups.some((g) => g.name === userGroupName) &&
             !currentOpenRequests.some(
               (r) =>
                 r.action === "CreateGroup" && r.data.name === userGroupName,
