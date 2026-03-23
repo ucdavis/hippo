@@ -121,6 +121,13 @@ export const AccountInfo = () => {
         message: (setReturn) => {
           return (
             <div className="row justify-content-center">
+              <p>
+                Qualifying faculty and staff may request the creation of a group
+                for which they become the sponsor. Once the group is approved,
+                the sponsor will be eligible to purchase resources for the
+                group, as well as approve user access to the sponsor's
+                resources.
+              </p>
               <div className="col-md-12">
                 <div className="form-group">
                   <label className="form-label">Display Name</label>
@@ -138,13 +145,6 @@ export const AccountInfo = () => {
                   <p className="form-helper">
                     If approved, your group will be named <b>{userGroupName}</b>
                     .
-                  </p>
-                  <p>
-                    Qualifying faculty and staff may request the creation of a
-                    group for which they become the sponsor. Once the group is
-                    approved, the sponsor will be eligible to purchase resources
-                    for the group, as well as approve user access to the
-                    sponsor's resources.
                   </p>
                 </div>
               </div>
