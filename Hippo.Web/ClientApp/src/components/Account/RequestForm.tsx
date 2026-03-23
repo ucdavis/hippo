@@ -115,8 +115,9 @@ export const RequestForm = () => {
         <hr />
         <div className="form-group">
           <label>
-            Who is sponsoring your account? If you are the PI wanting your own
-            group, please select the 'Sponsors' group.
+            Who is sponsoring your account? If you are a qualifying faculty or
+            staff member intending to request your own group, please select the
+            'Sponsors' group.
           </label>
           <GroupLookup
             setSelection={(group) => {
@@ -144,7 +145,7 @@ export const RequestForm = () => {
               }));
               setSupervisingPI(user);
             }}
-          />                
+          />
           <p className="form-helper">
             Some clusters may require additional clarification on who your
             supervising PI will be. If you are unsure, please ask your sponsor.
