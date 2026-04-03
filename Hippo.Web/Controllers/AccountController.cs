@@ -192,7 +192,7 @@ public class AccountController : SuperController
         }
 
         // Get user Id of the Supervising PI
-        var supervisingPIUserId = 0;
+        int? supervisingPIUserId = null;
         if (!string.IsNullOrWhiteSpace(model.SupervisingPIIamId))
         {
             var user = await _userService.GetUserByIam(model.SupervisingPIIamId);

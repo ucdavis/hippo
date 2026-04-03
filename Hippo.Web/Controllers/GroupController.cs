@@ -147,7 +147,7 @@ public class GroupController : SuperController
         }
 
         // Get user Id of the Supervising PI
-        var supervisingPIUserId = 0;
+        int? supervisingPIUserId = null;
         if (!string.IsNullOrWhiteSpace(addToGroupModel.SupervisingPIIamId))
         {
             var user = await _userService.GetUserByIam(addToGroupModel.SupervisingPIIamId);
