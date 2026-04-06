@@ -192,6 +192,12 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(accountModel?.Kerberos) || string.IsNullOrWhiteSpace(groupModel?.Name))
+            {
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateGroup);
+            }
+
             var account = await _dbContext.Accounts
                 .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
@@ -199,11 +205,6 @@ namespace Hippo.Core.Services
                 .IgnoreQueryFilters() // we need to consider all groups in case a deactivated one needs to be reactivated
                 .Where(g => g.Cluster.IsActive && g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
                 .FirstOrDefaultAsync();
-
-            if (accountModel == null || groupModel == null)
-            {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateGroup);
-            }
 
             if (group?.IsActive == true)
             {
