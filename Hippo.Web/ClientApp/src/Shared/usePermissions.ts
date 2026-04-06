@@ -12,8 +12,8 @@ export const usePermissions = () => {
   );
 
   const canViewGroup = (groupName: string) => {
-    if (isSystemAdmin || isClusterAdmin) return true;
     if (!clusterName) return false;
+    if (isSystemAdmin || isClusterAdmin) return true;
     const account = accounts.find((a) => a.cluster === clusterName);
     if (!account) return false;
     if (account.adminOfGroups.some((g) => g.name === groupName)) return true;
@@ -22,8 +22,8 @@ export const usePermissions = () => {
   };
 
   const canManageGroup = (groupName: string) => {
-    if (isSystemAdmin) return true;
     if (!clusterName) return false;
+    if (isSystemAdmin || isClusterAdmin) return true;
     const account = accounts.find((a) => a.cluster === clusterName);
     if (!account) return false;
     if (account.adminOfGroups.some((g) => g.name === groupName)) return true;

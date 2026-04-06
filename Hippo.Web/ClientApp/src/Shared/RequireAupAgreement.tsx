@@ -22,8 +22,11 @@ export const RequireAupAgreement = (props: Props) => {
   const hasSystemPermission = context.user.permissions.some(
     (p) => p.role === "System",
   );
+  const hasClusterAdminPermission = context.user.permissions.some(
+    (p) => p.role === "ClusterAdmin" && p.cluster === clusterName,
+  );
   const hasFinancialAdminPermission = context.user.permissions.some(
-    (p) => p.role === "FinancialAdmin",
+    (p) => p.role === "FinancialAdmin" && p.cluster === clusterName,
   );
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const account = context.accounts.find((a) => a.cluster === clusterName);
@@ -77,6 +80,7 @@ export const RequireAupAgreement = (props: Props) => {
 
   if (
     hasSystemPermission ||
+    hasClusterAdminPermission ||
     !cluster.acceptableUsePolicyUrl ||
     !cluster.acceptableUsePolicyUpdatedOn
   ) {
