@@ -1,0 +1,96 @@
+@{
+    Layout = null;
+    var requestId = ViewData["RequestId"] as string;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error - HiPPO</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+    <react-styles />
+    <style>
+        .error-shell {
+            padding-top: 2rem;
+        }
+
+        .error-brand {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .error-brand:hover {
+            text-decoration: none;
+        }
+
+        .error-branding {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .error-branding h1 img {
+            height: 1.5rem;
+            margin-right: 0.5rem;
+            vertical-align: baseline;
+        }
+
+        .error-panel {
+            background: #fff;
+            border-bottom: 4px solid #022851;
+            border-radius: 2px;
+            box-shadow: 0 4px 18px rgba(2, 40, 81, 0.12);
+            padding: 2rem;
+            margin: 0 auto;
+            max-width: 48rem;
+        }
+
+        .error-panel p:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-request-id {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(2, 40, 81, 0.12);
+        }
+
+        .error-request-id code {
+            background: rgba(2, 40, 81, 0.06);
+            border-radius: 4px;
+            padding: 0.15rem 0.35rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <main role="main" class="container error-shell">
+            <div class="error-branding appheader">
+                <a class="error-brand" href="/">
+                    <h1>
+                        <img src="/media/ucdavis.svg" alt="UC Davis" />
+                        HiPPO
+                    </h1>
+                    <p class="lede">High Performance Personnel Onboarding</p>
+                </a>
+            </div>
+
+            <section class="error-panel">
+                <h4 class="page-subtitle">Unexpected Error</h4>
+                <h2 class="page-title">An error occurred while processing your request.</h2>
+                <p>Please try again in a few minutes. If the problem continues, contact cluster support from the clusters page.</p>
+
+                @if (!string.IsNullOrWhiteSpace(requestId))
+                {
+                    <p class="error-request-id">
+                        <strong>Request ID:</strong> <code>@requestId</code>
+                    </p>
+                }
+            </section>
+        </main>
+    </div>
+    <partial name="_Footer" />
+
+    <react-scripts />
+</body>
+</html>

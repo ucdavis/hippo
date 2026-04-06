@@ -192,18 +192,21 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
-            var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
-                .FirstOrDefaultAsync();
-            var groupExists = await _dbContext.Groups
-                .AnyAsync(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name);
 
-            if (accountModel == null || groupModel == null)
+            if (string.IsNullOrWhiteSpace(accountModel?.Kerberos) || string.IsNullOrWhiteSpace(groupModel?.Name))
             {
                 return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateGroup);
             }
 
-            if (groupExists)
+            var account = await _dbContext.Accounts
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+            var group = await _dbContext.Groups
+                .IgnoreQueryFilters() // we need to consider all groups in case a deactivated one needs to be reactivated
+                .Where(g => g.Cluster.IsActive && g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
+                .FirstOrDefaultAsync();
+
+            if (group?.IsActive == true)
             {
                 return Result.Error("Group already exists: {Name} on cluster {Cluster}", groupModel.Name, data.Cluster);
             }
@@ -213,16 +216,26 @@ namespace Hippo.Core.Services
                 return Result.Error("Account does not exist: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
 
-            var newGroup = new Group
+            if (group == null)
             {
-                Name = groupModel.Name,
-                DisplayName = data.Metadata?["DisplayName"] ?? groupModel.Name,
-                AdminAccounts = new () { account },
-                ClusterId = account.ClusterId
-            };
-            
+                var newGroup = new Group
+                {
+                    Name = groupModel.Name,
+                    DisplayName = data.Metadata?["DisplayName"] ?? groupModel.Name,
+                    AdminAccounts = new () { account },
+                    ClusterId = account.ClusterId
+                };
+                
+                
+                await _dbContext.Groups.AddAsync(newGroup);
+            }
+            else
+            {
+                // undeleting previously deleted group
+                group.IsActive = true;
+                group.AdminAccounts = new () { account };
+            }
 
-            await _dbContext.Groups.AddAsync(newGroup);
             // _dbContext.SaveAsync() is handled elsewhere for this change
             return Result.Ok();
         }

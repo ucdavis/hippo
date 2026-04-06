@@ -1,0 +1,12 @@
+<footer class="container text-center footer">
+    <p>
+        Copyright &copy; <span data-current-year></span> The Regents of the University of California, Davis campus.
+        All rights reserved. <br> Questions? <a href="/clusters">See contact info for each cluster.</a>
+    </p>
+</footer>
+
+<script type="text/javascript">
+    document.querySelectorAll("[data-current-year]").forEach(function (element) {
+        element.textContent = new Date().getFullYear();
+    });
+</script>
