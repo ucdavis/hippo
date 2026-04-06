@@ -216,6 +216,25 @@ export const fakeGroupAdminAppContext: AppContextShape = {
   featureFlags: fakeFeatureFlags,
 };
 
+export const fakeClusterAdminAppContextNoAccount: AppContextShape = {
+  antiForgeryToken: "fakeAntiForgeryToken",
+  user: {
+    detail: {
+      ...fakeUser,
+    },
+    permissions: [
+      {
+        role: "ClusterAdmin",
+        cluster: "caesfarm",
+      },
+    ],
+  },
+  accounts: [],
+  clusters: [fakeCluster],
+  openRequests: fakeRequests,
+  featureFlags: fakeFeatureFlags,
+};
+
 export const fakeSetContext = vi.fn();
 
 

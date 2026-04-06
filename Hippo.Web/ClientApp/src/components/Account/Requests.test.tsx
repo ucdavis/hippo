@@ -2,6 +2,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import {
   fakeAccounts,
+  fakeClusterAdminAppContextNoAccount,
   fakeGroupAdminAppContext,
   fakeGroups,
   fakeRequests,
@@ -104,6 +105,26 @@ it("shows reject button for each pending account", async () => {
   expect(await screen.findAllByRole("button", { name: "Reject" })).toHaveLength(
     2,
   );
+});
+
+it("lets cluster admins without an account access approvals and approve requests", async () => {
+  (global as any).Hippo = fakeClusterAdminAppContextNoAccount;
+
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
+    );
+  });
+
+  expect(
+    await screen.findByText("There are 2 request(s) awaiting approval"),
+  ).toBeVisible();
+  expect(
+    await screen.findAllByRole("button", { name: "Approve" }),
+  ).toHaveLength(2);
+  expect(screen.queryByText("Acceptable Use Policy")).not.toBeInTheDocument();
 });
 
 it("displays dialog when reject is clicked", async () => {
