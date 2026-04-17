@@ -179,7 +179,7 @@ namespace Hippo.Core.Services
                 SshKey = accountModel.Key,
                 MemberOfGroups = new List<Group> { group },
                 AcceptableUsePolicyAgreedOn = accountRequestData.AcceptableUsePolicyAgreedOn,
-                SupervisingPIId = accountRequestData.SupervisingPIUserId ?? null,
+                SupervisingPIId = accountRequestData.SupervisingPIUserId == 0 ? null : accountRequestData.SupervisingPIUserId,
             };
 
             await _dbContext.Accounts.AddAsync(account);
@@ -222,18 +222,18 @@ namespace Hippo.Core.Services
                 {
                     Name = groupModel.Name,
                     DisplayName = data.Metadata?["DisplayName"] ?? groupModel.Name,
-                    AdminAccounts = new () { account },
+                    AdminAccounts = new() { account },
                     ClusterId = account.ClusterId
                 };
-                
-                
+
+
                 await _dbContext.Groups.AddAsync(newGroup);
             }
             else
             {
                 // undeleting previously deleted group
                 group.IsActive = true;
-                group.AdminAccounts = new () { account };
+                group.AdminAccounts = new() { account };
             }
 
             // _dbContext.SaveAsync() is handled elsewhere for this change
