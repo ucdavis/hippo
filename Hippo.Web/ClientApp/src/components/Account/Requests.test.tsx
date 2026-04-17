@@ -2,6 +2,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import {
   fakeAccounts,
+  fakeClusterAdminAppContextNoAccount,
   fakeGroupAdminAppContext,
   fakeGroups,
   fakeRequests,
@@ -12,17 +13,17 @@ import { responseMap } from "../../test/testHelpers";
 import App from "../../App";
 import { Requests } from "./Requests";
 import { ModalProvider } from "react-modal-hook";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
-import { RequireAupAgreement } from "../../Shared/RequireAupAgreement";
 import AppContext from "../../Shared/AppContext";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const testCluster = fakeAccounts[0].cluster;
 const approveUrl = `/${testCluster}/approve`;
+const pendingRequestCountText = `There are ${fakeRequests.length} request(s) awaiting approval`;
 
 beforeEach(() => {
   const requestResponse = Promise.resolve({
@@ -74,11 +75,11 @@ it("shows pending approvals count", async () => {
     );
   });
   expect(
-    await screen.findByText("There are 2 request(s) awaiting approval"),
+    await screen.findByText(pendingRequestCountText),
   ).toBeVisible();
 });
 
-it("shows approval button for each pending account", async () => {
+it("shows approval buttons for each request the group admin can manage", async () => {
   await act(async () => {
     render(
       <MemoryRouter initialEntries={[approveUrl]}>
@@ -92,7 +93,7 @@ it("shows approval button for each pending account", async () => {
   ).toHaveLength(2);
 });
 
-it("shows reject button for each pending account", async () => {
+it("shows reject buttons for each request the group admin can manage", async () => {
   await act(async () => {
     render(
       <MemoryRouter initialEntries={[approveUrl]}>
@@ -104,6 +105,44 @@ it("shows reject button for each pending account", async () => {
   expect(await screen.findAllByRole("button", { name: "Reject" })).toHaveLength(
     2,
   );
+});
+
+it("shows action buttons for CreateGroup requests for cluster admins without an account", async () => {
+  (global as any).Hippo = fakeClusterAdminAppContextNoAccount;
+
+  await act(async () => {
+    render(
+      <MemoryRouter initialEntries={[approveUrl]}>
+        <App />
+      </MemoryRouter>,
+    );
+  });
+
+  expect(
+    await screen.findByText(pendingRequestCountText),
+  ).toBeVisible();
+  const createGroupCell = (await screen.findAllByText("Create Group")).find(
+    (element) => element.tagName === "TD",
+  );
+  expect(createGroupCell).toBeDefined();
+  const createGroupRow = createGroupCell?.closest("tr");
+  expect(createGroupRow).not.toBeNull();
+  if (!createGroupRow) {
+    throw new Error("Expected Create Group request row to be present");
+  }
+  expect(
+    await screen.findAllByRole("button", { name: "Approve" }),
+  ).toHaveLength(fakeRequests.length);
+  expect(
+    await screen.findAllByRole("button", { name: "Reject" }),
+  ).toHaveLength(fakeRequests.length);
+  expect(
+    within(createGroupRow).getByRole("button", { name: "Approve" }),
+  ).toBeVisible();
+  expect(
+    within(createGroupRow).getByRole("button", { name: "Reject" }),
+  ).toBeVisible();
+  expect(screen.queryByText("Acceptable Use Policy")).not.toBeInTheDocument();
 });
 
 it("displays dialog when reject is clicked", async () => {
@@ -123,7 +162,7 @@ it("displays dialog when reject is clicked", async () => {
     );
   });
   expect(
-    await screen.findByText("There are 2 request(s) awaiting approval"),
+    await screen.findByText(pendingRequestCountText),
   ).toBeVisible();
 
   await act(async () => {
@@ -149,7 +188,7 @@ it("calls approve and filters list when approve is clicked", async () => {
     );
   });
   expect(
-    await screen.findByText("There are 2 request(s) awaiting approval"),
+    await screen.findByText(pendingRequestCountText),
   ).toBeVisible();
 
   await act(async () => {

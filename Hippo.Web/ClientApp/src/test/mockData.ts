@@ -8,6 +8,7 @@ import {
   PuppetUserRecord,
   RequestModel,
   AccountRequestDataModel,
+  GroupRequestDataModel,
   RequestStatus,
   GroupAccountModel
 } from "../types";
@@ -153,6 +154,25 @@ export const fakeRequests: RequestModel[] = [
       accessTypes: ["SshKey"],
     } as AccountRequestDataModel,
   },
+  {
+    id: 3,
+    requesterEmail: fakeUser.email,
+    requesterName: fakeUser.name,
+    action: "CreateGroup",
+    groupModel: {
+      id: 3,
+      name: "group3",
+      displayName: "Group 3",
+      admins: [fakeAdminGroupAccount],
+      data: {} as PuppetGroupRecord,
+    },
+    status: RequestStatus.PendingApproval,
+    cluster: "caesfarm",
+    data: {
+      name: "group3",
+      displayName: "Group 3",
+    } as GroupRequestDataModel,
+  },
 ];
 
 const fakeCluster: ClusterModel = {
@@ -211,6 +231,25 @@ export const fakeGroupAdminAppContext: AppContextShape = {
     ],
   },
   accounts: [fakeGroupAdminAccounts[0]],
+  clusters: [fakeCluster],
+  openRequests: fakeRequests,
+  featureFlags: fakeFeatureFlags,
+};
+
+export const fakeClusterAdminAppContextNoAccount: AppContextShape = {
+  antiForgeryToken: "fakeAntiForgeryToken",
+  user: {
+    detail: {
+      ...fakeUser,
+    },
+    permissions: [
+      {
+        role: "ClusterAdmin",
+        cluster: "caesfarm",
+      },
+    ],
+  },
+  accounts: [],
   clusters: [fakeCluster],
   openRequests: fakeRequests,
   featureFlags: fakeFeatureFlags,
