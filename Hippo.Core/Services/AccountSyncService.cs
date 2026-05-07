@@ -166,45 +166,25 @@ namespace Hippo.Core.Services
                     .ToDictionaryAsync(a => (a.ClusterId, a.Kerberos), a => a.Id);
 
                 // setup desired state of group memberships
-                var desiredGroupAccounts = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.PuppetData.Users
-                        .Where(u => mapClusterIdAndKerberosToAccountId.ContainsKey((x.Key, u.Kerberos)))
-                        .SelectMany(u => u.Groups.Select(g => new GroupMemberAccount
-                        {
-                            GroupId = mapClusterIdAndGroupNameToId[(x.Key, g)],
-                            AccountId = mapClusterIdAndKerberosToAccountId[(x.Key, u.Kerberos)],
-                            RevokedOn = null
-                        })));
+                var desiredGroupAccounts = AccountSyncPlanner.GetDesiredGroupMemberAccounts(
+                    mapClusterIdsToPuppetData.ToDictionary(x => x.Key, x => x.Value.PuppetData),
+                    mapClusterIdAndGroupNameToId,
+                    mapClusterIdAndKerberosToAccountId);
                 // identify group memberships that need to be soft-deleted
-                var mapClusterIdAndKerberosToUserExists = mapClusterIdsToPuppetData
-                    .SelectMany(x => x.Value.PuppetData.Users.Select(u => (x.Key, u.Kerberos)))
-                    .ToHashSet();
-                var deleteGroupAccounts = (await _dbContext.GroupMemberAccount
+                var activeGroupMemberAccounts = await _dbContext.GroupMemberAccount
                     .AsNoTracking()
                     .IgnoreQueryFilters()
                     .Where(gma => gma.RevokedOn == null)
-                    .Select(gma => new
-                    {
+                    .Select(gma => new GroupMemberAccountSyncState(
                         gma.GroupId,
                         gma.AccountId,
-                        gma.Group.ClusterId,
-                        gma.Account.Kerberos
-                    })
-                    .ToListAsync()) // Some filtering done locally to avoid a sending too many parameters to db
-                    .Where(gma => !mapClusterIdAndKerberosToUserExists.Contains((gma.ClusterId, gma.Kerberos)))
-                    .Select(gma => new GroupMemberAccount
-                    {
-                        GroupId = gma.GroupId,
-                        AccountId = gma.AccountId,
-                        RevokedOn = now
-                    })
-                    .ToList();
-                desiredGroupAccounts = desiredGroupAccounts
-                    // ensure we don't have any duplicates
-                    .Where(gma => !deleteGroupAccounts.Any(dgma => dgma.GroupId == gma.GroupId && dgma.AccountId == gma.AccountId))
-                    .Concat(deleteGroupAccounts)
-                    .ToList();
-
+                        gma.Group.ClusterId))
+                    .ToListAsync();
+                desiredGroupAccounts = AccountSyncPlanner.ApplyRevokedGroupMemberAccounts(
+                    desiredGroupAccounts,
+                    activeGroupMemberAccounts,
+                    mapClusterIdsToPuppetData.Keys,
+                    now);
 
                 var desiredGroupAdminAccounts = mapClusterIdsToPuppetData
                     .SelectMany(x => x.Value.PuppetData.Users
@@ -336,6 +316,61 @@ namespace Hippo.Core.Services
             public int ClusterId { get; set; }
             public PuppetData PuppetData { get; set; }
             public ConcurrentDictionary<string, JsonNode> MapQosStringToQosObject { get; set; } = new();
+        }
+    }
+
+    internal record GroupMemberAccountSyncState(int GroupId, int AccountId, int ClusterId);
+
+    internal static class AccountSyncPlanner
+    {
+        public static List<GroupMemberAccount> GetDesiredGroupMemberAccounts(
+            IReadOnlyDictionary<int, PuppetData> puppetDataByClusterId,
+            IReadOnlyDictionary<(int ClusterId, string GroupName), int> groupIds,
+            IReadOnlyDictionary<(int ClusterId, string Kerberos), int> accountIds)
+        {
+            return puppetDataByClusterId
+                .SelectMany(x => x.Value.Users
+                    .Where(u => accountIds.ContainsKey((x.Key, u.Kerberos)))
+                    .SelectMany(u => u.Groups.Select(g => new GroupMemberAccount
+                    {
+                        GroupId = groupIds[(x.Key, g)],
+                        AccountId = accountIds[(x.Key, u.Kerberos)],
+                        RevokedOn = null
+                    })))
+                .ToList();
+        }
+
+        public static List<GroupMemberAccount> ApplyRevokedGroupMemberAccounts(
+            IEnumerable<GroupMemberAccount> desiredGroupAccounts,
+            IEnumerable<GroupMemberAccountSyncState> activeGroupMemberAccounts,
+            IEnumerable<int> syncedClusterIds,
+            DateTime revokedOn)
+        {
+            var desiredGroupAccountsList = desiredGroupAccounts.ToList();
+            var desiredGroupAccountKeys = desiredGroupAccountsList
+                .Select(gma => (gma.GroupId, gma.AccountId))
+                .ToHashSet();
+            var syncedClusterIdsSet = syncedClusterIds.ToHashSet();
+
+            var deleteGroupAccounts = activeGroupMemberAccounts
+                .Where(gma => syncedClusterIdsSet.Contains(gma.ClusterId) &&
+                    !desiredGroupAccountKeys.Contains((gma.GroupId, gma.AccountId)))
+                .Select(gma => new GroupMemberAccount
+                {
+                    GroupId = gma.GroupId,
+                    AccountId = gma.AccountId,
+                    RevokedOn = revokedOn
+                })
+                .ToList();
+            var deleteGroupAccountKeys = deleteGroupAccounts
+                .Select(gma => (gma.GroupId, gma.AccountId))
+                .ToHashSet();
+
+            return desiredGroupAccountsList
+                // ensure we don't have any duplicates
+                .Where(gma => !deleteGroupAccountKeys.Contains((gma.GroupId, gma.AccountId)))
+                .Concat(deleteGroupAccounts)
+                .ToList();
         }
     }
 }
