@@ -1,7 +1,9 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
+using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Shouldly;
@@ -39,12 +41,10 @@ namespace Test
             var secretsService = new SecretsService(Options.Create(azureSettings));
             var secretName = $"hippo-smoke-test-{Guid.NewGuid():N}";
             var secretValue = $"smoke-test-value-{Guid.NewGuid():N}";
-            var secretWasCreated = false;
 
             try
             {
                 await secretsService.SetSecret(secretName, secretValue);
-                secretWasCreated = true;
 
                 var retrievedSecret = await secretsService.GetSecret(secretName);
 
@@ -52,9 +52,12 @@ namespace Test
             }
             finally
             {
-                if (secretWasCreated)
+                try
                 {
                     await secretsService.DeleteSecret(secretName);
+                }
+                catch (KeyVaultErrorException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+                {
                 }
             }
         }
