@@ -29,3 +29,14 @@ Make sure to invoke "Prettier" before committing JS changes.  If using VSCode co
 
 If making large JS changes, run `npm test` inside the `Hippo.Web/ClientApp` directory and it will automatically re-run affected tests.
 
+## Integration smoke tests
+
+The Key Vault smoke test is opt-in because it writes to the configured Azure Key Vault. It uses the same user-secrets file as `Hippo.Web`, so make sure the `Azure` section is configured before running it.
+
+To verify that Hippo can write, read, and delete a temporary Key Vault secret, run:
+
+```bash
+RUN_KEYVAULT_SMOKE_TESTS=true dotnet test Test/Test.csproj --filter FullyQualifiedName~KeyVaultSmokeTests
+```
+
+Without `RUN_KEYVAULT_SMOKE_TESTS=true`, the test exits without contacting Key Vault.
