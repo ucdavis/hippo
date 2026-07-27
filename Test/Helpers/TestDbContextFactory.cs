@@ -1,17 +1,25 @@
-using System;
 using Hippo.Core.Data;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace Test.Helpers;
 
 public static class TestDbContextFactory
 {
-    public static AppDbContextSqlServer Create()
+    public static AppDbContextSqlite Create()
     {
-        var options = new DbContextOptionsBuilder<AppDbContextSqlServer>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        SQLitePCL.Batteries_V2.Init();
+
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
+
+        var options = new DbContextOptionsBuilder<AppDbContextSqlite>()
+            .UseSqlite(connection, contextOwnsConnection: true)
             .Options;
 
-        return new AppDbContextSqlServer(options);
+        var dbContext = new AppDbContextSqlite(options);
+        dbContext.Database.EnsureCreated();
+
+        return dbContext;
     }
 }

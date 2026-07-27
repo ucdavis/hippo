@@ -174,7 +174,8 @@ namespace Hippo.Core.Services
                 return Result.Error("User not found: {Kerberos}", accountModel.Kerberos);
             }
 
-            if (!string.Equals(user.Kerberos, accountModel.Kerberos, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(user.Kerberos)
+                && !string.Equals(user.Kerberos, accountModel.Kerberos, StringComparison.OrdinalIgnoreCase))
             {
                 return Result.Error(
                     "Queued account Kerberos {Kerberos} does not match resolved user Kerberos {UserKerberos}",
@@ -190,6 +191,7 @@ namespace Hippo.Core.Services
                 }
 
                 account.Owner = user;
+                account.SshKey = accountModel.Key;
                 if (!account.MemberOfGroups.Any(g => g.Id == group.Id))
                 {
                     account.MemberOfGroups.Add(group);

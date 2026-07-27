@@ -66,12 +66,12 @@ namespace Hippo.Core.Services
                     usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
                 var ambiguousKerberos = AccountSyncPlanner.GetAmbiguousKerberos(
                     usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
-                var existingOwnerIdsForAmbiguousAccounts = await _dbContext.Accounts
+                var existingOwnerIdsForAccounts = await _dbContext.Accounts
                     .IgnoreQueryFilters()
-                    .Where(a => a.Kerberos != null && ambiguousKerberos.Contains(a.Kerberos))
+                    .Where(a => a.OwnerId != null && !string.IsNullOrEmpty(a.Kerberos))
                     .Select(a => new { a.ClusterId, a.Kerberos, a.OwnerId })
                     .ToListAsync();
-                var mapAmbiguousAccountKeysToOwnerIds = existingOwnerIdsForAmbiguousAccounts
+                var mapAccountKeysToOwnerIds = existingOwnerIdsForAccounts
                     .GroupBy(a => (a.ClusterId, a.Kerberos))
                     .ToDictionary(g => g.Key, g => g.First().OwnerId);
 
@@ -88,7 +88,7 @@ namespace Hippo.Core.Services
                             u.Kerberos,
                             mapKerbsToUserIds,
                             ambiguousKerberos,
-                            mapAmbiguousAccountKeysToOwnerIds),
+                            mapAccountKeysToOwnerIds),
                         ClusterId = x.Key,
                         CreatedOn = now,
                         UpdatedOn = now,
@@ -433,7 +433,7 @@ namespace Hippo.Core.Services
                 return userId;
             }
 
-            return ambiguousKerberos.Contains(kerberos)
+            return (ambiguousKerberos.Contains(kerberos) || !uniqueUserIdsByKerberos.ContainsKey(kerberos))
                 && existingOwnerIdsByAccountKey.TryGetValue((clusterId, kerberos), out var existingOwnerId)
                     ? existingOwnerId
                     : null;

@@ -157,6 +157,41 @@ namespace Test
         }
 
         [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosHasNoMatchingUser()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "missing")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "missing",
+                userIdsByKerberos,
+                new HashSet<string>(),
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_ClearsOwnerWhenKerberosHasNoMatchingUserOrExistingOwner()
+        {
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "missing",
+                new Dictionary<string, int>(),
+                new HashSet<string>(),
+                new Dictionary<(int ClusterId, string Kerberos), int?>());
+
+            ownerId.ShouldBeNull();
+        }
+
+        [Fact]
         public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosIsAmbiguous()
         {
             var userIdsByKerberos = new Dictionary<string, int>
