@@ -64,6 +64,16 @@ namespace Hippo.Core.Services
                     .ToListAsync();
                 var mapKerbsToUserIds = AccountSyncPlanner.GetUniqueUserIdsByKerberos(
                     usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
+                var ambiguousKerberos = AccountSyncPlanner.GetAmbiguousKerberos(
+                    usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
+                var existingOwnerIdsForAmbiguousAccounts = await _dbContext.Accounts
+                    .IgnoreQueryFilters()
+                    .Where(a => a.Kerberos != null && ambiguousKerberos.Contains(a.Kerberos))
+                    .Select(a => new { a.ClusterId, a.Kerberos, a.OwnerId })
+                    .ToListAsync();
+                var mapAmbiguousAccountKeysToOwnerIds = existingOwnerIdsForAmbiguousAccounts
+                    .GroupBy(a => (a.ClusterId, a.Kerberos))
+                    .ToDictionary(g => g.Key, g => g.First().OwnerId);
 
                 // Setup desired state of groups and accounts
                 // This will effectively undelete any that are soft-deleted
@@ -73,7 +83,12 @@ namespace Hippo.Core.Services
                         Name = u.Name,
                         Email = u.Email,
                         Kerberos = u.Kerberos,
-                        OwnerId = mapKerbsToUserIds.ContainsKey(u.Kerberos) ? mapKerbsToUserIds[u.Kerberos] : null,
+                        OwnerId = AccountSyncPlanner.GetDesiredOwnerId(
+                            x.Key,
+                            u.Kerberos,
+                            mapKerbsToUserIds,
+                            ambiguousKerberos,
+                            mapAmbiguousAccountKeysToOwnerIds),
                         ClusterId = x.Key,
                         CreatedOn = now,
                         UpdatedOn = now,
@@ -395,6 +410,33 @@ namespace Hippo.Core.Services
                     return false;
                 })
                 .ToDictionary(g => g.Key, g => g.Single().UserId);
+        }
+
+        public static HashSet<string> GetAmbiguousKerberos(IEnumerable<UserKerberosSyncState> users)
+        {
+            return users
+                .GroupBy(u => u.Kerberos)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToHashSet();
+        }
+
+        public static int? GetDesiredOwnerId(
+            int clusterId,
+            string kerberos,
+            IReadOnlyDictionary<string, int> uniqueUserIdsByKerberos,
+            IReadOnlySet<string> ambiguousKerberos,
+            IReadOnlyDictionary<(int ClusterId, string Kerberos), int?> existingOwnerIdsByAccountKey)
+        {
+            if (uniqueUserIdsByKerberos.TryGetValue(kerberos, out var userId))
+            {
+                return userId;
+            }
+
+            return ambiguousKerberos.Contains(kerberos)
+                && existingOwnerIdsByAccountKey.TryGetValue((clusterId, kerberos), out var existingOwnerId)
+                    ? existingOwnerId
+                    : null;
         }
     }
 }

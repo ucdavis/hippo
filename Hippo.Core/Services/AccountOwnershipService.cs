@@ -14,7 +14,7 @@ public static class AccountOwnershipService
             return 0;
         }
 
-        if (await HasMultipleUsersWithKerberos(dbContext, user.Kerberos))
+        if (await HasConflictingUserWithKerberos(dbContext, user))
         {
             Log.Warning(
                 "Multiple users found with Kerberos {Kerberos}. Skipping account ownership linking for user {UserId}.",
@@ -65,13 +65,16 @@ public static class AccountOwnershipService
         return true;
     }
 
-    private static async Task<bool> HasMultipleUsersWithKerberos(AppDbContext dbContext, string kerberos)
+    private static async Task<bool> HasConflictingUserWithKerberos(AppDbContext dbContext, User user)
     {
-        var userCount = await dbContext.Users
-            .Where(u => u.Kerberos == kerberos)
+        var matchingUserIds = await dbContext.Users
+            .Where(u => u.Kerberos == user.Kerberos)
+            .Select(u => u.Id)
             .Take(2)
-            .CountAsync();
+            .ToListAsync();
 
-        return userCount > 1;
+        return user.Id == 0
+            ? matchingUserIds.Count > 0
+            : matchingUserIds.Any(id => id != user.Id);
     }
 }

@@ -224,6 +224,71 @@ public class AccountUpdateServiceTests
         accountCreated.ShouldBeFalse();
     }
 
+    [Fact]
+    public async Task UpdateEvent_CompleteCreateAccount_FailsWhenIamResolvesToDifferentKerberos()
+    {
+        await using var dbContext = TestDbContextFactory.Create();
+        var cluster = new Cluster { Name = "farm" };
+        var requester = new User
+        {
+            FirstName = "Pat",
+            LastName = "Requester",
+            Email = "pat@example.com",
+            Iam = "100000001",
+            Kerberos = "pat",
+            MothraId = "mothra1"
+        };
+        var otherUser = new User
+        {
+            FirstName = "Other",
+            LastName = "User",
+            Email = "other@example.com",
+            Iam = "100000002",
+            Kerberos = "other",
+            MothraId = "mothra2"
+        };
+        var group = new Group { Cluster = cluster, Name = "research", DisplayName = "Research" };
+        dbContext.AddRange(cluster, requester, otherUser, group);
+        await dbContext.SaveChangesAsync();
+
+        var request = new Request
+        {
+            Requester = requester,
+            RequesterId = requester.Id,
+            Group = group.Name,
+            Action = Request.Actions.CreateAccount,
+            Status = Request.Statuses.Processing,
+            Cluster = cluster,
+            ClusterId = cluster.Id
+        }.WithAccountRequestData(new AccountRequestDataModel());
+        dbContext.Requests.Add(request);
+        await dbContext.SaveChangesAsync();
+
+        var queuedEvent = new QueuedEvent
+        {
+            Action = QueuedEvent.Actions.CreateAccount,
+            Status = QueuedEvent.Statuses.Pending,
+            Data = QueuedEventDataModel.FromRequestAndGroup(request, group),
+            Request = request,
+            RequestId = request.Id
+        };
+        queuedEvent.Data.Accounts.Single().Iam = otherUser.Iam;
+        dbContext.QueuedEvents.Add(queuedEvent);
+        await dbContext.SaveChangesAsync();
+
+        var service = new AccountUpdateService(dbContext, new CapturingHistoryService());
+
+        var result = await service.UpdateEvent(queuedEvent, QueuedEvent.Statuses.Complete);
+
+        result.IsError.ShouldBeTrue();
+        result.Message.ShouldBe("Queued account Kerberos pat does not match resolved user Kerberos other");
+        queuedEvent.Status.ShouldBe(QueuedEvent.Statuses.Failed);
+        var accountCreated = await dbContext.Accounts
+            .IgnoreQueryFilters()
+            .AnyAsync(a => a.ClusterId == cluster.Id && a.Kerberos == requester.Kerberos);
+        accountCreated.ShouldBeFalse();
+    }
+
     private class CapturingHistoryService : IHistoryService
     {
         public List<History> AddedHistory { get; } = new();

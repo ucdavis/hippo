@@ -140,7 +140,7 @@ namespace Hippo.Core.Services
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
 
-            if (accountModel == null || groupModel == null)
+            if (accountModel == null || groupModel == null || string.IsNullOrWhiteSpace(accountModel.Kerberos))
             {
                 return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateAccount);
             }
@@ -172,6 +172,14 @@ namespace Hippo.Core.Services
             if (user == null)
             {
                 return Result.Error("User not found: {Kerberos}", accountModel.Kerberos);
+            }
+
+            if (!string.Equals(user.Kerberos, accountModel.Kerberos, StringComparison.OrdinalIgnoreCase))
+            {
+                return Result.Error(
+                    "Queued account Kerberos {Kerberos} does not match resolved user Kerberos {UserKerberos}",
+                    accountModel.Kerberos,
+                    user.Kerberos);
             }
 
             if (account != null)

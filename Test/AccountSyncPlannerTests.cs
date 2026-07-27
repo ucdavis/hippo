@@ -155,5 +155,28 @@ namespace Test
                 ["unique"] = 1
             });
         }
+
+        [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosIsAmbiguous()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            };
+            var ambiguousKerberos = new HashSet<string> { "duplicate" };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "duplicate")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "duplicate",
+                userIdsByKerberos,
+                ambiguousKerberos,
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
     }
 }
