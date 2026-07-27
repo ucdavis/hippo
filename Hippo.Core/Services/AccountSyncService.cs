@@ -136,10 +136,11 @@ namespace Hippo.Core.Services
                         nameof(Account.CreatedOn),
                         nameof(Account.AcceptableUsePolicyAgreedOn) },
                     // PropertiesToIncludeOnCompare is more explicit than PropertiesToExcludeOnCompare on what differences
-                    // can be used to trigger an update. We're only interested when Name, Email, Data or IsActive changes...
+                    // can be used to trigger an update. We're only interested when synced account fields or ownership changes...
                     PropertiesToIncludeOnCompare = new List<string> {
                         nameof(Account.Name),
                         nameof(Account.Email),
+                        nameof(Account.OwnerId),
                         nameof(Account.Data),
                         nameof(Account.DeactivatedOn) },
                     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },

@@ -177,10 +177,15 @@ namespace Hippo.Core.Services
 
             if (dbUser != null)
             {
+                var accountLinksUpdated = await AccountOwnershipService.LinkAccountsToUser(_dbContext, dbUser);
                 if (dbUser.MothraId == null)
                 {
                     var foundUser = await _identityService.GetByKerberos(dbUser.Kerberos);
                     dbUser.MothraId = foundUser.MothraId;
+                    await _dbContext.SaveChangesAsync();
+                }
+                else if (accountLinksUpdated > 0)
+                {
                     await _dbContext.SaveChangesAsync();
                 }
 
@@ -204,14 +209,7 @@ namespace Hippo.Core.Services
                 await _dbContext.Users.AddAsync(newUser);
 
                 // check if any existing accounts need to be associated with this user
-                var existingAccounts = await _dbContext.Accounts.Where(a => a.Kerberos == newUser.Kerberos).ToArrayAsync();
-                if (existingAccounts.Length > 0)
-                {
-                    foreach (var account in existingAccounts)
-                    {
-                        account.Owner = newUser;
-                    }
-                }
+                await AccountOwnershipService.LinkAccountsToUser(_dbContext, newUser);
 
                 await _dbContext.SaveChangesAsync();
 
@@ -227,6 +225,11 @@ namespace Hippo.Core.Services
 
             if (user != null)
             {
+                var accountLinksUpdated = await AccountOwnershipService.LinkAccountsToUser(_dbContext, user);
+                if (accountLinksUpdated > 0)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
                 return user;
             }
 
@@ -235,6 +238,7 @@ namespace Hippo.Core.Services
             if (user != null)
             {
                 await _dbContext.Users.AddAsync(user);
+                await AccountOwnershipService.LinkAccountsToUser(_dbContext, user);
                 await _dbContext.SaveChangesAsync();
             }
 
