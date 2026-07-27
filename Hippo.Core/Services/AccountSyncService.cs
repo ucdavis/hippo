@@ -58,10 +58,12 @@ namespace Hippo.Core.Services
                 await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.Users.Select(u => new TempKerberos { ClusterId = x.Key, Kerberos = u.Kerberos })));
                 await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.GroupsWithSponsors.Select(g => new TempGroup { ClusterId = x.Key, Group = g.Name })));
 
-                var mapKerbsToUserIds = await _dbContext.Users
+                var usersMatchingSyncedKerberos = await _dbContext.Users
                     .Where(u => _dbContext.TempKerberos.Any(tg => tg.Kerberos == u.Kerberos))
                     .Select(u => new { u.Id, u.Kerberos })
-                    .ToDictionaryAsync(k => k.Kerberos, v => v.Id);
+                    .ToListAsync();
+                var mapKerbsToUserIds = AccountSyncPlanner.GetUniqueUserIdsByKerberos(
+                    usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
 
                 // Setup desired state of groups and accounts
                 // This will effectively undelete any that are soft-deleted
@@ -321,6 +323,7 @@ namespace Hippo.Core.Services
     }
 
     internal record GroupMemberAccountSyncState(int GroupId, int AccountId, int ClusterId);
+    internal record UserKerberosSyncState(int UserId, string Kerberos);
 
     internal static class AccountSyncPlanner
     {
@@ -372,6 +375,26 @@ namespace Hippo.Core.Services
                 .Where(gma => !deleteGroupAccountKeys.Contains((gma.GroupId, gma.AccountId)))
                 .Concat(deleteGroupAccounts)
                 .ToList();
+        }
+
+        public static Dictionary<string, int> GetUniqueUserIdsByKerberos(IEnumerable<UserKerberosSyncState> users)
+        {
+            return users
+                .GroupBy(u => u.Kerberos)
+                .Where(g =>
+                {
+                    if (g.Count() == 1)
+                    {
+                        return true;
+                    }
+
+                    Log.Warning(
+                        "Multiple users found with Kerberos {Kerberos} during account sync. Skipping owner assignment for matching accounts. UserIds: {UserIds}",
+                        g.Key,
+                        g.Select(u => u.UserId).ToArray());
+                    return false;
+                })
+                .ToDictionary(g => g.Key, g => g.Single().UserId);
         }
     }
 }

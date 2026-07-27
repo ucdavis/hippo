@@ -1,6 +1,7 @@
 using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Hippo.Core.Services;
 
@@ -10,6 +11,15 @@ public static class AccountOwnershipService
     {
         if (string.IsNullOrWhiteSpace(user.Kerberos))
         {
+            return 0;
+        }
+
+        if (await HasMultipleUsersWithKerberos(dbContext, user.Kerberos))
+        {
+            Log.Warning(
+                "Multiple users found with Kerberos {Kerberos}. Skipping account ownership linking for user {UserId}.",
+                user.Kerberos,
+                user.Id);
             return 0;
         }
 
@@ -32,16 +42,36 @@ public static class AccountOwnershipService
             return false;
         }
 
-        var user = await dbContext.Users
+        var users = await dbContext.Users
             .Where(u => u.Kerberos == account.Kerberos)
-            .FirstOrDefaultAsync();
+            .Take(2)
+            .ToListAsync();
 
-        if (user == null)
+        if (users.Count == 0)
         {
             return false;
         }
 
-        account.Owner = user;
+        if (users.Count > 1)
+        {
+            Log.Warning(
+                "Multiple users found with Kerberos {Kerberos}. Skipping owner assignment for account {AccountId}.",
+                account.Kerberos,
+                account.Id);
+            return false;
+        }
+
+        account.Owner = users.Single();
         return true;
+    }
+
+    private static async Task<bool> HasMultipleUsersWithKerberos(AppDbContext dbContext, string kerberos)
+    {
+        var userCount = await dbContext.Users
+            .Where(u => u.Kerberos == kerberos)
+            .Take(2)
+            .CountAsync();
+
+        return userCount > 1;
     }
 }

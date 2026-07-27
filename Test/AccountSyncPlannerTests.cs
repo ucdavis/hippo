@@ -137,5 +137,23 @@ namespace Test
             desiredMembership.AccountId.ShouldBe(100);
             desiredMembership.RevokedOn.ShouldBeNull();
         }
+
+        [Fact]
+        public void GetUniqueUserIdsByKerberos_SkipsAmbiguousKerberos()
+        {
+            var users = new[]
+            {
+                new UserKerberosSyncState(UserId: 1, Kerberos: "unique"),
+                new UserKerberosSyncState(UserId: 2, Kerberos: "duplicate"),
+                new UserKerberosSyncState(UserId: 3, Kerberos: "duplicate")
+            };
+
+            var userIdsByKerberos = AccountSyncPlanner.GetUniqueUserIdsByKerberos(users);
+
+            userIdsByKerberos.ShouldBe(new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            });
+        }
     }
 }

@@ -58,6 +58,40 @@ public class AccountOwnershipServiceTests
     }
 
     [Fact]
+    public async Task LinkAccountsToUser_DoesNotLinkWhenMultipleUsersHaveMatchingKerberos()
+    {
+        await using var dbContext = TestDbContextFactory.Create();
+        var cluster = new Cluster { Name = "farm" };
+        var user = new User
+        {
+            FirstName = "Pat",
+            LastName = "Requester",
+            Email = "pat@example.com",
+            Iam = "100000001",
+            Kerberos = "pat",
+            MothraId = "mothra1"
+        };
+        var duplicateUser = new User
+        {
+            FirstName = "Other",
+            LastName = "Requester",
+            Email = "other@example.com",
+            Iam = "100000002",
+            Kerberos = "pat",
+            MothraId = "mothra2"
+        };
+        var account = new Account { Cluster = cluster, Kerberos = "pat", Name = "Pat", Email = "pat@example.com" };
+        dbContext.AddRange(cluster, user, duplicateUser, account);
+        await dbContext.SaveChangesAsync();
+
+        var linkedCount = await AccountOwnershipService.LinkAccountsToUser(dbContext, user);
+        await dbContext.SaveChangesAsync();
+
+        linkedCount.ShouldBe(0);
+        account.OwnerId.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task LinkAccountToMatchingUser_DoesNotOverwriteExistingOwner()
     {
         await using var dbContext = TestDbContextFactory.Create();
@@ -95,5 +129,40 @@ public class AccountOwnershipServiceTests
 
         linked.ShouldBeFalse();
         account.OwnerId.ShouldBe(currentOwner.Id);
+    }
+
+    [Fact]
+    public async Task LinkAccountToMatchingUser_DoesNotLinkWhenMultipleUsersHaveMatchingKerberos()
+    {
+        await using var dbContext = TestDbContextFactory.Create();
+        var cluster = new Cluster { Name = "farm" };
+        var account = new Account { Cluster = cluster, Kerberos = "pat", Name = "Pat", Email = "pat@example.com" };
+        dbContext.AddRange(
+            cluster,
+            account,
+            new User
+            {
+                FirstName = "Pat",
+                LastName = "Requester",
+                Email = "pat@example.com",
+                Iam = "100000001",
+                Kerberos = "pat",
+                MothraId = "mothra1"
+            },
+            new User
+            {
+                FirstName = "Other",
+                LastName = "Requester",
+                Email = "other@example.com",
+                Iam = "100000002",
+                Kerberos = "pat",
+                MothraId = "mothra2"
+            });
+        await dbContext.SaveChangesAsync();
+
+        var linked = await AccountOwnershipService.LinkAccountToMatchingUser(dbContext, account);
+
+        linked.ShouldBeFalse();
+        account.OwnerId.ShouldBeNull();
     }
 }

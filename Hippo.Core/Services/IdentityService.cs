@@ -3,6 +3,7 @@ using Hippo.Core.Domain;
 using Hippo.Core.Models.Settings;
 using Ietws;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace Hippo.Core.Services
 {
@@ -60,9 +61,14 @@ namespace Hippo.Core.Services
             {
                 var iamIds = ucdKerbResult.ResponseData.Results.Select(a => a.IamId).Distinct().ToArray();
                 var userIDs = ucdKerbResult.ResponseData.Results.Select(a => a.UserId).Distinct().ToArray();
-                if (iamIds.Length != 1 && userIDs.Length != 1)
+                if (iamIds.Length != 1 || userIDs.Length != 1)
                 {
-                    throw new Exception($"IAM issue with non unique values for kerbs: {string.Join(',', userIDs)} IAM: {string.Join(',', iamIds)}");
+                    Log.Warning(
+                        "IAM returned multiple records for Kerberos {Kerberos}. UserIds: {UserIds}; IamIds: {IamIds}",
+                        kerb,
+                        userIDs,
+                        iamIds);
+                    return null;
                 }
             }
 

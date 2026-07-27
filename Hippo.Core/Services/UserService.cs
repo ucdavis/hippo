@@ -181,8 +181,22 @@ namespace Hippo.Core.Services
                 if (dbUser.MothraId == null)
                 {
                     var foundUser = await _identityService.GetByKerberos(dbUser.Kerberos);
-                    dbUser.MothraId = foundUser.MothraId;
-                    await _dbContext.SaveChangesAsync();
+                    if (foundUser == null)
+                    {
+                        Log.Warning(
+                            "Unable to update MothraId for user {UserId} because Kerberos {Kerberos} could not be resolved uniquely in IAM.",
+                            dbUser.Id,
+                            dbUser.Kerberos);
+                        if (accountLinksUpdated > 0)
+                        {
+                            await _dbContext.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        dbUser.MothraId = foundUser.MothraId;
+                        await _dbContext.SaveChangesAsync();
+                    }
                 }
                 else if (accountLinksUpdated > 0)
                 {
@@ -204,7 +218,17 @@ namespace Hippo.Core.Services
                 };
 
                 var foundUser = await _identityService.GetByKerberos(newUser.Kerberos);
-                newUser.MothraId = foundUser.MothraId;
+                if (foundUser == null)
+                {
+                    Log.Warning(
+                        "Unable to set MothraId for new user with IAM {Iam} because Kerberos {Kerberos} could not be resolved uniquely in IAM.",
+                        newUser.Iam,
+                        newUser.Kerberos);
+                }
+                else
+                {
+                    newUser.MothraId = foundUser.MothraId;
+                }
 
                 await _dbContext.Users.AddAsync(newUser);
 

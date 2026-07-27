@@ -149,7 +149,12 @@ namespace Hippo.Core.Services
                 .Include(a => a.MemberOfGroups)
                 .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
                 .FirstOrDefaultAsync();
-            var user = await GetQueuedAccountUser(queuedEvent, accountModel);
+            var userResult = await GetQueuedAccountUser(queuedEvent, accountModel);
+            if (userResult.IsError)
+            {
+                return userResult;
+            }
+            var user = userResult.Value;
             var group = await _dbContext.Groups
                 .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
                 .FirstOrDefaultAsync();
@@ -325,7 +330,7 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<User> GetQueuedAccountUser(QueuedEvent queuedEvent, QueuedEventAccountModel accountModel)
+        private async Task<Result<User>> GetQueuedAccountUser(QueuedEvent queuedEvent, QueuedEventAccountModel accountModel)
         {
             if (!string.IsNullOrWhiteSpace(accountModel.Iam))
             {
@@ -334,29 +339,34 @@ namespace Hippo.Core.Services
                     .FirstOrDefaultAsync();
                 if (user != null)
                 {
-                    return user;
+                    return Result.Value(user);
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(accountModel.Kerberos))
             {
-                var user = await _dbContext.Users
+                var users = await _dbContext.Users
                     .Where(u => u.Kerberos == accountModel.Kerberos)
-                    .FirstOrDefaultAsync();
-                if (user != null)
+                    .Take(2)
+                    .ToListAsync();
+                if (users.Count > 1)
                 {
-                    return user;
+                    return Result.Error("Multiple users found for Kerberos {Kerberos}; cannot determine account owner", accountModel.Kerberos);
+                }
+                if (users.Count == 1)
+                {
+                    return Result.Value(users.Single());
                 }
             }
 
             if (queuedEvent.Request?.RequesterId > 0)
             {
-                return await _dbContext.Users
+                return Result.Value(await _dbContext.Users
                     .Where(u => u.Id == queuedEvent.Request.RequesterId)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync());
             }
 
-            return null;
+            return Result.Value<User>(null);
         }
     }
 
