@@ -99,6 +99,12 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
+
+            if (accountModel == null || groupModel == null)
+            {
+                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.AddAccountToGroup);
+            }
+
             var account = await _dbContext.Accounts
                 .Include(a => a.MemberOfGroups)
                 .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
@@ -107,15 +113,12 @@ namespace Hippo.Core.Services
                 .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
                 .FirstOrDefaultAsync();
 
-            if (accountModel == null || groupModel == null)
-            {
-                return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.AddAccountToGroup);
-            }
-
             if (account == null)
             {
                 return Result.Error("Account not found: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
+
+            await AccountOwnershipService.LinkAccountToMatchingUser(_dbContext, account);
 
             if (group == null)
             {
@@ -136,24 +139,34 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
-            var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
-                .FirstOrDefaultAsync();
-            var user = await _dbContext.Users
-                .Where(u => u.Kerberos == accountModel.Kerberos)
-                .FirstOrDefaultAsync();
-            var group = await _dbContext.Groups
-                .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
-                .FirstOrDefaultAsync();
 
-            if (accountModel == null || groupModel == null)
+            if (accountModel == null || groupModel == null || string.IsNullOrWhiteSpace(accountModel.Kerberos))
             {
                 return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.CreateAccount);
             }
 
+            var account = await _dbContext.Accounts
+                .Include(a => a.MemberOfGroups)
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+            var userResult = await GetQueuedAccountUser(queuedEvent, accountModel);
+            if (userResult.IsError)
+            {
+                return userResult;
+            }
+            var user = userResult.Value;
+            var group = await _dbContext.Groups
+                .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
+                .FirstOrDefaultAsync();
+
             if (group == null)
             {
                 return Result.Error("Group not found: {Name} on cluster {Cluster}", groupModel.Name, data.Cluster);
+            }
+
+            if (queuedEvent.Request == null)
+            {
+                return Result.Error("Invalid data: action {Action} requires an associated request", QueuedEvent.Actions.CreateAccount);
             }
 
             if (user == null)
@@ -161,9 +174,33 @@ namespace Hippo.Core.Services
                 return Result.Error("User not found: {Kerberos}", accountModel.Kerberos);
             }
 
+            if (!string.IsNullOrWhiteSpace(user.Kerberos)
+                && !string.Equals(user.Kerberos, accountModel.Kerberos, StringComparison.OrdinalIgnoreCase))
+            {
+                return Result.Error(
+                    "Queued account Kerberos {Kerberos} does not match resolved user Kerberos {UserKerberos}",
+                    accountModel.Kerberos,
+                    user.Kerberos);
+            }
+
             if (account != null)
             {
-                return Result.Error("Account already exists: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
+                if (account.OwnerId != null && account.OwnerId != user.Id)
+                {
+                    return Result.Error("Account already exists for a different user: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
+                }
+
+                account.Owner = user;
+                account.SshKey = accountModel.Key;
+                if (!account.MemberOfGroups.Any(g => g.Id == group.Id))
+                {
+                    account.MemberOfGroups.Add(group);
+                }
+
+                var existingAccountRequestData = queuedEvent.Request.GetAccountRequestData();
+                account.AcceptableUsePolicyAgreedOn ??= existingAccountRequestData.AcceptableUsePolicyAgreedOn;
+                account.SupervisingPIId ??= existingAccountRequestData.SupervisingPIUserId == 0 ? null : existingAccountRequestData.SupervisingPIUserId;
+                return Result.Ok();
             }
 
             var accountRequestData = queuedEvent.Request.GetAccountRequestData();
@@ -216,6 +253,8 @@ namespace Hippo.Core.Services
                 return Result.Error("Account does not exist: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
 
+            await AccountOwnershipService.LinkAccountToMatchingUser(_dbContext, account);
+
             if (group == null)
             {
                 var newGroup = new Group
@@ -244,19 +283,22 @@ namespace Hippo.Core.Services
         {
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
-            var account = await _dbContext.Accounts
-                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
-                .FirstOrDefaultAsync();
 
             if (accountModel == null || string.IsNullOrWhiteSpace(accountModel.Key))
             {
                 return Result.Error("Invalid data: action {Action} requires one account and a key", QueuedEvent.Actions.UpdateSshKey);
             }
 
+            var account = await _dbContext.Accounts
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+
             if (account == null)
             {
                 return Result.Error("Account not found: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
+
+            await AccountOwnershipService.LinkAccountToMatchingUser(_dbContext, account);
 
             account.SshKey = accountModel.Key;
             // _dbContext.SaveAsync() is handled elsewhere for this change
@@ -268,20 +310,23 @@ namespace Hippo.Core.Services
             var data = queuedEvent.Data;
             var accountModel = data.Accounts.FirstOrDefault();
             var groupModel = data.Groups.FirstOrDefault();
-            var account = await _dbContext.Accounts
-                .Include(a => a.MemberOfGroups.Where(g => g.Name == groupModel.Name))
-                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
-                .FirstOrDefaultAsync();
 
             if (accountModel == null || groupModel == null)
             {
                 return Result.Error("Invalid data: action {Action} requires one account and one group", QueuedEvent.Actions.RemoveAccountFromGroup);
             }
 
+            var account = await _dbContext.Accounts
+                .Include(a => a.MemberOfGroups.Where(g => g.Name == groupModel.Name))
+                .Where(a => a.Cluster.Name == data.Cluster && a.Kerberos == accountModel.Kerberos)
+                .FirstOrDefaultAsync();
+
             if (account == null)
             {
                 return Result.Error("Account not found: {Kerberos} on cluster {Cluster}", accountModel.Kerberos, data.Cluster);
             }
+
+            await AccountOwnershipService.LinkAccountToMatchingUser(_dbContext, account);
 
             if (!account.MemberOfGroups.Any())
             {
@@ -293,6 +338,45 @@ namespace Hippo.Core.Services
 
             // _dbContext.SaveAsync() is handled elsewhere for this change
             return Result.Ok();
+        }
+
+        private async Task<Result<User>> GetQueuedAccountUser(QueuedEvent queuedEvent, QueuedEventAccountModel accountModel)
+        {
+            if (!string.IsNullOrWhiteSpace(accountModel.Iam))
+            {
+                var user = await _dbContext.Users
+                    .Where(u => u.Iam == accountModel.Iam)
+                    .FirstOrDefaultAsync();
+                if (user != null)
+                {
+                    return Result.Value(user);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(accountModel.Kerberos))
+            {
+                var users = await _dbContext.Users
+                    .Where(u => u.Kerberos == accountModel.Kerberos)
+                    .Take(2)
+                    .ToListAsync();
+                if (users.Count > 1)
+                {
+                    return Result.Error("Multiple users found for Kerberos {Kerberos}; cannot determine account owner", accountModel.Kerberos);
+                }
+                if (users.Count == 1)
+                {
+                    return Result.Value(users.Single());
+                }
+            }
+
+            if (queuedEvent.Request?.RequesterId > 0)
+            {
+                return Result.Value(await _dbContext.Users
+                    .Where(u => u.Id == queuedEvent.Request.RequesterId)
+                    .FirstOrDefaultAsync());
+            }
+
+            return Result.Value<User>(null);
         }
     }
 

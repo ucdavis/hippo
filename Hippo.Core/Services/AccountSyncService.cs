@@ -58,10 +58,23 @@ namespace Hippo.Core.Services
                 await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.Users.Select(u => new TempKerberos { ClusterId = x.Key, Kerberos = u.Kerberos })));
                 await _dbContext.BulkInsertAsync(mapClusterIdsToPuppetData.SelectMany(x => x.Value.PuppetData.GroupsWithSponsors.Select(g => new TempGroup { ClusterId = x.Key, Group = g.Name })));
 
-                var mapKerbsToUserIds = await _dbContext.Users
+                var usersMatchingSyncedKerberos = await _dbContext.Users
                     .Where(u => _dbContext.TempKerberos.Any(tg => tg.Kerberos == u.Kerberos))
                     .Select(u => new { u.Id, u.Kerberos })
-                    .ToDictionaryAsync(k => k.Kerberos, v => v.Id);
+                    .ToListAsync();
+                var mapKerbsToUserIds = AccountSyncPlanner.GetUniqueUserIdsByKerberos(
+                    usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
+                var existingOwnerIdsForAccounts = await _dbContext.Accounts
+                    .IgnoreQueryFilters()
+                    .Where(a => a.OwnerId != null && !string.IsNullOrEmpty(a.Kerberos))
+                    .Select(a => new { a.ClusterId, a.Kerberos, a.OwnerId })
+                    .ToListAsync();
+                var mapAccountKeysToOwnerIds = AccountSyncPlanner.GetExistingOwnerIdsByAccountKey(
+                    existingOwnerIdsForAccounts.Select(a => new ExistingAccountOwnerSyncState(
+                        a.ClusterId,
+                        a.Kerberos,
+                        a.OwnerId)),
+                    mapKerbsToUserIds);
 
                 // Setup desired state of groups and accounts
                 // This will effectively undelete any that are soft-deleted
@@ -71,7 +84,11 @@ namespace Hippo.Core.Services
                         Name = u.Name,
                         Email = u.Email,
                         Kerberos = u.Kerberos,
-                        OwnerId = mapKerbsToUserIds.ContainsKey(u.Kerberos) ? mapKerbsToUserIds[u.Kerberos] : null,
+                        OwnerId = AccountSyncPlanner.GetDesiredOwnerId(
+                            x.Key,
+                            u.Kerberos,
+                            mapKerbsToUserIds,
+                            mapAccountKeysToOwnerIds),
                         ClusterId = x.Key,
                         CreatedOn = now,
                         UpdatedOn = now,
@@ -136,10 +153,11 @@ namespace Hippo.Core.Services
                         nameof(Account.CreatedOn),
                         nameof(Account.AcceptableUsePolicyAgreedOn) },
                     // PropertiesToIncludeOnCompare is more explicit than PropertiesToExcludeOnCompare on what differences
-                    // can be used to trigger an update. We're only interested when Name, Email, Data or IsActive changes...
+                    // can be used to trigger an update. We're only interested when synced account fields or ownership changes...
                     PropertiesToIncludeOnCompare = new List<string> {
                         nameof(Account.Name),
                         nameof(Account.Email),
+                        nameof(Account.OwnerId),
                         nameof(Account.Data),
                         nameof(Account.DeactivatedOn) },
                     UpdateByProperties = new List<string> { nameof(Account.ClusterId), nameof(Account.Kerberos) },
@@ -320,6 +338,8 @@ namespace Hippo.Core.Services
     }
 
     internal record GroupMemberAccountSyncState(int GroupId, int AccountId, int ClusterId);
+    internal record UserKerberosSyncState(int UserId, string Kerberos);
+    internal record ExistingAccountOwnerSyncState(int ClusterId, string Kerberos, int? OwnerId);
 
     internal static class AccountSyncPlanner
     {
@@ -371,6 +391,86 @@ namespace Hippo.Core.Services
                 .Where(gma => !deleteGroupAccountKeys.Contains((gma.GroupId, gma.AccountId)))
                 .Concat(deleteGroupAccounts)
                 .ToList();
+        }
+
+        public static Dictionary<string, int> GetUniqueUserIdsByKerberos(IEnumerable<UserKerberosSyncState> users)
+        {
+            return users
+                .GroupBy(u => u.Kerberos)
+                .Where(g =>
+                {
+                    if (g.Count() == 1)
+                    {
+                        return true;
+                    }
+
+                    Log.Warning(
+                        "Multiple users found with Kerberos {Kerberos} during account sync. Skipping owner assignment for matching accounts. UserIds: {UserIds}",
+                        g.Key,
+                        g.Select(u => u.UserId).ToArray());
+                    return false;
+                })
+                .ToDictionary(g => g.Key, g => g.Single().UserId);
+        }
+
+        public static Dictionary<(int ClusterId, string Kerberos), int?> GetExistingOwnerIdsByAccountKey(
+            IEnumerable<ExistingAccountOwnerSyncState> existingAccounts,
+            IReadOnlyDictionary<string, int> uniqueUserIdsByKerberos)
+        {
+            return existingAccounts
+                .GroupBy(a => (a.ClusterId, a.Kerberos))
+                .Select(g =>
+                {
+                    var ownerIds = g
+                        .Select(a => a.OwnerId)
+                        .Where(ownerId => ownerId != null)
+                        .Distinct()
+                        .ToArray();
+
+                    if (ownerIds.Length == 1)
+                    {
+                        return new { g.Key, OwnerId = ownerIds.Single(), HasOwner = true };
+                    }
+
+                    if (ownerIds.Length == 0)
+                    {
+                        return new { g.Key, OwnerId = (int?)null, HasOwner = false };
+                    }
+
+                    Log.Warning(
+                        "Multiple account owners found for ClusterId {ClusterId} and Kerberos {Kerberos} during account sync. Falling back to unique Kerberos user owner assignment. OwnerIds: {OwnerIds}",
+                        g.Key.ClusterId,
+                        g.Key.Kerberos,
+                        ownerIds);
+
+                    if (uniqueUserIdsByKerberos.TryGetValue(g.Key.Kerberos, out var userId))
+                    {
+                        return new { g.Key, OwnerId = (int?)userId, HasOwner = true };
+                    }
+
+                    return new { g.Key, OwnerId = (int?)null, HasOwner = false };
+                })
+                .Where(x => x.HasOwner)
+                .ToDictionary(x => x.Key, x => x.OwnerId);
+        }
+
+        public static int? GetDesiredOwnerId(
+            int clusterId,
+            string kerberos,
+            IReadOnlyDictionary<string, int> uniqueUserIdsByKerberos,
+            IReadOnlyDictionary<(int ClusterId, string Kerberos), int?> existingOwnerIdsByAccountKey)
+        {
+            if (existingOwnerIdsByAccountKey.TryGetValue((clusterId, kerberos), out var existingOwnerId))
+            {
+                return existingOwnerId;
+            }
+
+            if (uniqueUserIdsByKerberos.TryGetValue(kerberos, out var userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
     }
 }

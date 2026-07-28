@@ -137,5 +137,180 @@ namespace Test
             desiredMembership.AccountId.ShouldBe(100);
             desiredMembership.RevokedOn.ShouldBeNull();
         }
+
+        [Fact]
+        public void GetUniqueUserIdsByKerberos_SkipsAmbiguousKerberos()
+        {
+            var users = new[]
+            {
+                new UserKerberosSyncState(UserId: 1, Kerberos: "unique"),
+                new UserKerberosSyncState(UserId: 2, Kerberos: "duplicate"),
+                new UserKerberosSyncState(UserId: 3, Kerberos: "duplicate")
+            };
+
+            var userIdsByKerberos = AccountSyncPlanner.GetUniqueUserIdsByKerberos(users);
+
+            userIdsByKerberos.ShouldBe(new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            });
+        }
+
+        [Fact]
+        public void GetExistingOwnerIdsByAccountKey_PreservesUnambiguousExistingOwner()
+        {
+            var existingAccounts = new[]
+            {
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 42),
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 42)
+            };
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["kerb"] = 1
+            };
+
+            var ownerIdsByAccountKey = AccountSyncPlanner.GetExistingOwnerIdsByAccountKey(
+                existingAccounts,
+                userIdsByKerberos);
+
+            ownerIdsByAccountKey.ShouldBe(new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "kerb")] = 42
+            });
+        }
+
+        [Fact]
+        public void GetExistingOwnerIdsByAccountKey_UsesUniqueKerberosUserWhenExistingOwnersConflict()
+        {
+            var existingAccounts = new[]
+            {
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 42),
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 43)
+            };
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["kerb"] = 1
+            };
+
+            var ownerIdsByAccountKey = AccountSyncPlanner.GetExistingOwnerIdsByAccountKey(
+                existingAccounts,
+                userIdsByKerberos);
+
+            ownerIdsByAccountKey.ShouldBe(new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "kerb")] = 1
+            });
+        }
+
+        [Fact]
+        public void GetExistingOwnerIdsByAccountKey_DoesNotSelectOwnerWhenNoExistingOwnersAreSet()
+        {
+            var existingAccounts = new[]
+            {
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: null),
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: null)
+            };
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["kerb"] = 1
+            };
+
+            var ownerIdsByAccountKey = AccountSyncPlanner.GetExistingOwnerIdsByAccountKey(
+                existingAccounts,
+                userIdsByKerberos);
+
+            ownerIdsByAccountKey.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void GetExistingOwnerIdsByAccountKey_DoesNotSelectOwnerWhenExistingOwnersConflictAndKerberosIsAmbiguous()
+        {
+            var existingAccounts = new[]
+            {
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 42),
+                new ExistingAccountOwnerSyncState(ClusterId: 7, Kerberos: "kerb", OwnerId: 43)
+            };
+
+            var ownerIdsByAccountKey = AccountSyncPlanner.GetExistingOwnerIdsByAccountKey(
+                existingAccounts,
+                new Dictionary<string, int>());
+
+            ownerIdsByAccountKey.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosHasNoMatchingUser()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "missing")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "missing",
+                userIdsByKerberos,
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosHasUniqueMatchingUser()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["kerb"] = 1
+            };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "kerb")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "kerb",
+                userIdsByKerberos,
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_ClearsOwnerWhenKerberosHasNoMatchingUserOrExistingOwner()
+        {
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "missing",
+                new Dictionary<string, int>(),
+                new Dictionary<(int ClusterId, string Kerberos), int?>());
+
+            ownerId.ShouldBeNull();
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosIsAmbiguous()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["unique"] = 1
+            };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "duplicate")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "duplicate",
+                userIdsByKerberos,
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
     }
 }
