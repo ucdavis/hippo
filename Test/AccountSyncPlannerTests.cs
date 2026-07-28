@@ -172,7 +172,27 @@ namespace Test
                 7,
                 "missing",
                 userIdsByKerberos,
-                new HashSet<string>(),
+                existingOwnerIdsByAccountKey);
+
+            ownerId.ShouldBe(42);
+        }
+
+        [Fact]
+        public void GetDesiredOwnerId_PreservesExistingOwnerWhenKerberosHasUniqueMatchingUser()
+        {
+            var userIdsByKerberos = new Dictionary<string, int>
+            {
+                ["kerb"] = 1
+            };
+            var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
+            {
+                [(7, "kerb")] = 42
+            };
+
+            var ownerId = AccountSyncPlanner.GetDesiredOwnerId(
+                7,
+                "kerb",
+                userIdsByKerberos,
                 existingOwnerIdsByAccountKey);
 
             ownerId.ShouldBe(42);
@@ -185,7 +205,6 @@ namespace Test
                 7,
                 "missing",
                 new Dictionary<string, int>(),
-                new HashSet<string>(),
                 new Dictionary<(int ClusterId, string Kerberos), int?>());
 
             ownerId.ShouldBeNull();
@@ -198,7 +217,6 @@ namespace Test
             {
                 ["unique"] = 1
             };
-            var ambiguousKerberos = new HashSet<string> { "duplicate" };
             var existingOwnerIdsByAccountKey = new Dictionary<(int ClusterId, string Kerberos), int?>
             {
                 [(7, "duplicate")] = 42
@@ -208,7 +226,6 @@ namespace Test
                 7,
                 "duplicate",
                 userIdsByKerberos,
-                ambiguousKerberos,
                 existingOwnerIdsByAccountKey);
 
             ownerId.ShouldBe(42);

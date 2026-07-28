@@ -16,10 +16,19 @@ public static class AccountOwnershipService
 
         if (await HasConflictingUserWithKerberos(dbContext, user))
         {
-            Log.Warning(
-                "Multiple users found with Kerberos {Kerberos}. Skipping account ownership linking for user {UserId}.",
-                user.Kerberos,
-                user.Id);
+            if (user.Id == 0)
+            {
+                Log.Warning(
+                    "User Kerberos {Kerberos} would duplicate an existing user. Skipping account ownership linking for new user.",
+                    user.Kerberos);
+            }
+            else
+            {
+                Log.Warning(
+                    "Multiple users found with Kerberos {Kerberos}. Skipping account ownership linking for user {UserId}.",
+                    user.Kerberos,
+                    user.Id);
+            }
             return 0;
         }
 

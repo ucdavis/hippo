@@ -64,8 +64,6 @@ namespace Hippo.Core.Services
                     .ToListAsync();
                 var mapKerbsToUserIds = AccountSyncPlanner.GetUniqueUserIdsByKerberos(
                     usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
-                var ambiguousKerberos = AccountSyncPlanner.GetAmbiguousKerberos(
-                    usersMatchingSyncedKerberos.Select(u => new UserKerberosSyncState(u.Id, u.Kerberos)));
                 var existingOwnerIdsForAccounts = await _dbContext.Accounts
                     .IgnoreQueryFilters()
                     .Where(a => a.OwnerId != null && !string.IsNullOrEmpty(a.Kerberos))
@@ -87,7 +85,6 @@ namespace Hippo.Core.Services
                             x.Key,
                             u.Kerberos,
                             mapKerbsToUserIds,
-                            ambiguousKerberos,
                             mapAccountKeysToOwnerIds),
                         ClusterId = x.Key,
                         CreatedOn = now,
@@ -412,31 +409,23 @@ namespace Hippo.Core.Services
                 .ToDictionary(g => g.Key, g => g.Single().UserId);
         }
 
-        public static HashSet<string> GetAmbiguousKerberos(IEnumerable<UserKerberosSyncState> users)
-        {
-            return users
-                .GroupBy(u => u.Kerberos)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToHashSet();
-        }
-
         public static int? GetDesiredOwnerId(
             int clusterId,
             string kerberos,
             IReadOnlyDictionary<string, int> uniqueUserIdsByKerberos,
-            IReadOnlySet<string> ambiguousKerberos,
             IReadOnlyDictionary<(int ClusterId, string Kerberos), int?> existingOwnerIdsByAccountKey)
         {
+            if (existingOwnerIdsByAccountKey.TryGetValue((clusterId, kerberos), out var existingOwnerId))
+            {
+                return existingOwnerId;
+            }
+
             if (uniqueUserIdsByKerberos.TryGetValue(kerberos, out var userId))
             {
                 return userId;
             }
 
-            return (ambiguousKerberos.Contains(kerberos) || !uniqueUserIdsByKerberos.ContainsKey(kerberos))
-                && existingOwnerIdsByAccountKey.TryGetValue((clusterId, kerberos), out var existingOwnerId)
-                    ? existingOwnerId
-                    : null;
+            return null;
         }
     }
 }
