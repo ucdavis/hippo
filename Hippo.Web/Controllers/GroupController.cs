@@ -20,6 +20,8 @@ namespace Hippo.Web.Controllers;
 [Authorize]
 public class GroupController : SuperController
 {
+    private const string SupervisingPIRequiredGroupName = "genome-center-grp";
+
     private readonly AppDbContext _dbContext;
     private readonly IUserService _userService;
     private readonly INotificationService _notificationService;
@@ -114,6 +116,12 @@ public class GroupController : SuperController
             return BadRequest($"Group does not exist.");
         }
 
+        if (group.Name == SupervisingPIRequiredGroupName
+            && string.IsNullOrWhiteSpace(addToGroupModel.SupervisingPIIamId))
+        {
+            return BadRequest("Please select a supervising PI for this group.");
+        }
+
         var currentAccount = await _dbContext.Accounts
             .AsNoTracking()
             .SingleOrDefaultAsync(a =>
@@ -148,6 +156,7 @@ public class GroupController : SuperController
 
         // Get user Id of the Supervising PI
         int? supervisingPIUserId = null;
+        var supervisingPI = addToGroupModel.SupervisingPI;
         if (!string.IsNullOrWhiteSpace(addToGroupModel.SupervisingPIIamId))
         {
             var user = await _userService.GetUserByIam(addToGroupModel.SupervisingPIIamId);
@@ -157,6 +166,7 @@ public class GroupController : SuperController
                 return BadRequest("Supervising PI not found");
             }
             supervisingPIUserId = user.Id;
+            supervisingPI = user.Name;
         }
 
         var request = new HippoRequest
@@ -171,7 +181,7 @@ public class GroupController : SuperController
         }
         .WithAccountRequestData(new AccountRequestDataModel
         {
-            SupervisingPI = addToGroupModel.SupervisingPI,
+            SupervisingPI = supervisingPI,
             SupervisingPIUserId = supervisingPIUserId
         });
 

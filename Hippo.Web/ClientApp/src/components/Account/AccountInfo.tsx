@@ -25,6 +25,8 @@ import HipButton from "../../Shared/HipComponents/HipButton";
 import { getGroupModelFromRequest } from "../../Shared/requestUtils";
 import { SearchPerson } from "../../Shared/SearchPerson";
 
+const supervisingPIRequiredGroupName = "genome-center-grp";
+
 export const AccountInfo = () => {
   const [notification, setNotification] = usePromiseNotification();
   const [context, setContext] = useContext(AppContext);
@@ -69,6 +71,15 @@ export const AccountInfo = () => {
     fetchGroups();
   }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
 
+  const isSupervisingPIRequiredForGroupAccess = useCallback(
+    (groupId?: number) =>
+      availableGroups.some(
+        (group) =>
+          group.id === groupId && group.name === supervisingPIRequiredGroupName,
+      ),
+    [availableGroups],
+  );
+
   const [getGroupAccessConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
       title: "Request Access to Group",
@@ -109,9 +120,12 @@ export const AccountInfo = () => {
           </div>
         );
       },
-      canConfirm: (returnValue) => returnValue !== undefined,
+      canConfirm: (returnValue) =>
+        !!returnValue?.groupId &&
+        (!isSupervisingPIRequiredForGroupAccess(returnValue.groupId) ||
+          notEmptyOrFalsey(returnValue.supervisingPIIamId)),
     },
-    [availableGroups, supervisingPI],
+    [availableGroups, supervisingPI, isSupervisingPIRequiredForGroupAccess],
   );
 
   const [getGroupCreationConfirmation] =
