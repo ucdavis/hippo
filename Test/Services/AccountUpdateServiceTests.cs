@@ -292,7 +292,7 @@ public class AccountUpdateServiceTests
     }
 
     [Fact]
-    public async Task UpdateEvent_CompleteCreateAccount_FailsWhenIamResolvesToDifferentKerberos()
+    public async Task UpdateEvent_CompleteCreateAccount_AllowsIamResolvedUserWithDifferentKerberos()
     {
         await using var dbContext = TestDbContextFactory.Create();
         var cluster = new Cluster { Name = "farm" };
@@ -347,13 +347,13 @@ public class AccountUpdateServiceTests
 
         var result = await service.UpdateEvent(queuedEvent, QueuedEvent.Statuses.Complete);
 
-        result.IsError.ShouldBeTrue();
-        result.Message.ShouldBe("Queued account Kerberos pat does not match resolved user Kerberos other");
-        queuedEvent.Status.ShouldBe(QueuedEvent.Statuses.Failed);
-        var accountCreated = await dbContext.Accounts
+        result.IsError.ShouldBeFalse();
+        queuedEvent.Status.ShouldBe(QueuedEvent.Statuses.Complete);
+        request.Status.ShouldBe(Request.Statuses.Completed);
+        var account = await dbContext.Accounts
             .IgnoreQueryFilters()
-            .AnyAsync(a => a.ClusterId == cluster.Id && a.Kerberos == requester.Kerberos);
-        accountCreated.ShouldBeFalse();
+            .SingleAsync(a => a.ClusterId == cluster.Id && a.Kerberos == requester.Kerberos);
+        account.OwnerId.ShouldBe(otherUser.Id);
     }
 
     private class CapturingHistoryService : IHistoryService

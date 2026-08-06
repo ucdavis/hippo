@@ -178,27 +178,25 @@ namespace Hippo.Core.Services
             if (dbUser != null)
             {
                 var accountLinksUpdated = await AccountOwnershipService.LinkAccountsToUser(_dbContext, dbUser);
+                var userUpdated = RefreshUserFromClaims(dbUser, userClaims);
                 if (dbUser.MothraId == null)
                 {
-                    var foundUser = await _identityService.GetByKerberos(dbUser.Kerberos);
+                    var foundUser = await _identityService.GetByIamId(dbUser.Iam);
                     if (foundUser == null)
                     {
                         Log.Warning(
-                            "Unable to update MothraId for user {UserId} because Kerberos {Kerberos} could not be resolved uniquely in IAM.",
+                            "Unable to update MothraId for user {UserId} because IAM {Iam} could not be resolved in IAM.",
                             dbUser.Id,
-                            dbUser.Kerberos);
-                        if (accountLinksUpdated > 0)
-                        {
-                            await _dbContext.SaveChangesAsync();
-                        }
+                            dbUser.Iam);
                     }
                     else
                     {
                         dbUser.MothraId = foundUser.MothraId;
-                        await _dbContext.SaveChangesAsync();
+                        userUpdated = true;
                     }
                 }
-                else if (accountLinksUpdated > 0)
+
+                if (accountLinksUpdated > 0 || userUpdated)
                 {
                     await _dbContext.SaveChangesAsync();
                 }
@@ -250,7 +248,9 @@ namespace Hippo.Core.Services
             if (user != null)
             {
                 var accountLinksUpdated = await AccountOwnershipService.LinkAccountsToUser(_dbContext, user);
-                if (accountLinksUpdated > 0)
+                var identityUser = await _identityService.GetByIamId(iamId);
+                var userUpdated = identityUser != null && RefreshUserFromIdentity(user, identityUser);
+                if (accountLinksUpdated > 0 || userUpdated)
                 {
                     await _dbContext.SaveChangesAsync();
                 }
@@ -267,6 +267,65 @@ namespace Hippo.Core.Services
             }
 
             return user;
+        }
+
+        private static bool RefreshUserFromClaims(User user, Claim[] userClaims)
+        {
+            var userUpdated = false;
+            userUpdated |= SetIfDifferent(user, nameof(User.FirstName), userClaims.Single(c => c.Type == ClaimTypes.GivenName).Value);
+            userUpdated |= SetIfDifferent(user, nameof(User.LastName), userClaims.Single(c => c.Type == ClaimTypes.Surname).Value);
+            userUpdated |= SetIfDifferent(user, nameof(User.Email), userClaims.Single(c => c.Type == ClaimTypes.Email).Value);
+            userUpdated |= SetKerberosIfDifferent(user, userClaims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            return userUpdated;
+        }
+
+        private static bool RefreshUserFromIdentity(User user, User identityUser)
+        {
+            var userUpdated = false;
+            userUpdated |= SetIfDifferent(user, nameof(User.FirstName), identityUser.FirstName);
+            userUpdated |= SetIfDifferent(user, nameof(User.LastName), identityUser.LastName);
+            userUpdated |= SetIfDifferent(user, nameof(User.Email), identityUser.Email);
+            userUpdated |= SetKerberosIfDifferent(user, identityUser.Kerberos);
+            userUpdated |= SetIfDifferent(user, nameof(User.MothraId), identityUser.MothraId);
+            return userUpdated;
+        }
+
+        private static bool SetKerberosIfDifferent(User user, string kerberos)
+        {
+            if (string.Equals(user.Kerberos, kerberos, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            Log.Information(
+                "Updating Kerberos for user {UserId} with IAM {Iam}: {OldKerberos} -> {NewKerberos}",
+                user.Id,
+                user.Iam,
+                user.Kerberos,
+                kerberos);
+            user.Kerberos = kerberos;
+            return true;
+        }
+
+        private static bool SetIfDifferent(User user, string propertyName, string value)
+        {
+            switch (propertyName)
+            {
+                case nameof(User.FirstName) when !string.Equals(user.FirstName, value, StringComparison.Ordinal):
+                    user.FirstName = value;
+                    return true;
+                case nameof(User.LastName) when !string.Equals(user.LastName, value, StringComparison.Ordinal):
+                    user.LastName = value;
+                    return true;
+                case nameof(User.Email) when !string.Equals(user.Email, value, StringComparison.Ordinal):
+                    user.Email = value;
+                    return true;
+                case nameof(User.MothraId) when !string.Equals(user.MothraId, value, StringComparison.Ordinal):
+                    user.MothraId = value;
+                    return true;
+                default:
+                    return false;
+            }
         }
 
 
