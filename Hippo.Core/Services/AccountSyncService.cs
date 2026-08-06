@@ -8,7 +8,6 @@ using Hippo.Core.Data;
 using Hippo.Core.Domain;
 using Hippo.Core.Extensions;
 using Hippo.Core.Utilities;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -229,18 +228,10 @@ namespace Hippo.Core.Services
                 await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [TempKerberos]");
 
                 // Update any requests that are now complete
-                var sqlQuery = $@"
-                    UPDATE r
-                    SET r.Status = '{Request.Statuses.Completed}', r.UpdatedOn = @UpdatedOn
-                    FROM Requests r
-                    INNER JOIN Accounts a ON r.ClusterId = a.ClusterId
-                    INNER JOIN Users u ON r.RequesterId = u.Id AND u.Kerberos = a.Kerberos
-                    WHERE r.Status = 'Processing' AND EXISTS (
-                        SELECT 1 FROM Groups g
-                        INNER JOIN GroupMemberAccount gma ON g.Id = gma.GroupId
-                        WHERE g.Name = r.[Group] AND gma.AccountId = a.Id)";
-                int requestsCompleted = await _dbContext.Database.ExecuteSqlRawAsync(sqlQuery,
-                    new SqlParameter("@UpdatedOn", now));
+                var requestsCompleted = await GetProcessingRequestsReadyToComplete(_dbContext)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(r => r.Status, Request.Statuses.Completed)
+                        .SetProperty(r => r.UpdatedOn, now));
                 Log.Information("Marked {RequestsCompleted} requests 'Completed'", requestsCompleted);
 
                 await _historyService.PuppetDataSynced();
@@ -254,6 +245,20 @@ namespace Hippo.Core.Services
             }
 
             return true;
+        }
+
+        internal static IQueryable<Request> GetProcessingRequestsReadyToComplete(AppDbContext dbContext)
+        {
+            return dbContext.Requests
+                .Where(r => r.Status == Request.Statuses.Processing)
+                .Where(r => dbContext.Accounts.Any(a =>
+                    a.ClusterId == r.ClusterId
+                    && (a.OwnerId == r.RequesterId
+                        || (a.OwnerId == null && a.Kerberos == r.Requester.Kerberos))
+                    && dbContext.GroupMemberAccount.Any(gma =>
+                        gma.AccountId == a.Id
+                        && gma.Group.ClusterId == r.ClusterId
+                        && gma.Group.Name == r.Group)));
         }
 
 

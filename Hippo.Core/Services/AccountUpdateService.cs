@@ -154,7 +154,7 @@ namespace Hippo.Core.Services
             {
                 return userResult;
             }
-            var user = userResult.Value;
+            var user = userResult.Value.User;
             var group = await _dbContext.Groups
                 .Where(g => g.Cluster.Name == data.Cluster && g.Name == groupModel.Name)
                 .FirstOrDefaultAsync();
@@ -174,7 +174,8 @@ namespace Hippo.Core.Services
                 return Result.Error("User not found: {Kerberos}", accountModel.Kerberos);
             }
 
-            if (!string.IsNullOrWhiteSpace(user.Kerberos)
+            if (!userResult.Value.ResolvedByIam
+                && !string.IsNullOrWhiteSpace(user.Kerberos)
                 && !string.Equals(user.Kerberos, accountModel.Kerberos, StringComparison.OrdinalIgnoreCase))
             {
                 return Result.Error(
@@ -340,7 +341,7 @@ namespace Hippo.Core.Services
             return Result.Ok();
         }
 
-        private async Task<Result<User>> GetQueuedAccountUser(QueuedEvent queuedEvent, QueuedEventAccountModel accountModel)
+        private async Task<Result<QueuedAccountUserResolution>> GetQueuedAccountUser(QueuedEvent queuedEvent, QueuedEventAccountModel accountModel)
         {
             if (!string.IsNullOrWhiteSpace(accountModel.Iam))
             {
@@ -349,7 +350,7 @@ namespace Hippo.Core.Services
                     .FirstOrDefaultAsync();
                 if (user != null)
                 {
-                    return Result.Value(user);
+                    return Result.Value(new QueuedAccountUserResolution(user, true));
                 }
             }
 
@@ -365,19 +366,22 @@ namespace Hippo.Core.Services
                 }
                 if (users.Count == 1)
                 {
-                    return Result.Value(users.Single());
+                    return Result.Value(new QueuedAccountUserResolution(users.Single(), false));
                 }
             }
 
             if (queuedEvent.Request?.RequesterId > 0)
             {
-                return Result.Value(await _dbContext.Users
+                var user = await _dbContext.Users
                     .Where(u => u.Id == queuedEvent.Request.RequesterId)
-                    .FirstOrDefaultAsync());
+                    .FirstOrDefaultAsync();
+                return Result.Value(new QueuedAccountUserResolution(user, false));
             }
 
-            return Result.Value<User>(null);
+            return Result.Value(new QueuedAccountUserResolution(null, false));
         }
+
+        private record QueuedAccountUserResolution(User User, bool ResolvedByIam);
     }
 
     public static class AccountUpdateServiceExtensions
