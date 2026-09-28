@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import { ResourceLoadError } from "../../Shared/LoadingAndErrors/ResourceLoadError";
+import { useResource } from "../../Shared/useResource";
+import React, { useContext, useState } from "react";
 import ObjectTree from "../../Shared/ObjectTree";
 import { AccountModel, GroupMembersModel } from "../../types";
 import { useParams } from "react-router-dom";
@@ -24,32 +26,24 @@ const GroupMembers: React.FC = () => {
   }>();
   const groupId = parseInt(groupIdStr);
   const [removing, setRemoving] = useState<AccountModel>();
-  const [groupMembers, setGroupMembers] = useState<GroupMembersModel>();
+  const {
+    data: groupMembers,
+    error: loadError,
+    setData: setGroupMembers,
+  } = useResource<GroupMembersModel>(
+    `/api/${clusterName}/account/groupMembers?groupId=${groupId}`,
+  );
   const [_, setNotification] = usePromiseNotification();
   const [context] = useContext(AppContext);
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      const response = await authenticatedFetch(
-        `/api/${clusterName}/account/groupMembers?groupId=${groupId}`,
-      );
-
-      if (response.ok) {
-        setGroupMembers((await response.json()) as GroupMembersModel);
-      }
-    };
-
-    fetchAccounts();
-  }, [clusterName, groupId]);
-
   const details = {
-    name: groupMembers?.group.name,
-    displayName: groupMembers?.group.displayName,
-    admins: (groupMembers?.group.admins ?? []).map((ga) => ({
+    name: groupMembers?.group?.name,
+    displayName: groupMembers?.group?.displayName,
+    admins: (groupMembers?.group?.admins ?? []).map((ga) => ({
       name: ga.name,
       email: ga.email,
     })),
-    ...(groupMembers?.group.data ?? {}),
+    ...(groupMembers?.group?.data ?? {}),
   };
 
   const [showDetails] = useConfirmationDialog(
@@ -70,7 +64,7 @@ const GroupMembers: React.FC = () => {
   const [confirmRemove] = useConfirmationDialog(
     {
       title: `Remove account from group`,
-      message: `You are about to request removal of account ${removing?.name} from group ${groupMembers?.group.name}`,
+      message: `You are about to request removal of account ${removing?.name} from group ${groupMembers?.group?.name}`,
     },
     [removing, groupMembers],
   );
@@ -113,6 +107,9 @@ const GroupMembers: React.FC = () => {
     }
     setRemoving(undefined);
   };
+
+  if (loadError)
+    return <ResourceLoadError error={loadError} resource="group members" />;
 
   if (groupMembers && !groupMembers.group) {
     return <NotFound />;
@@ -165,14 +162,14 @@ const GroupMembers: React.FC = () => {
             </>
           );
         },
-      })
+      }),
     );
   }
 
   const Title = (
     <HipTitle title="Group Member Accounts" subtitle="Administration" />
   );
-  if (groupMembers === undefined) {
+  if (groupMembers === null) {
     return (
       <HipMainWrapper>
         {Title}

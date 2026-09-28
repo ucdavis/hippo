@@ -84,7 +84,10 @@ export const ShowFor = (props: Props) => {
   // check if user has any other cluster-specific role
   if (
     context.user.permissions.some(
-      (p) => p.cluster === cluster && roles.includes(p.role),
+      (p) =>
+        p.role !== "GroupAdmin" &&
+        p.cluster === cluster &&
+        roles.includes(p.role),
     )
   ) {
     return <>{children}</>;

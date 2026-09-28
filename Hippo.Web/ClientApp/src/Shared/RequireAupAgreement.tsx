@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
 
 import AppContext from "./AppContext";
 import { useParams } from "react-router-dom";
@@ -25,16 +25,8 @@ export const RequireAupAgreement = (props: Props) => {
   const hasClusterAdminPermission = context.user.permissions.some(
     (p) => p.role === "ClusterAdmin" && p.cluster === clusterName,
   );
-  const hasFinancialAdminPermission = context.user.permissions.some(
-    (p) => p.role === "FinancialAdmin" && p.cluster === clusterName,
-  );
   const cluster = context.clusters.find((c) => c.name === clusterName);
   const account = context.accounts.find((a) => a.cluster === clusterName);
-
-  const currentOpenRequests = useMemo(
-    () => context.openRequests.filter((r) => r.cluster === clusterName),
-    [context.openRequests, clusterName],
-  );
 
   const handleAgreetoAup = async () => {
     const request = authenticatedFetch(
@@ -73,32 +65,16 @@ export const RequireAupAgreement = (props: Props) => {
     }
   };
 
-  if (!clusterName || !cluster) {
-    // route params are never available on first render
-    return null;
-  }
-
   if (
+    !account ||
     hasSystemPermission ||
     hasClusterAdminPermission ||
     !cluster.acceptableUsePolicyUrl ||
     !cluster.acceptableUsePolicyUpdatedOn
   ) {
-    // cluster doesn't have an AUP, so no verification necessary
+    // Renewal applies to existing accounts. Accountless administrators can
+    // use their permitted pages; newcomers accept the AUP during onboarding.
     return <>{children}</>;
-  }
-
-  if (!account) {
-    const request = currentOpenRequests.find(
-      (r) => r.cluster === clusterName && r.action === "CreateAccount",
-    );
-    if (request || hasFinancialAdminPermission) {
-      // A pending account creation request implies the AUP has already
-      // been agreed to, so it's okay to show the child components
-
-      // A financialAdmin without an account does not need to agree to the AUP
-      return <>{children}</>;
-    }
   }
 
   if (

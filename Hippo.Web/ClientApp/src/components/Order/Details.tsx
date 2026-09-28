@@ -1,3 +1,5 @@
+import { ResourceLoadError } from "../../Shared/LoadingAndErrors/ResourceLoadError";
+import { useResource } from "../../Shared/useResource";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { OrderModel, PaymentModel } from "../../types";
@@ -48,9 +50,12 @@ import { HipFormGroup } from "../../Shared/Form/HipFormGroup";
 export const Details = () => {
   const { cluster, orderId } = useParams();
   const [{ user }] = useContext(AppContext);
-  const [order, setOrder] = useState<OrderModel | null>(null);
-  const [balanceRemaining, setBalanceRemaining] = useState<number>(0);
-  const [balancePending, setBalancePending] = useState<number>(0);
+  const {
+    data: order,
+    error: loadError,
+    setData: setOrder,
+  } = useResource<OrderModel>(`/api/${cluster}/order/get/${orderId}`);
+  const balanceRemaining = order ? parseFloat(order.balanceRemaining) : 0;
   const { isClusterAdminForCluster } = usePermissions();
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
@@ -61,37 +66,6 @@ export const Details = () => {
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
   }, [isClusterAdmin, isClusterAdminForCluster]);
-
-  const calculateBalanceRemaining = (data: any) => {
-    const balanceRemaining = parseFloat(data.balanceRemaining);
-    setBalanceRemaining(balanceRemaining);
-    // const balancePending = data.payments
-    //   .filter(
-    //     (payment) =>
-    //       payment.status !== "Completed" && payment.status !== "Cancelled",
-    //   )
-    //   .reduce((acc, payment) => acc + parseFloat(payment.amount), 0);
-    setBalancePending(parseFloat(data.balancePending));
-  };
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/order/get/${orderId}`,
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-
-        setOrder(data);
-        calculateBalanceRemaining(data);
-      } else {
-        alert("Error fetching order");
-      }
-    };
-
-    fetchOrder();
-  }, [cluster, orderId]);
 
   useEffect(() => {
     if (order) {
@@ -184,9 +158,8 @@ export const Details = () => {
         createdOn: "",
         entryAmount: "",
       });
-      calculateBalanceRemaining(data);
     }
-  }, [cluster, orderId, makePaymentConfirmation, setNotification]);
+  }, [cluster, orderId, makePaymentConfirmation, setNotification, setOrder]);
 
   const [approveOrderConfirmation] =
     useConfirmationDialog<UpdateOrderStatusModel>(
@@ -237,6 +210,7 @@ export const Details = () => {
     orderId,
     approveOrderConfirmation,
     setNotification,
+    setOrder,
     updateStatusModel,
   ]);
 
@@ -469,6 +443,9 @@ export const Details = () => {
       setOrder(data);
     }
   };
+
+  if (loadError)
+    return <ResourceLoadError error={loadError} resource="order" />;
 
   if (!order) {
     return (
