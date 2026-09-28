@@ -82,6 +82,8 @@ export const ShowFor = (props: Props) => {
   }
 
   // check if user has any other cluster-specific role
+  // GroupAdmin is derived from account membership above, not permission records,
+  // matching backend authorization. Other administrative roles need no account.
   if (
     context.user.permissions.some(
       (p) =>
