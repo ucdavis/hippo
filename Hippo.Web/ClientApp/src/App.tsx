@@ -35,6 +35,7 @@ import { FinancialAdmins } from "./components/Admin/FinancialAdmins";
 import { Payments } from "./components/Report/Payments";
 import { ReportOrders } from "./components/Report/ReportOrders";
 import GroupMembers from "./components/Group/GroupMembers";
+import { RequireCluster } from "./Shared/RequireCluster";
 import { RequireAupAgreement } from "./Shared/RequireAupAgreement";
 import { AccountDeactivations } from "./components/Report/AccountDeactivations";
 
@@ -62,280 +63,289 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/clusters" element={<Clusters />} />
-            <Route path="/:cluster" element={<ClusterHome />} />
-            <Route
-              path="/:cluster/myaccount"
-              element={
-                <RequireAupAgreement>
-                  <AccountInfo />
-                </RequireAupAgreement>
-              }
-            />
-            <Route path="/:cluster/accountstatus" element={<AccountStatus />} />
-            <Route path="/:cluster/create" element={<RequestForm />} />
-            <Route
-              path="/:cluster/approve"
-              element={
-                <ShowFor roles={["GroupAdmin", "ClusterAdmin"]} alternative={<NotAuthorized />}>
+            <Route path="/:cluster" element={<RequireCluster />}>
+              <Route index element={<ClusterHome />} />
+              <Route
+                path="myaccount"
+                element={
                   <RequireAupAgreement>
-                    <Requests />
+                    <AccountInfo />
                   </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/activeaccounts"
-              element={
-                <ShowFor roles={["GroupAdmin", "ClusterAdmin"]} alternative={<NotAuthorized />}>
-                  <RequireAupAgreement>
-                    <ActiveAccounts />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/admin/groups"
-              element={
-                <ShowFor
-                  roles={["ClusterAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <Groups />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/admin/clusteradmins"
-              element={
-                <ShowFor
-                  roles={["ClusterAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <ClusterAdmins />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/admin/financialadmins"
-              element={
-                <ShowFor
-                  roles={["ClusterAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <FinancialAdmins />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
+                }
+              />
+              <Route path="accountstatus" element={<AccountStatus />} />
+              <Route path="create" element={<RequestForm />} />
+              <Route
+                path="approve"
+                element={
+                  <ShowFor
+                    roles={["GroupAdmin", "ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Requests />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="activeaccounts"
+                element={
+                  <ShowFor
+                    roles={["GroupAdmin", "ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <ActiveAccounts />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="admin/groups"
+                element={
+                  <ShowFor
+                    roles={["ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Groups />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="admin/clusteradmins"
+                element={
+                  <ShowFor
+                    roles={["ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <ClusterAdmins />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="admin/financialadmins"
+                element={
+                  <ShowFor
+                    roles={["ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <FinancialAdmins />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="financial/financialdetails"
+                element={
+                  <ShowFor
+                    roles={["System", "FinancialAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <FinancialDetail />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="product/index"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Products />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/:orderType"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Orders />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/details/:orderId"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Details />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/history/:orderId"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <OrderHistories />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/payments/:orderId"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <OrderPayments />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/edit/:orderId"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <EditOrder />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/updatechartstrings/:orderId"
+                element={
+                  <ShowFor
+                    roles={[
+                      "System",
+                      "ClusterAdmin",
+                      "GroupAdmin",
+                      "FinancialAdmin",
+                    ]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <UpdateChartStrings />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="order/create/:productId?"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <CreateOrder />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route //Copied from Orders
+                path="report/Payments"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <Payments />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="report/order/:reportType"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin", "FinancialAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <ReportOrders />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="report/accountdeactivations"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <AccountDeactivations />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route
+                path="group/:groupId"
+                element={
+                  <ShowFor
+                    roles={["System", "ClusterAdmin", "GroupAdmin"]}
+                    alternative={<NotAuthorized />}
+                  >
+                    <RequireAupAgreement>
+                      <GroupMembers />
+                    </RequireAupAgreement>
+                  </ShowFor>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Route>
             <Route
               path="/clusteradmin/clusters"
               element={
                 <ShowFor roles={["System"]} alternative={<NotAuthorized />}>
                   <AdminClusters />
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/financial/financialdetails"
-              element={
-                <ShowFor
-                  roles={["System", "FinancialAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <FinancialDetail />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/product/index"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <Products />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/:orderType"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <Orders />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/details/:orderId"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <Details />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/history/:orderId"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <OrderHistories />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/payments/:orderId"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <OrderPayments />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/edit/:orderId"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <EditOrder />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/updatechartstrings/:orderId"
-              element={
-                <ShowFor
-                  roles={[
-                    "System",
-                    "ClusterAdmin",
-                    "GroupAdmin",
-                    "FinancialAdmin",
-                  ]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <UpdateChartStrings />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/order/create/:productId?"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <CreateOrder />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route //Copied from Orders
-              path="/:cluster/report/Payments"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin", "FinancialAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <Payments />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/report/order/:reportType"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin", "FinancialAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <ReportOrders />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/report/accountdeactivations"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <AccountDeactivations />
-                  </RequireAupAgreement>
-                </ShowFor>
-              }
-            />
-            <Route
-              path="/:cluster/group/:groupId"
-              element={
-                <ShowFor
-                  roles={["System", "ClusterAdmin", "GroupAdmin"]}
-                  alternative={<NotAuthorized />}
-                >
-                  <RequireAupAgreement>
-                    <GroupMembers />
-                  </RequireAupAgreement>
                 </ShowFor>
               }
             />

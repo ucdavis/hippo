@@ -31,19 +31,11 @@ export const Home = () => {
 
 // redirect to the proper page depending on current account status within specific cluster
 export const ClusterHome = () => {
-  const [{ accounts, clusters }] = useContext(AppContext);
+  const [{ accounts }] = useContext(AppContext);
   const { cluster } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // first, let's make sure this is a valid cluster we support
-    var validCluster = clusters.some((c) => c.name === cluster);
-
-    if (!validCluster) {
-      navigate("/clusters");
-      return;
-    }
-
     const accountInCluster = accounts.find((a) => a.cluster === cluster);
 
     if (accountInCluster === undefined) {
@@ -53,7 +45,7 @@ export const ClusterHome = () => {
       // one account, show page depending on status
       navigate(`/${accountInCluster.cluster}/myaccount`);
     }
-  }, [accounts, clusters, navigate, cluster]);
+  }, [accounts, navigate, cluster]);
 
   return null;
 };

@@ -47,6 +47,8 @@ export const AccountInfo = () => {
 
   const [availableGroups, setAvailableGroups] = useState<GroupModel[]>([]);
   useEffect(() => {
+    if (!account) return;
+
     const fetchGroups = async () => {
       const response = await authenticatedFetch(
         `/api/${clusterName}/group/groups`,
@@ -67,7 +69,13 @@ export const AccountInfo = () => {
     };
 
     fetchGroups();
-  }, [adminOfGroups, clusterName, currentOpenRequests, memberOfGroups]);
+  }, [
+    account,
+    adminOfGroups,
+    clusterName,
+    currentOpenRequests,
+    memberOfGroups,
+  ]);
 
   const [getGroupAccessConfirmation] = useConfirmationDialog<AddToGroupModel>(
     {
@@ -303,10 +311,9 @@ export const AccountInfo = () => {
       const request = currentOpenRequests.find(
         (r) => r.cluster === clusterName && r.action === "CreateAccount",
       );
-      if (request) {
-        navigate(`/${clusterName}/accountstatus`);
-      }
-      navigate(`/${clusterName}/create`);
+      navigate(`/${clusterName}/${request ? "accountstatus" : "create"}`, {
+        replace: true,
+      });
     }
   }, [account, clusterName, currentOpenRequests, navigate]);
 

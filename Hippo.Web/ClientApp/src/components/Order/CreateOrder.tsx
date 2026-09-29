@@ -1,3 +1,5 @@
+import { ResourceLoadError } from "../../Shared/LoadingAndErrors/ResourceLoadError";
+import { useResource } from "../../Shared/useResource";
 import React, { useEffect, useState } from "react";
 import { OrderModel } from "../../types";
 import { useNavigate, useParams } from "react-router-dom";
@@ -49,40 +51,26 @@ const defaultOrder: OrderModel = {
 export const CreateOrder: React.FC = () => {
   const { cluster, productId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
-  const [order, setOrder] = useState<OrderModel>(null);
-  const [isClusterAdmin, setIsClusterAdmin] = useState(null);
+  const {
+    data: order,
+    error: loadError,
+    setData: setOrder,
+  } = useResource<OrderModel>(
+    productId ? `/api/${cluster}/order/GetProduct/${productId}` : null,
+  );
+  const isClusterAdmin = isClusterAdminForCluster();
   const [notification, setNotification] = usePromiseNotification();
   const navigate = useNavigate();
   const [foundPI, setFoundPI] = useState(null);
 
   useEffect(() => {
-    setIsClusterAdmin(isClusterAdminForCluster());
-  }, [isClusterAdmin, isClusterAdminForCluster]);
-
-  useEffect(() => {
-    if (productId) {
-      const fetchProductOrder = async () => {
-        const response = await authenticatedFetch(
-          `/api/${cluster}/order/GetProduct/${productId}`,
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setOrder(data);
-        } else {
-          alert("Error fetching product for order");
-        }
-      };
-
-      fetchProductOrder();
+    if (productId) return;
+    if (!isClusterAdmin) {
+      navigate(`/${cluster}/product/index`);
     } else {
-      if (isClusterAdmin === false) {
-        navigate(`/${cluster}/product/index`);
-      } else {
-        setOrder(defaultOrder);
-      }
+      setOrder(defaultOrder);
     }
-  }, [cluster, isClusterAdmin, navigate, productId]);
+  }, [cluster, isClusterAdmin, navigate, productId, setOrder]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -131,17 +119,8 @@ export const CreateOrder: React.FC = () => {
     }
   };
 
-  // RH TODO: handle loading/error states
-  if (isClusterAdmin === null) {
-    return (
-      <HipMainWrapper>
-        <HipTitle title="New Order" subtitle="Create" />
-        <HipBody>
-          <HipLoading />
-        </HipBody>
-      </HipMainWrapper>
-    );
-  }
+  if (loadError)
+    return <ResourceLoadError error={loadError} resource="product for order" />;
 
   if (!order) {
     return (

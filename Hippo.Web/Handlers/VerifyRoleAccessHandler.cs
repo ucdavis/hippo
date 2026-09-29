@@ -69,6 +69,12 @@ namespace Hippo.Web.Handlers
                 }
             }
 
+            // Group membership only satisfies policies that explicitly allow GroupAdmin.
+            if (!requirement.RoleStrings.Contains(Role.Codes.GroupAdmin))
+            {
+                return;
+            }
+
             // remaining roles involve an optional route value (Group, GroupAdmin)
             var groupName = _httpContext?.HttpContext?.GetRouteValue("group") as string;
             

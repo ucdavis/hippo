@@ -1,3 +1,5 @@
+import { ResourceLoadError } from "../../Shared/LoadingAndErrors/ResourceLoadError";
+import { useResource } from "../../Shared/useResource";
 import React, { useEffect, useState } from "react";
 import { OrderModel } from "../../types";
 import { useNavigate, useParams } from "react-router-dom";
@@ -16,7 +18,11 @@ import HipClientError from "../../Shared/LoadingAndErrors/HipClientError";
 export const UpdateChartStrings: React.FC = () => {
   const { cluster, orderId } = useParams();
   const { isClusterAdminForCluster } = usePermissions();
-  const [order, setOrder] = useState<OrderModel>(null);
+  const {
+    data: order,
+    error: loadError,
+    setData: setOrder,
+  } = useResource<OrderModel>(`/api/${cluster}/order/get/${orderId}`);
   const [isClusterAdmin, setIsClusterAdmin] = useState(null);
   const [notification, setNotification] = usePromiseNotification();
   const navigate = useNavigate();
@@ -24,23 +30,6 @@ export const UpdateChartStrings: React.FC = () => {
   useEffect(() => {
     setIsClusterAdmin(isClusterAdminForCluster());
   }, [isClusterAdmin, isClusterAdminForCluster]);
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      const response = await authenticatedFetch(
-        `/api/${cluster}/order/get/${orderId}`,
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setOrder(data);
-      } else {
-        alert("Error fetching order");
-      }
-    };
-
-    fetchOrder();
-  }, [cluster, orderId]);
 
   // async function so the form can manage the loading state
   const submitOrder = async (updatedOrder: OrderModel) => {
@@ -110,6 +99,9 @@ export const UpdateChartStrings: React.FC = () => {
 
   const Title = <HipTitle title="Order" subtitle="Update Billing Info" />;
   // RH TODO: handle loading/error states
+  if (loadError)
+    return <ResourceLoadError error={loadError} resource="order" />;
+
   if (isClusterAdmin === null) {
     return (
       <HipMainWrapper>
