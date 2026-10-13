@@ -33,6 +33,36 @@ public class SecretsServiceTests
         exception.Status.ShouldBe(404);
     }
 
+    [Fact]
+    public async Task DeleteSecretWaitsForCompletion()
+    {
+        var operation = new FakeDeleteSecretOperation(completed: false);
+        var client = new FakeSecrets { DeleteOperation = operation };
+        var service = new SecretsService(client);
+
+        var deletion = service.DeleteSecret("ssh-key");
+
+        client.Deleted.ShouldBe("ssh-key");
+        deletion.IsCompleted.ShouldBeFalse();
+        operation.Complete();
+        await deletion.WaitAsync(TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
+    public async Task DeleteSecretPropagatesCompletionFailure()
+    {
+        var operation = new FakeDeleteSecretOperation(completed: false);
+        var service = new SecretsService(new FakeSecrets { DeleteOperation = operation });
+        var failure = new RequestFailedException(503, "Deletion polling failed");
+
+        var deletion = service.DeleteSecret("ssh-key");
+        operation.Fail(failure);
+
+        var exception = await Should.ThrowAsync<RequestFailedException>(
+            () => deletion.WaitAsync(TimeSpan.FromSeconds(10)));
+        exception.ShouldBeSameAs(failure);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -47,9 +77,10 @@ public class SecretsServiceTests
 
     private sealed class FakeSecrets : SecretClient
     {
+        public FakeDeleteSecretOperation DeleteOperation { get; init; } = new();
         public string? Deleted { get; private set; }
         public override Task<DeleteSecretOperation> StartDeleteSecretAsync(string name, CancellationToken cancellationToken = default)
-        { Deleted = name; return Task.FromResult<DeleteSecretOperation>(null!); }
+        { Deleted = name; return Task.FromResult<DeleteSecretOperation>(DeleteOperation); }
         public (string, string) Stored { get; private set; }
         public override Task<Response<KeyVaultSecret>> SetSecretAsync(string name, string value, CancellationToken cancellationToken = default)
         {
@@ -68,5 +99,24 @@ public class SecretsServiceTests
                 Page<SecretProperties>.FromValues(new[] { new SecretProperties("first-page") }, "next", null!),
                 Page<SecretProperties>.FromValues(new[] { new SecretProperties("second-page") }, null, null!)
             });
+    }
+
+    private sealed class FakeDeleteSecretOperation : DeleteSecretOperation
+    {
+        private readonly TaskCompletionSource<Response<DeletedSecret>> _completion =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public FakeDeleteSecretOperation(bool completed = true)
+        {
+            if (completed) Complete();
+        }
+
+        public void Complete() => _completion.SetResult(Response.FromValue(
+            SecretModelFactory.DeletedSecret(new SecretProperties("ssh-key")), null!));
+
+        public void Fail(Exception exception) => _completion.SetException(exception);
+
+        public override ValueTask<Response<DeletedSecret>> WaitForCompletionAsync(CancellationToken cancellationToken = default)
+            => new(_completion.Task.WaitAsync(cancellationToken));
     }
 }

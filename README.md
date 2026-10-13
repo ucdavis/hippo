@@ -31,13 +31,15 @@ If making large JS changes, run `npm test` inside the `Hippo.Web/ClientApp` dire
 
 ## Integration smoke tests
 
-The Key Vault smoke test is opt-in because it writes to the configured Azure Key Vault. It uses the same user-secrets file as `Hippo.Web`, so make sure the `Azure` section is configured before running it.
+The Key Vault smoke test is opt-in because it writes to the configured Azure Key Vault. It reads Azure configuration only from the same user-secrets file as `Hippo.Web`. Configure `Azure:TenantId`, `Azure:ClientId`, `Azure:ClientSecret`, and `Azure:KeyVaultUrl` there before running it; the smoke test does not read these settings from environment variables or appsettings files.
 
-To verify that Hippo can write, read, and delete a temporary Key Vault secret, run:
+To verify that Hippo can write, read, and delete a temporary Key Vault secret, run from the repository root:
 
 ```bash
 RUN_KEYVAULT_SMOKE_TESTS=true dotnet test Test/Test.csproj --filter FullyQualifiedName~KeyVaultSmokeTests
 ```
+
+The test creates a uniquely named secret and attempts to delete it in cleanup, waiting for deletion to complete. It does not purge the deleted secret.
 
 Without `RUN_KEYVAULT_SMOKE_TESTS=true`, the test exits without contacting Key Vault.
 
@@ -45,9 +47,10 @@ Without `RUN_KEYVAULT_SMOKE_TESTS=true`, the test exits without contacting Key V
 
 Key Vault uses `Azure.Identity` client-secret authentication. Configure `Azure:TenantId`,
 `Azure:ClientId`, `Azure:ClientSecret`, and `Azure:KeyVaultUrl` (the vault HTTPS URL).
-The old misspelled `Azure:TentantId` is no longer accepted. Supply secrets through user-secrets
-or environment variables (`Azure__TenantId`, etc.); never commit credentials. Secret deletion
-starts a soft delete and does not purge or wait for vault-side completion, matching the previous behavior.
+The old misspelled `Azure:TentantId` is no longer accepted. For the application, supply secrets through user-secrets
+or environment variables (`Azure__TenantId`, etc.); never commit credentials. The live Key Vault smoke test
+uses only user-secrets, as described above. Secret deletion starts a soft delete and waits for
+vault-side completion; it does not purge the deleted secret.
 
 Serilog remains the only logging pipeline for the web app and all three jobs. Console output,
 request/action/client enrichment, exception details, `Application`, `AppEnvironment`, and job

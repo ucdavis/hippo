@@ -63,7 +63,8 @@ namespace Hippo.Core.Services
                 throw new ArgumentException(nameof(name));
             }
 
-            await _vault.StartDeleteSecretAsync(name);
+            var deleteOperation = await _vault.StartDeleteSecretAsync(name);
+            await deleteOperation.WaitForCompletionAsync();
         }
 
         public async Task<List<string>> GetSecretNames()
