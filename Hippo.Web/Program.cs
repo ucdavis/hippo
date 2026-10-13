@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using Hippo.Core.Data;
 using Hippo.Core.Models;
 using Hippo.Core.Models.Settings;
@@ -8,16 +6,12 @@ using Hippo.Web.Extensions;
 using Hippo.Web.Handlers;
 using Hippo.Web.Middleware;
 using Hippo.Web.Models.Settings;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
 using Mjml.Net;
 using MvcReact;
 using NSwag.Generation.Processors.Security;
@@ -26,47 +20,35 @@ using Serilog.Events;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
 using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
-using Serilog.Sinks.Elasticsearch;
+using Hippo.Core.Extensions;
 
-#if DEBUG
-Serilog.Debugging.SelfLog.Enable(msg => Debug.WriteLine(msg));
-#endif
+LoggingExtensions.EnableLoggingDiagnostics();
 
-var builder = WebApplication.CreateBuilder(args);
-
-var loggingSection = builder.Configuration.GetSection("Serilog");
-
-var loggerConfig = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    // .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning) // uncomment this to hide EF core general info logs
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .Enrich.WithClientIp()
-    .Enrich.WithCorrelationId()
-    .Enrich.WithRequestHeader("User-Agent")
-    .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
-        .WithDefaultDestructurers()
-        .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
-    .Enrich.WithProperty("Application", loggingSection.GetValue<string>("AppName"))
-    .Enrich.WithProperty("AppEnvironment", loggingSection.GetValue<string>("Environment"))
-    .WriteTo.Console();
-
-// add in elastic search sink if the uri is valid
-if (Uri.TryCreate(loggingSection.GetValue<string>("ElasticUrl"), UriKind.Absolute, out var elasticUri))
-{
-    loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(elasticUri)
-    {
-        IndexFormat = "aspnet-hippo-{0:yyyy.MM}",
-        TypeName = null,
-    });
-}
-
-Log.Logger = loggerConfig.CreateLogger();
+Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 
 try
 {
+    var builder = WebApplication.CreateBuilder(args);
+
+    var loggerConfig = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+        // .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning) // uncomment this to hide EF core general info logs
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .Enrich.WithClientIp()
+        .Enrich.WithCorrelationId()
+        .Enrich.WithRequestHeader("User-Agent")
+        .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+            .WithDefaultDestructurers()
+            .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+        .WriteToHippoSinks(builder.Configuration, builder.Environment.EnvironmentName);
+
+    var logger = loggerConfig.CreateLogger();
+    Log.CloseAndFlush();
+    Log.Logger = logger;
+
     Log.Information("Configuring web host");
 
     // Add services to the container.
@@ -79,87 +61,11 @@ try
     builder.Services.AddViteServices(options =>
     {
         options.DevServerPort = 3000;
+        // Match Vite's HTTP dev server; MvcReact defaults to HTTPS.
+        options.DevServerScheme = "http";
     });
 
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie()
-    .AddOpenIdConnect(oidc =>
-    {
-        oidc.ClientId = builder.Configuration["Authentication:ClientId"];
-        oidc.ClientSecret = builder.Configuration["Authentication:ClientSecret"];
-        oidc.Authority = builder.Configuration["Authentication:Authority"];
-        oidc.ResponseType = OpenIdConnectResponseType.Code;
-        oidc.Scope.Add("openid");
-        oidc.Scope.Add("profile");
-        oidc.Scope.Add("email");
-        oidc.Scope.Add("eduPerson");
-        oidc.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-        };
-        oidc.Events.OnTicketReceived = async context =>
-        {
-            if (context.Principal == null || context.Principal.Identity == null)
-            {
-                return;
-            }
-            var identity = (ClaimsIdentity)context.Principal.Identity;
-
-
-            // Sometimes CAS doesn't return the required IAM ID
-            // If this happens, we take the reliable Kerberos (NameIdentifier claim) and use it to lookup IAM ID
-            if (!identity.HasClaim(c => c.Type == Constants.IamIdClaimType) ||
-                !identity.HasClaim(c => c.Type == ClaimTypes.Surname) ||
-                !identity.HasClaim(c => c.Type == ClaimTypes.GivenName) ||
-                !identity.HasClaim(c => c.Type == ClaimTypes.Email))
-            {
-                var identityService = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
-                var kerbId = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                if (kerbId != null)
-                {
-                    Log.Error($"CAS IAM Id Missing. For Kerb: {kerbId}");
-                    var identityUser = await identityService.GetByKerberos(kerbId.Value);
-
-                    if (identityUser != null)
-                    {
-                        if (!identity.HasClaim(c => c.Type == Constants.IamIdClaimType))
-                        {
-                            identity.AddClaim(new Claim(Constants.IamIdClaimType, identityUser.Iam));
-                        }
-                        //Check for other missing claims
-                        if (!identity.HasClaim(c => c.Type == ClaimTypes.Surname))
-                        {
-                            identity.AddClaim(new Claim(ClaimTypes.Surname, identityUser.LastName));
-                        }
-                        if (!identity.HasClaim(c => c.Type == ClaimTypes.GivenName))
-                        {
-                            identity.AddClaim(new Claim(ClaimTypes.GivenName, identityUser.FirstName));
-                        }
-                        if (!identity.HasClaim(c => c.Type == ClaimTypes.Email))
-                        {
-                            identity.AddClaim(new Claim(ClaimTypes.Email, identityUser.Email));
-                        }
-                    }
-                    else
-                    {
-                        Log.Error($"IAM Id Not Found with identity service. For Kerb: {kerbId}");
-                    }
-                }
-                else
-                {
-                    Log.Error($"CAS IAM Id Missing. Kerb Not Found");
-                }
-            }
-
-            // Ensure user exists in the db
-            var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-            await userService.GetUser(identity.Claims.ToArray());
-        };
-    });
+    builder.Services.AddHippoAuthentication(builder.Configuration);
 
     builder.Services.AddAuthorization(options =>
     {
@@ -402,4 +308,3 @@ public static class Constants
 {
     public const string IamIdClaimType = "ucdPersonIAMID";
 }
-

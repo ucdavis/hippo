@@ -6,7 +6,7 @@ using Hippo.Core.Services;
 using Hippo.Core.Models.Email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.KeyVault.Models;
+using Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Mjml.Net;
@@ -202,7 +202,7 @@ namespace Hippo.Web.Controllers
                 sb.Append(secret);
                 sb.AppendLine(" (This should not be here)");
             }
-            catch (KeyVaultErrorException ex) when (ex.Message.Contains("NotFound"))
+            catch (RequestFailedException ex) when (ex.Status == 404)
             {
                 sb.AppendLine("Secret successfully deleted");
             }

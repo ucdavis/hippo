@@ -37,8 +37,8 @@ public class Result
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
     {
-        using var _ = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
-        LogContext.PushProperty("LineNumber", callerLineNumber);
+        using var fileName = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
+        using var lineNumber = LogContext.PushProperty("LineNumber", callerLineNumber);
         Log.Write(logLevel, messageTemplate);
         return new ResultError(messageTemplate);
     }
@@ -48,8 +48,8 @@ public class Result
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
     {
-        using var _ = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
-        LogContext.PushProperty("LineNumber", callerLineNumber);
+        using var fileName = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
+        using var lineNumber = LogContext.PushProperty("LineNumber", callerLineNumber);
         Log.Write(logLevel, messageTemplate, prop0, prop1, prop2);
         return new ResultError(messageTemplate.FormatTemplate(prop0, prop1, prop2));
     }
@@ -59,8 +59,8 @@ public class Result
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
     {
-        using var _ = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
-        LogContext.PushProperty("LineNumber", callerLineNumber);
+        using var fileName = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
+        using var lineNumber = LogContext.PushProperty("LineNumber", callerLineNumber);
         Log.Write(logLevel, messageTemplate, prop0, prop1);
         return new ResultError(messageTemplate.FormatTemplate(prop0, prop1));
     }
@@ -70,8 +70,8 @@ public class Result
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
     {
-        using var _ = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
-        LogContext.PushProperty("LineNumber", callerLineNumber);
+        using var fileName = LogContext.PushProperty("FileName", Path.GetFileName(callerFilePath));
+        using var lineNumber = LogContext.PushProperty("LineNumber", callerLineNumber);
         Log.Write(logLevel, messageTemplate, prop0);
         return new ResultError(messageTemplate.FormatTemplate(prop0));
     }

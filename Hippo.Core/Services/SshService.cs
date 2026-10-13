@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -77,7 +77,7 @@ namespace Hippo.Core.Services
         private async Task<ScpClient> GetScpClient(SshConnectionInfo connectionInfo)
         {
             var pkFile = await GetPrivateKeyFile(connectionInfo.KeyId);
-            var client = new ScpClient(connectionInfo.Url, connectionInfo.Name, pkFile);
+            var client = new ScpClient(connectionInfo.Url, connectionInfo.Name, RemotePathTransformation.ShellQuote, pkFile);
             client.Connect();
             return client;
         }

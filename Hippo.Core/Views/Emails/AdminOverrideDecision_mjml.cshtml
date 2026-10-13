@@ -1,4 +1,4 @@
-﻿@using Hippo.Core.Models.Email
+@using Hippo.Core.Models.Email
 @model Hippo.Core.Models.Email.DecisionModel
 
 @{
@@ -32,11 +32,11 @@
     <mj-column width="90%" vertical-align="top" border-left="4px solid @Model?.DecisionColor" padding-left="10px">
         <mj-text padding-top="0px" padding-left="0px" padding-bottom="5px">
             <h1>@Model?.Decision</h1>
-            @if(!string.IsNullOrWhiteSpace(Model?.DecisionDetails))
-            {
-                @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decision Details", Model!.DecisionDetails))
-            }
         </mj-text>
+        @if(!string.IsNullOrWhiteSpace(Model?.DecisionDetails))
+        {
+            @await Html.PartialAsync("_EmailInnerDetails_mjml", new EmailInnerDetailsModel("Decision Details", Model!.DecisionDetails))
+        }
     </mj-column>
 </mj-section>
 
