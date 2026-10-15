@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
-using Microsoft.Azure.KeyVault.Models;
+using Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Shouldly;
@@ -56,7 +56,7 @@ namespace Test
                 {
                     await secretsService.DeleteSecret(secretName);
                 }
-                catch (KeyVaultErrorException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+                catch (RequestFailedException ex) when (ex.Status == 404)
                 {
                 }
             }
@@ -71,6 +71,7 @@ namespace Test
             var azureSettings = configuration.GetSection("Azure").Get<AzureSettings>();
 
             azureSettings.ShouldNotBeNull("The Azure section must exist in the Hippo.Web user-secrets file.");
+            azureSettings.TenantId.ShouldNotBeNullOrWhiteSpace("Azure:TenantId must be set.");
             azureSettings.ClientId.ShouldNotBeNullOrWhiteSpace("Azure:ClientId must be set.");
             azureSettings.ClientSecret.ShouldNotBeNullOrWhiteSpace("Azure:ClientSecret must be set.");
             azureSettings.KeyVaultUrl.ShouldNotBeNullOrWhiteSpace("Azure:KeyVaultUrl must be set.");

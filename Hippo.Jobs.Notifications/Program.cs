@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Hippo.Core.Data;
+using Hippo.Core.Extensions;
 using Hippo.Core.Models.Settings;
 using Hippo.Core.Services;
 using Hippo.Jobs.Core;
@@ -19,15 +20,19 @@ namespace Hippo.Jobs.Notifications
     {
         static int Main(string[] args)
         {
+            LoggingExtensions.EnableLoggingDiagnostics();
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
             try
             {
-                Configure(jobName: typeof(Program).Assembly.GetName().Name, jobId: Guid.NewGuid());
+                var jobName = typeof(Program).Assembly.GetName().Name!;
+                var jobId = Guid.NewGuid();
+                Configure(jobName, jobId);
                 var assembyName = typeof(Program).Assembly.GetName();
 
                 Log.Information("Running {job} build {build}", assembyName.Name, assembyName.Version);
 
                 // setup di
-                var provider = ConfigureServices();
+                using var provider = ConfigureServices();
 
                 var expiringOrdersService = provider.GetRequiredService<IExpiringOrdersService>();
                 var notificationService = provider.GetRequiredService<INotificationService>(); //For nagging
@@ -60,6 +65,7 @@ namespace Hippo.Jobs.Notifications
         {
             IServiceCollection services = new ServiceCollection();
             services.AddOptions();
+            services.AddLogging(logging => logging.AddSerilog(Log.Logger, dispose: false));
 
             var efProvider = Configuration.GetValue("Provider", "none");
             if (efProvider == "SqlServer" || (efProvider == "none" && Configuration.GetValue<bool>("Dev:UseSql")))

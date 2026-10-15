@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <RuntimeFrameworkVersion>10.0.12</RuntimeFrameworkVersion>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  </PropertyGroup>
+</Project>

@@ -1,10 +1,8 @@
 using System;
 using Hippo.Core.Models.Settings;
-using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.KeyVault.Models;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Rest.Azure;
 
 namespace Hippo.Core.Services
 {
@@ -18,21 +16,18 @@ namespace Hippo.Core.Services
 
     public class SecretsService : ISecretsService
     {
-        private readonly AzureSettings _azureSettings;
-        private readonly KeyVaultClient _vault;
+        private readonly SecretClient _vault;
 
         public SecretsService(IOptions<AzureSettings> azureSettings)
+            : this(new SecretClient(new Uri(azureSettings.Value.KeyVaultUrl),
+                new ClientSecretCredential(azureSettings.Value.TenantId,
+                    azureSettings.Value.ClientId, azureSettings.Value.ClientSecret)))
         {
-            _azureSettings = azureSettings.Value;
-            _vault = new KeyVaultClient(async (authority, resource, scope) =>
-            {
-                var authContext = new AuthenticationContext(authority);
-                var credential = new ClientCredential(_azureSettings.ClientId, _azureSettings.ClientSecret);
-                var token = await authContext.AcquireTokenAsync(resource, credential);
+        }
 
-                return token.AccessToken;
-
-            });
+        public SecretsService(SecretClient vault)
+        {
+            _vault = vault;
         }
 
         public async Task SetSecret(string name, string value)
@@ -47,7 +42,7 @@ namespace Hippo.Core.Services
                 throw new ArgumentException(nameof(value));
             }
 
-            await _vault.SetSecretAsync(_azureSettings.KeyVaultUrl, name, value);
+            await _vault.SetSecretAsync(name, value);
         }
 
         public async Task<string> GetSecret(string name)
@@ -57,8 +52,8 @@ namespace Hippo.Core.Services
                 throw new ArgumentException(nameof(name));
             }
 
-            var secret = await _vault.GetSecretAsync(_azureSettings.KeyVaultUrl, name);
-            return secret.Value;
+            var secret = await _vault.GetSecretAsync(name);
+            return secret.Value.Value;
         }
 
         public async Task DeleteSecret(string name)
@@ -68,30 +63,16 @@ namespace Hippo.Core.Services
                 throw new ArgumentException(nameof(name));
             }
 
-            await _vault.DeleteSecretAsync(_azureSettings.KeyVaultUrl, name);
+            var deleteOperation = await _vault.StartDeleteSecretAsync(name);
+            await deleteOperation.WaitForCompletionAsync();
         }
 
         public async Task<List<string>> GetSecretNames()
         {
             var ids = new List<string>();
-            IPage<SecretItem> items = await _vault.GetSecretsAsync(_azureSettings.KeyVaultUrl);
-
-            while (items.Any())
+            await foreach (var secret in _vault.GetPropertiesOfSecretsAsync())
             {
-                foreach (var item in items)
-                {
-                    var id = item.Id.Replace(_azureSettings.KeyVaultUrl + "secrets/", "").Split('/')[0];
-                    ids.Add(id);
-                }
-
-                if (!string.IsNullOrEmpty(items.NextPageLink))
-                {
-                    items = await _vault.GetSecretsNextAsync(items.NextPageLink);
-                }
-                else
-                {
-                    break;
-                }
+                ids.Add(secret.Name);
             }
             return ids;
         }
